@@ -1,0 +1,16 @@
+# Python
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# scrapy
+.scrapy
+
+# vs code
+.vscode
+.vs
+.trash
+
+# virtual environments
+.venv
