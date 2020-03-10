@@ -2,7 +2,7 @@ from flask_restplus import Namespace, Resource, abort, inputs
 from .projects_model import project_dao
 from time_tracker_api.errors import MissingResource
 
-ns = Namespace('projects', description='Api for resource `Projects`')
+ns = Namespace('projects', description='API for projects (clients)')
 
 @ns.route('/')
 class Projects(Resource):

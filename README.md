@@ -1,5 +1,15 @@
 # time-tracker-api
 
+## Getting started
+Follow the following instructions to get the project ready to use ASAP:
+
+### Requirements
+Be sure you have installed in your system
+
+- [Python version 3](https://www.python.org/download/releases/3.0/) in your path. It will install
+automatically [pip](https://pip.pypa.io/en/stable/) as well.
+- A virtual environment, namely [venv](https://docs.python.org/3/library/venv.html).
+
 ## Setup
 
 - Create and activate the environment,
@@ -36,4 +46,5 @@
     flask run
     ```
 
-- Open `http://127.0.0.1:5000/` in a browser
+- Open `http://127.0.0.1:5000/` in a browser. You will find in the presented UI 
+a link to the swagger.json with the definition of the api.
