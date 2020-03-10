@@ -17,3 +17,6 @@ __pycache__/
 
 # virtual environments
 .venv
+
+# Files generated for development
+.env
