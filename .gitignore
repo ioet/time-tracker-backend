@@ -12,5 +12,11 @@ __pycache__/
 .vs
 .trash
 
+# Jetbrans IDEs
+.idea
+
 # virtual environments
 .venv
+
+# Files generated for development
+.env
