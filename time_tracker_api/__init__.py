@@ -9,6 +9,6 @@ def create_app():
     return flask_app
 
 
-def init_app(app):
+def init_app(app: Flask):
     from .api import api
     api.init_app(app)
