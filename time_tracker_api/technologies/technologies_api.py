@@ -38,6 +38,7 @@ technology_response = ns.inherit('TechnologyResponse', technology, {
     ),
 })
 
+
 @ns.route('')
 class Technologies(Resource):
     @ns.doc('list_technologies')
