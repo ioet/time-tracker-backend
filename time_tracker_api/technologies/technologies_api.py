@@ -65,19 +65,11 @@ class Technology(Resource):
         """Retrieve a technology"""
         return {}
 
-    @ns.doc('update_technology_status')
-    @ns.param('uid', 'The technology identifier')
-    @ns.expect(technology)
-    @ns.response(204, 'State of the technology successfully updated')
-    def post(self, uid):
-        """Updates a technology using form data"""
-        return ns.payload()
-
     @ns.doc('put_technology')
     @ns.expect(technology)
     @ns.marshal_with(technology_response)
     def put(self, uid):
-        """Create or replace a technology"""
+        """Updates a technology"""
         return ns.payload()
 
     @ns.doc('delete_technology')
