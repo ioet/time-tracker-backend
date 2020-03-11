@@ -23,13 +23,13 @@ technology = ns.model('Technology', {
         description='Name of the technology'
     ),
     'created_at': fields.Date(
-        title='Date',
+        title='Created',
         description='Date of creation'
     ),
     'created_by': fields.String(
         required=True,
-        title='Type',
-        max_length=30,
+        title='Creator',
+        max_length=64,
         description='Id of user who first added this technology',
     ),
 })
