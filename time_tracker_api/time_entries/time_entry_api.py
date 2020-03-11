@@ -112,7 +112,7 @@ class TimeEntry(Resource):
         return ns.payload
 
 
-@ns.route('<string:id>/stop')
+@ns.route('/<string:id>/stop')
 @ns.response(404, 'Running time entry not found')
 @ns.param('id', 'The unique identifier of a running time entry')
 class StopTimeEntry(Resource):
@@ -123,7 +123,7 @@ class StopTimeEntry(Resource):
         return None, 204
 
 
-@ns.route('<string:id>/continue')
+@ns.route('/<string:id>/continue')
 @ns.response(404, 'Stopped time entry not found')
 @ns.param('id', 'The unique identifier of a stopped time entry')
 class ContinueTimeEntry(Resource):
