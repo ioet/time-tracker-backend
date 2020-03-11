@@ -13,3 +13,6 @@ api.add_namespace(activities_api.ns)
 
 from time_tracker_api.technologies import technologies_api
 api.add_namespace(technologies_api.ns)
+
+from time_tracker_api.time_entries import time_entry_api
+api.add_namespace(time_entry_api.ns)
