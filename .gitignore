@@ -20,3 +20,5 @@ __pycache__/
 
 # Files generated for development
 .env
+timetracker-api-postman-collection.json
+swagger.json
