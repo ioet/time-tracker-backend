@@ -4,48 +4,51 @@ ns = Namespace('technologies', description='API for technologies used')
 
 # Technology Model
 technology = ns.model('Technology', {
-    'id': fields.String(
-        readOnly=True,
-        required=True,
-        title='Identifier',
-        description='The unique id of the technology'
-    ),
-    'tenant_id': fields.String(
-        required=True,
-        title='Tenant',
-        max_length=64,
-        description='The tenant this technology belongs to'
-    ),
     'name': fields.String(
         required=True,
         title='Name',
         max_length=50,
         description='Name of the technology'
     ),
+})
+
+technology_response = ns.inherit('TechnologyResponse', technology, {
+    'id': fields.String(
+        readOnly=True,
+        required=True,
+        title='Identifier',
+        description='The unique identifier',
+    ),
     'created_at': fields.Date(
+        readOnly=True,
         title='Created',
         description='Date of creation'
     ),
     'created_by': fields.String(
-        required=True,
+        readOnly=True,
         title='Creator',
         max_length=64,
-        description='Id of user who first added this technology',
+        description='User that created it',
+    ),
+    'tenant_id': fields.String(
+        readOnly=True,
+        title='Tenant',
+        max_length=64,
+        description='The tenant this belongs to',
     ),
 })
-
 
 @ns.route('')
 class Technologies(Resource):
     @ns.doc('list_technologies')
-    @ns.marshal_list_with(technology, code=200)
+    @ns.marshal_list_with(technology_response, code=200)
     def get(self):
         """List all technologies"""
         return [], 200
 
     @ns.doc('create_technology')
     @ns.expect(technology)
-    @ns.marshal_with(technology, code=201)
+    @ns.marshal_with(technology_response, code=201)
     def post(self):
         """Create a technology"""
         return ns.payload, 201
@@ -56,7 +59,7 @@ class Technologies(Resource):
 @ns.param('uid', 'The technology identifier')
 class Technology(Resource):
     @ns.doc('get_technology')
-    @ns.marshal_with(technology)
+    @ns.marshal_with(technology_response)
     def get(self, uid):
         """Retrieve a technology"""
         return {}
@@ -71,7 +74,7 @@ class Technology(Resource):
 
     @ns.doc('put_technology')
     @ns.expect(technology)
-    @ns.marshal_with(technology)
+    @ns.marshal_with(technology_response)
     def put(self, uid):
         """Create or replace a technology"""
         return ns.payload()
