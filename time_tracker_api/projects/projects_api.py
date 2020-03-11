@@ -6,18 +6,6 @@ ns = Namespace('projects', description='API for projects (clients)')
 
 # Project Model
 project = ns.model('Project', {
-    'id': fields.String(
-        readOnly=True,
-        required=True,
-        title='Identifier',
-        description='The unique id of the project'
-    ),
-    'tenant_id': fields.String(
-        required=True,
-        title='Tenant',
-        max_length=64,
-        description='The tenant this project belongs to'
-    ),
     'name': fields.String(
         required=True,
         title='Name',
@@ -37,17 +25,38 @@ project = ns.model('Project', {
 })
 
 
+project_response = ns.inherit('ProjectResponse', project, {
+    'id': fields.String(
+        readOnly=True,
+        required=True,
+        title='Identifier',
+        description='The unique identifier',
+    ),
+    'created_at': fields.Date(
+        readOnly=True,
+        title='Created',
+        description='Date of creation'
+    ),
+    'tenant_id': fields.String(
+        readOnly=True,
+        title='Tenant',
+        max_length=64,
+        description='The tenant this belongs to',
+    ),
+})
+
+
 @ns.route('')
 class Projects(Resource):
     @ns.doc('list_projects')
-    @ns.marshal_list_with(project, code=200)
+    @ns.marshal_list_with(project_response, code=200)
     def get(self):
         """List all projects"""
         return project_dao.get_all(), 200
 
     @ns.doc('create_project')
     @ns.expect(project)
-    @ns.marshal_with(project, code=201)
+    @ns.marshal_with(project_response, code=201)
     def post(self):
         """Create a project"""
         return project_dao.create(ns.payload), 201
@@ -66,7 +75,7 @@ project_update_parser.add_argument('active',
 @ns.param('uid', 'The project identifier')
 class Project(Resource):
     @ns.doc('get_project')
-    @ns.marshal_with(project)
+    @ns.marshal_with(project_response)
     def get(self, uid):
         """Retrieve a project"""
         return project_dao.get(uid)
@@ -87,7 +96,7 @@ class Project(Resource):
 
     @ns.doc('put_project')
     @ns.expect(project)
-    @ns.marshal_with(project)
+    @ns.marshal_with(project_response)
     def put(self, uid):
         """Create or replace a project"""
         return project_dao.update(uid, ns.payload)
@@ -98,4 +107,3 @@ class Project(Resource):
         """Deletes a project"""
         project_dao.delete(uid)
         return None, 204
-
