@@ -52,16 +52,16 @@ a link to the swagger.json with the definition of the api.
 
 ## CLI
 
-There are available commands aware of the API that can be verify useful for you. You
+There are available commands, aware of the API, that can be very helpful to you. You
 can check them out by running
 
-```angular2
+```
 python cli.py
 ```
 
 If you want to run an specific command, e.g. `gen_swagger_json`, specify it as a param
 as well as its correspondent options.
 
-```angular2
+```
 python cli.py gen_swagger_json -f ~/Downloads/swagger.json
 ```

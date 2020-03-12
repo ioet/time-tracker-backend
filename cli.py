@@ -7,8 +7,9 @@ print("****************")
 import os
 
 from flask import json
-from time_tracker_api import create_app
 from flask_script import Manager
+
+from time_tracker_api import create_app
 from time_tracker_api.api import api
 
 app = create_app()
@@ -16,7 +17,9 @@ cli_manager = Manager(app)
 
 
 @cli_manager.command
-@cli_manager.option('-f', '--filename', help='Path of the swagger file. By default swagger.json')
+@cli_manager.option('-f', '--filename',
+                    dest='filename',
+                    help='Path of the swagger file. By default swagger.json')
 def gen_swagger_json(filename='swagger.json'):
     """ Exports swagger specifications in json format """
     schema_json_data = json.dumps(api.__schema__)
@@ -24,17 +27,28 @@ def gen_swagger_json(filename='swagger.json'):
 
 
 @cli_manager.command
-@cli_manager.option('-f', '--filename', dest='filename', help='Path of the postman collection file.'
-                                         'By default it is timetracker-api-postman-collection.json')
-def gen_postman_collection(filename='timetracker-api-postman-collection.json'):
+@cli_manager.option('-f', '--filename',
+                    dest='filename',
+                    help='Path of the postman collection file.'
+                         'By default it is timetracker-api-postman-collection.json')
+@cli_manager.option('-b', '--base-url-placeholder',
+                    dest='base_url_placeholder',
+                    help='Text used as placeholder. E.g. {{timetracker_api_host}}.'
+                         'By default the base url will be http://localhost')
+def gen_postman_collection(filename='timetracker-api-postman-collection.json',
+                           base_url_placeholder=None):
     """ Generates a Postman collection for the API """
     data = api.as_postman(urlvars=False, swagger=True)
     postman_collection_json_data = json.dumps(data)
-    parsed_json = postman_collection_json_data.replace("http://localhost", '{{timetracker_api_host}}')
+    if base_url_placeholder is not None:
+        parsed_json = postman_collection_json_data.replace("http://localhost", base_url_placeholder)
+    else:
+        parsed_json = postman_collection_json_data
+
     save_data(parsed_json, filename)
 
 
-def save_data(data, filename):
+def save_data(data: str, filename: str) -> None:
     """ Save text content to a file """
     if filename:
         try:
