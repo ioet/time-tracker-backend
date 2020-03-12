@@ -25,14 +25,14 @@ audit_fields = {
 }
 
 # APIs
-from time_tracker_api.projects import projects_api
-api.add_namespace(projects_api.ns)
+from time_tracker_api.projects import projects_namespace
+api.add_namespace(projects_namespace.ns)
 
-from time_tracker_api.activities import activities_api
-api.add_namespace(activities_api.ns)
+from time_tracker_api.activities import activities_namespace
+api.add_namespace(activities_namespace.ns)
 
-from time_tracker_api.technologies import technologies_api
-api.add_namespace(technologies_api.ns)
+from time_tracker_api.technologies import technologies_namespace
+api.add_namespace(technologies_namespace.ns)
 
-from time_tracker_api.time_entries import time_entry_api
-api.add_namespace(time_entry_api.ns)
+from time_tracker_api.time_entries import time_entries_namespace
+api.add_namespace(time_entries_namespace.ns)
