@@ -1,6 +1,7 @@
 from flask_restplus import Namespace, Resource, abort, inputs, fields
 from .projects_model import project_dao
 from time_tracker_api.errors import MissingResource
+from time_tracker_api.api import audit_fields
 
 ns = Namespace('projects', description='API for projects (clients)')
 
@@ -24,26 +25,21 @@ project = ns.model('Project', {
     ),
 })
 
-
-project_response = ns.inherit('ProjectResponse', project, {
+project_response_fields = {
     'id': fields.String(
         readOnly=True,
         required=True,
         title='Identifier',
         description='The unique identifier',
-    ),
-    'created_at': fields.Date(
-        readOnly=True,
-        title='Created',
-        description='Date of creation'
-    ),
-    'tenant_id': fields.String(
-        readOnly=True,
-        title='Tenant',
-        max_length=64,
-        description='The tenant this belongs to',
-    ),
-})
+    )
+}
+project_response_fields.update(audit_fields)
+
+project_response = ns.inherit(
+    'ProjectResponse',
+    project,
+    project_response_fields
+)
 
 
 @ns.route('')
