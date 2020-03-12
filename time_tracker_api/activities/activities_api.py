@@ -1,4 +1,5 @@
 from flask_restplus import fields, Resource, Namespace
+from time_tracker_api.api import audit_fields
 
 ns = Namespace('activities', description='API for activities')
 
@@ -16,31 +17,21 @@ activity = ns.model('Activity', {
     ),
 })
 
-activity_response = ns.inherit('ActivityResponse', activity, {
+activity_response_fields = {
     'id': fields.String(
         readOnly=True,
         required=True,
         title='Identifier',
         description='The unique identifier',
-    ),
-    'created_at': fields.Date(
-        readOnly=True,
-        title='Created',
-        description='Date of creation'
-    ),
-    'created_by': fields.String(
-        readOnly=True,
-        title='Creator',
-        max_length=64,
-        description='User that created it',
-    ),
-    'tenant_id': fields.String(
-        readOnly=True,
-        title='Tenant',
-        max_length=64,
-        description='The tenant this belongs to',
-    ),
-})
+    )
+}
+activity_response_fields.update(audit_fields)
+
+activity_response = ns.inherit(
+    'ActivityResponse',
+    activity,
+    activity_response_fields
+)
 
 
 @ns.route('')
