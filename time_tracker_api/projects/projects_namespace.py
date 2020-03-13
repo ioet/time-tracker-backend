@@ -77,7 +77,6 @@ class Project(Resource):
         return project_dao.get(uid)
 
     @ns.doc('update_project_status')
-    @ns.param('uid', 'The project identifier')
     @ns.expect(project)
     @ns.response(204, 'State of the project successfully updated')
     def post(self, uid):
