@@ -1,0 +1,11 @@
+# requirements/dev.txt
+
+-r prod.txt
+
+# For development
+
+# Tests
+pytest==4.1.1
+
+# Coverage
+coverage==4.5.1

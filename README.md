@@ -1,7 +1,9 @@
 # time-tracker-api
 
+The API of the TSheets killer app.
+
 ## Getting started
-Follow the following instructions to get the project ready to use ASAP:
+Follow the following instructions to get the project ready to use ASAP.
 
 ### Requirements
 Be sure you have installed in your system
@@ -10,7 +12,7 @@ Be sure you have installed in your system
 automatically [pip](https://pip.pypa.io/en/stable/) as well.
 - A virtual environment, namely [venv](https://docs.python.org/3/library/venv.html).
 
-## Setup
+### Setup
 
 - Create and activate the environment,
     
@@ -26,13 +28,16 @@ automatically [pip](https://pip.pypa.io/en/stable/) as well.
     virtualenv .venv
     source .venv/bin/activate
     ```
+    
 - Install the requirements:
     ```
-    python3 -m pip install -r requirements/prod.txt
+    python3 -m pip install -r requirements/<stage>.txt
     ```
+    
+    The `stage` can be `dev` or `prod`. 
     Remember to do it with Python 3.
 
-## How to use it
+### How to use it
 - Set the env var `FLASK_APP` to `time_tracker_api` and start the app:
 
     In Windows
@@ -50,7 +55,47 @@ automatically [pip](https://pip.pypa.io/en/stable/) as well.
 a link to the swagger.json with the definition of the api.
 
 
-## CLI
+## Development
+
+### Test
+We are using Pytest](https://docs.pytest.org/en/latest/index.html) for tests. The tests are located in the package 
+`tests` and use the [conventions for python test discovery](https://docs.pytest.org/en/latest/goodpractices.html#test-discovery).
+
+To run the tests just execute:
+
+```
+python3 -m pytest -v
+```
+
+The option `-v` shows which tests failed or succeeded. Have into account that you can also debug each test 
+(test_* files) with the help of an IDE like PyCharm.
+
+#### Coverage
+To check the coverage of the tests execute
+
+```bash
+ coverage run -m pytest -v
+```
+
+To get a report table 
+
+```bash
+ coverage report
+```
+
+To get a full report in html
+```bash
+ coverage html
+```
+Then check in the [htmlcov/index.html](./htmlcov/index.html) to see it
+
+If you want that previously collected coverage data is erased, you can execute:
+
+```
+coverage erase
+```
+
+### CLI
 
 There are available commands, aware of the API, that can be very helpful to you. You
 can check them out by running
@@ -65,3 +110,19 @@ as well as its correspondent options.
 ```
 python cli.py gen_swagger_json -f ~/Downloads/swagger.json
 ```
+
+## Built with
+- [Python version 3](https://www.python.org/download/releases/3.0/) as backend programming language. Strong typing for 
+the win.
+- [Flask](http://flask.pocoo.org/) as the micro framework of choice.
+- [Flask RestPlus](https://flask-restplus.readthedocs.io/en/stable/) for building Restful APIs with Swagger.
+- [Pytest](https://docs.pytest.org/en/latest/index.html) for tests
+- [Coverage](https://coverage.readthedocs.io/en/coverage-4.5.4/) for coverage
+- [Swagger](https://swagger.io/) for documentation and standardization, taking into account the
+[API import restrictions and known issues](https://docs.microsoft.com/en-us/azure/api-management/api-management-api-import-restrictions)
+in Azure.
+
+
+## License
+
+Copyright 2020 ioet Inc. All Rights Reserved.

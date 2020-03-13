@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-print("****************")
-print("TimeTracker CLI")
-print("****************")
-
 import os
 
 from flask import json
@@ -63,4 +59,8 @@ def save_data(data: str, filename: str) -> None:
 
 
 if __name__ == "__main__":
+    print("****************")
+    print("TimeTracker CLI")
+    print("****************")
+
     cli_manager.run()
