@@ -7,3 +7,6 @@ class WhateverDevelopConfig(Config):
     FLASK_DEBUG = True
     FLASK_ENV = "develop"
     DATABASE = "whatever"
+
+
+DefaultConfig = WhateverDevelopConfig

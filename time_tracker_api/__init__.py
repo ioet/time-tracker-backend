@@ -1,8 +1,9 @@
 import os
+
 from flask import Flask
 
 
-def create_app(config_path='time_tracker_api.config.WhateverDevelopConfig',
+def create_app(config_path='time_tracker_api.config.DefaultConfig',
                config_data=None):
     flask_app = Flask(__name__)
 
@@ -12,7 +13,7 @@ def create_app(config_path='time_tracker_api.config.WhateverDevelopConfig',
     return flask_app
 
 
-def init_app_config(app, config_path, config_data=None):
+def init_app_config(app: Flask, config_path: str, config_data: dict = None):
     if config_path:
         app.config.from_object(config_path)
     else:
