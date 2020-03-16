@@ -4,7 +4,7 @@ from time_tracker_api.api import audit_fields
 ns = Namespace('technologies', description='API for technologies used')
 
 # Technology Model
-technology = ns.model('Technology', {
+technology_input = ns.model('TechnologyInput', {
     'name': fields.String(
         required=True,
         title='Name',
@@ -23,9 +23,9 @@ technology_response_fields = {
 }
 technology_response_fields.update(audit_fields)
 
-technology_response = ns.inherit(
-    'TechnologyResponse',
-    technology,
+technology = ns.inherit(
+    'Technology',
+    technology_input,
     technology_response_fields
 )
 
@@ -33,14 +33,14 @@ technology_response = ns.inherit(
 @ns.route('')
 class Technologies(Resource):
     @ns.doc('list_technologies')
-    @ns.marshal_list_with(technology_response, code=200)
+    @ns.marshal_list_with(technology, code=200)
     def get(self):
         """List all technologies"""
         return [], 200
 
     @ns.doc('create_technology')
-    @ns.expect(technology)
-    @ns.marshal_with(technology_response, code=201)
+    @ns.expect(technology_input)
+    @ns.marshal_with(technology, code=201)
     def post(self):
         """Create a technology"""
         return ns.payload, 201
@@ -51,14 +51,14 @@ class Technologies(Resource):
 @ns.param('uid', 'The technology identifier')
 class Technology(Resource):
     @ns.doc('get_technology')
-    @ns.marshal_with(technology_response)
+    @ns.marshal_with(technology)
     def get(self, uid):
         """Retrieve a technology"""
         return {}
 
     @ns.doc('put_technology')
-    @ns.expect(technology)
-    @ns.marshal_with(technology_response)
+    @ns.expect(technology_input)
+    @ns.marshal_with(technology)
     def put(self, uid):
         """Updates a technology"""
         return ns.payload()

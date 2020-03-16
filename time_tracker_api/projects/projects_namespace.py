@@ -6,7 +6,7 @@ from time_tracker_api.api import audit_fields
 ns = Namespace('projects', description='API for projects (clients)')
 
 # Project Model
-project = ns.model('Project', {
+project_input = ns.model('ProjectInput', {
     'name': fields.String(
         required=True,
         title='Name',
@@ -35,9 +35,9 @@ project_response_fields = {
 }
 project_response_fields.update(audit_fields)
 
-project_response = ns.inherit(
-    'ProjectResponse',
-    project,
+project = ns.inherit(
+    'Project',
+    project_input,
     project_response_fields
 )
 
@@ -45,14 +45,14 @@ project_response = ns.inherit(
 @ns.route('')
 class Projects(Resource):
     @ns.doc('list_projects')
-    @ns.marshal_list_with(project_response, code=200)
+    @ns.marshal_list_with(project, code=200)
     def get(self):
         """List all projects"""
         return project_dao.get_all(), 200
 
     @ns.doc('create_project')
-    @ns.expect(project)
-    @ns.marshal_with(project_response, code=201)
+    @ns.expect(project_input)
+    @ns.marshal_with(project, code=201)
     def post(self):
         """Create a project"""
         return project_dao.create(ns.payload), 201
@@ -71,7 +71,7 @@ project_update_parser.add_argument('active',
 @ns.param('uid', 'The project identifier')
 class Project(Resource):
     @ns.doc('get_project')
-    @ns.marshal_with(project_response)
+    @ns.marshal_with(project)
     def get(self, uid):
         """Retrieve a project"""
         return project_dao.get(uid)
@@ -90,8 +90,8 @@ class Project(Resource):
             abort(message=str(e), code=404)
 
     @ns.doc('put_project')
-    @ns.expect(project)
-    @ns.marshal_with(project_response)
+    @ns.expect(project_input)
+    @ns.marshal_with(project)
     def put(self, uid):
         """Create or replace a project"""
         return project_dao.update(uid, ns.payload)

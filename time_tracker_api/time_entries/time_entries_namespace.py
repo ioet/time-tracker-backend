@@ -1,10 +1,11 @@
 from flask_restplus import fields, Resource, Namespace
 from time_tracker_api.api import audit_fields
+from time_tracker_api import database
 
 ns = Namespace('time-entries', description='API for time entries')
 
 # TimeEntry Model
-time_entry = ns.model('TimeEntry', {
+time_entry_input = ns.model('TimeEntryInput', {
     'project_id': fields.String(
         required=True,
         title='Project',
@@ -54,24 +55,26 @@ time_entry_response_fields = {
 }
 time_entry_response_fields.update(audit_fields)
 
-time_entry_response = ns.inherit(
-    'TimeEntryResponse',
-    time_entry,
+time_entry = ns.inherit(
+    'TimeEntry',
+    time_entry_input,
     time_entry_response_fields,
 )
 
 
+model = database.create('time-entries')
+
 @ns.route('')
 class TimeEntries(Resource):
     @ns.doc('list_time_entries')
-    @ns.marshal_list_with(time_entry_response, code=200)
+    @ns.marshal_list_with(time_entry, code=200)
     def get(self):
         """List all available time entries"""
-        return []
+        return model.find_all()
 
     @ns.doc('create_time_entry')
-    @ns.expect(time_entry)
-    @ns.marshal_with(time_entry_response, code=201)
+    @ns.expect(time_entry_input)
+    @ns.marshal_with(time_entry, code=201)
     @ns.response(400, 'Invalid format of the attributes of the time entry')
     def post(self):
         """Starts a time entry by creating it"""
@@ -83,7 +86,7 @@ class TimeEntries(Resource):
 @ns.param('id', 'The unique identifier of the time entry')
 class TimeEntry(Resource):
     @ns.doc('get_time_entry')
-    @ns.marshal_with(time_entry_response)
+    @ns.marshal_with(time_entry)
     def get(self, id):
         """Retrieve all the data of a single time entry"""
         return {}
@@ -96,8 +99,8 @@ class TimeEntry(Resource):
 
     @ns.doc('put_time_entry')
     @ns.response(400, 'Invalid format of the attributes of the time entry.')
-    @ns.expect(time_entry)
-    @ns.marshal_with(time_entry_response)
+    @ns.expect(time_entry_input)
+    @ns.marshal_with(time_entry)
     def put(self, id):
         """Updates a time entry"""
         return ns.payload

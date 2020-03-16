@@ -63,7 +63,7 @@ We are using Pytest](https://docs.pytest.org/en/latest/index.html) for tests. Th
 
 To run the tests just execute:
 
-```
+```bash
 python3 -m pytest -v
 ```
 
