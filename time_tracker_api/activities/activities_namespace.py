@@ -4,7 +4,7 @@ from time_tracker_api.api import audit_fields
 ns = Namespace('activities', description='API for activities')
 
 # Activity Model
-activity = ns.model('Activity', {
+activity_input = ns.model('ActivityInput', {
     'name': fields.String(
         required=True,
         title='Name',
@@ -27,9 +27,9 @@ activity_response_fields = {
 }
 activity_response_fields.update(audit_fields)
 
-activity_response = ns.inherit(
-    'ActivityResponse',
-    activity,
+activity = ns.inherit(
+    'Activity',
+    activity_input,
     activity_response_fields
 )
 
@@ -37,14 +37,14 @@ activity_response = ns.inherit(
 @ns.route('')
 class Activities(Resource):
     @ns.doc('list_activities')
-    @ns.marshal_list_with(activity_response, code=200)
+    @ns.marshal_list_with(activity, code=200)
     def get(self):
         """List all available activities"""
         return []
 
     @ns.doc('create_activity')
-    @ns.expect(activity)
-    @ns.marshal_with(activity_response, code=201)
+    @ns.expect(activity_input)
+    @ns.marshal_with(activity, code=201)
     @ns.response(400, 'Invalid format of the attributes of the activity.')
     def post(self):
         """Create a single activity"""
@@ -56,7 +56,7 @@ class Activities(Resource):
 @ns.param('id', 'The unique identifier of the activity')
 class Activity(Resource):
     @ns.doc('get_activity')
-    @ns.marshal_with(activity_response)
+    @ns.marshal_with(activity)
     def get(self, id):
         """Retrieve all the data of a single activity"""
         return {}
@@ -69,8 +69,8 @@ class Activity(Resource):
 
     @ns.doc('put_activity')
     @ns.response(400, 'Invalid format of the attributes of the activity.')
-    @ns.expect(activity)
-    @ns.marshal_with(activity_response)
+    @ns.expect(activity_input)
+    @ns.marshal_with(activity)
     def put(self, id):
         """Updates an activity"""
         return ns.payload
