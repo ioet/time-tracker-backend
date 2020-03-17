@@ -10,29 +10,29 @@ class InMemoryProjectDAO(object):
     def get_all(self):
         return self.projects
 
-    def get(self, uid):
+    def get(self, id):
         for project in self.projects:
-            if project.get('uid') == uid:
+            if project.get('id') == id:
                 return project
-        raise MissingResource("Project '%s' not found" % uid)
+        raise MissingResource("Project '%s' not found" % id)
 
     def create(self, project):
         self.counter += 1
-        project['uid'] = str(self.counter)
+        project['id'] = str(self.counter)
         self.projects.append(project)
         return project
 
-    def update(self, uid, data):
-        project = self.get(uid)
+    def update(self, id, data):
+        project = self.get(id)
         if project:
             project.update(data)
             return project
         else:
-            raise MissingResource("Project '%s' not found" % uid)
+            raise MissingResource("Project '%s' not found" % id)
 
-    def delete(self, uid):
-        if uid:
-            project = self.get(uid)
+    def delete(self, id):
+        if id:
+            project = self.get(id)
             self.projects.remove(project)
 
     def flush(self):

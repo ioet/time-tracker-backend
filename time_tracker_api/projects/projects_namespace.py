@@ -73,24 +73,24 @@ project_update_parser.add_argument('active',
                                    help='Is the project active?')
 
 
-@ns.route('/<string:uid>')
+@ns.route('/<string:id>')
 @ns.response(404, 'Project not found')
-@ns.param('uid', 'The project identifier')
+@ns.param('id', 'The project identifier')
 class Project(Resource):
     @ns.doc('get_project')
     @ns.marshal_with(project)
-    def get(self, uid):
+    def get(self, id):
         """Retrieve a project"""
-        return project_dao.get(uid)
+        return project_dao.get(id)
 
     @ns.doc('update_project_status')
     @ns.expect(project)
     @ns.response(204, 'State of the project successfully updated')
-    def post(self, uid):
+    def post(self, id):
         """Updates a project using form data"""
         try:
             update_data = project_update_parser.parse_args()
-            return project_dao.update(uid, update_data), 200
+            return project_dao.update(id, update_data), 200
         except ValueError:
             abort(code=400)
         except MissingResource as e:
@@ -99,13 +99,13 @@ class Project(Resource):
     @ns.doc('put_project')
     @ns.expect(project_input)
     @ns.marshal_with(project)
-    def put(self, uid):
+    def put(self, id):
         """Create or replace a project"""
-        return project_dao.update(uid, ns.payload)
+        return project_dao.update(id, ns.payload)
 
     @ns.doc('delete_project')
     @ns.response(204, 'Project deleted successfully')
-    def delete(self, uid):
+    def delete(self, id):
         """Deletes a project"""
-        project_dao.delete(uid)
+        project_dao.delete(id)
         return None, 204

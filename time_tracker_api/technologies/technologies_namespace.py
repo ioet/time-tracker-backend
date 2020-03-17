@@ -51,25 +51,25 @@ class Technologies(Resource):
         return ns.payload, 201
 
 
-@ns.route('/<string:uid>')
+@ns.route('/<string:id>')
 @ns.response(404, 'Technology not found')
-@ns.param('uid', 'The technology identifier')
+@ns.param('id', 'The technology identifier')
 class Technology(Resource):
     @ns.doc('get_technology')
     @ns.marshal_with(technology)
-    def get(self, uid):
+    def get(self, id):
         """Retrieve a technology"""
         return {}
 
     @ns.doc('put_technology')
     @ns.expect(technology_input)
     @ns.marshal_with(technology)
-    def put(self, uid):
+    def put(self, id):
         """Updates a technology"""
         return ns.payload()
 
     @ns.doc('delete_technology')
     @ns.response(204, 'Technology deleted successfully')
-    def delete(self, uid):
+    def delete(self, id):
         """Deletes a technology"""
         return None, 204
