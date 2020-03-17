@@ -15,19 +15,19 @@ project_input = ns.model('ProjectInput', {
         title='Name',
         max_length=50,
         description='Name of the project',
-        example=faker.word(['YoSpace', 'Yira'])
+        example=faker.word(['YoSpace', 'Yira']),
     ),
     'description': fields.String(
         title='Description',
         description='Description about the project',
-        example=faker.paragraph()
+        example=faker.paragraph(),
     ),
     'type': fields.String(
         required=True,
         title='Type',
         max_length=30,
         description='If it is `Costumer`, `Training` or other type',
-        example=faker.word(['Customer', 'Training'])
+        example=faker.word(['Customer', 'Training']),
     ),
 })
 
@@ -37,7 +37,7 @@ project_response_fields = {
         required=True,
         title='Identifier',
         description='The unique identifier',
-        example=faker.uuid4()
+        example=faker.random_int(1, 9999),
     )
 }
 project_response_fields.update(audit_fields)

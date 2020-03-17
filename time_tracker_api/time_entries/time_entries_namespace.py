@@ -14,14 +14,14 @@ time_entry_input = ns.model('TimeEntryInput', {
         title='Project',
         max_length=64,
         description='The id of the selected project',
-        example=faker.uuid4()
+        example=faker.random_int(1, 9999),
     ),
     'activity_id': fields.String(
         required=False,
         title='Activity',
         max_length=64,
         description='The id of the selected activity',
-        example=faker.uuid4()
+        example=faker.random_int(1, 9999),
     ),
     'technologies': fields.String(
         required=True,
@@ -32,19 +32,19 @@ time_entry_input = ns.model('TimeEntryInput', {
     'description': fields.String(
         title='Comments',
         description='Comments about the time entry',
-        example=faker.paragraph()
+        example=faker.paragraph(),
     ),
     'start_date': fields.DateTime(
         required=True,
         title='Start date',
         description='When the user started doing this activity',
-        example=faker.iso8601(end_datetime=None)
+        example=faker.iso8601(end_datetime=None),
     ),
     'end_date': fields.DateTime(
         required=True,
         title='End date',
         description='When the user ended doing this activity',
-        example=faker.iso8601(end_datetime=None)
+        example=faker.iso8601(end_datetime=None),
     ),
 })
 
@@ -54,13 +54,13 @@ time_entry_response_fields = {
         required=True,
         title='Identifier',
         description='The unique identifier',
-        example=faker.uuid4()
+        example=faker.random_int(1, 9999),
     ),
     'running': fields.Boolean(
         readOnly=True,
         title='Is it running?',
         description='Whether this time entry is currently running or not',
-        example=faker.boolean()
+        example=faker.boolean(),
     ),
 }
 time_entry_response_fields.update(audit_fields)

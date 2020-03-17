@@ -13,12 +13,12 @@ activity_input = ns.model('ActivityInput', {
         title='Name',
         max_length=50,
         description='Canonical name of the activity',
-        example=faker.word(['Development', 'Training'])
+        example=faker.word(['Development', 'Training']),
     ),
     'description': fields.String(
         title='Description',
         description='Comments about the activity',
-        example=faker.paragraph()
+        example=faker.paragraph(),
     ),
 })
 
@@ -28,7 +28,7 @@ activity_response_fields = {
         required=True,
         title='Identifier',
         description='The unique identifier',
-        example=faker.uuid4()
+        example=faker.random_int(1, 9999),
     )
 }
 activity_response_fields.update(audit_fields)

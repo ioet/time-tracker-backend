@@ -23,7 +23,7 @@ technology_response_fields = {
         required=True,
         title='Identifier',
         description='The unique identifier',
-        example=faker.uuid4()
+        example=faker.random_int(1, 9999),
     ),
 }
 technology_response_fields.update(audit_fields)

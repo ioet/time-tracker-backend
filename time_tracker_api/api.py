@@ -12,21 +12,21 @@ audit_fields = {
         readOnly=True,
         title='Created',
         description='Date of creation',
-        example=faker.iso8601(end_datetime=None)
+        example=faker.iso8601(end_datetime=None),
     ),
     'tenant_id': fields.String(
         readOnly=True,
         title='Tenant',
         max_length=64,
         description='The tenant this belongs to',
-        example=faker.uuid4()
+        example=faker.random_int(1, 9999),
     ),
     'created_by': fields.String(
         readOnly=True,
         title='Creator',
         max_length=64,
         description='User that created it',
-        example=faker.uuid4()
+        example=faker.random_int(1, 9999),
     ),
 }
 
