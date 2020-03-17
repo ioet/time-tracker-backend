@@ -1,4 +1,7 @@
 from flask_restplus import Api, fields
+from faker import Faker
+
+faker = Faker()
 
 api = Api(version='1.0.1', title="TimeTracker API",
           description="API for the TimeTracker project")
@@ -8,19 +11,22 @@ audit_fields = {
     'created_at': fields.Date(
         readOnly=True,
         title='Created',
-        description='Date of creation'
+        description='Date of creation',
+        example=faker.iso8601(end_datetime=None)
     ),
     'tenant_id': fields.String(
         readOnly=True,
         title='Tenant',
         max_length=64,
         description='The tenant this belongs to',
+        example=faker.uuid4()
     ),
     'created_by': fields.String(
         readOnly=True,
         title='Creator',
         max_length=64,
         description='User that created it',
+        example=faker.uuid4()
     ),
 }
 

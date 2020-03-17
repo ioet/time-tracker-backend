@@ -1,6 +1,9 @@
 from flask_restplus import fields, Resource, Namespace
 from time_tracker_api.api import audit_fields
 from time_tracker_api import database
+from faker import Faker
+
+faker = Faker()
 
 ns = Namespace('time-entries', description='API for time entries')
 
@@ -11,12 +14,14 @@ time_entry_input = ns.model('TimeEntryInput', {
         title='Project',
         max_length=64,
         description='The id of the selected project',
+        example=faker.uuid4()
     ),
     'activity_id': fields.String(
         required=False,
         title='Activity',
         max_length=64,
         description='The id of the selected activity',
+        example=faker.uuid4()
     ),
     'technologies': fields.String(
         required=True,
@@ -26,17 +31,20 @@ time_entry_input = ns.model('TimeEntryInput', {
     ),
     'description': fields.String(
         title='Comments',
-        description='Comments about the time entry'
+        description='Comments about the time entry',
+        example=faker.paragraph()
     ),
     'start_date': fields.DateTime(
         required=True,
         title='Start date',
         description='When the user started doing this activity',
+        example=faker.iso8601(end_datetime=None)
     ),
     'end_date': fields.DateTime(
         required=True,
         title='End date',
         description='When the user ended doing this activity',
+        example=faker.iso8601(end_datetime=None)
     ),
 })
 
@@ -46,11 +54,13 @@ time_entry_response_fields = {
         required=True,
         title='Identifier',
         description='The unique identifier',
+        example=faker.uuid4()
     ),
     'running': fields.Boolean(
         readOnly=True,
         title='Is it running?',
-        description='Whether this time entry is currently running or not'
+        description='Whether this time entry is currently running or not',
+        example=faker.boolean()
     ),
 }
 time_entry_response_fields.update(audit_fields)
@@ -63,6 +73,7 @@ time_entry = ns.inherit(
 
 
 model = database.create('time-entries')
+
 
 @ns.route('')
 class TimeEntries(Resource):

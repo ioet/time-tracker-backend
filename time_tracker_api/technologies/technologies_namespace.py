@@ -1,5 +1,8 @@
 from flask_restplus import Namespace, Resource, fields
 from time_tracker_api.api import audit_fields
+from faker import Faker
+
+faker = Faker()
 
 ns = Namespace('technologies', description='API for technologies used')
 
@@ -9,7 +12,8 @@ technology_input = ns.model('TechnologyInput', {
         required=True,
         title='Name',
         max_length=50,
-        description='Name of the technology'
+        description='Name of the technology',
+        example=faker.word(['Java', 'Python', 'Elixir'])
     ),
 })
 
@@ -19,6 +23,7 @@ technology_response_fields = {
         required=True,
         title='Identifier',
         description='The unique identifier',
+        example=faker.uuid4()
     ),
 }
 technology_response_fields.update(audit_fields)

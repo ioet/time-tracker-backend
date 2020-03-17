@@ -2,6 +2,9 @@ from flask_restplus import Namespace, Resource, abort, inputs, fields
 from .projects_model import project_dao
 from time_tracker_api.errors import MissingResource
 from time_tracker_api.api import audit_fields
+from faker import Faker
+
+faker = Faker()
 
 ns = Namespace('projects', description='API for projects (clients)')
 
@@ -11,17 +14,20 @@ project_input = ns.model('ProjectInput', {
         required=True,
         title='Name',
         max_length=50,
-        description='Name of the project'
+        description='Name of the project',
+        example=faker.word(['YoSpace', 'Yira'])
     ),
     'description': fields.String(
         title='Description',
-        description='Description about the project'
+        description='Description about the project',
+        example=faker.paragraph()
     ),
     'type': fields.String(
         required=True,
         title='Type',
         max_length=30,
         description='If it is `Costumer`, `Training` or other type',
+        example=faker.word(['Customer', 'Training'])
     ),
 })
 
@@ -31,6 +37,7 @@ project_response_fields = {
         required=True,
         title='Identifier',
         description='The unique identifier',
+        example=faker.uuid4()
     )
 }
 project_response_fields.update(audit_fields)
