@@ -15,7 +15,7 @@ project_input = ns.model('ProjectInput', {
         title='Name',
         max_length=50,
         description='Name of the project',
-        example=faker.word(['YoSpace', 'Yira']),
+        example=faker.company(),
     ),
     'description': fields.String(
         title='Description',
