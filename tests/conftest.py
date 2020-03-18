@@ -21,8 +21,8 @@ def client(app: Flask) -> FlaskClient:
         return c
 
 
-@pytest.fixture()
-def repository(app: Flask):
+@pytest.fixture(scope="module")
+def sql_repository(app: Flask):
     with app.app_context():
         from .resources import TestModel
         from time_tracker_api.sql_repository import db
@@ -31,4 +31,7 @@ def repository(app: Flask):
         print("Models for test created!")
 
         from time_tracker_api.sql_repository import SQLRepository
-        return SQLRepository(TestModel)
+        yield SQLRepository(TestModel)
+
+        print("Models for test removed!")
+        db.drop_all()
