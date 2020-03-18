@@ -13,3 +13,6 @@ Faker==4.0.2
 
 # Coverage
 coverage==4.5.1
+
+# SQL database (MS SQL)
+flask_sqlalchemy==2.4.1
