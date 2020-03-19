@@ -15,5 +15,8 @@ gunicorn==20.0.4
 #Swagger support for Restful API
 flask-restplus==0.13.0
 
+#Mocking
+Faker==4.0.2
+
 #CLI support
 Flask-Script==2.0.6
