@@ -1,9 +1,10 @@
-from time_tracker_api.sql_repository import db
+from time_tracker_api.sql_repository import db, SQLAuditedModel
 
 
-class TestModel(db.Model):
+class PersonSQLModel(db.Model, SQLAuditedModel):
+    __tablename__ = 'tests'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), unique=True, nullable=False)
+    name = db.Column(db.String(80), unique=False, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     age = db.Column(db.Integer, nullable=False)
 

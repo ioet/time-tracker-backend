@@ -1,6 +1,7 @@
-from flask_restplus import Namespace, Resource, fields
-from time_tracker_api.api import audit_fields
 from faker import Faker
+from flask_restplus import Namespace, Resource, fields
+
+from time_tracker_api.api import audit_fields
 
 faker = Faker()
 

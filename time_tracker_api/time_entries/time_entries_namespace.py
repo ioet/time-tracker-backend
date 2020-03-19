@@ -1,7 +1,7 @@
-from flask_restplus import fields, Resource, Namespace
-from time_tracker_api.api import audit_fields
-from time_tracker_api import database
 from faker import Faker
+from flask_restplus import fields, Resource, Namespace
+
+from time_tracker_api.api import audit_fields
 
 faker = Faker()
 
@@ -72,16 +72,13 @@ time_entry = ns.inherit(
 )
 
 
-model = database.create('time-entries')
-
-
 @ns.route('')
 class TimeEntries(Resource):
     @ns.doc('list_time_entries')
     @ns.marshal_list_with(time_entry, code=200)
     def get(self):
         """List all available time entries"""
-        return model.find_all()
+        return [], 200
 
     @ns.doc('create_time_entry')
     @ns.expect(time_entry_input)

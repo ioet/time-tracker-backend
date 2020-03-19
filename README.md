@@ -39,7 +39,7 @@ automatically [pip](https://pip.pypa.io/en/stable/) as well.
     
     
 - Install the [Microsoft ODBC Driver for SQL Server](https://docs.microsoft.com/en-us/sql/connect/odbc/microsoft-odbc-driver-for-sql-server?view=sql-server-ver15) 
-in your operative system. Then you have to check out how is called the SQL Driver installation. 
+in your operative system. Then you have to check out what is the name of the SQL Driver installation. 
 Check it out with:
 
 ```bash
@@ -55,7 +55,7 @@ Driver=/usr/local/lib/libmsodbcsql.17.dylib
 UsageCount=2
 ```
 
-Then when you specify the driver name, e.g. _DBC Driver 17 for SQL Server_ in the `DATABASE_URI`. E.g. 
+Then specify the driver name, in this case _DBC Driver 17 for SQL Server_ in the `DATABASE_URI`, e.g.:
 
 ```.dotenv
 DATABASE_URI=mssql+pyodbc://<user>:<password>@time-tracker-srv.database.windows.net/<database>?driver\=ODBC Driver 17 for SQL Server
