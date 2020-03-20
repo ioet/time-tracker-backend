@@ -123,7 +123,7 @@ docker build -t time_tracker_api:local .
 docker run -p 5000:5000 time_tracker_api:local
 ```
 
-3. Visit `0.0.0.0:5000`
+3. Visit `127.0.0.1:5000`
 
 ## Built with
 - [Python version 3](https://www.python.org/download/releases/3.0/) as backend programming language. Strong typing for 
