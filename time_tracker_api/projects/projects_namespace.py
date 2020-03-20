@@ -65,7 +65,6 @@ class Projects(Resource):
     @ns.doc('list_projects')
     @ns.marshal_list_with(project, code=200)
     def get(self):
-        """List all projects"""
         return project_dao.get_all(), 200
 
     @ns.doc('create_project')
@@ -74,7 +73,6 @@ class Projects(Resource):
     @ns.expect(project_input)
     @ns.marshal_with(project, code=201)
     def post(self):
-        """Create a project"""
         return project_dao.create(ns.payload), 201
 
 
@@ -90,7 +88,6 @@ class Project(Resource):
     @ns.response(422, 'The id has an invalid format')
     @ns.marshal_with(project)
     def get(self, id):
-        """Retrieve a project"""
         return project_dao.get(id)
 
     @ns.doc('update_project')
@@ -99,13 +96,11 @@ class Project(Resource):
     @ns.expect(project_input)
     @ns.marshal_with(project)
     def put(self, id):
-        """Updates a project"""
         return project_dao.update(id, ns.payload)
 
     @ns.doc('delete_project')
     @ns.response(204, 'Project deleted successfully')
     @ns.response(422, 'The id has an invalid format')
     def delete(self, id):
-        """Deletes a project"""
         project_dao.delete(id)
         return None, 204

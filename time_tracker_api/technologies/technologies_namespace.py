@@ -41,14 +41,12 @@ class Technologies(Resource):
     @ns.doc('list_technologies')
     @ns.marshal_list_with(technology, code=200)
     def get(self):
-        """List all technologies"""
         return [], 200
 
     @ns.doc('create_technology')
     @ns.expect(technology_input)
     @ns.marshal_with(technology, code=201)
     def post(self):
-        """Create a technology"""
         return ns.payload, 201
 
 
@@ -59,18 +57,15 @@ class Technology(Resource):
     @ns.doc('get_technology')
     @ns.marshal_with(technology)
     def get(self, id):
-        """Retrieve a technology"""
         return {}
 
     @ns.doc('put_technology')
     @ns.expect(technology_input)
     @ns.marshal_with(technology)
     def put(self, id):
-        """Updates a technology"""
         return ns.payload()
 
     @ns.doc('delete_technology')
     @ns.response(204, 'Technology deleted successfully')
     def delete(self, id):
-        """Deletes a technology"""
         return None, 204

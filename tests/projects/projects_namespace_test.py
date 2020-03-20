@@ -4,7 +4,6 @@ from pytest_mock import MockFixture
 
 
 def test_list_all_elements(client: FlaskClient, mocker: MockFixture):
-    """Should return all elements in a list"""
     from time_tracker_api.projects.projects_namespace import project_dao
     repository_find_all_mock = mocker.patch.object(project_dao.repository, 'find_all', return_value=[])
 

@@ -46,7 +46,6 @@ class Activities(Resource):
     @ns.doc('list_activities')
     @ns.marshal_list_with(activity, code=200)
     def get(self):
-        """List all available activities"""
         return []
 
     @ns.doc('create_activity')
@@ -54,7 +53,6 @@ class Activities(Resource):
     @ns.marshal_with(activity, code=201)
     @ns.response(400, 'Invalid format of the attributes of the activity.')
     def post(self):
-        """Create a single activity"""
         return ns.payload, 201
 
 
@@ -65,13 +63,11 @@ class Activity(Resource):
     @ns.doc('get_activity')
     @ns.marshal_with(activity)
     def get(self, id):
-        """Retrieve all the data of a single activity"""
         return {}
 
     @ns.doc('delete_activity')
     @ns.response(204, 'The activity was deleted successfully (No content is returned)')
     def delete(self, id):
-        """Deletes a activity"""
         return None, 204
 
     @ns.doc('put_activity')
@@ -79,5 +75,4 @@ class Activity(Resource):
     @ns.expect(activity_input)
     @ns.marshal_with(activity)
     def put(self, id):
-        """Updates an activity"""
         return ns.payload

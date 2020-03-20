@@ -42,12 +42,10 @@ class CRUDDao(abc.ABC):
 class Seeder(abc.ABC):
     @abc.abstractmethod
     def run(self):
-        """Provision database"""
         raise NotImplementedError
 
     @abc.abstractmethod
     def fresh(self):
-        """will drop all tables and seed again the database"""
         raise NotImplementedError
 
     def __call__(self, *args, **kwargs):
@@ -55,13 +53,7 @@ class Seeder(abc.ABC):
 
 
 class DatabaseModel:
-    """
-    Represents a model of a particular database, 
-    e.g. SQL Model
-    """
-
     def to_dto(self):
-        """Override this in case you need a DTO instead of a model"""
         return self
 
 
@@ -74,10 +66,6 @@ def convert_result_to_dto(f):
         return result
 
     def to_dto(*args, **kw):
-        """
-        Decorator that converts any result that is a
-        DatabaseModel into its correspondent dto.
-        """
         result = f(*args, **kw)
         return convert_if_necessary(result)
 
@@ -88,7 +76,6 @@ seeder: Seeder = None
 
 
 def init_app(app: Flask) -> None:
-    """Make the app ready to use the database"""
     database_strategy = app.config['DATABASE']
     with app.app_context():
         globals()["use_%s" % database_strategy.name.lower()](app)

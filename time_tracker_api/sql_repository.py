@@ -8,17 +8,11 @@ from time_tracker_api.security import current_user_id
 
 db = None
 SQLModel = None
-SQLAuditedModel = None
+AuditedSQLModel = None
 
 
 def handle_commit_issues(f):
-    """If during a commit an exception happened it should be rolled-back"""
-
     def rollback_if_necessary(*args, **kw):
-        """
-        Decorator that converts any result that is a
-        DatabaseModel into its correspondent dto.
-        """
         try:
             return f(*args, **kw)
         except:
@@ -40,15 +34,15 @@ def init_app(app: Flask) -> None:
 
     SQLModel = SQLModelClass
 
-    global SQLAuditedModel
+    global AuditedSQLModel
 
-    class SQLAuditedModelClass():
+    class AuditedSQLModelClass():
         created_at = db.Column(db.DateTime, server_default=db.func.now())
         updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
         created_by = db.Column(db.String, default=current_user_id)
         updated_by = db.Column(db.String, onupdate=current_user_id)
 
-    SQLAuditedModel = SQLAuditedModelClass
+    AuditedSQLModel = AuditedSQLModelClass
 
 
 class SQLRepository():

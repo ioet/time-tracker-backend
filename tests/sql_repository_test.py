@@ -7,7 +7,6 @@ last_deleted_element = None
 
 
 def test_create(sql_repository):
-    """Should create a new Entry"""
     global sample_element
     sample_element = dict(name=fake.name(),
                           email=fake.safe_email(),
@@ -26,7 +25,6 @@ def test_create(sql_repository):
 
 
 def test_find(sql_repository):
-    """Should find created element"""
     existing_element = existing_elements_registry[0]
 
     found_element = sql_repository.find(existing_element.id)
@@ -36,7 +34,6 @@ def test_find(sql_repository):
 
 
 def test_update(sql_repository):
-    """Updates an existing element"""
     existing_element = existing_elements_registry[0]
 
     updated_element = sql_repository.update(existing_element.id,
@@ -52,7 +49,6 @@ def test_update(sql_repository):
 
 
 def test_find_all(sql_repository):
-    """Find all existing elements"""
     existing_elements = sql_repository.find_all()
 
     assert all(e in existing_elements_registry for e in existing_elements)
@@ -78,7 +74,6 @@ def test_find_all_that_contains_property_with_string(sql_repository):
 
 
 def test_delete_existing_element(sql_repository):
-    """Should delete created element"""
     existing_element = existing_elements_registry[0]
 
     result = sql_repository.remove(existing_element.id)

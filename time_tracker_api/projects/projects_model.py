@@ -3,7 +3,7 @@ import enum
 from flask import Flask
 
 from time_tracker_api.database import DATABASE_TYPE, CRUDDao
-from time_tracker_api.sql_repository import SQLCRUDDao, SQLAuditedModel, SQLModel
+from time_tracker_api.sql_repository import SQLCRUDDao, AuditedSQLModel, SQLModel
 
 
 class PROJECT_TYPE(enum.Enum):
@@ -20,11 +20,10 @@ class ProjectDao(CRUDDao):
 
 
 def create_dao(app: Flask) -> ProjectDao:
-    """This will construct the dao based on the chosen DATABASE"""
     if app.config['DATABASE'] == DATABASE_TYPE.SQL:
         from time_tracker_api.sql_repository import db
 
-        class ProjectSQLModel(db.Model, SQLModel, SQLAuditedModel):
+        class ProjectSQLModel(db.Model, SQLModel, AuditedSQLModel):
             __tablename__ = 'projects'
             id = db.Column(db.Integer, primary_key=True)
             name = db.Column(db.String(50), unique=True, nullable=False)

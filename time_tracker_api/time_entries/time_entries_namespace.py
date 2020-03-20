@@ -77,7 +77,6 @@ class TimeEntries(Resource):
     @ns.doc('list_time_entries')
     @ns.marshal_list_with(time_entry, code=200)
     def get(self):
-        """List all available time entries"""
         return [], 200
 
     @ns.doc('create_time_entry')
@@ -85,7 +84,6 @@ class TimeEntries(Resource):
     @ns.marshal_with(time_entry, code=201)
     @ns.response(400, 'Invalid format of the attributes of the time entry')
     def post(self):
-        """Starts a time entry by creating it"""
         return ns.payload, 201
 
 
@@ -96,13 +94,11 @@ class TimeEntry(Resource):
     @ns.doc('get_time_entry')
     @ns.marshal_with(time_entry)
     def get(self, id):
-        """Retrieve all the data of a single time entry"""
         return {}
 
     @ns.doc('delete_time_entry')
     @ns.response(204, 'The time entry was deleted successfully (No content is returned)')
     def delete(self, id):
-        """Deletes a time entry"""
         return None, 204
 
     @ns.doc('put_time_entry')
@@ -110,7 +106,6 @@ class TimeEntry(Resource):
     @ns.expect(time_entry_input)
     @ns.marshal_with(time_entry)
     def put(self, id):
-        """Updates a time entry"""
         return ns.payload
 
 
@@ -121,7 +116,6 @@ class StopTimeEntry(Resource):
     @ns.doc('stop_time_entry')
     @ns.response(204, 'The time entry was stopped successfully (No content is returned)')
     def post(self, id):
-        """Stops a running time entry"""
         return None, 204
 
 
@@ -132,5 +126,4 @@ class ContinueTimeEntry(Resource):
     @ns.doc('continue_time_entry')
     @ns.response(204, 'The time entry was continued successfully (No content is returned)')
     def post(self, id):
-        """Restart an stopped time entry"""
         return None, 204

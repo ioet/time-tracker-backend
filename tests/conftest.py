@@ -10,13 +10,11 @@ CONFIGURATIONS = ['AzureSQLDatabaseDevelopTestConfig']
 
 @pytest.fixture(scope='session', params=CONFIGURATIONS)
 def app(request: FixtureRequest) -> Flask:
-    """An instance of the app for tests"""
     return create_app("time_tracker_api.config.%s" % request.param)
 
 
 @pytest.fixture
 def client(app: Flask) -> FlaskClient:
-    """A test client for the app."""
     with app.test_client() as c:
         return c
 
