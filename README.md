@@ -111,6 +111,20 @@ as well as its correspondent options.
 python cli.py gen_swagger_json -f ~/Downloads/swagger.json
 ```
 
+## Run as docker container
+
+1. Build image
+```bash
+docker build -t time_tracker_api:local .
+```
+
+2. Run app
+```bash
+docker run -p 5000:5000 time_tracker_api:local
+```
+
+3. Visit `127.0.0.1:5000`
+
 ## Built with
 - [Python version 3](https://www.python.org/download/releases/3.0/) as backend programming language. Strong typing for 
 the win.
