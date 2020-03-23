@@ -22,6 +22,7 @@ Faker==4.0.2
 Flask-Script==2.0.6
 
 # SQL database (MS SQL)
+pyodbc==4.0.30
 flask_sqlalchemy==2.4.1
 
 # Handling requests

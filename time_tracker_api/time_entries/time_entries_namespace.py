@@ -23,11 +23,18 @@ time_entry_input = ns.model('TimeEntryInput', {
         description='The id of the selected activity',
         example=faker.random_int(1, 9999),
     ),
-    'technologies': fields.String(
-        required=True,
-        title='Technologies',
-        max_length=64,
-        description='Canonical names of the used technologies during this period',
+    'technologies': fields.List(
+        fields.String(
+            required=True,
+            title='Technologies',
+            max_length=64,
+            description='Technology names used in this time-entry',
+        ),
+        example=faker.words(
+            3,
+            ['java', 'elixir', 'python', 'docker'],
+            unique=True
+        )
     ),
     'description': fields.String(
         title='Comments',
