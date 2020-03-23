@@ -1,6 +1,5 @@
 import os
 
-from time_tracker_api.database import DATABASE_TYPE
 from time_tracker_api.security import generate_dev_secret_key
 
 
@@ -26,7 +25,6 @@ class SQLConfig(Config):
     SQLALCHEMY_DATABASE_URI = Config.DATABASE_URI
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    DATABASE = DATABASE_TYPE.SQL
 
 
 class AzureConfig(SQLConfig):

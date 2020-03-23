@@ -94,6 +94,5 @@ def handle_connection_error(e):
 
 @api.errorhandler
 def generic_exception_handler(e):
-    if not app.config.get("FLASK_DEBUG", False):
-        app.logger.error(e)
+    app.logger.error(e)
     return {'message': 'An unhandled exception occurred.'}, 500

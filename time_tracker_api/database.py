@@ -12,11 +12,6 @@ from datetime import datetime
 from flask import Flask
 
 
-class DATABASE_TYPE(enum.Enum):
-    IN_MEMORY = 'in-memory'
-    SQL = 'sql'
-
-
 class CRUDDao(abc.ABC):
     @abc.abstractmethod
     def get_all(self):
@@ -76,13 +71,8 @@ seeder: Seeder = None
 
 
 def init_app(app: Flask) -> None:
-    database_strategy = app.config['DATABASE']
-    with app.app_context():
-        globals()["use_%s" % database_strategy.name.lower()](app)
-
-
-def use_sql(app: Flask) -> None:
     from time_tracker_api.sql_repository import init_app, SQLSeeder
     init_app(app)
     global seeder
     seeder = SQLSeeder()
+

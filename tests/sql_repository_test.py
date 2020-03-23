@@ -54,8 +54,7 @@ def test_find_all(sql_repository):
     assert all(e in existing_elements_registry for e in existing_elements)
 
 
-def test_find_all_that_contains_property_with_string(sql_repository):
-    """Find all elements that have a property that partially contains a string (case-insensitive)"""
+def test_find_all_that_contains_property_with_string_case_insensitive(sql_repository):
     fake_name = fake.name()
     new_element = dict(name="%s Snow" % fake_name,
                        email=fake.safe_email(),
