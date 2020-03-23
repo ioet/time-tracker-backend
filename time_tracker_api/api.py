@@ -58,10 +58,6 @@ from time_tracker_api.activities import activities_namespace
 
 api.add_namespace(activities_namespace.ns)
 
-from time_tracker_api.technologies import technologies_namespace
-
-api.add_namespace(technologies_namespace.ns)
-
 from time_tracker_api.time_entries import time_entries_namespace
 
 api.add_namespace(time_entries_namespace.ns)
