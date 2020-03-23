@@ -28,7 +28,7 @@ time_entry_input = ns.model('TimeEntryInput', {
             required=True,
             title='Technologies',
             max_length=64,
-            description='Canonical names of the used technologies during this period',
+            description='Technology names used in this time-entry',
         ),
         example=faker.words(
             3,
