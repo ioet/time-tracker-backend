@@ -6,9 +6,11 @@ from flask import json
 from flask_script import Manager
 
 from time_tracker_api import create_app
+
+app = create_app('time_tracker_api.config.CLIConfig')
+
 from time_tracker_api.api import api
 
-app = create_app()
 cli_manager = Manager(app)
 
 
@@ -42,6 +44,23 @@ def gen_postman_collection(filename='timetracker-api-postman-collection.json',
         parsed_json = postman_collection_json_data
 
     save_data(parsed_json, filename)
+
+
+@cli_manager.command
+def seed():
+    from time_tracker_api.database import seeder as seed
+    seed()
+
+
+@cli_manager.command
+def re_create_db():
+    print('This is going to drop all tables and seed again the database')
+    confirm_answer = input('Do you confirm (Y) you want to remove all your data?\n')
+    if confirm_answer.upper() == 'Y':
+        from time_tracker_api.database import seeder
+        seeder.fresh()
+    else:
+        print('\nThis action was cancelled!')
 
 
 def save_data(data: str, filename: str) -> None:

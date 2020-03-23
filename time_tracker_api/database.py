@@ -2,27 +2,77 @@
 Agnostic database assets
 
 Put here your utils and class independent of
-the database solution
+the database solution.
+To know more about protocols and subtyping check out PEP-0544
 """
+import abc
+import enum
+from datetime import datetime
+
 from flask import Flask
 
-RepositoryModel = None
+
+class CRUDDao(abc.ABC):
+    @abc.abstractmethod
+    def get_all(self):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get(self, id):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def create(self, project):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def update(self, id, data):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def delete(self, id):
+        raise NotImplementedError
+
+
+class Seeder(abc.ABC):
+    @abc.abstractmethod
+    def run(self):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def fresh(self):
+        raise NotImplementedError
+
+    def __call__(self, *args, **kwargs):
+        self.run()
+
+
+class DatabaseModel:
+    def to_dto(self):
+        return self
+
+
+def convert_result_to_dto(f):
+    def convert_if_necessary(result):
+        if hasattr(result, 'to_dto'):
+            return result.to_dto()
+        elif issubclass(type(result), list):
+            return list(map(convert_if_necessary, result))
+        return result
+
+    def to_dto(*args, **kw):
+        result = f(*args, **kw)
+        return convert_if_necessary(result)
+
+    return to_dto
+
+
+seeder: Seeder = None
 
 
 def init_app(app: Flask) -> None:
-    """Make the app ready to use the database"""
-    database_strategy_name = app.config['DATABASE']
-    with app.app_context():
-        module = globals()["use_%s" % database_strategy_name]()
-        global RepositoryModel
-        RepositoryModel = module.repository_model
+    from time_tracker_api.sql_repository import init_app, SQLSeeder
+    init_app(app)
+    global seeder
+    seeder = SQLSeeder()
 
-
-def create(model_name: str):
-    """Creates the repository instance for the chosen database"""
-    return RepositoryModel(model_name)
-
-
-def use_whatever():
-    from time_tracker_api import whatever_repository
-    return whatever_repository

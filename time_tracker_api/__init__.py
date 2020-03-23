@@ -2,9 +2,12 @@ import os
 
 from flask import Flask
 
+flask_app: Flask = None
+
 
 def create_app(config_path='time_tracker_api.config.DefaultConfig',
                config_data=None):
+    global flask_app
     flask_app = Flask(__name__)
 
     init_app_config(flask_app, config_path, config_data)
@@ -36,3 +39,24 @@ def init_app(app: Flask):
 
     from .api import api
     api.init_app(app)
+
+    if app.config.get('DEBUG'):
+        add_debug_toolbar(app)
+
+
+def add_debug_toolbar(app):
+    app.config['DEBUG_TB_PANELS'] = (
+        'flask_debugtoolbar.panels.versions.VersionDebugPanel',
+        'flask_debugtoolbar.panels.timer.TimerDebugPanel',
+        'flask_debugtoolbar.panels.headers.HeaderDebugPanel',
+        'flask_debugtoolbar.panels.request_vars.RequestVarsDebugPanel',
+        'flask_debugtoolbar.panels.config_vars.ConfigVarsDebugPanel',
+        'flask_debugtoolbar.panels.template.TemplateDebugPanel',
+        'flask_debugtoolbar.panels.logger.LoggingPanel',
+        'flask_debugtoolbar.panels.route_list.RouteListDebugPanel',
+        'flask_debugtoolbar.panels.profiler.ProfilerDebugPanel'
+    )
+
+    from flask_debugtoolbar import DebugToolbarExtension
+    toolbar = DebugToolbarExtension()
+    toolbar.init_app(app)
