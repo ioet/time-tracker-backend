@@ -32,7 +32,7 @@ time_entry_input = ns.model('TimeEntryInput', {
         ),
         example=faker.words(
             3,
-            ['Java', 'Elixir', 'Python', 'Docker'],
+            ['java', 'elixir', 'python', 'docker'],
             unique=True
         )
     ),
