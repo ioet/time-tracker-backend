@@ -1,13 +1,13 @@
 FROM python:3.8-alpine
 
-ARG buildDeps='gcc g++ unixodbc-dev'
+ARG buildDeps='g++'
 
 WORKDIR /usr/src/app
 
 COPY . .
 
 RUN apk update \
-	&& apk add --no-cache $buildDeps \
+	&& apk add --no-cache $buildDeps gcc unixodbc-dev \
 	&& pip3 install --no-cache-dir -r requirements/prod.txt \
 	&& apk del $buildDeps \
 	&& rm -rfv /root/.cache/pip/* && \
