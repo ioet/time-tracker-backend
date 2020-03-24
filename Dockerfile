@@ -1,10 +1,17 @@
 FROM python:3.8-alpine
 
+ARG buildDeps='gcc g++ unixodbc-dev'
+
 WORKDIR /usr/src/app
 
 COPY . .
 
-RUN pip3 install -r requirements/prod.txt
+RUN apk update \
+	&& apk add --no-cache $buildDeps \
+	&& pip3 install --no-cache-dir -r requirements/prod.txt \
+	&& apk del $buildDeps \
+	&& rm -rfv /root/.cache/pip/* && \
+find /usr/local \( -type d -a -name test -o -name tests \) -o \( -type f -a -name '*.pyc' -o -name '*.pyo' \) -exec rm -rfv '{}' \+
 
 ENV FLASK_APP time_tracker_api
 
