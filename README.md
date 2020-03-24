@@ -87,14 +87,33 @@ a link to the swagger.json with the definition of the api.
 ## Development
 
 ### Test
-We are using Pytest](https://docs.pytest.org/en/latest/index.html) for tests. The tests are located in the package 
+We are using [Pytest](https://docs.pytest.org/en/latest/index.html) for tests. The tests are located in the package 
 `tests` and use the [conventions for python test discovery](https://docs.pytest.org/en/latest/goodpractices.html#test-discovery).
 
-To run the tests just execute:
+#### Integration tests
+The [integrations tests](https://en.wikipedia.org/wiki/Integration_testing) verifies that all the components of the app
+are working well together. These are the default tests we should run:
 
-```bash
+```dotenv
+python3 -m pytest -v --ignore=tests/sql_repository_test.py
+```
+
+As you may have noticed we are ignoring the tests related with the repository.
+
+
+#### System tests
+In addition to the integration testing we might include tests to the data access layer in order to verify that the 
+persisted data is being managed the right way, i.e. it actually works. We may classify the execution of all the existing
+tests as [system testing](https://en.wikipedia.org/wiki/System_testing):
+
+```dotenv
 python3 -m pytest -v
 ```
+
+The database tests will be done in the table `tests` of the database specified by the variable `DATABASE_URI`. If this
+variable is not specified it will automatically connect to `sqlite:///tests.db`. This will do, because we are using SQL
+Alchemy to be able connect to any SQL database maintaining the same codebase.
+
 
 The option `-v` shows which tests failed or succeeded. Have into account that you can also debug each test 
 (test_* files) with the help of an IDE like PyCharm.

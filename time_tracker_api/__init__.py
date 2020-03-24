@@ -46,7 +46,6 @@ def init_app(app: Flask):
         add_debug_toolbar(app)
 
 
-
 def add_debug_toolbar(app):
     app.config['DEBUG_TB_PANELS'] = (
         'flask_debugtoolbar.panels.versions.VersionDebugPanel',

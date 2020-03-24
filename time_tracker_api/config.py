@@ -10,16 +10,10 @@ class Config:
     RESTPLUS_VALIDATE = True
 
 
-class DevelopConfig(Config):
+class DevelopmentConfig(Config):
     DEBUG = True
     FLASK_DEBUG = True
-    FLASK_ENV = "develop"
-
-
-class TestConfig(Config):
-    TESTING = True
-    FLASK_DEBUG = True
-    TEST_TABLE = 'tests'
+    FLASK_ENV = "development"
 
 
 class SQLConfig(Config):
@@ -28,19 +22,32 @@ class SQLConfig(Config):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
+class TestConfig(SQLConfig):
+    TESTING = True
+    FLASK_DEBUG = True
+    TEST_TABLE = 'tests'
+    DATABASE_URI = os.environ.get('DATABASE_URI', 'sqlite:///tests.db')
+    SQLALCHEMY_DATABASE_URI = DATABASE_URI
+
+
+class ProductionConfig(Config):
+    FLASK_ENV = 'production'
+
+
 class AzureConfig(SQLConfig):
     pass
 
 
-class AzureSQLDatabaseDevelopConfig(DevelopConfig, AzureConfig):
+class AzureDevelopmentConfig(DevelopmentConfig, AzureConfig):
     pass
 
 
-class AzureSQLDatabaseDevelopTestConfig(TestConfig, AzureSQLDatabaseDevelopConfig):
+class AzureProductionConfig(ProductionConfig, AzureConfig):
     pass
 
 
-DefaultConfig = AzureSQLDatabaseDevelopConfig
+DefaultConfig = AzureDevelopmentConfig
+ProductionConfig = AzureProductionConfig
 
 
 class CLIConfig(DefaultConfig):

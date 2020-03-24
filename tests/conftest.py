@@ -5,12 +5,10 @@ from flask.testing import FlaskClient
 
 from time_tracker_api import create_app
 
-CONFIGURATIONS = ['AzureSQLDatabaseDevelopTestConfig']
 
-
-@pytest.fixture(scope='session', params=CONFIGURATIONS)
+@pytest.fixture(scope='session')
 def app(request: FixtureRequest) -> Flask:
-    return create_app("time_tracker_api.config.%s" % request.param)
+    return create_app("time_tracker_api.config.TestConfig")
 
 
 @pytest.fixture

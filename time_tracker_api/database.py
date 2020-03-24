@@ -6,8 +6,6 @@ the database solution.
 To know more about protocols and subtyping check out PEP-0544
 """
 import abc
-import enum
-from datetime import datetime
 
 from flask import Flask
 
@@ -75,4 +73,3 @@ def init_app(app: Flask) -> None:
     init_app(app)
     global seeder
     seeder = SQLSeeder()
-

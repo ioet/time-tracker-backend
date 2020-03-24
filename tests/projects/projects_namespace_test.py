@@ -106,7 +106,7 @@ def test_get_project_should_return_422_for_invalid_id_format(client: FlaskClient
     repository_find_mock.assert_called_once_with(str(invalid_id))
 
 
-def update_project_should_succeed_with_valid_data(client: FlaskClient, mocker: MockFixture):
+def test_update_project_should_succeed_with_valid_data(client: FlaskClient, mocker: MockFixture):
     from time_tracker_api.projects.projects_namespace import project_dao
 
     repository_update_mock = mocker.patch.object(project_dao.repository,
@@ -118,7 +118,7 @@ def update_project_should_succeed_with_valid_data(client: FlaskClient, mocker: M
 
     assert 200 == response.status_code
     fake_project == json.loads(response.data)
-    repository_update_mock.assert_called_once_with(valid_id, valid_project_data)
+    repository_update_mock.assert_called_once_with(str(valid_id), valid_project_data)
 
 
 def test_update_project_should_reject_bad_request(client: FlaskClient, mocker: MockFixture):
@@ -147,7 +147,9 @@ def test_update_project_should_return_not_found_with_invalid_id(client: FlaskCli
                                                  'update',
                                                  side_effect=NotFound)
 
-    response = client.put("/projects/%s" % invalid_id, json=valid_project_data, follow_redirects=True)
+    response = client.put("/projects/%s" % invalid_id,
+                          json=valid_project_data,
+                          follow_redirects=True)
 
     assert 404 == response.status_code
     repository_update_mock.assert_called_once_with(str(invalid_id), valid_project_data)
@@ -192,8 +194,8 @@ def test_delete_project_should_return_422_for_invalid_id_format(client: FlaskCli
     invalid_id = fake.company()
 
     repository_remove_mock = mocker.patch.object(project_dao.repository,
-                                               'remove',
-                                               side_effect=UnprocessableEntity)
+                                                 'remove',
+                                                 side_effect=UnprocessableEntity)
 
     response = client.delete("/projects/%s" % invalid_id, follow_redirects=True)
 
