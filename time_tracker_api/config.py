@@ -7,6 +7,7 @@ class Config:
     SECRET_KEY = generate_dev_secret_key()
     DATABASE_URI = os.environ.get('DATABASE_URI')
     PROPAGATE_EXCEPTIONS = True
+    RESTPLUS_VALIDATE = True
 
 
 class DevelopConfig(Config):

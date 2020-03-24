@@ -22,13 +22,13 @@ def client(app: Flask) -> FlaskClient:
 @pytest.fixture(scope="module")
 def sql_repository():
     from .resources import PersonSQLModel
-    from time_tracker_api.database import seeder
     from time_tracker_api.sql_repository import db
 
-    seeder.fresh()
+    db.metadata.create_all(bind=db.engine, tables=[PersonSQLModel.__table__])
+    print("Test models created!")
 
     from time_tracker_api.sql_repository import SQLRepository
     yield SQLRepository(PersonSQLModel)
 
-    db.drop_all()
-    print("Models for test removed!")
+    db.metadata.drop_all(bind=db.engine, tables=[PersonSQLModel.__table__])
+    print("Test models removed!")

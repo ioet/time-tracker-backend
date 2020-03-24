@@ -1,3 +1,4 @@
+import logging
 import os
 
 from flask import Flask
@@ -34,14 +35,16 @@ def init_app_config(app: Flask, config_path: str, config_data: dict = None):
 
 
 def init_app(app: Flask):
-    from .database import init_app as init_database
+    from time_tracker_api.database import init_app as init_database
     init_database(app)
 
-    from .api import api
+    from time_tracker_api.api import api
     api.init_app(app)
 
     if app.config.get('DEBUG'):
+        app.logger.setLevel(logging.INFO)
         add_debug_toolbar(app)
+
 
 
 def add_debug_toolbar(app):

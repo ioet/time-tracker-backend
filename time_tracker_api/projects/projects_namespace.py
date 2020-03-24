@@ -3,7 +3,7 @@ from flask_restplus import Namespace, Resource, fields
 
 from time_tracker_api import flask_app
 from time_tracker_api.api import audit_fields
-from .projects_model import PROJECT_TYPE, create_dao
+from time_tracker_api.projects.projects_model import PROJECT_TYPE, create_dao
 
 faker = Faker()
 
@@ -65,19 +65,17 @@ class Projects(Resource):
     @ns.doc('list_projects')
     @ns.marshal_list_with(project, code=200)
     def get(self):
+        """List all projects"""
         return project_dao.get_all(), 200
 
     @ns.doc('create_project')
     @ns.response(409, 'This project already exists')
-    @ns.response(422, 'The data has an invalid format')
+    @ns.response(400, 'Bad request')
     @ns.expect(project_input)
     @ns.marshal_with(project, code=201)
     def post(self):
+        """Create a project"""
         return project_dao.create(ns.payload), 201
-
-
-# TODO : fix, this parser is for a field that is not being used.
-project_update_parser = ns.parser()
 
 
 @ns.route('/<string:id>')
@@ -88,6 +86,7 @@ class Project(Resource):
     @ns.response(422, 'The id has an invalid format')
     @ns.marshal_with(project)
     def get(self, id):
+        """Get a project"""
         return project_dao.get(id)
 
     @ns.doc('update_project')
@@ -96,11 +95,13 @@ class Project(Resource):
     @ns.expect(project_input)
     @ns.marshal_with(project)
     def put(self, id):
+        """Update a project"""
         return project_dao.update(id, ns.payload)
 
     @ns.doc('delete_project')
     @ns.response(204, 'Project deleted successfully')
     @ns.response(422, 'The id has an invalid format')
     def delete(self, id):
+        """Delete a project"""
         project_dao.delete(id)
         return None, 204
