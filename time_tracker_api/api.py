@@ -25,14 +25,6 @@ audit_fields = {
         description='Date of update',
         example=faker.iso8601(end_datetime=None),
     ),
-    # TODO Activate it when the tenants model is implemented
-    # 'tenant_id': fields.String(
-    #     readOnly=True,
-    #     title='Tenant',
-    #     max_length=64,
-    #     description='The tenant this belongs to',
-    #     example=faker.random_int(1, 9999),
-    # ),
     'created_by': fields.String(
         readOnly=True,
         title='Creator',

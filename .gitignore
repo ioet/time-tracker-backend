@@ -27,3 +27,6 @@ htmlcov/
 .env
 timetracker-api-postman-collection.json
 swagger.json
+
+# Ignore any SQLite generated database
+*.db

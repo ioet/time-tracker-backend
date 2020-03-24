@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from time_tracker_api.database import CRUDDao, Seeder, DatabaseModel, convert_result_to_dto
 from time_tracker_api.security import current_user_id
 
-db = None
+db: SQLAlchemy = None
 SQLModel = None
 AuditedSQLModel = None
 
