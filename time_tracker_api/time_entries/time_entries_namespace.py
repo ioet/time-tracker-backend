@@ -5,7 +5,8 @@ from flask_restplus import fields, Resource, Namespace
 from flask_restplus._http import HTTPStatus
 
 from time_tracker_api.api import audit_fields
-from time_tracker_api.time_entries.time_entries_model import COMMENTS_MAX_NUMBER_CHARS, create_dao
+from time_tracker_api.database import COMMENTS_MAX_LENGTH
+from time_tracker_api.time_entries.time_entries_model import create_dao
 
 faker = Faker()
 
@@ -40,7 +41,7 @@ time_entry_input = ns.model('TimeEntryInput', {
         title='Comments',
         description='Comments about the time entry',
         example=faker.paragraph(nb_sentences=2),
-        max_length=COMMENTS_MAX_NUMBER_CHARS,
+        max_length=COMMENTS_MAX_LENGTH,
     ),
     'start_date': fields.DateTime(
         required=True,
@@ -96,7 +97,7 @@ class TimeEntries(Resource):
                                          'of the attributes of the time entry')
     def post(self):
         """Create a time entry"""
-        return time_entries_dao.create(ns.payload)
+        return time_entries_dao.create(ns.payload), HTTPStatus.CREATED
 
 
 @ns.route('/<string:id>')
@@ -113,7 +114,8 @@ class TimeEntry(Resource):
     @ns.doc('put_time_entry')
     @ns.response(HTTPStatus.BAD_REQUEST, 'Invalid format or structure '
                                          'of the attributes of the time entry')
-    @ns.response(HTTPStatus.CONFLICT, 'A time entry already exists with this new data')
+    @ns.response(HTTPStatus.CONFLICT, 'A time entry already exists with this new data or there'
+                                      ' is a bad reference for the project or activity')
     @ns.expect(time_entry_input)
     @ns.marshal_with(time_entry)
     def put(self, id):

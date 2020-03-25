@@ -3,11 +3,8 @@ from datetime import datetime
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-from time_tracker_api.database import CRUDDao, Seeder, DatabaseModel
+from time_tracker_api.database import CRUDDao, Seeder, DatabaseModel, ID_MAX_LENGTH
 from time_tracker_api.security import current_user_id
-
-LIST_SEPARATOR_CHAR = ";"
-
 
 db: SQLAlchemy = None
 SQLModel = None
@@ -37,8 +34,8 @@ def init_app(app: Flask) -> None:
     class AuditedSQLModelClass():
         created_at = db.Column(db.DateTime, server_default=db.func.now())
         updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
-        created_by = db.Column(db.String, default=current_user_id)
-        updated_by = db.Column(db.String, onupdate=current_user_id)
+        created_by = db.Column(db.String(ID_MAX_LENGTH), default=current_user_id)
+        updated_by = db.Column(db.String(ID_MAX_LENGTH), onupdate=current_user_id)
 
     AuditedSQLModel = AuditedSQLModelClass
 

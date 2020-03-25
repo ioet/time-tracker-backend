@@ -13,7 +13,6 @@ automatically [pip](https://pip.pypa.io/en/stable/) as well.
 - A virtual environment, namely [venv](https://docs.python.org/3/library/venv.html).
 
 ### Setup
-
 - Create and activate the environment,
     
     In Windows:
@@ -111,8 +110,9 @@ python3 -m pytest -v
 ```
 
 The database tests will be done in the table `tests` of the database specified by the variable `DATABASE_URI`. If this
-variable is not specified it will automatically connect to `sqlite:///tests.db`. This will do, because we are using SQL
-Alchemy to be able connect to any SQL database maintaining the same codebase.
+variable is not specified it will automatically connect to SQLite database in-memory. This will do, because we are using 
+[SQL Alchemy](https://www.sqlalchemy.org/features.html) to be able connect to any SQL database maintaining the same 
+codebase.
 
 
 The option `-v` shows which tests failed or succeeded. Have into account that you can also debug each test 
@@ -132,10 +132,12 @@ To get a report table
 ```
 
 To get a full report in html
+
 ```bash
  coverage html
 ```
-Then check in the [htmlcov/index.html](./htmlcov/index.html) to see it
+
+Then check in the [htmlcov/index.html](./htmlcov/index.html) to see it.
 
 If you want that previously collected coverage data is erased, you can execute:
 
@@ -144,7 +146,6 @@ coverage erase
 ```
 
 ### CLI
-
 There are available commands, aware of the API, that can be very helpful to you. You
 can check them out by running
 
@@ -160,7 +161,6 @@ python cli.py gen_swagger_json -f ~/Downloads/swagger.json
 ```
 
 ## Run as docker container
-
 1. Build image
 ```bash
 docker build -t time_tracker_api:local .
@@ -178,8 +178,8 @@ docker run -p 5000:5000 time_tracker_api:local
 the win.
 - [Flask](http://flask.pocoo.org/) as the micro framework of choice.
 - [Flask RestPlus](https://flask-restplus.readthedocs.io/en/stable/) for building Restful APIs with Swagger.
-- [Pytest](https://docs.pytest.org/en/latest/index.html) for tests
-- [Coverage](https://coverage.readthedocs.io/en/coverage-4.5.4/) for coverage
+- [Pytest](https://docs.pytest.org/en/latest/index.html) for tests.
+- [Coverage](https://coverage.readthedocs.io/en/coverage-4.5.4/) for coverage.
 - [Swagger](https://swagger.io/) for documentation and standardization, taking into account the
 [API import restrictions and known issues](https://docs.microsoft.com/en-us/azure/api-management/api-management-api-import-restrictions)
 in Azure.

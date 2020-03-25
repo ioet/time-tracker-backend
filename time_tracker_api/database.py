@@ -9,40 +9,43 @@ import abc
 
 from flask import Flask
 
+COMMENTS_MAX_LENGTH = 500
+ID_MAX_LENGTH = 64
+
 
 class CRUDDao(abc.ABC):
     @abc.abstractmethod
     def get_all(self):
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     @abc.abstractmethod
     def get(self, id):
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     @abc.abstractmethod
     def create(self, project):
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     @abc.abstractmethod
     def update(self, id, data):
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     @abc.abstractmethod
     def delete(self, id):
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
 
 class Seeder(abc.ABC):
     @abc.abstractmethod
     def run(self):
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     @abc.abstractmethod
     def fresh(self):
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def __call__(self, *args, **kwargs):
-        self.run()
+        self.run()  # pragma: no cover
 
 
 class DatabaseModel:

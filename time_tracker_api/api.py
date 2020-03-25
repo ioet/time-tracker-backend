@@ -4,8 +4,7 @@ import sqlalchemy
 from faker import Faker
 from flask import current_app as app
 from flask_restplus import Api, fields
-from flask_restplus.fields import Raw, to_marshallable_type, MarshallingError
-from werkzeug.exceptions import Conflict
+from flask_restplus._http import HTTPStatus
 
 faker = Faker()
 
@@ -65,24 +64,24 @@ Error handlers
 def handle_db_integrity_error(e):
     """Handles errors related to data consistency"""
     if e.code == 'gkpj':
-        return {'message': 'It already exists or references data that does not exist.'}, 409
+        return {'message': 'It already exists or references data that does not exist.'}, HTTPStatus.CONFLICT
     else:
-        return {'message': 'Data integrity issues.'}, 409
+        return {'message': 'Data integrity issues.'}, HTTPStatus.CONFLICT
 
 
 @api.errorhandler(sqlalchemy.exc.DataError)
 def handle_invalid_data_error(e):
     """Return a 422 because the user entered data of an invalid type"""
-    return {'message': 'The processed data was invalid. Please correct it.'}, 422
+    return {'message': 'The processed data was invalid. Please correct it.'}, HTTPStatus.UNPROCESSABLE_ENTITY
 
 
 @api.errorhandler(pyodbc.OperationalError)
 def handle_connection_error(e):
     """Return a 500 due to a issue in the connection to a 3rd party service"""
-    return {'message': 'Connection issues. Please try again in a few minutes.'}, 500
+    return {'message': 'Connection issues. Please try again in a few minutes.'}, HTTPStatus.INTERNAL_SERVER_ERROR
 
 
 @api.errorhandler
 def generic_exception_handler(e):
     app.logger.error(e)
-    return {'message': 'An unhandled exception occurred.'}, 500
+    return {'message': 'An unhandled exception occurred.'}, HTTPStatus.INTERNAL_SERVER_ERROR

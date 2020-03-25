@@ -76,7 +76,7 @@ class Projects(Resource):
     @ns.marshal_with(project, code=HTTPStatus.CREATED)
     def post(self):
         """Create a project"""
-        return project_dao.create(ns.payload)
+        return project_dao.create(ns.payload), HTTPStatus.CREATED
 
 
 @ns.route('/<string:id>')
@@ -92,6 +92,8 @@ class Project(Resource):
         return project_dao.get(id)
 
     @ns.doc('update_project')
+    @ns.response(HTTPStatus.BAD_REQUEST, 'Invalid format or structure '
+                                         'of the attributes of the project')
     @ns.response(HTTPStatus.CONFLICT, 'A project already exists with this new data')
     @ns.expect(project_input)
     @ns.marshal_with(project)
