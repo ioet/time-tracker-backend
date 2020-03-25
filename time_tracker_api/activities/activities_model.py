@@ -1,5 +1,3 @@
-from flask import Flask
-
 from time_tracker_api.database import CRUDDao
 
 
@@ -7,7 +5,7 @@ class ActivityDao(CRUDDao):
     pass
 
 
-def create_dao(app: Flask) -> ActivityDao:
+def create_dao() -> ActivityDao:
     from time_tracker_api.sql_repository import db
     from time_tracker_api.sql_repository import SQLCRUDDao, AuditedSQLModel, SQLModel
 

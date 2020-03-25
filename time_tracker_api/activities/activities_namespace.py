@@ -1,7 +1,7 @@
 from faker import Faker
 from flask_restplus import fields, Resource, Namespace
+from flask_restplus._http import HTTPStatus
 
-from time_tracker_api import flask_app
 from time_tracker_api.api import audit_fields
 from time_tracker_api.activities.activities_model import create_dao
 
@@ -42,39 +42,39 @@ activity = ns.inherit(
     activity_response_fields
 )
 
-activity_dao = create_dao(flask_app)
+activity_dao = create_dao()
 
 
 @ns.route('')
 class Activities(Resource):
     @ns.doc('list_activities')
-    @ns.marshal_list_with(activity, code=200)
+    @ns.marshal_list_with(activity, code=HTTPStatus.OK)
     def get(self):
         """List all activities"""
-        return activity_dao.get_all(), 200
+        return activity_dao.get_all(), HTTPStatus.OK
 
     @ns.doc('create_activity')
-    @ns.response(400, 'Bad request')
+    @ns.response(HTTPStatus.BAD_REQUEST, 'Bad request')
     @ns.expect(activity_input)
-    @ns.marshal_with(activity, code=201)
+    @ns.marshal_with(activity, code=HTTPStatus.CREATED)
     def post(self):
         """Create an activity"""
-        return activity_dao.create(ns.payload), 201
+        return activity_dao.create(ns.payload), HTTPStatus.CREATED
 
 
 @ns.route('/<string:id>')
-@ns.response(404, 'Activity not found')
+@ns.response(HTTPStatus.NOT_FOUND, 'Activity not found')
 @ns.param('id', 'The activity identifier')
 class Activity(Resource):
     @ns.doc('get_activity')
-    @ns.response(422, 'The id has an invalid format')
-    @ns.marshal_with(activity, code=200)
+    @ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'The id has an invalid format')
+    @ns.marshal_with(activity, code=HTTPStatus.OK)
     def get(self, id):
         """Get an activity"""
-        return activity_dao.get(id)
+        return activity_dao.get(id), HTTPStatus.OK
 
     @ns.doc('update_activity')
-    @ns.response(422, 'The data has an invalid format.')
+    @ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'The data has an invalid format.')
     @ns.expect(activity_input)
     @ns.marshal_with(activity)
     def put(self, id):
@@ -82,9 +82,9 @@ class Activity(Resource):
         return activity_dao.update(id, ns.payload)
 
     @ns.doc('delete_activity')
-    @ns.response(422, 'The id has an invalid format')
-    @ns.response(204, 'Activity deleted successfully')
+    @ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'The id has an invalid format')
+    @ns.response(HTTPStatus.NO_CONTENT, 'Activity deleted successfully')
     def delete(self, id):
         """Delete an activity"""
         activity_dao.delete(id)
-        return None, 204
+        return None, HTTPStatus.NO_CONTENT
