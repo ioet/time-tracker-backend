@@ -8,6 +8,7 @@ class Config:
     DATABASE_URI = os.environ.get('DATABASE_URI')
     PROPAGATE_EXCEPTIONS = True
     RESTPLUS_VALIDATE = True
+    DEBUG = True
 
 
 class DevelopmentConfig(Config):
@@ -26,16 +27,18 @@ class TestConfig(SQLConfig):
     TESTING = True
     FLASK_DEBUG = True
     TEST_TABLE = 'tests'
-    DATABASE_URI = os.environ.get('DATABASE_URI', 'sqlite:///tests.db')
+    DATABASE_URI = os.environ.get('DATABASE_URI', 'sqlite:///:memory:')
     SQLALCHEMY_DATABASE_URI = DATABASE_URI
 
 
 class ProductionConfig(Config):
+    DEBUG = False
+    FLASK_DEBUG = True
     FLASK_ENV = 'production'
 
 
 class AzureConfig(SQLConfig):
-    pass
+    DATABASE_URI = os.environ.get('SQLAZURECONNSTR_DATABASE_URI')
 
 
 class AzureDevelopmentConfig(DevelopmentConfig, AzureConfig):

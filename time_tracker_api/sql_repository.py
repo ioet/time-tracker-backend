@@ -3,11 +3,10 @@ from datetime import datetime
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-from time_tracker_api.database import CRUDDao, Seeder, DatabaseModel, convert_result_to_dto
+from time_tracker_api.database import CRUDDao, Seeder, ID_MAX_LENGTH
 from time_tracker_api.security import current_user_id
 
 db: SQLAlchemy = None
-SQLModel = None
 AuditedSQLModel = None
 
 
@@ -26,21 +25,13 @@ def init_app(app: Flask) -> None:
     global db
     db = SQLAlchemy(app)
 
-    global SQLModel
-
-    class SQLModelClass(DatabaseModel):
-        def to_dto(self):
-            return self
-
-    SQLModel = SQLModelClass
-
     global AuditedSQLModel
 
     class AuditedSQLModelClass():
         created_at = db.Column(db.DateTime, server_default=db.func.now())
         updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
-        created_by = db.Column(db.String, default=current_user_id)
-        updated_by = db.Column(db.String, onupdate=current_user_id)
+        created_by = db.Column(db.String(ID_MAX_LENGTH), default=current_user_id)
+        updated_by = db.Column(db.String(ID_MAX_LENGTH), onupdate=current_user_id)
 
     AuditedSQLModel = AuditedSQLModelClass
 
@@ -85,19 +76,15 @@ class SQLCRUDDao(CRUDDao):
     def __init__(self, model: type):
         self.repository = SQLRepository(model)
 
-    @convert_result_to_dto
     def get_all(self) -> list:
         return self.repository.find_all()
 
-    @convert_result_to_dto
     def get(self, id):
         return self.repository.find(id)
 
-    @convert_result_to_dto
     def create(self, element: dict):
         return self.repository.create(element)
 
-    @convert_result_to_dto
     def update(self, id, data: dict):
         return self.repository.update(id, data)
 
