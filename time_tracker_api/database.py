@@ -48,10 +48,6 @@ class Seeder(abc.ABC):
         self.run()  # pragma: no cover
 
 
-class DatabaseModel:
-    pass
-
-
 seeder: Seeder = None
 
 

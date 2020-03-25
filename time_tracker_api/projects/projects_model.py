@@ -19,9 +19,9 @@ class ProjectDao(CRUDDao):
 def create_dao() -> ProjectDao:
     from time_tracker_api.sql_repository import db
     from time_tracker_api.database import COMMENTS_MAX_LENGTH
-    from time_tracker_api.sql_repository import SQLCRUDDao, AuditedSQLModel, SQLModel
+    from time_tracker_api.sql_repository import SQLCRUDDao, AuditedSQLModel
 
-    class ProjectSQLModel(db.Model, SQLModel, AuditedSQLModel):
+    class ProjectSQLModel(db.Model, AuditedSQLModel):
         __tablename__ = 'project'
         id = db.Column(db.Integer, primary_key=True)
         name = db.Column(db.String(50), unique=True, nullable=False)

@@ -7,9 +7,9 @@ class ActivitiesDao(CRUDDao):
 
 def create_dao() -> ActivitiesDao:
     from time_tracker_api.sql_repository import db
-    from time_tracker_api.sql_repository import SQLCRUDDao, AuditedSQLModel, SQLModel
+    from time_tracker_api.sql_repository import SQLCRUDDao, AuditedSQLModel
 
-    class ActivitySQLModel(db.Model, SQLModel, AuditedSQLModel):
+    class ActivitySQLModel(db.Model, AuditedSQLModel):
         __tablename__ = 'activity'
         id = db.Column(db.Integer, primary_key=True)
 

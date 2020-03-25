@@ -3,11 +3,10 @@ from datetime import datetime
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-from time_tracker_api.database import CRUDDao, Seeder, DatabaseModel, ID_MAX_LENGTH
+from time_tracker_api.database import CRUDDao, Seeder, ID_MAX_LENGTH
 from time_tracker_api.security import current_user_id
 
 db: SQLAlchemy = None
-SQLModel = None
 AuditedSQLModel = None
 
 
@@ -25,9 +24,6 @@ def handle_commit_issues(f):
 def init_app(app: Flask) -> None:
     global db
     db = SQLAlchemy(app)
-
-    global SQLModel
-    SQLModel = DatabaseModel
 
     global AuditedSQLModel
 

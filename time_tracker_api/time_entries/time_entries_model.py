@@ -10,9 +10,9 @@ class TimeEntriesDao(CRUDDao):
 def create_dao() -> TimeEntriesDao:
     from time_tracker_api.sql_repository import db
     from time_tracker_api.database import COMMENTS_MAX_LENGTH
-    from time_tracker_api.sql_repository import SQLCRUDDao, AuditedSQLModel, SQLModel
+    from time_tracker_api.sql_repository import SQLCRUDDao, AuditedSQLModel
 
-    class TimeEntrySQLModel(db.Model, SQLModel, AuditedSQLModel):
+    class TimeEntrySQLModel(db.Model, AuditedSQLModel):
         __tablename__ = 'time_entry'
         id = db.Column(db.Integer, primary_key=True)
         description = db.Column(db.String(COMMENTS_MAX_LENGTH))

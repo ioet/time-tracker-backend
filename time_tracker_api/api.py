@@ -78,7 +78,7 @@ def handle_invalid_data_error(e):
 @api.errorhandler(pyodbc.OperationalError)
 def handle_connection_error(e):
     """Return a 500 due to a issue in the connection to a 3rd party service"""
-    return {'message': 'Connection issues. Please try again in a few minutes.'}, HTTPStatus.INTERNAL_SERVER_ERROR
+    return {'message': 'Connection issues. Please try again in a few minutes.'}, HTTPStatus.SERVICE_UNAVAILABLE
 
 
 @api.errorhandler
