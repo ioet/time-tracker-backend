@@ -4,6 +4,8 @@ import sqlalchemy
 from faker import Faker
 from flask import current_app as app
 from flask_restplus import Api, fields
+from flask_restplus.fields import Raw, to_marshallable_type, MarshallingError
+from werkzeug.exceptions import Conflict
 
 faker = Faker()
 
@@ -63,7 +65,7 @@ Error handlers
 def handle_db_integrity_error(e):
     """Handles errors related to data consistency"""
     if e.code == 'gkpj':
-        return {'message': 'It already exists.'}, 409
+        return {'message': 'It already exists or references data that does not exist.'}, 409
     else:
         return {'message': 'Data integrity issues.'}, 409
 

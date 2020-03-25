@@ -3,8 +3,11 @@ from datetime import datetime
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-from time_tracker_api.database import CRUDDao, Seeder, DatabaseModel, convert_result_to_dto
+from time_tracker_api.database import CRUDDao, Seeder, DatabaseModel
 from time_tracker_api.security import current_user_id
+
+LIST_SEPARATOR_CHAR = ";"
+
 
 db: SQLAlchemy = None
 SQLModel = None
@@ -27,12 +30,7 @@ def init_app(app: Flask) -> None:
     db = SQLAlchemy(app)
 
     global SQLModel
-
-    class SQLModelClass(DatabaseModel):
-        def to_dto(self):
-            return self
-
-    SQLModel = SQLModelClass
+    SQLModel = DatabaseModel
 
     global AuditedSQLModel
 
@@ -85,19 +83,15 @@ class SQLCRUDDao(CRUDDao):
     def __init__(self, model: type):
         self.repository = SQLRepository(model)
 
-    @convert_result_to_dto
     def get_all(self) -> list:
         return self.repository.find_all()
 
-    @convert_result_to_dto
     def get(self, id):
         return self.repository.find(id)
 
-    @convert_result_to_dto
     def create(self, element: dict):
         return self.repository.create(element)
 
-    @convert_result_to_dto
     def update(self, id, data: dict):
         return self.repository.update(id, data)
 

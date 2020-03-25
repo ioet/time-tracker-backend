@@ -1,6 +1,7 @@
 from faker import Faker
 from flask_restplus import fields, Resource, Namespace
 
+from time_tracker_api.activities.activities_model import create_dao
 from time_tracker_api.api import audit_fields
 
 faker = Faker()
@@ -39,6 +40,8 @@ activity = ns.inherit(
     activity_input,
     activity_response_fields
 )
+
+activities_dao = create_dao()
 
 
 @ns.route('')

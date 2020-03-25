@@ -35,7 +35,7 @@ class ProductionConfig(Config):
 
 
 class AzureConfig(SQLConfig):
-    pass
+    DATABASE_URI = os.environ.get('SQLAZURECONNSTR_DATABASE_URI')
 
 
 class AzureDevelopmentConfig(DevelopmentConfig, AzureConfig):

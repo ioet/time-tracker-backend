@@ -46,23 +46,7 @@ class Seeder(abc.ABC):
 
 
 class DatabaseModel:
-    def to_dto(self):
-        return self
-
-
-def convert_result_to_dto(f):
-    def convert_if_necessary(result):
-        if hasattr(result, 'to_dto'):
-            return result.to_dto()
-        elif issubclass(type(result), list):
-            return list(map(convert_if_necessary, result))
-        return result
-
-    def to_dto(*args, **kw):
-        result = f(*args, **kw)
-        return convert_if_necessary(result)
-
-    return to_dto
+    pass
 
 
 seeder: Seeder = None

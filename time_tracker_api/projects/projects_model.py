@@ -1,7 +1,5 @@
 import enum
 
-from flask import Flask
-
 from time_tracker_api.database import CRUDDao
 
 
@@ -18,12 +16,12 @@ class ProjectDao(CRUDDao):
     pass
 
 
-def create_dao(app: Flask) -> ProjectDao:
+def create_dao() -> ProjectDao:
     from time_tracker_api.sql_repository import db
     from time_tracker_api.sql_repository import SQLCRUDDao, AuditedSQLModel, SQLModel
 
     class ProjectSQLModel(db.Model, SQLModel, AuditedSQLModel):
-        __tablename__ = 'projects'
+        __tablename__ = 'project'
         id = db.Column(db.Integer, primary_key=True)
         name = db.Column(db.String(50), unique=True, nullable=False)
         description = db.Column(db.String(250), unique=False, nullable=False)
