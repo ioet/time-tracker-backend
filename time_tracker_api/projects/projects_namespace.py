@@ -1,7 +1,7 @@
 from faker import Faker
 from flask_restplus import Namespace, Resource, fields
+from flask_restplus._http import HTTPStatus
 
-from time_tracker_api import flask_app
 from time_tracker_api.api import audit_fields
 from time_tracker_api.projects.projects_model import PROJECT_TYPE, create_dao
 
@@ -57,41 +57,44 @@ project = ns.inherit(
     project_response_fields
 )
 
-project_dao = create_dao(flask_app)
+project_dao = create_dao()
 
 
 @ns.route('')
 class Projects(Resource):
     @ns.doc('list_projects')
-    @ns.marshal_list_with(project, code=200)
+    @ns.marshal_list_with(project)
     def get(self):
         """List all projects"""
-        return project_dao.get_all(), 200
+        return project_dao.get_all()
 
     @ns.doc('create_project')
-    @ns.response(409, 'This project already exists')
-    @ns.response(400, 'Bad request')
+    @ns.response(HTTPStatus.CONFLICT, 'This project already exists')
+    @ns.response(HTTPStatus.BAD_REQUEST, 'Invalid format or structure '
+                                         'of the attributes of the project')
     @ns.expect(project_input)
-    @ns.marshal_with(project, code=201)
+    @ns.marshal_with(project, code=HTTPStatus.CREATED)
     def post(self):
         """Create a project"""
-        return project_dao.create(ns.payload), 201
+        return project_dao.create(ns.payload), HTTPStatus.CREATED
 
 
 @ns.route('/<string:id>')
-@ns.response(404, 'Project not found')
+@ns.response(HTTPStatus.NOT_FOUND, 'This project does not exist')
+@ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'The data has an invalid format')
 @ns.param('id', 'The project identifier')
 class Project(Resource):
     @ns.doc('get_project')
-    @ns.response(422, 'The id has an invalid format')
+    @ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'The id has an invalid format')
     @ns.marshal_with(project)
     def get(self, id):
         """Get a project"""
         return project_dao.get(id)
 
     @ns.doc('update_project')
-    @ns.response(422, 'The data has an invalid format.')
-    @ns.response(409, 'This project already exists')
+    @ns.response(HTTPStatus.BAD_REQUEST, 'Invalid format or structure '
+                                         'of the attributes of the project')
+    @ns.response(HTTPStatus.CONFLICT, 'A project already exists with this new data')
     @ns.expect(project_input)
     @ns.marshal_with(project)
     def put(self, id):
@@ -99,9 +102,8 @@ class Project(Resource):
         return project_dao.update(id, ns.payload)
 
     @ns.doc('delete_project')
-    @ns.response(204, 'Project deleted successfully')
-    @ns.response(422, 'The id has an invalid format')
+    @ns.response(HTTPStatus.NO_CONTENT, 'Project successfully deleted')
     def delete(self, id):
         """Delete a project"""
         project_dao.delete(id)
-        return None, 204
+        return None, HTTPStatus.NO_CONTENT

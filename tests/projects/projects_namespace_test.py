@@ -1,6 +1,7 @@
 from faker import Faker
 from flask import json
 from flask.testing import FlaskClient
+from flask_restplus._http import HTTPStatus
 from pytest_mock import MockFixture
 
 from time_tracker_api.projects.projects_model import PROJECT_TYPE
@@ -25,7 +26,7 @@ def test_create_project_should_succeed_with_valid_request(client: FlaskClient, m
 
     response = client.post("/projects", json=valid_project_data, follow_redirects=True)
 
-    assert 201 == response.status_code
+    assert HTTPStatus.CREATED == response.status_code
     repository_create_mock.assert_called_once_with(valid_project_data)
 
 
@@ -40,7 +41,7 @@ def test_create_project_should_reject_bad_request(client: FlaskClient, mocker: M
 
     response = client.post("/projects", json=invalid_project_data, follow_redirects=True)
 
-    assert 400 == response.status_code
+    assert HTTPStatus.BAD_REQUEST == response.status_code
     repository_create_mock.assert_not_called()
 
 
@@ -52,24 +53,21 @@ def test_list_all_projects(client: FlaskClient, mocker: MockFixture):
 
     response = client.get("/projects", follow_redirects=True)
 
-    assert 200 == response.status_code
-    json_data = json.loads(response.data)
-    assert [] == json_data
+    assert HTTPStatus.OK == response.status_code
+    assert [] == json.loads(response.data)
     repository_find_all_mock.assert_called_once()
 
 
 def test_get_project_should_succeed_with_valid_id(client: FlaskClient, mocker: MockFixture):
     from time_tracker_api.projects.projects_namespace import project_dao
-
     valid_id = fake.random_int(1, 9999)
-
     repository_find_mock = mocker.patch.object(project_dao.repository,
                                                'find',
                                                return_value=fake_project)
 
     response = client.get("/projects/%s" % valid_id, follow_redirects=True)
 
-    assert 200 == response.status_code
+    assert HTTPStatus.OK == response.status_code
     fake_project == json.loads(response.data)
     repository_find_mock.assert_called_once_with(str(valid_id))
 
@@ -86,11 +84,12 @@ def test_get_project_should_return_not_found_with_invalid_id(client: FlaskClient
 
     response = client.get("/projects/%s" % invalid_id, follow_redirects=True)
 
-    assert 404 == response.status_code
+    assert HTTPStatus.NOT_FOUND == response.status_code
     repository_find_mock.assert_called_once_with(str(invalid_id))
 
 
-def test_get_project_should_return_422_for_invalid_id_format(client: FlaskClient, mocker: MockFixture):
+def test_get_project_should_response_with_unprocessable_entity_for_invalid_id_format(client: FlaskClient,
+                                                                                     mocker: MockFixture):
     from time_tracker_api.projects.projects_namespace import project_dao
     from werkzeug.exceptions import UnprocessableEntity
 
@@ -102,7 +101,7 @@ def test_get_project_should_return_422_for_invalid_id_format(client: FlaskClient
 
     response = client.get("/projects/%s" % invalid_id, follow_redirects=True)
 
-    assert 422 == response.status_code
+    assert HTTPStatus.UNPROCESSABLE_ENTITY == response.status_code
     repository_find_mock.assert_called_once_with(str(invalid_id))
 
 
@@ -116,7 +115,7 @@ def test_update_project_should_succeed_with_valid_data(client: FlaskClient, mock
     valid_id = fake.random_int(1, 9999)
     response = client.put("/projects/%s" % valid_id, json=valid_project_data, follow_redirects=True)
 
-    assert 200 == response.status_code
+    assert HTTPStatus.OK == response.status_code
     fake_project == json.loads(response.data)
     repository_update_mock.assert_called_once_with(str(valid_id), valid_project_data)
 
@@ -133,7 +132,7 @@ def test_update_project_should_reject_bad_request(client: FlaskClient, mocker: M
     valid_id = fake.random_int(1, 9999)
     response = client.put("/projects/%s" % valid_id, json=invalid_project_data, follow_redirects=True)
 
-    assert 400 == response.status_code
+    assert HTTPStatus.BAD_REQUEST == response.status_code
     repository_update_mock.assert_not_called()
 
 
@@ -151,7 +150,7 @@ def test_update_project_should_return_not_found_with_invalid_id(client: FlaskCli
                           json=valid_project_data,
                           follow_redirects=True)
 
-    assert 404 == response.status_code
+    assert HTTPStatus.NOT_FOUND == response.status_code
     repository_update_mock.assert_called_once_with(str(invalid_id), valid_project_data)
 
 
@@ -166,7 +165,7 @@ def test_delete_project_should_succeed_with_valid_id(client: FlaskClient, mocker
 
     response = client.delete("/projects/%s" % valid_id, follow_redirects=True)
 
-    assert 204 == response.status_code
+    assert HTTPStatus.NO_CONTENT == response.status_code
     assert b'' == response.data
     repository_remove_mock.assert_called_once_with(str(valid_id))
 
@@ -183,11 +182,12 @@ def test_delete_project_should_return_not_found_with_invalid_id(client: FlaskCli
 
     response = client.delete("/projects/%s" % invalid_id, follow_redirects=True)
 
-    assert 404 == response.status_code
+    assert HTTPStatus.NOT_FOUND == response.status_code
     repository_remove_mock.assert_called_once_with(str(invalid_id))
 
 
-def test_delete_project_should_return_422_for_invalid_id_format(client: FlaskClient, mocker: MockFixture):
+def test_delete_project_should_return_unprocessable_entity_for_invalid_id_format(client: FlaskClient,
+                                                                                 mocker: MockFixture):
     from time_tracker_api.projects.projects_namespace import project_dao
     from werkzeug.exceptions import UnprocessableEntity
 
@@ -199,5 +199,5 @@ def test_delete_project_should_return_422_for_invalid_id_format(client: FlaskCli
 
     response = client.delete("/projects/%s" % invalid_id, follow_redirects=True)
 
-    assert 422 == response.status_code
+    assert HTTPStatus.UNPROCESSABLE_ENTITY == response.status_code
     repository_remove_mock.assert_called_once_with(str(invalid_id))
