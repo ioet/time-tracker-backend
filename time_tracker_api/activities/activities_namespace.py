@@ -67,12 +67,14 @@ class Activities(Resource):
 @ns.param('id', 'The activity identifier')
 class Activity(Resource):
     @ns.doc('get_activity')
+    @ns.response(422, 'The id has an invalid format')
     @ns.marshal_with(activity, code=200)
     def get(self, id):
         """Get an activity"""
         return activity_dao.get(id)
 
     @ns.doc('update_activity')
+    @ns.response(422, 'The data has an invalid format.')
     @ns.expect(activity_input)
     @ns.marshal_with(activity)
     def put(self, id):
@@ -80,6 +82,7 @@ class Activity(Resource):
         return activity_dao.update(id, ns.payload)
 
     @ns.doc('delete_activity')
+    @ns.response(422, 'The id has an invalid format')
     @ns.response(204, 'Activity deleted successfully')
     def delete(self, id):
         """Delete an activity"""
