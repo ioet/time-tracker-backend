@@ -49,13 +49,14 @@ activity_dao = create_dao()
 @ns.route('')
 class Activities(Resource):
     @ns.doc('list_activities')
-    @ns.marshal_list_with(activity, code=HTTPStatus.OK)
+    @ns.marshal_list_with(activity)
     def get(self):
         """List all activities"""
-        return activity_dao.get_all(), HTTPStatus.OK
+        return activity_dao.get_all()
 
     @ns.doc('create_activity')
-    @ns.response(HTTPStatus.BAD_REQUEST, 'Bad request')
+    @ns.response(HTTPStatus.CONFLICT, 'This activity already exists')
+    @ns.response(HTTPStatus.BAD_REQUEST, 'Invalid format or structure of the attributes of the activity')
     @ns.expect(activity_input)
     @ns.marshal_with(activity, code=HTTPStatus.CREATED)
     def post(self):
@@ -65,25 +66,25 @@ class Activities(Resource):
 
 @ns.route('/<string:id>')
 @ns.response(HTTPStatus.NOT_FOUND, 'Activity not found')
+@ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'The id has an invalid format')
 @ns.param('id', 'The activity identifier')
 class Activity(Resource):
     @ns.doc('get_activity')
-    @ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'The id has an invalid format')
-    @ns.marshal_with(activity, code=HTTPStatus.OK)
+    @ns.marshal_with(activity)
     def get(self, id):
         """Get an activity"""
-        return activity_dao.get(id), HTTPStatus.OK
+        return activity_dao.get(id)
 
     @ns.doc('update_activity')
-    @ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'The data has an invalid format.')
     @ns.expect(activity_input)
+    @ns.response(HTTPStatus.BAD_REQUEST, 'Invalid format or structure of the activity')
+    @ns.response(HTTPStatus.CONFLICT, 'An activity already exists with this new data')
     @ns.marshal_with(activity)
     def put(self, id):
         """Update an activity"""
         return activity_dao.update(id, ns.payload)
 
     @ns.doc('delete_activity')
-    @ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'The id has an invalid format')
     @ns.response(HTTPStatus.NO_CONTENT, 'Activity deleted successfully')
     def delete(self, id):
         """Delete an activity"""
