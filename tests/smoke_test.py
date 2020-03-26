@@ -5,12 +5,11 @@ from flask.testing import FlaskClient
 from flask_restplus._http import HTTPStatus
 from pytest_mock import MockFixture
 
+unexpected_errors_to_be_handled = [pyodbc.OperationalError]
+
 
 def test_app_exists(app):
     assert app is not None
-
-
-unexpected_errors_to_be_handled = [pyodbc.OperationalError]
 
 
 @pytest.mark.parametrize("error_type", unexpected_errors_to_be_handled)
