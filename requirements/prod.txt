@@ -29,3 +29,6 @@ flask_sqlalchemy==2.4.1
 
 # Handling requests
 requests==2.23.0
+
+# The Debug Toolbar
+Flask-DebugToolbar==0.11.0

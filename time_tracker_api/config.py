@@ -2,6 +2,8 @@ import os
 
 from time_tracker_api.security import generate_dev_secret_key
 
+DISABLE_STR_VALUES = ("false", "0", "disabled")
+
 
 class Config:
     SECRET_KEY = generate_dev_secret_key()
@@ -32,13 +34,14 @@ class TestConfig(SQLConfig):
 
 
 class ProductionConfig(Config):
-    DEBUG = False
+    DEBUG = os.environ.get('DEBUG', "false").lower() not in DISABLE_STR_VALUES
     FLASK_DEBUG = True
     FLASK_ENV = 'production'
 
 
 class AzureConfig(SQLConfig):
-    DATABASE_URI = os.environ.get('SQLAZURECONNSTR_DATABASE_URI')
+    DATABASE_URI = os.environ.get('DATABASE_URI', os.environ.get('SQLAZURECONNSTR_DATABASE_URI'))
+    SQLALCHEMY_DATABASE_URI = DATABASE_URI
 
 
 class AzureDevelopmentConfig(DevelopmentConfig, AzureConfig):
