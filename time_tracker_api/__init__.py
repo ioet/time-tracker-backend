@@ -45,8 +45,12 @@ def init_app(app: Flask):
         app.logger.setLevel(logging.INFO)
         add_debug_toolbar(app)
 
+    cors_origins = app.config.get('CORS_ORIGINS')
+    if cors_origins:
+        enable_cors(app, cors_origins)
 
-def add_debug_toolbar(app):
+
+def add_debug_toolbar(app: Flask):
     app.config['DEBUG_TB_PANELS'] = (
         'flask_debugtoolbar.panels.versions.VersionDebugPanel',
         'flask_debugtoolbar.panels.timer.TimerDebugPanel',
@@ -62,3 +66,10 @@ def add_debug_toolbar(app):
     from flask_debugtoolbar import DebugToolbarExtension
     toolbar = DebugToolbarExtension()
     toolbar.init_app(app)
+
+
+def enable_cors(app: Flask, cors_origins: str):
+    from flask_cors import CORS
+    cors_origins_list = cors_origins.split(",")
+    CORS(app, resources={r"/*": {"origins": cors_origins_list}})
+    app.logger.info("Set CORS access to [%s]" % cors_origins)

@@ -11,6 +11,7 @@ class Config:
     PROPAGATE_EXCEPTIONS = True
     RESTPLUS_VALIDATE = True
     DEBUG = True
+    CORS_ORIGINS = "*"
 
 
 class DevelopmentConfig(Config):
