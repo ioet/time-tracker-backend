@@ -1,5 +1,6 @@
-# requirements/dev.txt
+# requirements/time_tracker_api/dev.txt
 
+# Include the prod resources
 -r prod.txt
 
 # For development

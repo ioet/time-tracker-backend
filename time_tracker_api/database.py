@@ -52,7 +52,7 @@ seeder: Seeder = None
 
 
 def init_app(app: Flask) -> None:
-    from time_tracker_api.sql_repository import init_app, SQLSeeder
+    from commons.data_access_layer.azure.sql_repository import init_app, SQLSeeder
     init_app(app)
     global seeder
     seeder = SQLSeeder()

@@ -1,5 +1,4 @@
 import pytest
-from _pytest.fixtures import FixtureRequest
 from flask import Flask
 from flask.testing import FlaskClient
 
@@ -7,7 +6,7 @@ from time_tracker_api import create_app
 
 
 @pytest.fixture(scope='session')
-def app(request: FixtureRequest) -> Flask:
+def app() -> Flask:
     return create_app("time_tracker_api.config.TestConfig")
 
 
@@ -18,15 +17,16 @@ def client(app: Flask) -> FlaskClient:
 
 
 @pytest.fixture(scope="module")
-def sql_repository():
-    from .resources import PersonSQLModel
-    from time_tracker_api.sql_repository import db
+def sql_repository(app: Flask):
+    with app.test_client():
+        from tests.commons.data_access_layer.azure.resources import PersonSQLModel
+        from commons.data_access_layer.azure.sql_repository import db
 
-    db.metadata.create_all(bind=db.engine, tables=[PersonSQLModel.__table__])
-    print("Test models created!")
+        db.metadata.create_all(bind=db.engine, tables=[PersonSQLModel.__table__])
+        print("Test models created!")
 
-    from time_tracker_api.sql_repository import SQLRepository
-    yield SQLRepository(PersonSQLModel)
+        from commons.data_access_layer.azure.sql_repository import SQLRepository
+        yield SQLRepository(PersonSQLModel)
 
-    db.metadata.drop_all(bind=db.engine, tables=[PersonSQLModel.__table__])
-    print("Test models removed!")
+        db.metadata.drop_all(bind=db.engine, tables=[PersonSQLModel.__table__])
+        print("Test models removed!")

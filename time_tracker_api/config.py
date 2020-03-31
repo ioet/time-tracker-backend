@@ -21,9 +21,10 @@ class DevelopmentConfig(Config):
 
 
 class SQLConfig(Config):
-    SQLALCHEMY_DATABASE_URI = Config.DATABASE_URI
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    DATABASE_URI = os.environ.get('DATABASE_URI')
+    SQLALCHEMY_DATABASE_URI = DATABASE_URI
 
 
 class TestConfig(SQLConfig):
@@ -41,7 +42,7 @@ class ProductionConfig(Config):
 
 
 class AzureConfig(SQLConfig):
-    DATABASE_URI = os.environ.get('DATABASE_URI', os.environ.get('SQLAZURECONNSTR_DATABASE_URI'))
+    DATABASE_URI = os.environ.get('SQLAZURECONNSTR_DATABASE_URI', SQLConfig.DATABASE_URI)
     SQLALCHEMY_DATABASE_URI = DATABASE_URI
 
 

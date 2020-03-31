@@ -1,6 +1,6 @@
 # time-tracker-api
 
-The API of the TSheets killer app.
+This is the mono-repository for the backend services and common codebase
 
 ## Getting started
 Follow the following instructions to get the project ready to use ASAP.
@@ -30,10 +30,16 @@ automatically [pip](https://pip.pypa.io/en/stable/) as well.
     
 - Install the requirements:
     ```
-    python3 -m pip install -r requirements/<stage>.txt
+    python3 -m pip install -r requirements/<app>/<stage>.txt
     ```
     
-    The `stage` can be `dev` or `prod`. 
+    Where <app> is one of the executable app namespace, e.g. `time_tracker_api`.
+    The `stage` can be 
+    
+    * `dev`: Used for working locally
+    * `prod`: For anything deployed
+    
+    
     Remember to do it with Python 3.
     
     

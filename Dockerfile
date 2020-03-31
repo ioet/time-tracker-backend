@@ -27,4 +27,4 @@ ENV FLASK_APP time_tracker_api
 
 EXPOSE 5000
 
-CMD ["gunicorn", "-b 0.0.0.0:5000", "run:app"]
+CMD ["gunicorn", "-b 0.0.0.0:5000", "api:app"]

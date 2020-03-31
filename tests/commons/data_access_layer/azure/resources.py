@@ -1,4 +1,4 @@
-from time_tracker_api.sql_repository import db, AuditedSQLModel
+from commons.data_access_layer.azure.sql_repository import db, AuditedSQLModel
 
 from sqlalchemy_utils import UUIDType
 import uuid

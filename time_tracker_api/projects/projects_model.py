@@ -17,11 +17,12 @@ class ProjectDao(CRUDDao):
 
 
 def create_dao() -> ProjectDao:
-    from time_tracker_api.sql_repository import db
+    from commons.data_access_layer.azure.sql_repository import db
     from time_tracker_api.database import COMMENTS_MAX_LENGTH
     from time_tracker_api.sql_repository import SQLCRUDDao
     from sqlalchemy_utils import UUIDType
     import uuid
+    from commons.data_access_layer.azure.sql_repository import SQLCRUDDao, AuditedSQLModel
 
     class ProjectSQLModel(db.Model):
         __tablename__ = 'project'
