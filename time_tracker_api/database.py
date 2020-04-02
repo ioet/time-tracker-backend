@@ -52,7 +52,28 @@ seeder: Seeder = None
 
 
 def init_app(app: Flask) -> None:
-    from commons.data_access_layer.azure.sql_repository import init_app, SQLSeeder
+    init_sql(app)
+
+
+def init_sql(app: Flask) -> None:
+    from commons.data_access_layer.sql import init_app, SQLSeeder
     init_app(app)
     global seeder
     seeder = SQLSeeder()
+
+
+def init_cosmos_db(app: Flask) -> None:
+    # from commons.data_access_layer.azure.cosmos_db import cosmos_helper
+    class CosmosSeeder(Seeder):
+        def run(self):
+            print("Provisioning namespace(database)...")
+            # cosmos_helper.create_container()
+            print("Database seeded!")
+
+        def fresh(self):
+            print("Removing namespace(database)...")
+            # cosmos_helper.remove_container()
+            self.run()
+
+    global seeder
+    seeder = CosmosSeeder()

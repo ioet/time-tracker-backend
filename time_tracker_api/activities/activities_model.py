@@ -1,3 +1,5 @@
+import abc
+
 from time_tracker_api.database import CRUDDao
 
 
@@ -8,8 +10,8 @@ class ActivityDao(CRUDDao):
 def create_dao() -> ActivityDao:
     from sqlalchemy_utils import UUIDType
     import uuid
-    from commons.data_access_layer.azure.sql_repository import db
-    from commons.data_access_layer.azure.sql_repository import SQLCRUDDao
+    from commons.data_access_layer.sql import db
+    from commons.data_access_layer.sql import SQLCRUDDao
 
     class ActivitySQLModel(db.Model):
         __tablename__ = 'activity'
@@ -25,7 +27,7 @@ def create_dao() -> ActivityDao:
         def __str___(self):
             return "the activity \"%s\"" % self.name
 
-    class ActivitySQLDao(SQLCRUDDao):
+    class ActivitySQLDao(ActivityDao, SQLCRUDDao):
         def __init__(self):
             SQLCRUDDao.__init__(self, ActivitySQLModel)
 

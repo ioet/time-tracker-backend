@@ -8,11 +8,11 @@ class TimeEntriesDao(CRUDDao):
 
 
 def create_dao() -> TimeEntriesDao:
-    from commons.data_access_layer.azure.sql_repository import db
+    from commons.data_access_layer.sql import db
     from time_tracker_api.database import COMMENTS_MAX_LENGTH
     from sqlalchemy_utils import UUIDType
     import uuid
-    from commons.data_access_layer.azure.sql_repository import SQLCRUDDao
+    from commons.data_access_layer.sql import SQLCRUDDao
 
     class TimeEntrySQLModel(db.Model):
         __tablename__ = 'time_entry'

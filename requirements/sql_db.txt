@@ -1,6 +1,6 @@
-# requirements/sql_db_serverless.txt
+# requirements/sql_db.txt
 
-# For SQL database serverless (MS SQL)
+# For SQL database (MS SQL)
 
 
 # SQL Server driver

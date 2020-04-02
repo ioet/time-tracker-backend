@@ -1,6 +1,6 @@
 # time-tracker-api
 
-This is the mono-repository for the backend services and common codebase
+This is the mono-repository for the backend services and their common codebase
 
 ## Getting started
 Follow the following instructions to get the project ready to use ASAP.
@@ -100,7 +100,7 @@ The [integrations tests](https://en.wikipedia.org/wiki/Integration_testing) veri
 are working well together. These are the default tests we should run:
 
 ```dotenv
-python3 -m pytest -v --ignore=tests/sql_repository_test.py
+python3 -m pytest -v --ignore=tests/commons/data_access_layer/azure/sql_repository_test.py
 ```
 
 As you may have noticed we are ignoring the tests related with the repository.

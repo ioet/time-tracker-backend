@@ -4,7 +4,6 @@ from flask_restplus._http import HTTPStatus
 
 from time_tracker_api.activities.activities_model import create_dao
 from time_tracker_api.api import audit_fields
-from time_tracker_api.activities.activities_model import create_dao
 
 faker = Faker()
 

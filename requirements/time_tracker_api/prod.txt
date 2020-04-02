@@ -1,8 +1,9 @@
 # requirements/time_tracker_api/prod.txt
 
 # Dependencies
--r ../sql_db_serverless.txt
-
+-r ../commons.txt
+-r ../azure_cosmos.txt
+-r ../sql_db.txt
 
 # For production releases
 
@@ -19,14 +20,8 @@ gunicorn==20.0.4
 #Swagger support for Restful API
 flask-restplus==0.12.1
 
-#Mocking
-Faker==4.0.2
-
 #CLI support
 Flask-Script==2.0.6
-
-# Handling requests
-requests==2.23.0
 
 # The Debug Toolbar
 Flask-DebugToolbar==0.11.0
