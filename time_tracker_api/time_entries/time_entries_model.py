@@ -20,10 +20,10 @@ def create_dao() -> TimeEntriesDao:
         description = db.Column(db.String(COMMENTS_MAX_LENGTH))
         start_date = db.Column(db.DateTime, server_default=db.func.now())
         end_date = db.Column(db.DateTime)
-        project_id = db.Column(db.String,
+        project_id = db.Column(UUIDType(binary=False),
                                db.ForeignKey('project.id'),
                                nullable=False)
-        activity_id = db.Column(db.String,
+        activity_id = db.Column(UUIDType(binary=False),
                                 db.ForeignKey('activity.id'),
                                 nullable=False)
         technologies = db.Column(ScalarListType())
