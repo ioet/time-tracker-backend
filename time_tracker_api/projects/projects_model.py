@@ -28,10 +28,10 @@ def create_dao() -> ProjectDao:
         id = db.Column(UUIDType(binary=False), primary_key=True, default=uuid.uuid4)
         name = db.Column(db.String(50), unique=True, nullable=False)
         description = db.Column(db.String(COMMENTS_MAX_LENGTH), unique=False, nullable=False)
-        project_type_id = db.Column(db.String, default=None)
-        customer_id = db.Column(db.String, nullable=False)
-        deleted = db.Column(db.String, default=None)
-        tenant_id = db.Column(db.String, nullable=False)
+        project_type_id = db.Column(UUIDType(binary=False), default=uuid.uuid4)
+        customer_id = db.Column(UUIDType(binary=False), default=uuid.uuid4)
+        deleted = db.Column(UUIDType(binary=False), default=uuid.uuid4)
+        tenant_id = db.Column(UUIDType(binary=False), default=uuid.uuid4)
 
         def __repr__(self):
             return '<Project %r>' % self.name

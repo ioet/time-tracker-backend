@@ -28,9 +28,9 @@ def create_dao() -> TimeEntriesDao:
                                 nullable=False)
         technologies = db.Column(ScalarListType())
         uri = db.Column(db.String(500))
-        owner_id = db.Column(db.String, nullable=False)
-        deleted = db.Column(db.String, default=None)
-        tenant_id = db.Column(db.String, nullable=False)
+        owner_id = db.Column(UUIDType(binary=False), default=uuid.uuid4)
+        deleted = db.Column(UUIDType(binary=False), default=uuid.uuid4)
+        tenant_id = db.Column(UUIDType(binary=False), default=uuid.uuid4)
 
         @property
         def running(self):

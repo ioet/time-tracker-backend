@@ -16,8 +16,8 @@ def create_dao() -> ActivityDao:
         id = db.Column(UUIDType(binary=False), primary_key=True, default=uuid.uuid4)
         name = db.Column(db.String(50), unique=True, nullable=False)
         description = db.Column(db.String(250), unique=False, nullable=False)
-        deleted = db.Column(db.String, default=None)
-        tenant_id = db.Column(db.String, nullable=False)
+        deleted = db.Column(UUIDType(binary=False), default=uuid.uuid4)
+        tenant_id = db.Column(UUIDType(binary=False), default=uuid.uuid4)
 
         def __repr__(self):
             return '<Activity %r>' % self.name
