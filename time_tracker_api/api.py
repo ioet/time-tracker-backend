@@ -22,35 +22,6 @@ audit_fields = {
         example=faker.uuid4(),
     ),
 }
-"""
-    'created_at': fields.Date(
-        readOnly=True,
-        title='Created',
-        description='Date of creation',
-        example=faker.iso8601(end_datetime=None),
-    ),
-    'updated_at': fields.Date(
-        readOnly=True,
-        title='Updated',
-        description='Date of update',
-        example=faker.iso8601(end_datetime=None),
-    ),
-    'created_by': fields.String(
-        readOnly=True,
-        title='Creator',
-        max_length=64,
-        description='User that created it',
-        example='anonymous',
-    ),
-    'updated_by': fields.String(
-        readOnly=True,
-        title='Updater',
-        max_length=64,
-        description='User that updated it',
-        example='anonymous',
-    ),
-}
-"""
 
 # APIs
 from time_tracker_api.projects import projects_namespace

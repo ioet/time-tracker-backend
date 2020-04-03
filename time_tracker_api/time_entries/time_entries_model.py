@@ -10,11 +10,13 @@ class TimeEntriesDao(CRUDDao):
 def create_dao() -> TimeEntriesDao:
     from time_tracker_api.sql_repository import db
     from time_tracker_api.database import COMMENTS_MAX_LENGTH
-    from time_tracker_api.sql_repository import SQLCRUDDao, AuditedSQLModel
+    from time_tracker_api.sql_repository import SQLCRUDDao
+    from sqlalchemy_utils import UUIDType
+    import uuid
 
     class TimeEntrySQLModel(db.Model):
         __tablename__ = 'time_entry'
-        id = db.Column(db.String, primary_key=True)
+        id = db.Column(UUIDType(binary=False), primary_key=True, default=uuid.uuid4)
         description = db.Column(db.String(COMMENTS_MAX_LENGTH))
         start_date = db.Column(db.DateTime, server_default=db.func.now())
         end_date = db.Column(db.DateTime)

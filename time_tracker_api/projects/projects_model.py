@@ -19,11 +19,13 @@ class ProjectDao(CRUDDao):
 def create_dao() -> ProjectDao:
     from time_tracker_api.sql_repository import db
     from time_tracker_api.database import COMMENTS_MAX_LENGTH
-    from time_tracker_api.sql_repository import SQLCRUDDao, AuditedSQLModel
+    from time_tracker_api.sql_repository import SQLCRUDDao
+    from sqlalchemy_utils import UUIDType
+    import uuid
 
     class ProjectSQLModel(db.Model):
         __tablename__ = 'project'
-        id = db.Column(db.String, primary_key=True)
+        id = db.Column(UUIDType(binary=False), primary_key=True, default=uuid.uuid4)
         name = db.Column(db.String(50), unique=True, nullable=False)
         description = db.Column(db.String(COMMENTS_MAX_LENGTH), unique=False, nullable=False)
         project_type_id = db.Column(db.String, default=None)

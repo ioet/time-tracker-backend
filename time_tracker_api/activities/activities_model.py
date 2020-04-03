@@ -7,11 +7,13 @@ class ActivityDao(CRUDDao):
 
 def create_dao() -> ActivityDao:
     from time_tracker_api.sql_repository import db
-    from time_tracker_api.sql_repository import SQLCRUDDao, AuditedSQLModel
+    from time_tracker_api.sql_repository import SQLCRUDDao
+    from sqlalchemy_utils import UUIDType
+    import uuid
 
     class ActivitySQLModel(db.Model):
         __tablename__ = 'activity'
-        id = db.Column(db.String, primary_key=True)
+        id = db.Column(UUIDType(binary=False), primary_key=True, default=uuid.uuid4)
         name = db.Column(db.String(50), unique=True, nullable=False)
         description = db.Column(db.String(250), unique=False, nullable=False)
         deleted = db.Column(db.String, default=None)

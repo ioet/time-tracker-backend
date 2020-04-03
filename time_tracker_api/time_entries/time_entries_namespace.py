@@ -48,7 +48,11 @@ time_entry_input = ns.model('TimeEntryInput', {
         description='Either identifier or locator',
         example=faker.words(
             1,
-            ['http://example.com/mypage.html', '/some/page.html']
+            [
+                'https://github.com/ioet/time-tracker-backend/issues/51',
+                '#54',
+                'TT-54'
+            ]
         ),
     ),
     'owner_id': fields.String(
