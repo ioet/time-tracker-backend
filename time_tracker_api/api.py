@@ -14,31 +14,12 @@ api = Api(version='1.0.1',
 
 # Common models structure
 audit_fields = {
-    'created_at': fields.Date(
+    'deleted': fields.String(
         readOnly=True,
-        title='Created',
-        description='Date of creation',
-        example=faker.iso8601(end_datetime=None),
-    ),
-    'updated_at': fields.Date(
-        readOnly=True,
-        title='Updated',
-        description='Date of update',
-        example=faker.iso8601(end_datetime=None),
-    ),
-    'created_by': fields.String(
-        readOnly=True,
-        title='Creator',
-        max_length=64,
-        description='User that created it',
-        example='anonymous',
-    ),
-    'updated_by': fields.String(
-        readOnly=True,
-        title='Updater',
-        max_length=64,
-        description='User that updated it',
-        example='anonymous',
+        required=True,
+        title='Last event Identifier',
+        description='Last event over this resource',
+        example=faker.uuid4(),
     ),
 }
 

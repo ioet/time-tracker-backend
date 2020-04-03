@@ -8,7 +8,8 @@ fake = Faker()
 
 valid_activity_data = {
     "name": fake.company(),
-    "description": fake.paragraph()
+    "description": fake.paragraph(),
+    "tenant_id": fake.uuid4()
 }
 
 fake_activity = ({

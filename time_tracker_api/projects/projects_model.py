@@ -19,15 +19,19 @@ class ProjectDao(CRUDDao):
 def create_dao() -> ProjectDao:
     from time_tracker_api.sql_repository import db
     from time_tracker_api.database import COMMENTS_MAX_LENGTH
-    from time_tracker_api.sql_repository import SQLCRUDDao, AuditedSQLModel
+    from time_tracker_api.sql_repository import SQLCRUDDao
+    from sqlalchemy_utils import UUIDType
+    import uuid
 
-    class ProjectSQLModel(db.Model, AuditedSQLModel):
+    class ProjectSQLModel(db.Model):
         __tablename__ = 'project'
-        id = db.Column(db.Integer, primary_key=True)
+        id = db.Column(UUIDType(binary=False), primary_key=True, default=uuid.uuid4)
         name = db.Column(db.String(50), unique=True, nullable=False)
         description = db.Column(db.String(COMMENTS_MAX_LENGTH), unique=False, nullable=False)
-        type = db.Column(db.String(10), nullable=False)
-        active = db.Column(db.Boolean, default=True)
+        project_type_id = db.Column(UUIDType(binary=False), default=uuid.uuid4)
+        customer_id = db.Column(UUIDType(binary=False), default=uuid.uuid4)
+        deleted = db.Column(UUIDType(binary=False), default=uuid.uuid4)
+        tenant_id = db.Column(UUIDType(binary=False), default=uuid.uuid4)
 
         def __repr__(self):
             return '<Project %r>' % self.name

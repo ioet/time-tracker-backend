@@ -14,28 +14,17 @@ ns = Namespace('time-entries', description='API for time entries')
 
 # TimeEntry Model
 time_entry_input = ns.model('TimeEntryInput', {
-    'project_id': fields.Integer(
+    'project_id': fields.String(
         required=True,
         title='Project',
         description='The id of the selected project',
-        example=faker.random_int(1, 9999),
+        example=faker.uuid4(),
     ),
-    'activity_id': fields.Integer(
+    'activity_id': fields.String(
+        required=True,
         title='Activity',
         description='The id of the selected activity',
-        example=faker.random_int(1, 9999),
-    ),
-    'technologies': fields.List(
-        fields.String(
-            required=True,
-            title='Technologies',
-            description='Technology names used in this time-entry',
-        ),
-        example=faker.words(
-            3,
-            ['java', 'elixir', 'python', 'docker'],
-            unique=True
-        )
+        example=faker.uuid4(),
     ),
     'description': fields.String(
         title='Comments',
@@ -54,6 +43,30 @@ time_entry_input = ns.model('TimeEntryInput', {
         description='When the user ended doing this activity',
         example=faker.iso8601(end_datetime=None),
     ),
+    'uri': fields.String(
+        title='Uniform Resource identifier',
+        description='Either identifier or locator',
+        example=faker.words(
+            1,
+            [
+                'https://github.com/ioet/time-tracker-backend/issues/51',
+                '#54',
+                'TT-54'
+            ]
+        ),
+    ),
+    'owner_id': fields.String(
+        required=True,
+        title='Owner of time entry',
+        description='User who owns the time entry',
+        example=faker.uuid4(),
+    ),
+    'tenant_id': fields.String(
+        required=True,
+        title='Identifier of Tenant',
+        description='Tenant this project belongs to',
+        example=faker.uuid4(),
+    ),
 })
 
 time_entry_response_fields = {
@@ -61,7 +74,7 @@ time_entry_response_fields = {
         readOnly=True,
         title='Identifier',
         description='The unique identifier',
-        example=faker.random_int(1, 9999),
+        example=faker.uuid4(),
     ),
     'running': fields.Boolean(
         readOnly=True,

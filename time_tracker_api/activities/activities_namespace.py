@@ -24,6 +24,12 @@ activity_input = ns.model('ActivityInput', {
         description='Comments about the activity',
         example=faker.paragraph(),
     ),
+    'tenant_id': fields.String(
+        required=True,
+        title='Identifier of Tenant',
+        description='Tenant this activity belongs to',
+        example=faker.uuid4(),
+    )
 })
 
 activity_response_fields = {
@@ -32,8 +38,8 @@ activity_response_fields = {
         required=True,
         title='Identifier',
         description='The unique identifier',
-        example=faker.random_int(1, 9999),
-    )
+        example=faker.uuid4(),
+    ),
 }
 activity_response_fields.update(audit_fields)
 

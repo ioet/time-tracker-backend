@@ -11,8 +11,11 @@ fake = Faker()
 valid_project_data = {
     "name": fake.company(),
     "description": fake.paragraph(),
-    "type": fake.word(PROJECT_TYPE.valid_type_values()),
+    'customer_id': fake.uuid4(),
+    'tenant_id': fake.uuid4(),
+    'project_type_id': fake.uuid4()
 }
+
 fake_project = ({
     "id": fake.random_int(1, 9999)
 }).update(valid_project_data)
