@@ -7,12 +7,13 @@ from pytest_mock import MockFixture
 fake = Faker()
 
 valid_time_entry_input = {
-    "project_id": fake.random_int(1, 9999),
-    "activity_id": fake.random_int(1, 9999),
-    "technologies": fake.words(3, ['java', 'javascript', 'python', 'azure'], unique=True),
+    "project_id": fake.uuid4(),
+    "activity_id": fake.uuid4(),
     "description": fake.paragraph(nb_sentences=2),
     "start_date": fake.iso8601(end_datetime=None),
     "end_date": fake.iso8601(end_datetime=None),
+    "owner_id": fake.uuid4(),
+    "tenant_id": fake.uuid4()
 }
 fake_time_entry = ({
     "id": fake.random_int(1, 9999),
