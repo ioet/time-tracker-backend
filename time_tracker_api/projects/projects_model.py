@@ -21,13 +21,15 @@ def create_dao() -> ProjectDao:
     from time_tracker_api.database import COMMENTS_MAX_LENGTH
     from time_tracker_api.sql_repository import SQLCRUDDao, AuditedSQLModel
 
-    class ProjectSQLModel(db.Model, AuditedSQLModel):
+    class ProjectSQLModel(db.Model):
         __tablename__ = 'project'
-        id = db.Column(db.Integer, primary_key=True)
+        id = db.Column(db.String, primary_key=True)
         name = db.Column(db.String(50), unique=True, nullable=False)
         description = db.Column(db.String(COMMENTS_MAX_LENGTH), unique=False, nullable=False)
-        type = db.Column(db.String(10), nullable=False)
-        active = db.Column(db.Boolean, default=True)
+        project_type_id = db.Column(db.String, default=None)
+        customer_id = db.Column(db.String, nullable=False)
+        deleted = db.Column(db.String, default=None)
+        tenant_id = db.Column(db.String, nullable=False)
 
         def __repr__(self):
             return '<Project %r>' % self.name

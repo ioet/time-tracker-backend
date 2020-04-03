@@ -24,20 +24,23 @@ project_input = ns.model('ProjectInput', {
         description='Description about the project',
         example=faker.paragraph(),
     ),
-    'type': fields.String(
-        required=False,
-        title='Type',
-        max_length=10,
-        description='If it is `Costumer`, `Training` or other type',
-        enum=PROJECT_TYPE.valid_type_values(),
-        example=faker.word(PROJECT_TYPE.valid_type_values()),
+    'customer_id': fields.String(
+        required=True,
+        title='Identifier of the Customer',
+        description='Customer this project belongs to',
+        example=faker.uuid4(),
     ),
-    'active': fields.Boolean(
-        title='Is active?',
-        description='Whether the project is active or not',
-        default=True,
-        example=faker.boolean(),
+    'tenant_id': fields.String(
+        required=True,
+        title='Identifier of Tenant',
+        description='Tenant this project belongs to',
+        example=faker.uuid4(),
     ),
+    'project_type_id': fields.String(
+        title='Identifier of Project type',
+        description='Type of the project. Used for grouping',
+        example=faker.uuid4(),
+    )
 })
 
 project_response_fields = {
@@ -46,7 +49,7 @@ project_response_fields = {
         required=True,
         title='Identifier',
         description='The unique identifier',
-        example=faker.random_int(1, 9999),
+        example=faker.uuid4(),
     )
 }
 project_response_fields.update(audit_fields)

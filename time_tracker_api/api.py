@@ -14,6 +14,15 @@ api = Api(version='1.0.1',
 
 # Common models structure
 audit_fields = {
+    'deleted': fields.String(
+        readOnly=True,
+        required=True,
+        title='Last event Identifier',
+        description='Last event over this resource',
+        example=faker.uuid4(),
+    ),
+}
+"""
     'created_at': fields.Date(
         readOnly=True,
         title='Created',
@@ -41,6 +50,7 @@ audit_fields = {
         example='anonymous',
     ),
 }
+"""
 
 # APIs
 from time_tracker_api.projects import projects_namespace

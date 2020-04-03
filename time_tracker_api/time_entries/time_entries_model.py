@@ -12,19 +12,23 @@ def create_dao() -> TimeEntriesDao:
     from time_tracker_api.database import COMMENTS_MAX_LENGTH
     from time_tracker_api.sql_repository import SQLCRUDDao, AuditedSQLModel
 
-    class TimeEntrySQLModel(db.Model, AuditedSQLModel):
+    class TimeEntrySQLModel(db.Model):
         __tablename__ = 'time_entry'
-        id = db.Column(db.Integer, primary_key=True)
+        id = db.Column(db.String, primary_key=True)
         description = db.Column(db.String(COMMENTS_MAX_LENGTH))
         start_date = db.Column(db.DateTime, server_default=db.func.now())
         end_date = db.Column(db.DateTime)
-        project_id = db.Column(db.Integer,
+        project_id = db.Column(db.String,
                                db.ForeignKey('project.id'),
                                nullable=False)
-        activity_id = db.Column(db.Integer,
+        activity_id = db.Column(db.String,
                                 db.ForeignKey('activity.id'),
                                 nullable=False)
         technologies = db.Column(ScalarListType())
+        uri = db.Column(db.String(500))
+        owner_id = db.Column(db.String, nullable=False)
+        deleted = db.Column(db.String, default=None)
+        tenant_id = db.Column(db.String, nullable=False)
 
         @property
         def running(self):

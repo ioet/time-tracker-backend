@@ -9,11 +9,13 @@ def create_dao() -> ActivityDao:
     from time_tracker_api.sql_repository import db
     from time_tracker_api.sql_repository import SQLCRUDDao, AuditedSQLModel
 
-    class ActivitySQLModel(db.Model, AuditedSQLModel):
+    class ActivitySQLModel(db.Model):
         __tablename__ = 'activity'
-        id = db.Column(db.Integer, primary_key=True)
+        id = db.Column(db.String, primary_key=True)
         name = db.Column(db.String(50), unique=True, nullable=False)
         description = db.Column(db.String(250), unique=False, nullable=False)
+        deleted = db.Column(db.String, default=None)
+        tenant_id = db.Column(db.String, nullable=False)
 
         def __repr__(self):
             return '<Activity %r>' % self.name
