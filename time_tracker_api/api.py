@@ -36,6 +36,14 @@ from time_tracker_api.time_entries import time_entries_namespace
 
 api.add_namespace(time_entries_namespace.ns)
 
+from time_tracker_api.project_types import project_types_namespace
+
+api.add_namespace(project_types_namespace.ns)
+
+from time_tracker_api.customers import customers_namespace
+
+api.add_namespace(customers_namespace.ns)
+
 """
 Error handlers
 """
