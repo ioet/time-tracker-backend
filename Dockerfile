@@ -1,6 +1,6 @@
 FROM python:3.8-alpine
 
-ARG buildDeps='g++ gnupg curl'
+ARG buildDeps='g++ gnupg curl libffi-dev openssl-dev'
 
 WORKDIR /usr/src/app
 
