@@ -6,9 +6,9 @@ class ProjectTypeDao(CRUDDao):
 
 
 def create_dao() -> ProjectTypeDao:
-    from time_tracker_api.sql_repository import db
+    from commons.data_access_layer.sql import db
     from time_tracker_api.database import COMMENTS_MAX_LENGTH
-    from time_tracker_api.sql_repository import SQLCRUDDao
+    from commons.data_access_layer.sql import SQLCRUDDao
     from sqlalchemy_utils import UUIDType
     import uuid
 

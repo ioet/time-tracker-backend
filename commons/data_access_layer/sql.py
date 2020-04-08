@@ -14,7 +14,7 @@ def handle_commit_issues(f):
     def rollback_if_necessary(*args, **kw):
         try:
             return f(*args, **kw)
-        except:
+        except: # pragma: no cover
             db.session.rollback()
             raise
 
@@ -92,7 +92,7 @@ class SQLCRUDDao(CRUDDao):
         self.repository.remove(id)
 
 
-class SQLSeeder(Seeder):
+class SQLSeeder(Seeder): # pragma: no cover
     def run(self):
         print("Provisioning database...")
         db.create_all()

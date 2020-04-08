@@ -31,14 +31,11 @@ def test_create_activity_should_succeed_with_valid_request(client: FlaskClient, 
 
 def test_create_activity_should_reject_bad_request(client: FlaskClient, mocker: MockFixture):
     from time_tracker_api.activities.activities_namespace import activity_dao
-    invalid_activity_data = valid_activity_data.copy().update({
-        "invalid_field": 123,
-    })
     repository_create_mock = mocker.patch.object(activity_dao.repository,
                                                  'create',
                                                  return_value=fake_activity)
 
-    response = client.post("/activities", json=invalid_activity_data, follow_redirects=True)
+    response = client.post("/activities", json=None, follow_redirects=True)
 
     assert HTTPStatus.BAD_REQUEST == response.status_code
     repository_create_mock.assert_not_called()
@@ -123,15 +120,12 @@ def test_update_activity_should_succeed_with_valid_data(client: FlaskClient, moc
 
 def test_update_activity_should_reject_bad_request(client: FlaskClient, mocker: MockFixture):
     from time_tracker_api.activities.activities_namespace import activity_dao
-    invalid_activity_data = valid_activity_data.copy().update({
-        "invalid_field": 123,
-    })
     repository_update_mock = mocker.patch.object(activity_dao.repository,
                                                  'update',
                                                  return_value=fake_activity)
 
     valid_id = fake.random_int(1, 9999)
-    response = client.put("/activities/%s" % valid_id, json=invalid_activity_data, follow_redirects=True)
+    response = client.put("/activities/%s" % valid_id, json=None, follow_redirects=True)
 
     assert HTTPStatus.BAD_REQUEST == response.status_code
     repository_update_mock.assert_not_called()

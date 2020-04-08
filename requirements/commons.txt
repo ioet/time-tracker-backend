@@ -1,0 +1,9 @@
+# requirements/commons.txt
+
+# For Common dependencies
+
+# Handling requests
+requests==2.23.0
+
+# To create sample content in tests and API documentation
+Faker==4.0.2

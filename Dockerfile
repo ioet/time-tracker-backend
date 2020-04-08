@@ -8,7 +8,7 @@ COPY . .
 
 RUN apk update \
 	&& apk add --no-cache $buildDeps gcc unixodbc-dev \
-	&& pip3 install --no-cache-dir -r requirements/prod.txt \	
+	&& pip3 install --no-cache-dir -r requirements/time_tracker_api/prod.txt \
 	&& curl -O https://download.microsoft.com/download/e/4/e/e4e67866-dffd-428c-aac7-8d28ddafb39b/msodbcsql17_17.5.2.1-1_amd64.apk \
 	&& curl -O https://download.microsoft.com/download/e/4/e/e4e67866-dffd-428c-aac7-8d28ddafb39b/mssql-tools_17.5.2.1-1_amd64.apk \
 	&& curl -O https://download.microsoft.com/download/e/4/e/e4e67866-dffd-428c-aac7-8d28ddafb39b/msodbcsql17_17.5.2.1-1_amd64.sig \
@@ -27,4 +27,4 @@ ENV FLASK_APP time_tracker_api
 
 EXPOSE 5000
 
-CMD ["gunicorn", "-b 0.0.0.0:5000", "run:app"]
+CMD ["gunicorn", "-b 0.0.0.0:5000", "api:app"]

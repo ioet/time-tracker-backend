@@ -21,17 +21,25 @@ class DevelopmentConfig(Config):
 
 
 class SQLConfig(Config):
-    SQLALCHEMY_DATABASE_URI = Config.DATABASE_URI
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    DATABASE_URI = os.environ.get('DATABASE_URI')
+    SQLALCHEMY_DATABASE_URI = DATABASE_URI
 
 
-class TestConfig(SQLConfig):
+class CosmosDB(Config):
+    DATABASE_URI = os.environ.get('DATABASE_URI')
+    DATABASE_ACCOUNT_URI = os.environ.get('DATABASE_ACCOUNT_URI')
+    DATABASE_MASTER_KEY = os.environ.get('DATABASE_MASTER_KEY')
+    DATABASE_NAME = os.environ.get('DATABASE_NAME')
+
+
+class TestConfig(CosmosDB, SQLConfig):
     TESTING = True
     FLASK_DEBUG = True
     TEST_TABLE = 'tests'
-    DATABASE_URI = os.environ.get('DATABASE_URI', 'sqlite:///:memory:')
-    SQLALCHEMY_DATABASE_URI = DATABASE_URI
+    DATABASE_URI = os.environ.get('DATABASE_URI')
+    SQLALCHEMY_DATABASE_URI = DATABASE_URI or 'sqlite:///:memory:'
 
 
 class ProductionConfig(Config):
@@ -40,7 +48,7 @@ class ProductionConfig(Config):
     FLASK_ENV = 'production'
 
 
-class AzureConfig(SQLConfig):
+class AzureConfig(CosmosDB):
     DATABASE_URI = os.environ.get('DATABASE_URI', os.environ.get('SQLAZURECONNSTR_DATABASE_URI'))
     SQLALCHEMY_DATABASE_URI = DATABASE_URI
 

@@ -35,7 +35,8 @@ def test_create_time_entry_should_succeed_with_valid_request(client: FlaskClient
 
 def test_create_time_entry_should_reject_bad_request(client: FlaskClient, mocker: MockFixture):
     from time_tracker_api.time_entries.time_entries_namespace import time_entries_dao
-    invalid_time_entry_input = valid_time_entry_input.copy().update({
+    invalid_time_entry_input = valid_time_entry_input.copy()
+    invalid_time_entry_input.update({
         "project_id": None,
     })
     repository_create_mock = mocker.patch.object(time_entries_dao.repository,
@@ -110,8 +111,9 @@ def test_update_time_entry_should_succeed_with_valid_data(client: FlaskClient, m
 
 def test_update_time_entry_should_reject_bad_request(client: FlaskClient, mocker: MockFixture):
     from time_tracker_api.time_entries.time_entries_namespace import time_entries_dao
-    invalid_time_entry_data = valid_time_entry_input.copy().update({
-        "project_id": 'anything',
+    invalid_time_entry_data = valid_time_entry_input.copy()
+    invalid_time_entry_data.update({
+        "project_id": fake.pyint(min_value=1, max_value=100),
     })
     repository_update_mock = mocker.patch.object(time_entries_dao.repository,
                                                  'update',

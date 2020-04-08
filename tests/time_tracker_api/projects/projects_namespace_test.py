@@ -35,8 +35,9 @@ def test_create_project_should_succeed_with_valid_request(client: FlaskClient, m
 
 def test_create_project_should_reject_bad_request(client: FlaskClient, mocker: MockFixture):
     from time_tracker_api.projects.projects_namespace import project_dao
-    invalid_project_data = valid_project_data.copy().update({
-        "type": 'anything',
+    invalid_project_data = valid_project_data.copy()
+    invalid_project_data.update({
+        "project_type_id": fake.pyint(min_value=1, max_value=100),
     })
     repository_create_mock = mocker.patch.object(project_dao.repository,
                                                  'create',
@@ -125,8 +126,9 @@ def test_update_project_should_succeed_with_valid_data(client: FlaskClient, mock
 
 def test_update_project_should_reject_bad_request(client: FlaskClient, mocker: MockFixture):
     from time_tracker_api.projects.projects_namespace import project_dao
-    invalid_project_data = valid_project_data.copy().update({
-        "type": 'anything',
+    invalid_project_data = valid_project_data.copy()
+    invalid_project_data.update({
+        "project_type_id": fake.pyint(min_value=1, max_value=100),
     })
     repository_update_mock = mocker.patch.object(project_dao.repository,
                                                  'update',

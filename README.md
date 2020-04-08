@@ -1,6 +1,6 @@
 # time-tracker-api
 
-The API of the TSheets killer app.
+This is the mono-repository for the backend services and their common codebase
 
 ## Getting started
 Follow the following instructions to get the project ready to use ASAP.
@@ -30,10 +30,16 @@ automatically [pip](https://pip.pypa.io/en/stable/) as well.
     
 - Install the requirements:
     ```
-    python3 -m pip install -r requirements/<stage>.txt
+    python3 -m pip install -r requirements/<app>/<stage>.txt
     ```
     
-    The `stage` can be `dev` or `prod`. 
+    Where <app> is one of the executable app namespace, e.g. `time_tracker_api`.
+    The `stage` can be 
+    
+    * `dev`: Used for working locally
+    * `prod`: For anything deployed
+    
+    
     Remember to do it with Python 3.
     
     
@@ -94,7 +100,7 @@ The [integrations tests](https://en.wikipedia.org/wiki/Integration_testing) veri
 are working well together. These are the default tests we should run:
 
 ```dotenv
-python3 -m pytest -v --ignore=tests/sql_repository_test.py
+python3 -m pytest -v --ignore=tests/commons/data_access_layer/azure/sql_repository_test.py
 ```
 
 As you may have noticed we are ignoring the tests related with the repository.
