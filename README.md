@@ -166,6 +166,17 @@ as well as its correspondent options.
 python cli.py gen_swagger_json -f ~/Downloads/swagger.json
 ```
 
+## Semantic versioning
+
+### Style
+We use [angular commit message style](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits) as the standard commit message style.
+
+### Release
+1. The release is automatically done by the [TimeTracker CI](https://dev.azure.com/IOET-DevOps/TimeTracker-API/_build?definitionId=1&_a=summary) although can also be done manually. The variable `GH_TOKEN` is required to post releases to Github. The `GH_TOKEN` can be generated following [these steps](https://help.github.com/es/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line).
+
+2. We use the command `semantic-release publish` after a successful PR to make a release. Check the library
+[python-semantic-release](https://python-semantic-release.readthedocs.io/en/latest/commands.html#publish) for details of underlying operations.
+
 ## Run as docker container
 1. Build image
 ```bash

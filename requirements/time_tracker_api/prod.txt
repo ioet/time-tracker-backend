@@ -23,6 +23,9 @@ flask-restplus==0.12.1
 #CLI support
 Flask-Script==2.0.6
 
+#Semantic versioning
+python-semantic-release==5.1.0
+
 # The Debug Toolbar
 Flask-DebugToolbar==0.11.0
 
