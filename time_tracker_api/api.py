@@ -5,12 +5,15 @@ from faker import Faker
 from flask import current_app as app
 from flask_restplus import Api, fields
 from flask_restplus._http import HTTPStatus
+from time_tracker_api import __version__
 
 faker = Faker()
 
-api = Api(version='1.0.1',
-          title="TimeTracker API",
-          description="API for the TimeTracker project")
+api = Api(
+    version=__version__,
+    title="TimeTracker API",
+    description="API for the TimeTracker project"
+)
 
 # Common models structure
 audit_fields = {
