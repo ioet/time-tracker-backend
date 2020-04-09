@@ -28,5 +28,8 @@ htmlcov/
 timetracker-api-postman-collection.json
 swagger.json
 
-# Ignore any SQLite generated database
+# SQLite databases
 *.db
+
+# Local migration files
+migration_status.csv

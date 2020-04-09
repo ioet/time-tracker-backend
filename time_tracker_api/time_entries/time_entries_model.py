@@ -1,3 +1,4 @@
+from azure.cosmos import PartitionKey
 from sqlalchemy_utils import ScalarListType
 
 from time_tracker_api.database import CRUDDao
@@ -47,3 +48,15 @@ def create_dao() -> TimeEntriesDao:
             SQLCRUDDao.__init__(self, TimeEntrySQLModel)
 
     return TimeEntriesSQLDao()
+
+
+container_definition = {
+    'id': 'time_entry',
+    'partition_key': PartitionKey(path='/tenant_id'),
+    'unique_key_policy': {
+        'uniqueKeys': [
+            {'paths': ['/owner_id', '/end_date']},
+            {'paths': ['/deleted']},
+        ]
+    }
+}

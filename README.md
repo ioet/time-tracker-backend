@@ -60,10 +60,10 @@ Driver=/usr/local/lib/libmsodbcsql.17.dylib
 UsageCount=2
 ```
 
-Then specify the driver name, in this case _DBC Driver 17 for SQL Server_ in the `DATABASE_URI`, e.g.:
+Then specify the driver name, in this case _DBC Driver 17 for SQL Server_ in the `SQL_DATABASE_URI`, e.g.:
 
 ```.dotenv
-DATABASE_URI=mssql+pyodbc://<user>:<password>@time-tracker-srv.database.windows.net/<database>?driver\=ODBC Driver 17 for SQL Server
+SQL_DATABASE_URI=mssql+pyodbc://<user>:<password>@time-tracker-srv.database.windows.net/<database>?driver\=ODBC Driver 17 for SQL Server
 ```
 
 To troubleshoot issues regarding this part please check out:
@@ -115,7 +115,7 @@ tests as [system testing](https://en.wikipedia.org/wiki/System_testing):
 python3 -m pytest -v
 ```
 
-The database tests will be done in the table `tests` of the database specified by the variable `DATABASE_URI`. If this
+The database tests will be done in the table `tests` of the database specified by the variable `SQL_DATABASE_URI`. If this
 variable is not specified it will automatically connect to SQLite database in-memory. This will do, because we are using 
 [SQL Alchemy](https://www.sqlalchemy.org/features.html) to be able connect to any SQL database maintaining the same 
 codebase.
@@ -178,6 +178,36 @@ docker run -p 5000:5000 time_tracker_api:local
 ```
 
 3. Visit `127.0.0.1:5000`
+
+## Migrations
+Looking for a DB-agnostic migration tool, the only choice I found was [migrate-anything](https://pypi.org/project/migrate-anything/).
+An specific requirement file was created to run the migrations in `requirements/migrations.txt`. This way we do not mix
+any possible vulnerable dependency brought by these dependencies to the environment `prod`. Therefore the dependencies
+to run the migrations shall be installed this way:
+
+```bash
+pip install -r requirements/<app>/prod.txt
+pip install -r requirements/migrations.txt
+```
+
+All the migrations will be handled and created in the python package `migrations`. In order to create a migration we 
+must do it manually (for now) and prefixed by a number, e.g. `migrations/01-initialize-db.py` in order to warranty the 
+order of execution alphabetically.
+Inside every migration there is an `up` and `down` method. The `down` method is executed from the persisted migration in
+the database. Whe a `down` logic that used external dependencies was tested it failed, whilst I put that same logic in 
+the an `up` method it run correctly. In general the library seems to present [design issues](https://github.com/Lieturd/migrate-anything/issues/3).
+Therefore, it is recommended to apply changes just in one direction: `up`.
+For more information, please check out [some examples](https://github.com/Lieturd/migrate-anything/tree/master/examples) 
+that illustrates the usage of this migration tool.
+
+Basically, for running the migrations you must execute
+
+```bash
+migrate-anything migrations
+```
+
+They will be automatically run during the Continuous Deployment process.
+
 
 ## Built with
 - [Python version 3](https://www.python.org/download/releases/3.0/) as backend programming language. Strong typing for 

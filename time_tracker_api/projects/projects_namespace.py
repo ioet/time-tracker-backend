@@ -3,7 +3,7 @@ from flask_restplus import Namespace, Resource, fields
 from flask_restplus._http import HTTPStatus
 
 from time_tracker_api.api import audit_fields
-from time_tracker_api.projects.projects_model import PROJECT_TYPE, create_dao
+from time_tracker_api.projects.projects_model import create_dao
 
 faker = Faker()
 
