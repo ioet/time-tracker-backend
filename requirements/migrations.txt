@@ -1,0 +1,6 @@
+# requirements/migrations.txt
+
+# For running any kind of data migration
+
+# Migration tool
+migrate-anything==0.1.6

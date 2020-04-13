@@ -1,3 +1,5 @@
+from azure.cosmos import PartitionKey
+
 from time_tracker_api.database import CRUDDao
 
 
@@ -33,3 +35,15 @@ def create_dao() -> ProjectTypeDao:
             SQLCRUDDao.__init__(self, ProjectTypeSQLModel)
 
     return ProjectTypeSQLDao()
+
+
+container_definition = {
+    'id': 'project_type',
+    'partition_key': PartitionKey(path='/customer_id'),
+    'unique_key_policy': {
+        'uniqueKeys': [
+            {'paths': ['/name']},
+            {'paths': ['/deleted']},
+        ]
+    }
+}

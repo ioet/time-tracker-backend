@@ -1,20 +1,28 @@
 import dataclasses
+import logging
 import uuid
 from typing import Callable
 
 import azure.cosmos.cosmos_client as cosmos_client
 import azure.cosmos.exceptions as exceptions
-from azure.cosmos import ContainerProxy
+from azure.cosmos import ContainerProxy, PartitionKey
 from flask import Flask
 
 
 class CosmosDBFacade:
-    def __init__(self, app: Flask):  # pragma: no cover
-        self.app = app
+    def __init__(self, client, db_id: str, logger=None):  # pragma: no cover
+        self.client = client
+        self.db = self.client.get_database_client(db_id)
+        if logger is None:
+            self.logger = logging.getLogger(CosmosDBFacade.__name__)
+        else:
+            self.logger = logger
 
-        db_uri = app.config.get('DATABASE_URI')
+    @classmethod
+    def from_flask_config(cls, app: Flask):
+        db_uri = app.config.get('COSMOS_DATABASE_URI')
         if db_uri is None:
-            app.logger.warn("DATABASE_URI was not found. Looking for alternative variables.")
+            app.logger.warn("COSMOS_DATABASE_URI was not found. Looking for alternative variables.")
             account_uri = app.config.get('DATABASE_ACCOUNT_URI')
             if account_uri is None:
                 raise EnvironmentError("DATABASE_ACCOUNT_URI is not defined in the environment")
@@ -23,31 +31,26 @@ class CosmosDBFacade:
             if master_key is None:
                 raise EnvironmentError("DATABASE_MASTER_KEY is not defined in the environment")
 
-            self.client = cosmos_client.CosmosClient(account_uri, {'masterKey': master_key},
-                                                     user_agent="CosmosDBDotnetQuickstart",
-                                                     user_agent_overwrite=True)
+            client = cosmos_client.CosmosClient(account_uri, {'masterKey': master_key},
+                                                user_agent="CosmosDBDotnetQuickstart",
+                                                user_agent_overwrite=True)
         else:
-            self.client = cosmos_client.CosmosClient.from_connection_string(db_uri)
+            client = cosmos_client.CosmosClient.from_connection_string(db_uri)
 
         db_id = app.config.get('DATABASE_NAME')
         if db_id is None:
             raise EnvironmentError("DATABASE_NAME is not defined in the environment")
 
-        self.db = self.client.get_database_client(db_id)
+        return cls(client, db_id, logger=app.logger)
 
     def create_container(self, container_definition: dict):
-        try:
-            return self.db.create_container(**container_definition)
+        return self.db.create_container(**container_definition)
 
-        except exceptions.CosmosResourceExistsError:  # pragma: no cover
-            self.app.logger.info('Container with id \'{0}\' was found'.format(container_definition["id"]))
+    def create_container_if_not_exists(self, container_definition: dict):
+        return self.db.create_container_if_not_exists(**container_definition)
 
     def delete_container(self, container_id: str):
-        try:
-            return self.db.delete_container(container_id)
-
-        except exceptions.CosmosHttpResponseError:  # pragma: no cover
-            self.app.logger.info('Container with id \'{0}\' was not deleted'.format(container_id))
+        return self.db.delete_container(container_id)
 
 
 cosmos_helper: CosmosDBFacade = None
@@ -61,8 +64,13 @@ class CosmosDBModel():
                 setattr(self, k, v)
 
 
+def partition_key_attribute(pk: PartitionKey) -> str:
+    return pk.path.strip('/')
+
+
 class CosmosDBRepository:
     def __init__(self, container_id: str,
+                 partition_key_attribute: str,
                  mapper: Callable = None,
                  custom_cosmos_helper: CosmosDBFacade = None):
         global cosmos_helper
@@ -71,12 +79,16 @@ class CosmosDBRepository:
             raise ValueError("The cosmos_db module has not been initialized!")
         self.mapper = mapper
         self.container: ContainerProxy = self.cosmos_helper.db.get_container_client(container_id)
+        self.partition_key_attribute: str = partition_key_attribute
 
     @classmethod
     def from_definition(cls, container_definition: dict,
                         mapper: Callable = None,
                         custom_cosmos_helper: CosmosDBFacade = None):
-        return cls(container_definition['id'], mapper, custom_cosmos_helper)
+        pk_attrib = partition_key_attribute(container_definition['partition_key'])
+        return cls(container_definition['id'], pk_attrib,
+                   mapper=mapper,
+                   custom_cosmos_helper=custom_cosmos_helper)
 
     def create(self, data: dict, mapper: Callable = None):
         function_mapper = self.get_mapper_or_dict(mapper)
@@ -93,11 +105,12 @@ class CosmosDBRepository:
         max_count = self.get_page_size_or(max_count)
         result = self.container.query_items(
             query="""
-            SELECT * FROM c WHERE c.tenant_id=@tenant_id AND {visibility_condition}
+            SELECT * FROM c WHERE c.{partition_key_attribute}=@partition_key_value AND {visibility_condition}
             OFFSET @offset LIMIT @max_count
-            """.format(visibility_condition=self.create_sql_condition_for_visibility(visible_only)),
+            """.format(partition_key_attribute=self.partition_key_attribute,
+                       visibility_condition=self.create_sql_condition_for_visibility(visible_only)),
             parameters=[
-                {"name": "@tenant_id", "value": partition_key_value},
+                {"name": "@partition_key_value", "value": partition_key_value},
                 {"name": "@offset", "value": offset},
                 {"name": "@max_count", "value": max_count},
             ],
@@ -121,6 +134,9 @@ class CosmosDBRepository:
         return self.partial_update(id, {
             'deleted': str(uuid.uuid4())
         }, partition_key_value, visible_only=True, mapper=mapper)
+
+    def delete_permanently(self, id: str, partition_key_value: str) -> None:
+        self.container.delete_item(id, partition_key_value)
 
     def check_visibility(self, item, throw_not_found_if_deleted):
         if throw_not_found_if_deleted and item.get('deleted') is not None:
@@ -146,4 +162,4 @@ class CosmosDBRepository:
 
 def init_app(app: Flask) -> None:
     global cosmos_helper
-    cosmos_helper = CosmosDBFacade(app)
+    cosmos_helper = CosmosDBFacade.from_flask_config(app)

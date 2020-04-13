@@ -7,7 +7,7 @@ DISABLE_STR_VALUES = ("false", "0", "disabled")
 
 class Config:
     SECRET_KEY = generate_dev_secret_key()
-    DATABASE_URI = os.environ.get('DATABASE_URI')
+    SQL_DATABASE_URI = os.environ.get('SQL_DATABASE_URI')
     PROPAGATE_EXCEPTIONS = True
     RESTPLUS_VALIDATE = True
     DEBUG = True
@@ -23,12 +23,12 @@ class DevelopmentConfig(Config):
 class SQLConfig(Config):
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    DATABASE_URI = os.environ.get('DATABASE_URI')
-    SQLALCHEMY_DATABASE_URI = DATABASE_URI
+    SQL_DATABASE_URI = os.environ.get('SQL_DATABASE_URI')
+    SQLALCHEMY_DATABASE_URI = SQL_DATABASE_URI
 
 
 class CosmosDB(Config):
-    DATABASE_URI = os.environ.get('DATABASE_URI')
+    COSMOS_DATABASE_URI = os.environ.get('COSMOS_DATABASE_URI')
     DATABASE_ACCOUNT_URI = os.environ.get('DATABASE_ACCOUNT_URI')
     DATABASE_MASTER_KEY = os.environ.get('DATABASE_MASTER_KEY')
     DATABASE_NAME = os.environ.get('DATABASE_NAME')
@@ -38,8 +38,8 @@ class TestConfig(CosmosDB, SQLConfig):
     TESTING = True
     FLASK_DEBUG = True
     TEST_TABLE = 'tests'
-    DATABASE_URI = os.environ.get('DATABASE_URI')
-    SQLALCHEMY_DATABASE_URI = DATABASE_URI or 'sqlite:///:memory:'
+    SQL_DATABASE_URI = os.environ.get('SQL_DATABASE_URI')
+    SQLALCHEMY_DATABASE_URI = SQL_DATABASE_URI or 'sqlite:///:memory:'
 
 
 class ProductionConfig(Config):
@@ -49,8 +49,9 @@ class ProductionConfig(Config):
 
 
 class AzureConfig(CosmosDB):
-    DATABASE_URI = os.environ.get('DATABASE_URI', os.environ.get('SQLAZURECONNSTR_DATABASE_URI'))
-    SQLALCHEMY_DATABASE_URI = DATABASE_URI
+    SQL_DATABASE_URI = os.environ.get('SQL_DATABASE_URI', os.environ.get('SQLCONNSTR_DATABASE_URI'))
+    COSMOS_DATABASE_URI = os.environ.get('COSMOS_DATABASE_URI', os.environ.get('CUSTOMCONNSTR_COSMOS_DATABASE_URI'))
+    SQLALCHEMY_DATABASE_URI = SQL_DATABASE_URI
 
 
 class AzureDevelopmentConfig(DevelopmentConfig, AzureConfig):

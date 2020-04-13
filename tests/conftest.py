@@ -80,7 +80,7 @@ def cosmos_db_repository(app: Flask, cosmos_db_model) -> CosmosDBRepository:
             from commons.data_access_layer.cosmos_db import cosmos_helper
 
         app.logger.info("Creating Cosmos DB test models...")
-        cosmos_helper.create_container(cosmos_db_model)
+        cosmos_helper.create_container_if_not_exists(cosmos_db_model)
         app.logger.info("Cosmos DB test models created!")
 
         yield CosmosDBRepository.from_definition(cosmos_db_model)

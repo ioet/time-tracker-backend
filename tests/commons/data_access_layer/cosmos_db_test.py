@@ -507,3 +507,32 @@ def test_partial_update_should_not_find_element_that_is_already_deleted(
     except Exception as e:
         assert type(e) is CosmosResourceNotFoundError
         assert e.status_code == 404
+
+
+def test_delete_permanently_with_invalid_id_should_fail(
+        cosmos_db_repository: CosmosDBRepository,
+        sample_item: dict):
+    try:
+        cosmos_db_repository.delete_permanently(fake.uuid4(), sample_item['tenant_id'])
+        fail('It should have not found the deleted item')
+    except Exception as e:
+        assert type(e) is CosmosResourceNotFoundError
+        assert e.status_code == 404
+
+
+def test_delete_permanently_with_valid_id_should_succeed(
+        cosmos_db_repository: CosmosDBRepository,
+        sample_item: dict):
+    found_item = cosmos_db_repository.find(sample_item['id'], sample_item['tenant_id'])
+
+    assert found_item is not None
+    assert found_item['id'] == sample_item['id']
+
+    cosmos_db_repository.delete_permanently(sample_item['id'], sample_item['tenant_id'])
+
+    try:
+        cosmos_db_repository.find(sample_item['id'], sample_item['tenant_id'])
+        fail('It should have not found the deleted item')
+    except Exception as e:
+        assert type(e) is CosmosResourceNotFoundError
+        assert e.status_code == 404
