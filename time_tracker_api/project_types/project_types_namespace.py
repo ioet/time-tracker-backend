@@ -2,7 +2,7 @@ from faker import Faker
 from flask_restplus import Namespace, Resource, fields
 from flask_restplus._http import HTTPStatus
 
-from time_tracker_api.api import audit_fields
+from time_tracker_api.api import common_fields
 from time_tracker_api.project_types.project_types_model import create_dao
 
 faker = Faker()
@@ -51,7 +51,7 @@ project_type_response_fields = {
         example=faker.uuid4(),
     )
 }
-project_type_response_fields.update(audit_fields)
+project_type_response_fields.update(common_fields)
 
 project_type = ns.inherit(
     'ProjectType',

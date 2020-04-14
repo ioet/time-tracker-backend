@@ -4,8 +4,8 @@ from faker import Faker
 from flask_restplus import fields, Resource, Namespace
 from flask_restplus._http import HTTPStatus
 
-from time_tracker_api.api import audit_fields
 from commons.data_access_layer.database import COMMENTS_MAX_LENGTH
+from time_tracker_api.api import common_fields
 from time_tracker_api.time_entries.time_entries_model import create_dao
 
 faker = Faker()
@@ -83,7 +83,7 @@ time_entry_response_fields = {
         example=faker.boolean(),
     ),
 }
-time_entry_response_fields.update(audit_fields)
+time_entry_response_fields.update(common_fields)
 
 time_entry = ns.inherit(
     'TimeEntry',

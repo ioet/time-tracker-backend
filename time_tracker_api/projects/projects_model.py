@@ -32,13 +32,13 @@ class ProjectCosmosDBModel(CosmosDBModel):
     tenant_id: str
 
     def __init__(self, data):
-        super(ProjectCosmosDBModel, self).__init__(data)
+        super(ProjectCosmosDBModel, self).__init__(data)  # pragma: no cover 
 
     def __repr__(self):
-        return '<Project %r>' % self.name
+        return '<Project %r>' % self.name  # pragma: no cover
 
     def __str___(self):
-        return "the project \"%s\"" % self.name
+        return "the project \"%s\"" % self.name  # pragma: no cover
 
 
 def create_dao() -> ProjectDao:

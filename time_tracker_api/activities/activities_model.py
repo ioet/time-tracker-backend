@@ -30,13 +30,13 @@ class ActivityCosmosDBModel(CosmosDBModel):
     tenant_id: str
 
     def __init__(self, data):
-        super(ActivityCosmosDBModel, self).__init__(data)
+        super(ActivityCosmosDBModel, self).__init__(data)  # pragma: no cover
 
     def __repr__(self):
-        return '<Activity %r>' % self.name
+        return '<Activity %r>' % self.name  # pragma: no cover
 
     def __str___(self):
-        return "the activity \"%s\"" % self.name
+        return "the activity \"%s\"" % self.name  # pragma: no cover
 
 
 def create_dao() -> ActivityDao:

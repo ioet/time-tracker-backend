@@ -15,7 +15,7 @@ api = Api(
 )
 
 # Common models structure
-audit_fields = {
+common_fields = {
     'deleted': fields.String(
         readOnly=True,
         required=True,

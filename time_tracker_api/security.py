@@ -30,9 +30,8 @@ def generate_dev_secret_key():
     """
     global dev_secret_key
     dev_secret_key = fake.password(length=16, special_chars=True, digits=True, upper_case=True, lower_case=True)
-    if app.config.get("FLASK_DEBUG", False):
+    if app.config.get("FLASK_DEBUG", False):  # pragma: no cover
         print('*********************************************************')
         print("The generated secret is \"%s\"" % dev_secret_key)
         print('*********************************************************')
     return dev_secret_key
-
