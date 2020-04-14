@@ -8,6 +8,9 @@ import azure.cosmos.exceptions as exceptions
 from azure.cosmos import ContainerProxy, PartitionKey
 from flask import Flask
 
+from commons.data_access_layer.database import CRUDDao
+from time_tracker_api.security import current_user_tenant_id
+
 
 class CosmosDBFacade:
     def __init__(self, client, db_id: str, logger=None):  # pragma: no cover
@@ -122,7 +125,7 @@ class CosmosDBRepository:
 
     def partial_update(self, id: str, changes: dict, partition_key_value: str,
                        visible_only=True, mapper: Callable = None):
-        item_data = self.find(id, partition_key_value, visible_only=visible_only)
+        item_data = self.find(id, partition_key_value, visible_only=visible_only, mapper=dict)
         item_data.update(changes)
         return self.update(id, item_data, mapper=mapper)
 
@@ -158,6 +161,34 @@ class CosmosDBRepository:
         # TODO The default value should be taken from the Azure Feature Manager
         # or any other repository for the settings
         return custom_page_size or 100
+
+
+class CosmosDBDao(CRUDDao):
+    def __init__(self, repository: CosmosDBRepository):
+        self.repository = repository
+
+    def get_all(self) -> list:
+        tenant_id: str = current_user_tenant_id()
+        return self.repository.find_all(partition_key_value=tenant_id)
+
+    def get(self, id):
+        tenant_id: str = current_user_tenant_id()
+        return self.repository.find(id, partition_key_value=tenant_id)
+
+    def create(self, data: dict):
+        data['id'] = str(uuid.uuid4())
+        data['tenant_id'] = current_user_tenant_id()
+        return self.repository.create(data)
+
+    def update(self, id, data: dict):
+        tenant_id: str = current_user_tenant_id()
+        return self.repository.partial_update(id,
+                                              changes=data,
+                                              partition_key_value=tenant_id)
+
+    def delete(self, id):
+        tenant_id: str = current_user_tenant_id()
+        self.repository.delete(id, partition_key_value=tenant_id)
 
 
 def init_app(app: Flask) -> None:

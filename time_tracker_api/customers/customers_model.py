@@ -1,6 +1,6 @@
 from azure.cosmos import PartitionKey
 
-from time_tracker_api.database import CRUDDao
+from commons.data_access_layer.database import CRUDDao
 
 
 class CustomerDao(CRUDDao):
@@ -9,7 +9,7 @@ class CustomerDao(CRUDDao):
 
 def create_dao() -> CustomerDao:
     from commons.data_access_layer.sql import db
-    from time_tracker_api.database import COMMENTS_MAX_LENGTH
+    from commons.data_access_layer.database import COMMENTS_MAX_LENGTH
     from commons.data_access_layer.sql import SQLCRUDDao
     from sqlalchemy_utils import UUIDType
     import uuid

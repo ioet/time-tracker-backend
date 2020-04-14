@@ -35,45 +35,16 @@ class CRUDDao(abc.ABC):
         raise NotImplementedError  # pragma: no cover
 
 
-class Seeder(abc.ABC):
-    @abc.abstractmethod
-    def run(self):
-        raise NotImplementedError  # pragma: no cover
-
-    @abc.abstractmethod
-    def fresh(self):
-        raise NotImplementedError  # pragma: no cover
-
-    def __call__(self, *args, **kwargs):
-        self.run()  # pragma: no cover
-
-
-seeder: Seeder = None
-
-
 def init_app(app: Flask) -> None:
-    init_sql(app)
+    init_sql(app)  # TODO Delete after the migration to Cosmos DB has finished.
+    init_cosmos_db(app)
 
 
 def init_sql(app: Flask) -> None:
-    from commons.data_access_layer.sql import init_app, SQLSeeder
+    from commons.data_access_layer.sql import init_app
     init_app(app)
-    global seeder
-    seeder = SQLSeeder()
 
 
 def init_cosmos_db(app: Flask) -> None:
-    # from commons.data_access_layer.azure.cosmos_db import cosmos_helper
-    class CosmosSeeder(Seeder):
-        def run(self):
-            print("Provisioning namespace(database)...")
-            # cosmos_helper.create_container()
-            print("Database seeded!")
-
-        def fresh(self):
-            print("Removing namespace(database)...")
-            # cosmos_helper.remove_container()
-            self.run()
-
-    global seeder
-    seeder = CosmosSeeder()
+    from commons.data_access_layer.cosmos_db import init_app
+    init_app(app)

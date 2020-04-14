@@ -9,12 +9,17 @@ fake = Faker()
 dev_secret_key: str = None
 
 
-def current_user_id():
+def current_user_id() -> str:
     """
     Returns the id of the authenticated user in
     Azure Active Directory
     """
     return 'anonymous'
+
+
+def current_user_tenant_id() -> str:
+    # TODO Get this from the JWT
+    return "ioet"
 
 
 def generate_dev_secret_key():
@@ -30,3 +35,4 @@ def generate_dev_secret_key():
         print("The generated secret is \"%s\"" % dev_secret_key)
         print('*********************************************************')
     return dev_secret_key
+

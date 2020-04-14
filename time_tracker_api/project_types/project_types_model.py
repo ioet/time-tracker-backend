@@ -1,6 +1,6 @@
 from azure.cosmos import PartitionKey
 
-from time_tracker_api.database import CRUDDao
+from commons.data_access_layer.database import CRUDDao
 
 
 class ProjectTypeDao(CRUDDao):
@@ -9,7 +9,7 @@ class ProjectTypeDao(CRUDDao):
 
 def create_dao() -> ProjectTypeDao:
     from commons.data_access_layer.sql import db
-    from time_tracker_api.database import COMMENTS_MAX_LENGTH
+    from commons.data_access_layer.database import COMMENTS_MAX_LENGTH
     from commons.data_access_layer.sql import SQLCRUDDao
     from sqlalchemy_utils import UUIDType
     import uuid
@@ -43,7 +43,6 @@ container_definition = {
     'unique_key_policy': {
         'uniqueKeys': [
             {'paths': ['/name']},
-            {'paths': ['/deleted']},
         ]
     }
 }

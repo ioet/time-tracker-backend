@@ -5,7 +5,7 @@ from flask_restplus import fields, Resource, Namespace
 from flask_restplus._http import HTTPStatus
 
 from time_tracker_api.api import audit_fields
-from time_tracker_api.database import COMMENTS_MAX_LENGTH
+from commons.data_access_layer.database import COMMENTS_MAX_LENGTH
 from time_tracker_api.time_entries.time_entries_model import create_dao
 
 faker = Faker()

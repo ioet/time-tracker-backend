@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-from time_tracker_api.database import CRUDDao, Seeder, ID_MAX_LENGTH
+from commons.data_access_layer.database import CRUDDao, ID_MAX_LENGTH
 from time_tracker_api.security import current_user_id
 
 db: SQLAlchemy = None
@@ -14,7 +14,7 @@ def handle_commit_issues(f):
     def rollback_if_necessary(*args, **kw):
         try:
             return f(*args, **kw)
-        except: # pragma: no cover
+        except:  # pragma: no cover
             db.session.rollback()
             raise
 
@@ -90,16 +90,3 @@ class SQLCRUDDao(CRUDDao):
 
     def delete(self, id):
         self.repository.remove(id)
-
-
-class SQLSeeder(Seeder): # pragma: no cover
-    def run(self):
-        print("Provisioning database...")
-        db.create_all()
-        print("Database seeded!")
-
-    def fresh(self):
-        print("Removing all existing data...")
-        db.drop_all()
-
-        self.run()

@@ -1,6 +1,10 @@
 # time-tracker-api
 
+[![Build status](https://dev.azure.com/IOET-DevOps/TimeTracker-API/_apis/build/status/TimeTracker-API%20-%20CI)](https://dev.azure.com/IOET-DevOps/TimeTracker-API/_build/latest?definitionId=1)
+
 This is the mono-repository for the backend services and their common codebase
+
+
 
 ## Getting started
 Follow the following instructions to get the project ready to use ASAP.

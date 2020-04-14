@@ -74,4 +74,4 @@ class CosmosDBStorage(Storage):
         self.repository.delete_permanently(name, self.app_id)
 
 
-configure(storage=CosmosDBStorage("migrations", "time-tracker-api"))
+configure(storage=CosmosDBStorage("migration", "time-tracker-api"))

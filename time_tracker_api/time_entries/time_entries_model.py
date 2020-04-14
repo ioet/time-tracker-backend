@@ -1,7 +1,7 @@
 from azure.cosmos import PartitionKey
 from sqlalchemy_utils import ScalarListType
 
-from time_tracker_api.database import CRUDDao
+from commons.data_access_layer.database import CRUDDao
 
 
 class TimeEntriesDao(CRUDDao):
@@ -10,7 +10,7 @@ class TimeEntriesDao(CRUDDao):
 
 def create_dao() -> TimeEntriesDao:
     from commons.data_access_layer.sql import db
-    from time_tracker_api.database import COMMENTS_MAX_LENGTH
+    from commons.data_access_layer.database import COMMENTS_MAX_LENGTH
     from sqlalchemy_utils import UUIDType
     import uuid
     from commons.data_access_layer.sql import SQLCRUDDao
@@ -56,7 +56,6 @@ container_definition = {
     'unique_key_policy': {
         'uniqueKeys': [
             {'paths': ['/owner_id', '/end_date']},
-            {'paths': ['/deleted']},
         ]
     }
 }

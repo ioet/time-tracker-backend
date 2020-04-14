@@ -4,7 +4,7 @@ from flask.testing import FlaskClient
 from flask_restplus._http import HTTPStatus
 from pytest_mock import MockFixture
 
-from time_tracker_api.projects.projects_model import PROJECT_TYPE
+from time_tracker_api.security import current_user_tenant_id
 
 fake = Faker()
 
@@ -12,7 +12,6 @@ valid_project_data = {
     "name": fake.company(),
     "description": fake.paragraph(),
     'customer_id': fake.uuid4(),
-    'tenant_id': fake.uuid4(),
     'project_type_id': fake.uuid4()
 }
 
@@ -30,7 +29,7 @@ def test_create_project_should_succeed_with_valid_request(client: FlaskClient, m
     response = client.post("/projects", json=valid_project_data, follow_redirects=True)
 
     assert HTTPStatus.CREATED == response.status_code
-    repository_create_mock.assert_called_once_with(valid_project_data)
+    repository_create_mock.assert_called_once()
 
 
 def test_create_project_should_reject_bad_request(client: FlaskClient, mocker: MockFixture):
@@ -73,7 +72,8 @@ def test_get_project_should_succeed_with_valid_id(client: FlaskClient, mocker: M
 
     assert HTTPStatus.OK == response.status_code
     fake_project == json.loads(response.data)
-    repository_find_mock.assert_called_once_with(str(valid_id))
+    repository_find_mock.assert_called_once_with(str(valid_id),
+                                                 partition_key_value=current_user_tenant_id())
 
 
 def test_get_project_should_return_not_found_with_invalid_id(client: FlaskClient, mocker: MockFixture):
@@ -89,7 +89,8 @@ def test_get_project_should_return_not_found_with_invalid_id(client: FlaskClient
     response = client.get("/projects/%s" % invalid_id, follow_redirects=True)
 
     assert HTTPStatus.NOT_FOUND == response.status_code
-    repository_find_mock.assert_called_once_with(str(invalid_id))
+    repository_find_mock.assert_called_once_with(str(invalid_id),
+                                                 partition_key_value=current_user_tenant_id())
 
 
 def test_get_project_should_response_with_unprocessable_entity_for_invalid_id_format(client: FlaskClient,
@@ -106,14 +107,15 @@ def test_get_project_should_response_with_unprocessable_entity_for_invalid_id_fo
     response = client.get("/projects/%s" % invalid_id, follow_redirects=True)
 
     assert HTTPStatus.UNPROCESSABLE_ENTITY == response.status_code
-    repository_find_mock.assert_called_once_with(str(invalid_id))
+    repository_find_mock.assert_called_once_with(str(invalid_id),
+                                                 partition_key_value=current_user_tenant_id())
 
 
 def test_update_project_should_succeed_with_valid_data(client: FlaskClient, mocker: MockFixture):
     from time_tracker_api.projects.projects_namespace import project_dao
 
     repository_update_mock = mocker.patch.object(project_dao.repository,
-                                                 'update',
+                                                 'partial_update',
                                                  return_value=fake_project)
 
     valid_id = fake.random_int(1, 9999)
@@ -121,7 +123,9 @@ def test_update_project_should_succeed_with_valid_data(client: FlaskClient, mock
 
     assert HTTPStatus.OK == response.status_code
     fake_project == json.loads(response.data)
-    repository_update_mock.assert_called_once_with(str(valid_id), valid_project_data)
+    repository_update_mock.assert_called_once_with(str(valid_id),
+                                                   changes=valid_project_data,
+                                                   partition_key_value=current_user_tenant_id())
 
 
 def test_update_project_should_reject_bad_request(client: FlaskClient, mocker: MockFixture):
@@ -148,7 +152,7 @@ def test_update_project_should_return_not_found_with_invalid_id(client: FlaskCli
     invalid_id = fake.random_int(1, 9999)
 
     repository_update_mock = mocker.patch.object(project_dao.repository,
-                                                 'update',
+                                                 'partial_update',
                                                  side_effect=NotFound)
 
     response = client.put("/projects/%s" % invalid_id,
@@ -156,7 +160,9 @@ def test_update_project_should_return_not_found_with_invalid_id(client: FlaskCli
                           follow_redirects=True)
 
     assert HTTPStatus.NOT_FOUND == response.status_code
-    repository_update_mock.assert_called_once_with(str(invalid_id), valid_project_data)
+    repository_update_mock.assert_called_once_with(str(invalid_id),
+                                                   changes=valid_project_data,
+                                                   partition_key_value=current_user_tenant_id())
 
 
 def test_delete_project_should_succeed_with_valid_id(client: FlaskClient, mocker: MockFixture):
@@ -165,14 +171,15 @@ def test_delete_project_should_succeed_with_valid_id(client: FlaskClient, mocker
     valid_id = fake.random_int(1, 9999)
 
     repository_remove_mock = mocker.patch.object(project_dao.repository,
-                                                 'remove',
+                                                 'delete',
                                                  return_value=None)
 
     response = client.delete("/projects/%s" % valid_id, follow_redirects=True)
 
     assert HTTPStatus.NO_CONTENT == response.status_code
     assert b'' == response.data
-    repository_remove_mock.assert_called_once_with(str(valid_id))
+    repository_remove_mock.assert_called_once_with(str(valid_id),
+                                                   partition_key_value=current_user_tenant_id())
 
 
 def test_delete_project_should_return_not_found_with_invalid_id(client: FlaskClient, mocker: MockFixture):
@@ -182,13 +189,14 @@ def test_delete_project_should_return_not_found_with_invalid_id(client: FlaskCli
     invalid_id = fake.random_int(1, 9999)
 
     repository_remove_mock = mocker.patch.object(project_dao.repository,
-                                                 'remove',
+                                                 'delete',
                                                  side_effect=NotFound)
 
     response = client.delete("/projects/%s" % invalid_id, follow_redirects=True)
 
     assert HTTPStatus.NOT_FOUND == response.status_code
-    repository_remove_mock.assert_called_once_with(str(invalid_id))
+    repository_remove_mock.assert_called_once_with(str(invalid_id),
+                                                   partition_key_value=current_user_tenant_id())
 
 
 def test_delete_project_should_return_unprocessable_entity_for_invalid_id_format(client: FlaskClient,
@@ -199,10 +207,11 @@ def test_delete_project_should_return_unprocessable_entity_for_invalid_id_format
     invalid_id = fake.company()
 
     repository_remove_mock = mocker.patch.object(project_dao.repository,
-                                                 'remove',
+                                                 'delete',
                                                  side_effect=UnprocessableEntity)
 
     response = client.delete("/projects/%s" % invalid_id, follow_redirects=True)
 
     assert HTTPStatus.UNPROCESSABLE_ENTITY == response.status_code
-    repository_remove_mock.assert_called_once_with(str(invalid_id))
+    repository_remove_mock.assert_called_once_with(str(invalid_id),
+                                                   partition_key_value=current_user_tenant_id())

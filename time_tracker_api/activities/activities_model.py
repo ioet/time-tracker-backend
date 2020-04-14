@@ -1,6 +1,6 @@
 from azure.cosmos import PartitionKey
 
-from time_tracker_api.database import CRUDDao
+from commons.data_access_layer.database import CRUDDao
 
 
 class ActivityDao(CRUDDao):
@@ -40,7 +40,6 @@ container_definition = {
     'unique_key_policy': {
         'uniqueKeys': [
             {'paths': ['/name']},
-            {'paths': ['/deleted']},
         ]
     }
 }

@@ -46,23 +46,6 @@ def gen_postman_collection(filename='timetracker-api-postman-collection.json',
     save_data(parsed_json, filename)
 
 
-@cli_manager.command
-def seed():
-    from time_tracker_api.database import seeder as seed
-    seed()
-
-
-@cli_manager.command
-def re_create_db():
-    print('This is going to drop all tables and seed again the database')
-    confirm_answer = input('Do you confirm (Y) you want to remove all your data?\n')
-    if confirm_answer.upper() == 'Y':
-        from time_tracker_api.database import seeder
-        seeder.fresh()
-    else:
-        print('\nThis action was cancelled!')
-
-
 def save_data(data: str, filename: str) -> None:
     """ Save text content to a file """
     if filename:
