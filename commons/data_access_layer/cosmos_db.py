@@ -168,27 +168,30 @@ class CosmosDBDao(CRUDDao):
         self.repository = repository
 
     def get_all(self) -> list:
-        tenant_id: str = current_user_tenant_id()
+        tenant_id: str = self.partition_key_value
         return self.repository.find_all(partition_key_value=tenant_id)
 
     def get(self, id):
-        tenant_id: str = current_user_tenant_id()
+        tenant_id: str = self.partition_key_value
         return self.repository.find(id, partition_key_value=tenant_id)
 
     def create(self, data: dict):
         data['id'] = str(uuid.uuid4())
-        data['tenant_id'] = current_user_tenant_id()
+        data['tenant_id'] = self.partition_key_value
         return self.repository.create(data)
 
     def update(self, id, data: dict):
-        tenant_id: str = current_user_tenant_id()
         return self.repository.partial_update(id,
                                               changes=data,
-                                              partition_key_value=tenant_id)
+                                              partition_key_value=self.partition_key_value)
 
     def delete(self, id):
         tenant_id: str = current_user_tenant_id()
         self.repository.delete(id, partition_key_value=tenant_id)
+
+    @property
+    def partition_key_value(self):
+        return current_user_tenant_id()
 
 
 def init_app(app: Flask) -> None:

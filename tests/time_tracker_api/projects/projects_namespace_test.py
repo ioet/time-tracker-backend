@@ -135,7 +135,7 @@ def test_update_project_should_reject_bad_request(client: FlaskClient, mocker: M
         "project_type_id": fake.pyint(min_value=1, max_value=100),
     })
     repository_update_mock = mocker.patch.object(project_dao.repository,
-                                                 'update',
+                                                 'partial_update',
                                                  return_value=fake_project)
 
     valid_id = fake.random_int(1, 9999)

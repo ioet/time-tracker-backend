@@ -5,18 +5,10 @@ from azure.cosmos import PartitionKey
 from commons.data_access_layer.cosmos_db import CosmosDBModel, CosmosDBDao, CosmosDBRepository
 from commons.data_access_layer.database import CRUDDao
 
-"""
-Protocols
-"""
-
 
 class ProjectDao(CRUDDao):
     pass
 
-
-"""
-Cosmos DB
-"""
 
 container_definition = {
     'id': 'project',
