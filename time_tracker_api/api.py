@@ -4,6 +4,7 @@ from flask import current_app as app
 from flask_restplus import Api, fields
 from flask_restplus._http import HTTPStatus
 
+from commons.data_access_layer.cosmos_db import CustomError
 from time_tracker_api import __version__
 
 faker = Faker()
@@ -52,17 +53,27 @@ Error handlers
 
 @api.errorhandler(CosmosResourceExistsError)
 def handle_cosmos_resource_exists_error(error):
-    return {'message': 'This item already exists'}, HTTPStatus.CONFLICT
+    return {'message': 'It already exists'}, HTTPStatus.CONFLICT
 
 
 @api.errorhandler(CosmosResourceNotFoundError)
 def handle_cosmos_resource_not_found_error(error):
-    return {'message': 'This item was not found'}, HTTPStatus.NOT_FOUND
+    return {'message': 'It was not found'}, HTTPStatus.NOT_FOUND
 
 
 @api.errorhandler(CosmosHttpResponseError)
 def handle_cosmos_http_response_error(error):
     return {'message': 'Invalid request. Please verify your data.'}, HTTPStatus.BAD_REQUEST
+
+
+@api.errorhandler(AttributeError)
+def handle_attribute_error(error):
+    return {'message': "There are missing attributes"}, HTTPStatus.UNPROCESSABLE_ENTITY
+
+
+@api.errorhandler(CustomError)
+def handle_custom_error(error):
+    return {'message': error.description}, error.code
 
 
 @api.errorhandler

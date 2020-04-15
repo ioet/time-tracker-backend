@@ -9,6 +9,7 @@ This is the mono-repository for the backend services and their common codebase
 ## Getting started
 Follow the following instructions to get the project ready to use ASAP.
 
+
 ### Requirements
 Be sure you have installed in your system
 
@@ -46,35 +47,6 @@ automatically [pip](https://pip.pypa.io/en/stable/) as well.
     
     Remember to do it with Python 3.
     
-    
-- Install the [Microsoft ODBC Driver for SQL Server](https://docs.microsoft.com/en-us/sql/connect/odbc/microsoft-odbc-driver-for-sql-server?view=sql-server-ver15) 
-in your operative system. Then you have to check out what is the name of the SQL Driver installation. 
-Check it out with:
-
-```bash
-vim /usr/local/etc/odbcinst.ini
-```
-
-It may display something like
-
-```.ini
-[ODBC Driver 17 for SQL Server] 
-Description=Microsoft ODBC Driver 17 for SQL Server 
-Driver=/usr/local/lib/libmsodbcsql.17.dylib 
-UsageCount=2
-```
-
-Then specify the driver name, in this case _DBC Driver 17 for SQL Server_ in the `SQL_DATABASE_URI`, e.g.:
-
-```.dotenv
-SQL_DATABASE_URI=mssql+pyodbc://<user>:<password>@time-tracker-srv.database.windows.net/<database>?driver\=ODBC Driver 17 for SQL Server
-```
-
-To troubleshoot issues regarding this part please check out:
-- [Install the Microsoft ODBC driver for SQL Server (macOS)](https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/install-microsoft-odbc-driver-sql-server-macos?view=sql-server-ver15).
-- Github issue [odbcinst: SQLRemoveDriver failed with Unable to find component name](https://github.com/Microsoft/homebrew-mssql-preview/issues/2).
-- Stack overflow solution to [Can't open lib 'ODBC Driver 13 for SQL Server'? Sym linking issue?](https://stackoverflow.com/questions/44527452/cant-open-lib-odbc-driver-13-for-sql-server-sym-linking-issue).
-
 ### How to use it
 - Set the env var `FLASK_APP` to `time_tracker_api` and start the app:
 
@@ -92,6 +64,13 @@ To troubleshoot issues regarding this part please check out:
 - Open `http://127.0.0.1:5000/` in a browser. You will find in the presented UI 
 a link to the swagger.json with the definition of the api.
 
+
+### Important notes
+Due to the used technology and particularities on the implementation of this API, it is important that you respect the
+following notes regarding to the manipulation of the data from and towards the API:
+
+- The [recommended](https://docs.microsoft.com/en-us/azure/cosmos-db/working-with-dates#storing-datetimes) format for 
+DateTime strings in Azure Cosmos DB is `YYYY-MM-DDThh:mm:ss.fffffffZ` which follows the ISO 8601 **UTC standard**.
 
 ## Development
 

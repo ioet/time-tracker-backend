@@ -5,6 +5,7 @@ from flask.testing import FlaskClient
 
 from commons.data_access_layer.cosmos_db import CosmosDBRepository
 from time_tracker_api import create_app
+from time_tracker_api.time_entries.time_entries_model import TimeEntryCosmosDBRepository
 
 fake = Faker()
 Faker.seed()
@@ -96,7 +97,12 @@ def tenant_id() -> str:
 
 
 @pytest.fixture(scope="session")
-def another_tenant_id() -> str:
+def another_tenant_id(tenant_id) -> str:
+    return tenant_id[:-5] + 'fffff'
+
+
+@pytest.fixture(scope="session")
+def owner_id() -> str:
     return fake.uuid4()
 
 
@@ -109,3 +115,8 @@ def sample_item(cosmos_db_repository: CosmosDBRepository, tenant_id: str) -> dic
                             tenant_id=tenant_id)
 
     return cosmos_db_repository.create(sample_item_data)
+
+
+@pytest.yield_fixture(scope="module")
+def time_entry_repository(cosmos_db_repository: CosmosDBRepository) -> TimeEntryCosmosDBRepository:
+    return TimeEntryCosmosDBRepository()

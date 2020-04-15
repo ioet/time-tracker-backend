@@ -1,15 +1,17 @@
 import dataclasses
 import logging
 import uuid
+from datetime import datetime
 from typing import Callable
 
 import azure.cosmos.cosmos_client as cosmos_client
 import azure.cosmos.exceptions as exceptions
 from azure.cosmos import ContainerProxy, PartitionKey
 from flask import Flask
+from werkzeug.exceptions import HTTPException
 
 from commons.data_access_layer.database import CRUDDao
-from time_tracker_api.security import current_user_tenant_id
+from time_tracker_api.security import current_user_tenant_id, current_user_id
 
 
 class CosmosDBFacade:
@@ -75,12 +77,14 @@ class CosmosDBRepository:
     def __init__(self, container_id: str,
                  partition_key_attribute: str,
                  mapper: Callable = None,
+                 order_fields: list = [],
                  custom_cosmos_helper: CosmosDBFacade = None):
         global cosmos_helper
         self.cosmos_helper = custom_cosmos_helper or cosmos_helper
         if self.cosmos_helper is None:  # pragma: no cover
             raise ValueError("The cosmos_db module has not been initialized!")
         self.mapper = mapper
+        self.order_fields = order_fields
         self.container: ContainerProxy = self.cosmos_helper.db.get_container_client(container_id)
         self.partition_key_attribute: str = partition_key_attribute
 
@@ -93,7 +97,29 @@ class CosmosDBRepository:
                    mapper=mapper,
                    custom_cosmos_helper=custom_cosmos_helper)
 
+    @staticmethod
+    def create_sql_condition_for_visibility(visible_only: bool, container_name='c') -> str:
+        if visible_only:
+            # We are considering that `deleted == null` is not a choice
+            return 'AND NOT IS_DEFINED(%s.deleted)' % container_name
+        return ''
+
+    @staticmethod
+    def create_sql_condition_for_owner_id(owner_id: str, container_name='c') -> str:
+        if owner_id:
+            return 'AND %s.owner_id=@owner_id' % container_name
+        return ''
+
+    @staticmethod
+    def check_visibility(item, throw_not_found_if_deleted):
+        if throw_not_found_if_deleted and item.get('deleted') is not None:
+            raise exceptions.CosmosResourceNotFoundError(message='Deleted item',
+                                                         status_code=404)
+
+        return item
+
     def create(self, data: dict, mapper: Callable = None):
+        self.on_create(data)
         function_mapper = self.get_mapper_or_dict(mapper)
         return function_mapper(self.container.create_item(body=data))
 
@@ -102,20 +128,24 @@ class CosmosDBRepository:
         function_mapper = self.get_mapper_or_dict(mapper)
         return function_mapper(self.check_visibility(found_item, visible_only))
 
-    def find_all(self, partition_key_value: str, max_count=None, offset=0,
+    def find_all(self, partition_key_value: str, owner_id=None, max_count=None, offset=0,
                  visible_only=True, mapper: Callable = None):
         # TODO Use the tenant_id param and change container alias
         max_count = self.get_page_size_or(max_count)
         result = self.container.query_items(
             query="""
-            SELECT * FROM c WHERE c.{partition_key_attribute}=@partition_key_value AND {visibility_condition}
+            SELECT * FROM c WHERE c.{partition_key_attribute}=@partition_key_value
+            {owner_condition} {visibility_condition}  {order_clause}
             OFFSET @offset LIMIT @max_count
             """.format(partition_key_attribute=self.partition_key_attribute,
-                       visibility_condition=self.create_sql_condition_for_visibility(visible_only)),
+                       visibility_condition=self.create_sql_condition_for_visibility(visible_only),
+                       owner_condition=self.create_sql_condition_for_owner_id(owner_id),
+                       order_clause=self.create_sql_order_clause()),
             parameters=[
                 {"name": "@partition_key_value", "value": partition_key_value},
                 {"name": "@offset", "value": offset},
                 {"name": "@max_count", "value": max_count},
+                {"name": "@owner_id", "value": owner_id},
             ],
             partition_key=partition_key_value,
             max_item_count=max_count)
@@ -130,6 +160,7 @@ class CosmosDBRepository:
         return self.update(id, item_data, mapper=mapper)
 
     def update(self, id: str, item_data: dict, mapper: Callable = None):
+        self.on_update(item_data)
         function_mapper = self.get_mapper_or_dict(mapper)
         return function_mapper(self.container.replace_item(id, body=item_data))
 
@@ -141,19 +172,6 @@ class CosmosDBRepository:
     def delete_permanently(self, id: str, partition_key_value: str) -> None:
         self.container.delete_item(id, partition_key_value)
 
-    def check_visibility(self, item, throw_not_found_if_deleted):
-        if throw_not_found_if_deleted and item.get('deleted') is not None:
-            raise exceptions.CosmosResourceNotFoundError(message='Deleted item',
-                                                         status_code=404)
-
-        return item
-
-    def create_sql_condition_for_visibility(self, visible_only: bool, container_name='c') -> str:
-        if visible_only:
-            # We are considering that `deleted == null` is not a choice
-            return 'NOT IS_DEFINED(%s.deleted)' % container_name
-        return 'true'
-
     def get_mapper_or_dict(self, alternative_mapper: Callable) -> Callable:
         return alternative_mapper or self.mapper or dict
 
@@ -162,22 +180,40 @@ class CosmosDBRepository:
         # or any other repository for the settings
         return custom_page_size or 100
 
+    def on_create(self, new_item_data: dict):
+        if new_item_data.get('id') is None:
+            new_item_data['id'] = str(uuid.uuid4())
+
+    def on_update(self, update_item_data: dict):
+        pass
+
+    def create_sql_order_clause(self):
+        if len(self.order_fields) > 0:
+            return "ORDER BY c.{}".format(", c.".join(self.order_fields))
+        else:
+            return ""
+
 
 class CosmosDBDao(CRUDDao):
     def __init__(self, repository: CosmosDBRepository):
         self.repository = repository
 
+    @property
+    def partition_key_value(self):
+        return current_user_tenant_id()
+
     def get_all(self) -> list:
         tenant_id: str = self.partition_key_value
-        return self.repository.find_all(partition_key_value=tenant_id)
+        owner_id = current_user_id()
+        return self.repository.find_all(partition_key_value=tenant_id, owner_id=owner_id)
 
     def get(self, id):
         tenant_id: str = self.partition_key_value
         return self.repository.find(id, partition_key_value=tenant_id)
 
     def create(self, data: dict):
-        data['id'] = str(uuid.uuid4())
-        data['tenant_id'] = self.partition_key_value
+        data[self.repository.partition_key_attribute] = self.partition_key_value
+        data['owner_id'] = current_user_id()
         return self.repository.create(data)
 
     def update(self, id, data: dict):
@@ -189,9 +225,22 @@ class CosmosDBDao(CRUDDao):
         tenant_id: str = current_user_tenant_id()
         self.repository.delete(id, partition_key_value=tenant_id)
 
-    @property
-    def partition_key_value(self):
-        return current_user_tenant_id()
+
+class CustomError(HTTPException):
+    def __init__(self, status_code: int, description: str = None):
+        self.code = status_code
+        self.description = description
+
+
+def current_datetime():
+    return datetime.utcnow()
+
+
+def datetime_str(value: datetime):
+    if value is not None:
+        return value.isoformat()
+    else:
+        return None
 
 
 def init_app(app: Flask) -> None:
