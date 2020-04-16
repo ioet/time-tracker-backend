@@ -1,10 +1,10 @@
-import pyodbc
-
-import sqlalchemy
+from azure.cosmos.exceptions import CosmosResourceExistsError, CosmosResourceNotFoundError, CosmosHttpResponseError
 from faker import Faker
 from flask import current_app as app
 from flask_restplus import Api, fields
 from flask_restplus._http import HTTPStatus
+
+from commons.data_access_layer.cosmos_db import CustomError
 from time_tracker_api import __version__
 
 faker = Faker()
@@ -16,13 +16,12 @@ api = Api(
 )
 
 # Common models structure
-audit_fields = {
+common_fields = {
     'deleted': fields.String(
         readOnly=True,
         required=True,
         title='Last event Identifier',
         description='Last event over this resource',
-        example=faker.uuid4(),
     ),
 }
 
@@ -52,28 +51,32 @@ Error handlers
 """
 
 
-@api.errorhandler(sqlalchemy.exc.IntegrityError)
-def handle_db_integrity_error(e):
-    """Handles errors related to data consistency"""
-    if e.code == 'gkpj':
-        return {'message': 'It already exists or references data that does not exist.'}, HTTPStatus.CONFLICT
-    else:
-        return {'message': 'Data integrity issues.'}, HTTPStatus.CONFLICT
+@api.errorhandler(CosmosResourceExistsError)
+def handle_cosmos_resource_exists_error(error):
+    return {'message': 'It already exists'}, HTTPStatus.CONFLICT
 
 
-@api.errorhandler(sqlalchemy.exc.DataError)
-def handle_invalid_data_error(e):
-    """Return a 422 because the user entered data of an invalid type"""
-    return {'message': 'The processed data was invalid. Please correct it.'}, HTTPStatus.UNPROCESSABLE_ENTITY
+@api.errorhandler(CosmosResourceNotFoundError)
+def handle_cosmos_resource_not_found_error(error):
+    return {'message': 'It was not found'}, HTTPStatus.NOT_FOUND
 
 
-@api.errorhandler(pyodbc.OperationalError)
-def handle_connection_error(e):
-    """Return a 500 due to a issue in the connection to a 3rd party service"""
-    return {'message': 'Connection issues. Please try again in a few minutes.'}, HTTPStatus.SERVICE_UNAVAILABLE
+@api.errorhandler(CosmosHttpResponseError)
+def handle_cosmos_http_response_error(error):
+    return {'message': 'Invalid request. Please verify your data.'}, HTTPStatus.BAD_REQUEST
+
+
+@api.errorhandler(AttributeError)
+def handle_attribute_error(error):
+    return {'message': "There are missing attributes"}, HTTPStatus.UNPROCESSABLE_ENTITY
+
+
+@api.errorhandler(CustomError)
+def handle_custom_error(error):
+    return {'message': error.description}, error.code
 
 
 @api.errorhandler
-def generic_exception_handler(e):
-    app.logger.error(e)
+def default_error_handler(error):
+    app.logger.error(error)
     return {'message': 'An unhandled exception occurred.'}, HTTPStatus.INTERNAL_SERVER_ERROR

@@ -2,7 +2,7 @@ from faker import Faker
 from flask_restplus import Namespace, Resource, fields
 from flask_restplus._http import HTTPStatus
 
-from time_tracker_api.api import audit_fields
+from time_tracker_api.api import common_fields
 from time_tracker_api.projects.projects_model import create_dao
 
 faker = Faker()
@@ -30,12 +30,6 @@ project_input = ns.model('ProjectInput', {
         description='Customer this project belongs to',
         example=faker.uuid4(),
     ),
-    'tenant_id': fields.String(
-        required=True,
-        title='Identifier of Tenant',
-        description='Tenant this project belongs to',
-        example=faker.uuid4(),
-    ),
     'project_type_id': fields.String(
         title='Identifier of Project type',
         description='Type of the project. Used for grouping',
@@ -50,9 +44,15 @@ project_response_fields = {
         title='Identifier',
         description='The unique identifier',
         example=faker.uuid4(),
-    )
+    ),
+    'tenant_id': fields.String(
+        required=False,
+        title='Identifier of Tenant',
+        description='Tenant this project belongs to',
+        example=faker.uuid4(),
+    ),
 }
-project_response_fields.update(audit_fields)
+project_response_fields.update(common_fields)
 
 project = ns.inherit(
     'Project',

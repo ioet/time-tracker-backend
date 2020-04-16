@@ -1,24 +1,64 @@
+from datetime import timedelta
+from unittest.mock import ANY
+
 from faker import Faker
 from flask import json
 from flask.testing import FlaskClient
 from flask_restplus._http import HTTPStatus
 from pytest_mock import MockFixture
 
+from commons.data_access_layer.cosmos_db import current_datetime
+from time_tracker_api.security import current_user_tenant_id
+
 fake = Faker()
 
+yesterday = current_datetime() - timedelta(days=1)
 valid_time_entry_input = {
     "project_id": fake.uuid4(),
     "activity_id": fake.uuid4(),
     "description": fake.paragraph(nb_sentences=2),
-    "start_date": fake.iso8601(end_datetime=None),
-    "end_date": fake.iso8601(end_datetime=None),
+    "start_date": str(yesterday.isoformat()),
     "owner_id": fake.uuid4(),
     "tenant_id": fake.uuid4()
 }
+
 fake_time_entry = ({
     "id": fake.random_int(1, 9999),
     "running": True,
 }).update(valid_time_entry_input)
+
+
+def test_create_time_entry_with_invalid_date_range_should_raise_bad_request_error(client: FlaskClient,
+                                                                                  mocker: MockFixture):
+    from time_tracker_api.time_entries.time_entries_namespace import time_entries_dao
+    repository_container_create_item_mock = mocker.patch.object(time_entries_dao.repository.container,
+                                                                'create_item',
+                                                                return_value=fake_time_entry)
+
+    invalid_time_entry_input = valid_time_entry_input.copy()
+    invalid_time_entry_input.update({
+        "end_date": str(yesterday.isoformat())
+    })
+    response = client.post("/time-entries", json=invalid_time_entry_input, follow_redirects=True)
+
+    assert HTTPStatus.BAD_REQUEST == response.status_code
+    repository_container_create_item_mock.assert_not_called()
+
+
+def test_create_time_entry_with_end_date_in_future_should_raise_bad_request_error(client: FlaskClient,
+                                                                                  mocker: MockFixture):
+    from time_tracker_api.time_entries.time_entries_namespace import time_entries_dao
+    repository_container_create_item_mock = mocker.patch.object(time_entries_dao.repository.container,
+                                                                'create_item',
+                                                                return_value=fake_time_entry)
+    invalid_time_entry_input = valid_time_entry_input.copy()
+    invalid_time_entry_input.update({
+        "end_date": str(fake.future_datetime().isoformat())
+    })
+    response = client.post("/time-entries", json=invalid_time_entry_input, follow_redirects=True)
+
+    assert HTTPStatus.BAD_REQUEST == response.status_code
+    repository_container_create_item_mock.assert_not_called()
 
 
 def test_create_time_entry_should_succeed_with_valid_request(client: FlaskClient, mocker: MockFixture):
@@ -30,7 +70,7 @@ def test_create_time_entry_should_succeed_with_valid_request(client: FlaskClient
     response = client.post("/time-entries", json=valid_time_entry_input, follow_redirects=True)
 
     assert HTTPStatus.CREATED == response.status_code
-    repository_create_mock.assert_called_once_with(valid_time_entry_input)
+    repository_create_mock.assert_called_once()
 
 
 def test_create_time_entry_should_reject_bad_request(client: FlaskClient, mocker: MockFixture):
@@ -64,16 +104,16 @@ def test_list_all_time_entries(client: FlaskClient, mocker: MockFixture):
 
 def test_get_time_entry_should_succeed_with_valid_id(client: FlaskClient, mocker: MockFixture):
     from time_tracker_api.time_entries.time_entries_namespace import time_entries_dao
-    valid_id = fake.random_int(1, 9999)
     repository_find_mock = mocker.patch.object(time_entries_dao.repository,
                                                'find',
                                                return_value=fake_time_entry)
 
+    valid_id = fake.random_int(1, 9999)
     response = client.get("/time-entries/%s" % valid_id, follow_redirects=True)
 
     assert HTTPStatus.OK == response.status_code
     fake_time_entry == json.loads(response.data)
-    repository_find_mock.assert_called_once_with(str(valid_id))
+    repository_find_mock.assert_called_once_with(str(valid_id), partition_key_value=current_user_tenant_id())
 
 
 def test_get_time_entry_should_response_with_unprocessable_entity_for_invalid_id_format(client: FlaskClient,
@@ -90,13 +130,13 @@ def test_get_time_entry_should_response_with_unprocessable_entity_for_invalid_id
     response = client.get("/time-entries/%s" % invalid_id, follow_redirects=True)
 
     assert HTTPStatus.UNPROCESSABLE_ENTITY == response.status_code
-    repository_find_mock.assert_called_once_with(str(invalid_id))
+    repository_find_mock.assert_called_once_with(str(invalid_id), partition_key_value=current_user_tenant_id())
 
 
 def test_update_time_entry_should_succeed_with_valid_data(client: FlaskClient, mocker: MockFixture):
     from time_tracker_api.time_entries.time_entries_namespace import time_entries_dao
     repository_update_mock = mocker.patch.object(time_entries_dao.repository,
-                                                 'update',
+                                                 'partial_update',
                                                  return_value=fake_time_entry)
 
     valid_id = fake.random_int(1, 9999)
@@ -106,7 +146,9 @@ def test_update_time_entry_should_succeed_with_valid_data(client: FlaskClient, m
 
     assert HTTPStatus.OK == response.status_code
     fake_time_entry == json.loads(response.data)
-    repository_update_mock.assert_called_once_with(str(valid_id), valid_time_entry_input)
+    repository_update_mock.assert_called_once_with(str(valid_id),
+                                                   changes=valid_time_entry_input,
+                                                   partition_key_value=current_user_tenant_id())
 
 
 def test_update_time_entry_should_reject_bad_request(client: FlaskClient, mocker: MockFixture):
@@ -132,7 +174,7 @@ def test_update_time_entry_should_return_not_found_with_invalid_id(client: Flask
     from time_tracker_api.time_entries.time_entries_namespace import time_entries_dao
     from werkzeug.exceptions import NotFound
     repository_update_mock = mocker.patch.object(time_entries_dao.repository,
-                                                 'update',
+                                                 'partial_update',
                                                  side_effect=NotFound)
     invalid_id = fake.random_int(1, 9999)
 
@@ -141,13 +183,15 @@ def test_update_time_entry_should_return_not_found_with_invalid_id(client: Flask
                           follow_redirects=True)
 
     assert HTTPStatus.NOT_FOUND == response.status_code
-    repository_update_mock.assert_called_once_with(str(invalid_id), valid_time_entry_input)
+    repository_update_mock.assert_called_once_with(str(invalid_id),
+                                                   changes=valid_time_entry_input,
+                                                   partition_key_value=current_user_tenant_id())
 
 
 def test_delete_time_entry_should_succeed_with_valid_id(client: FlaskClient, mocker: MockFixture):
     from time_tracker_api.time_entries.time_entries_namespace import time_entries_dao
     repository_remove_mock = mocker.patch.object(time_entries_dao.repository,
-                                                 'remove',
+                                                 'delete',
                                                  return_value=None)
     valid_id = fake.random_int(1, 9999)
 
@@ -155,7 +199,8 @@ def test_delete_time_entry_should_succeed_with_valid_id(client: FlaskClient, moc
 
     assert HTTPStatus.NO_CONTENT == response.status_code
     assert b'' == response.data
-    repository_remove_mock.assert_called_once_with(str(valid_id))
+    repository_remove_mock.assert_called_once_with(str(valid_id),
+                                                   partition_key_value=current_user_tenant_id())
 
 
 def test_delete_time_entry_should_return_not_found_with_invalid_id(client: FlaskClient,
@@ -163,14 +208,15 @@ def test_delete_time_entry_should_return_not_found_with_invalid_id(client: Flask
     from time_tracker_api.time_entries.time_entries_namespace import time_entries_dao
     from werkzeug.exceptions import NotFound
     repository_remove_mock = mocker.patch.object(time_entries_dao.repository,
-                                                 'remove',
+                                                 'delete',
                                                  side_effect=NotFound)
     invalid_id = fake.random_int(1, 9999)
 
     response = client.delete("/time-entries/%s" % invalid_id, follow_redirects=True)
 
     assert HTTPStatus.NOT_FOUND == response.status_code
-    repository_remove_mock.assert_called_once_with(str(invalid_id))
+    repository_remove_mock.assert_called_once_with(str(invalid_id),
+                                                   partition_key_value=current_user_tenant_id())
 
 
 def test_delete_time_entry_should_return_unprocessable_entity_for_invalid_id_format(client: FlaskClient,
@@ -178,73 +224,74 @@ def test_delete_time_entry_should_return_unprocessable_entity_for_invalid_id_for
     from time_tracker_api.time_entries.time_entries_namespace import time_entries_dao
     from werkzeug.exceptions import UnprocessableEntity
     repository_remove_mock = mocker.patch.object(time_entries_dao.repository,
-                                                 'remove',
+                                                 'delete',
                                                  side_effect=UnprocessableEntity)
     invalid_id = fake.word()
 
     response = client.delete("/time-entries/%s" % invalid_id, follow_redirects=True)
 
     assert HTTPStatus.UNPROCESSABLE_ENTITY == response.status_code
-    repository_remove_mock.assert_called_once_with(str(invalid_id))
+    repository_remove_mock.assert_called_once_with(str(invalid_id),
+                                                   partition_key_value=current_user_tenant_id())
 
 
 def test_stop_time_entry_with_valid_id(client: FlaskClient, mocker: MockFixture):
     from time_tracker_api.time_entries.time_entries_namespace import time_entries_dao
     repository_update_mock = mocker.patch.object(time_entries_dao.repository,
-                                                 'update',
+                                                 'partial_update',
                                                  return_value=fake_time_entry)
     valid_id = fake.random_int(1, 9999)
 
     response = client.post("/time-entries/%s/stop" % valid_id, follow_redirects=True)
 
     assert HTTPStatus.OK == response.status_code
-    repository_update_mock.assert_called_once_with(str(valid_id), {
-        "end_date": mocker.ANY
-    })
+    repository_update_mock.assert_called_once_with(str(valid_id),
+                                                   changes={"end_date": mocker.ANY},
+                                                   partition_key_value=current_user_tenant_id())
 
 
-def test_stop_time_entry_with_invalid_id(client: FlaskClient, mocker: MockFixture):
+def test_stop_time_entry_with_id_with_invalid_format(client: FlaskClient, mocker: MockFixture):
     from time_tracker_api.time_entries.time_entries_namespace import time_entries_dao
     from werkzeug.exceptions import UnprocessableEntity
     repository_update_mock = mocker.patch.object(time_entries_dao.repository,
-                                                 'update',
+                                                 'partial_update',
                                                  side_effect=UnprocessableEntity)
     invalid_id = fake.word()
 
     response = client.post("/time-entries/%s/stop" % invalid_id, follow_redirects=True)
 
     assert HTTPStatus.UNPROCESSABLE_ENTITY == response.status_code
-    repository_update_mock.assert_called_once_with(invalid_id, {
-        "end_date": mocker.ANY
-    })
+    repository_update_mock.assert_called_once_with(invalid_id,
+                                                   changes={"end_date": ANY},
+                                                   partition_key_value=current_user_tenant_id())
 
 
 def test_restart_time_entry_with_valid_id(client: FlaskClient, mocker: MockFixture):
     from time_tracker_api.time_entries.time_entries_namespace import time_entries_dao
     repository_update_mock = mocker.patch.object(time_entries_dao.repository,
-                                                 'update',
+                                                 'partial_update',
                                                  return_value=fake_time_entry)
     valid_id = fake.random_int(1, 9999)
 
     response = client.post("/time-entries/%s/restart" % valid_id, follow_redirects=True)
 
     assert HTTPStatus.OK == response.status_code
-    repository_update_mock.assert_called_once_with(str(valid_id), {
-        "end_date": None
-    })
+    repository_update_mock.assert_called_once_with(str(valid_id),
+                                                   changes={"end_date": None},
+                                                   partition_key_value=current_user_tenant_id())
 
 
-def test_restart_time_entry_with_invalid_id(client: FlaskClient, mocker: MockFixture):
+def test_restart_time_entry_with_id_with_invalid_format(client: FlaskClient, mocker: MockFixture):
     from time_tracker_api.time_entries.time_entries_namespace import time_entries_dao
     from werkzeug.exceptions import UnprocessableEntity
     repository_update_mock = mocker.patch.object(time_entries_dao.repository,
-                                                 'update',
+                                                 'partial_update',
                                                  side_effect=UnprocessableEntity)
     invalid_id = fake.word()
 
     response = client.post("/time-entries/%s/restart" % invalid_id, follow_redirects=True)
 
     assert HTTPStatus.UNPROCESSABLE_ENTITY == response.status_code
-    repository_update_mock.assert_called_once_with(invalid_id, {
-        "end_date": None
-    })
+    repository_update_mock.assert_called_once_with(invalid_id,
+                                                   changes={"end_date": None},
+                                                   partition_key_value=current_user_tenant_id())

@@ -1,11 +1,14 @@
-import pyodbc
-
 import pytest
+from azure.cosmos.exceptions import CosmosHttpResponseError, CosmosResourceExistsError, CosmosResourceNotFoundError
 from flask.testing import FlaskClient
 from flask_restplus._http import HTTPStatus
 from pytest_mock import MockFixture
 
-unexpected_errors_to_be_handled = [pyodbc.OperationalError]
+from commons.data_access_layer.cosmos_db import CustomError
+
+unexpected_errors_to_be_handled = [CustomError(HTTPStatus.BAD_REQUEST, "Anything"),
+                                   CosmosHttpResponseError, CosmosResourceNotFoundError,
+                                   CosmosResourceExistsError, AttributeError]
 
 
 def test_app_exists(app):

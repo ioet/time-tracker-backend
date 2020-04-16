@@ -2,7 +2,7 @@ from faker import Faker
 from flask_restplus import Namespace, Resource, fields
 from flask_restplus._http import HTTPStatus
 
-from time_tracker_api.api import audit_fields
+from time_tracker_api.api import common_fields
 from time_tracker_api.customers.customers_model import create_dao
 
 faker = Faker()
@@ -24,12 +24,6 @@ customer_input = ns.model('CustomerInput', {
         description='Description about the customer',
         example=faker.paragraph(),
     ),
-    'tenant_id': fields.String(
-        required=True,
-        title='Identifier of Tenant',
-        description='Tenant this customer belongs to',
-        example=faker.uuid4(),
-    ),
 })
 
 customer_response_fields = {
@@ -39,9 +33,15 @@ customer_response_fields = {
         title='Identifier',
         description='The unique identifier',
         example=faker.uuid4(),
-    )
+    ),
+    'tenant_id': fields.String(
+        required=True,
+        title='Identifier of Tenant',
+        description='Tenant this customer belongs to',
+        example=faker.uuid4(),
+    ),
 }
-customer_response_fields.update(audit_fields)
+customer_response_fields.update(common_fields)
 
 customer = ns.inherit(
     'Customer',

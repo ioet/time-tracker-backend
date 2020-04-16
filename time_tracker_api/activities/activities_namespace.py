@@ -3,7 +3,7 @@ from flask_restplus import fields, Resource, Namespace
 from flask_restplus._http import HTTPStatus
 
 from time_tracker_api.activities.activities_model import create_dao
-from time_tracker_api.api import audit_fields
+from time_tracker_api.api import common_fields
 
 faker = Faker()
 
@@ -22,12 +22,6 @@ activity_input = ns.model('ActivityInput', {
         title='Description',
         description='Comments about the activity',
         example=faker.paragraph(),
-    ),
-    'tenant_id': fields.String(
-        required=True,
-        title='Identifier of Tenant',
-        description='Tenant this activity belongs to',
-        example=faker.uuid4(),
     )
 })
 
@@ -39,8 +33,14 @@ activity_response_fields = {
         description='The unique identifier',
         example=faker.uuid4(),
     ),
+    'tenant_id': fields.String(
+        required=True,
+        title='Identifier of Tenant',
+        description='Tenant this activity belongs to',
+        example=faker.uuid4(),
+    ),
 }
-activity_response_fields.update(audit_fields)
+activity_response_fields.update(common_fields)
 
 activity = ns.inherit(
     'Activity',

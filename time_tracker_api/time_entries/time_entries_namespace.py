@@ -1,11 +1,12 @@
-from datetime import datetime
+from datetime import timedelta
 
 from faker import Faker
 from flask_restplus import fields, Resource, Namespace
 from flask_restplus._http import HTTPStatus
 
-from time_tracker_api.api import audit_fields
-from time_tracker_api.database import COMMENTS_MAX_LENGTH
+from commons.data_access_layer.cosmos_db import current_datetime, datetime_str
+from commons.data_access_layer.database import COMMENTS_MAX_LENGTH
+from time_tracker_api.api import common_fields
 from time_tracker_api.time_entries.time_entries_model import create_dao
 
 faker = Faker()
@@ -15,57 +16,61 @@ ns = Namespace('time-entries', description='API for time entries')
 # TimeEntry Model
 time_entry_input = ns.model('TimeEntryInput', {
     'project_id': fields.String(
-        required=True,
         title='Project',
+        required=True,
         description='The id of the selected project',
         example=faker.uuid4(),
     ),
     'activity_id': fields.String(
-        required=True,
         title='Activity',
+        required=True,
         description='The id of the selected activity',
         example=faker.uuid4(),
     ),
     'description': fields.String(
         title='Comments',
+        required=False,
         description='Comments about the time entry',
         example=faker.paragraph(nb_sentences=2),
         max_length=COMMENTS_MAX_LENGTH,
     ),
     'start_date': fields.DateTime(
-        required=True,
+        dt_format='iso8601',
         title='Start date',
+        required=True,
         description='When the user started doing this activity',
-        example=faker.iso8601(end_datetime=None),
+        example=datetime_str(current_datetime() - timedelta(days=1)),
     ),
     'end_date': fields.DateTime(
+        dt_format='iso8601',
         title='End date',
+        required=False,
         description='When the user ended doing this activity',
-        example=faker.iso8601(end_datetime=None),
+        example=datetime_str(current_datetime()),
     ),
     'uri': fields.String(
         title='Uniform Resource identifier',
         description='Either identifier or locator',
-        example=faker.words(
-            1,
-            [
-                'https://github.com/ioet/time-tracker-backend/issues/51',
-                '#54',
-                'TT-54'
-            ]
+        example=faker.random_element([
+            'https://github.com/ioet/time-tracker-backend/issues/51',
+            '#54',
+            'TT-54'
+        ]),
+    ),
+    'technologies': fields.List(
+        fields.String(
+            title='Technologies',
+            description='List of the canonical names of the used technologies',
         ),
-    ),
-    'owner_id': fields.String(
-        required=True,
-        title='Owner of time entry',
-        description='User who owns the time entry',
-        example=faker.uuid4(),
-    ),
-    'tenant_id': fields.String(
-        required=True,
-        title='Identifier of Tenant',
-        description='Tenant this project belongs to',
-        example=faker.uuid4(),
+        required=False,
+        max_items=10,
+        unique=True,
+        example=faker.words(
+            3,
+            ['cosmos_db', 'azure', 'python', 'docker', 'sql',
+             'javascript', 'typescript'],
+            unique=True
+        )
     ),
 })
 
@@ -82,8 +87,22 @@ time_entry_response_fields = {
         description='Whether this time entry is currently running or not',
         example=faker.boolean(),
     ),
+    'tenant_id': fields.String(
+        required=True,
+        readOnly=True,
+        title='Identifier of Tenant',
+        description='Tenant this project belongs to',
+        example=faker.uuid4(),
+    ),
+    'owner_id': fields.String(
+        required=True,
+        readOnly=True,
+        title='Owner of time entry',
+        description='User who owns the time entry',
+        example=faker.uuid4(),
+    ),
 }
-time_entry_response_fields.update(audit_fields)
+time_entry_response_fields.update(common_fields)
 
 time_entry = ns.inherit(
     'TimeEntry',
@@ -105,9 +124,11 @@ class TimeEntries(Resource):
     @ns.doc('create_time_entry')
     @ns.expect(time_entry_input)
     @ns.marshal_with(time_entry, code=HTTPStatus.CREATED)
-    @ns.response(HTTPStatus.CONFLICT, 'This time entry already exists')
+    @ns.response(HTTPStatus.CONFLICT, 'There is already an active time entry')
     @ns.response(HTTPStatus.BAD_REQUEST, 'Invalid format or structure '
                                          'of the attributes of the time entry')
+    @ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'This new time entry intercepts another one. '
+                                                  'Please check your start and end date.')
     def post(self):
         """Create a time entry"""
         return time_entries_dao.create(ns.payload), HTTPStatus.CREATED
@@ -153,7 +174,7 @@ class StopTimeEntry(Resource):
     def post(self, id):
         """Stop a running time entry"""
         return time_entries_dao.update(id, {
-            'end_date': datetime.utcnow()
+            'end_date': datetime_str(current_datetime())
         })
 
 
