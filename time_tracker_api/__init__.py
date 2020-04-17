@@ -3,7 +3,7 @@ import os
 
 from flask import Flask
 
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 flask_app: Flask = None
 
