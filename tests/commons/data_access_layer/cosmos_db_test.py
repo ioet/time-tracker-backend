@@ -4,9 +4,10 @@ from typing import Callable
 import pytest
 from azure.cosmos.exceptions import CosmosResourceExistsError, CosmosResourceNotFoundError
 from faker import Faker
+from flask_restplus._http import HTTPStatus
 from pytest import fail
 
-from commons.data_access_layer.cosmos_db import CosmosDBRepository, CosmosDBModel
+from commons.data_access_layer.cosmos_db import CosmosDBRepository, CosmosDBModel, CustomError
 
 fake = Faker()
 Faker.seed()
@@ -459,7 +460,7 @@ def test_find_all_can_find_deleted_items_only_if_visibile_only_is_true(
     assert deleted_item is not None
     assert deleted_item['deleted'] is not None
 
-    visible_items = cosmos_db_repository.find_all(sample_item['tenant_id'])
+    visible_items = cosmos_db_repository.find_all(partition_key_value=sample_item.get('tenant_id'))
 
     assert visible_items is not None
     assert any(item['id'] == sample_item['id'] for item in visible_items) == False, \
@@ -536,3 +537,52 @@ def test_delete_permanently_with_valid_id_should_succeed(
     except Exception as e:
         assert type(e) is CosmosResourceNotFoundError
         assert e.status_code == 404
+
+
+def test_repository_create_sql_where_conditions_with_multiple_values(cosmos_db_repository: CosmosDBRepository):
+    result = cosmos_db_repository.create_sql_where_conditions({
+        'owner_id': 'mark',
+        'customer_id': 'me'
+    }, "c")
+
+    assert result is not None
+    assert result == "AND c.owner_id = @owner_id AND c.customer_id = @customer_id"
+
+
+def test_repository_create_sql_where_conditions_with_no_values(cosmos_db_repository: CosmosDBRepository):
+    result = cosmos_db_repository.create_sql_where_conditions({}, "c")
+
+    assert result is not None
+    assert result == ""
+
+
+def test_repository_append_conditions_values(cosmos_db_repository: CosmosDBRepository):
+    result = cosmos_db_repository.append_conditions_values([], {'owner_id': 'mark', 'customer_id': 'ioet'})
+
+    assert result is not None
+    assert result == [{'name': '@owner_id', 'value': 'mark'},
+                      {'name': '@customer_id', 'value': 'ioet'}]
+
+
+def test_find_should_call_picker_if_it_was_specified(cosmos_db_repository: CosmosDBRepository,
+                                                     sample_item: dict,
+                                                     another_item: dict):
+    def raise_bad_request_if_name_diff_the_one_from_sample_item(data: dict):
+        if sample_item['name'] != data['name']:
+            raise CustomError(HTTPStatus.BAD_REQUEST, "Anything")
+
+    found_item = cosmos_db_repository.find(sample_item['id'],
+                                           partition_key_value=sample_item['tenant_id'])
+
+    assert found_item is not None
+    assert found_item['id'] == sample_item['id']
+
+    try:
+        cosmos_db_repository.find(another_item['id'],
+                                  partition_key_value=another_item['tenant_id'],
+                                  peeker=raise_bad_request_if_name_diff_the_one_from_sample_item)
+
+        fail('It should have not found any item because of condition')
+    except Exception as e:
+        assert e.code == HTTPStatus.BAD_REQUEST
+        assert e.description == "Anything"

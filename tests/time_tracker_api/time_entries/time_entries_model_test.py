@@ -53,6 +53,7 @@ def test_find_interception_with_date_range_should_find(start_date: datetime,
     finally:
         time_entry_repository.delete_permanently(existing_item.id, partition_key_value=existing_item.tenant_id)
 
+
 def test_find_interception_should_ignore_id_of_existing_item(owner_id: str,
                                                              tenant_id: str,
                                                              time_entry_repository: TimeEntryCosmosDBRepository):
@@ -62,13 +63,13 @@ def test_find_interception_should_ignore_id_of_existing_item(owner_id: str,
     try:
 
         colliding_result = time_entry_repository.find_interception_with_date_range(start_date, end_date,
-                                                                         owner_id=owner_id,
-                                                                         partition_key_value=tenant_id)
+                                                                                   owner_id=owner_id,
+                                                                                   partition_key_value=tenant_id)
 
         non_colliding_result = time_entry_repository.find_interception_with_date_range(start_date, end_date,
-                                                                         owner_id=owner_id,
-                                                                         partition_key_value=tenant_id,
-                                                                         ignore_id=existing_item.id)
+                                                                                       owner_id=owner_id,
+                                                                                       partition_key_value=tenant_id,
+                                                                                       ignore_id=existing_item.id)
 
         colliding_result is not None
         assert any([existing_item.id == item.id for item in colliding_result])
@@ -77,4 +78,3 @@ def test_find_interception_should_ignore_id_of_existing_item(owner_id: str,
         assert not any([existing_item.id == item.id for item in non_colliding_result])
     finally:
         time_entry_repository.delete_permanently(existing_item.id, partition_key_value=existing_item.tenant_id)
-

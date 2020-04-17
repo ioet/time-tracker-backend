@@ -1,4 +1,3 @@
-import abc
 from dataclasses import dataclass, field
 from typing import List, Callable
 
@@ -8,13 +7,13 @@ from flask_restplus._http import HTTPStatus
 from commons.data_access_layer.cosmos_db import CosmosDBDao, CosmosDBRepository, CustomError, CosmosDBModel, \
     current_datetime, datetime_str
 from commons.data_access_layer.database import CRUDDao
-from time_tracker_api.security import current_user_tenant_id
+from time_tracker_api.security import current_user_id
 
 
 class TimeEntriesDao(CRUDDao):
-    @abc.abstractmethod
-    def delete_permanently(self, id: str):
-        raise NotImplementedError  # pragma: no cover
+    @staticmethod
+    def current_user_id():
+        return current_user_id()
 
 
 container_definition = {
@@ -80,24 +79,24 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
     def find_interception_with_date_range(self, start_date, end_date, owner_id, partition_key_value,
                                           ignore_id=None, visible_only=True, mapper: Callable = None):
-        # TODO Use the tenant_id param and change container alias
+        conditions = {"owner_id": owner_id}
+        params = self.append_conditions_values([
+            {"name": "@partition_key_value", "value": partition_key_value},
+            {"name": "@start_date", "value": start_date},
+            {"name": "@end_date", "value": end_date or datetime_str(current_datetime())},
+            {"name": "@ignore_id", "value": ignore_id},
+        ], conditions)
         result = self.container.query_items(
             query="""
             SELECT * FROM c WHERE c.tenant_id=@partition_key_value  
              AND ((c.start_date BETWEEN @start_date AND @end_date) OR (c.end_date BETWEEN @start_date AND @end_date))
-             {owner_condition} {ignore_id_condition} {visibility_condition} {order_clause}
+             {conditions_clause} {ignore_id_condition} {visibility_condition} {order_clause}
             """.format(partition_key_attribute=self.partition_key_attribute,
                        ignore_id_condition=self.create_sql_ignore_id_condition(ignore_id),
                        visibility_condition=self.create_sql_condition_for_visibility(visible_only),
-                       owner_condition=self.create_sql_condition_for_owner_id(owner_id),
+                       conditions_clause=self.create_sql_where_conditions(conditions),
                        order_clause=self.create_sql_order_clause()),
-            parameters=[
-                {"name": "@partition_key_value", "value": partition_key_value},
-                {"name": "@start_date", "value": start_date},
-                {"name": "@end_date", "value": end_date or datetime_str(current_datetime())},
-                {"name": "@owner_id", "value": owner_id},
-                {"name": "@ignore_id", "value": ignore_id},
-            ],
+            parameters=params,
             partition_key=partition_key_value)
 
         function_mapper = self.get_mapper_or_dict(mapper)
@@ -122,15 +121,43 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
                               description="There is another time entry in that date range")
 
 
+class TimeEntriesCosmosDBDao(TimeEntriesDao, CosmosDBDao):
+    def __init__(self, repository):
+        CosmosDBDao.__init__(self, repository)
+
+    @classmethod
+    def check_whether_current_user_owns_item(cls, data: dict):
+        if data.get('owner_id') is not None \
+                and data.get('owner_id') != cls.current_user_id():
+            raise CustomError(HTTPStatus.FORBIDDEN,
+                              "The current user is not the owner of this time entry")
+
+    def get_all(self) -> list:
+        return self.repository.find_all(partition_key_value=self.partition_key_value,
+                                        conditions={"owner_id": self.current_user_id()})
+
+    def get(self, id):
+        return self.repository.find(id,
+                                    partition_key_value=self.partition_key_value,
+                                    peeker=self.check_whether_current_user_owns_item)
+
+    def create(self, data: dict):
+        data[self.repository.partition_key_attribute] = self.partition_key_value
+        data["owner_id"] = self.current_user_id()
+        return self.repository.create(data)
+
+    def update(self, id, data: dict):
+        return self.repository.partial_update(id,
+                                              changes=data,
+                                              partition_key_value=self.partition_key_value,
+                                              peeker=self.check_whether_current_user_owns_item)
+
+    def delete(self, id):
+        self.repository.delete(id, partition_key_value=self.partition_key_value,
+                               peeker=self.check_whether_current_user_owns_item)
+
+
 def create_dao() -> TimeEntriesDao:
     repository = TimeEntryCosmosDBRepository()
 
-    class TimeEntriesCosmosDBDao(CosmosDBDao, TimeEntriesDao):
-        def __init__(self):
-            CosmosDBDao.__init__(self, repository)
-
-        def delete_permanently(self, id: str):
-            tenant_id: str = current_user_tenant_id()
-            self.repository.delete_permanently(id, partition_key_value=tenant_id)
-
-    return TimeEntriesCosmosDBDao()
+    return TimeEntriesCosmosDBDao(repository)
