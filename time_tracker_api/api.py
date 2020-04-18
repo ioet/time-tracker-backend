@@ -5,7 +5,7 @@ from flask_restplus import Api, fields
 from flask_restplus._http import HTTPStatus
 
 from commons.data_access_layer.cosmos_db import CustomError
-from time_tracker_api import __version__
+from time_tracker_api.version import __version__
 
 faker = Faker()
 

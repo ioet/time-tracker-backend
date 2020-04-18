@@ -4,7 +4,7 @@ import sys
 
 def get_version() -> str:
     version = {}
-    path_to_file_with_version = "time_tracker_api/__init__.py"
+    path_to_file_with_version = "time_tracker_api/version.py"
     try:
         with open(path_to_file_with_version) as fp:
             exec(fp.read(), version)
