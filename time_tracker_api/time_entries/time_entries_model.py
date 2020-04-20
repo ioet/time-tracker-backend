@@ -1,3 +1,4 @@
+import abc
 from dataclasses import dataclass, field
 from typing import List, Callable
 
@@ -14,6 +15,10 @@ class TimeEntriesDao(CRUDDao):
     @staticmethod
     def current_user_id():
         return current_user_id()
+
+    @abc.abstractmethod
+    def find_running(self):
+        pass
 
 
 container_definition = {
@@ -102,6 +107,19 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         function_mapper = self.get_mapper_or_dict(mapper)
         return list(map(function_mapper, result))
 
+    def find_running(self, partition_key_value: str, mapper: Callable = None):
+        result = self.container.query_items(
+            query="""
+                  SELECT * from c
+                  WHERE NOT IS_DEFINED(c.end_date) OR c.end_date = null
+                  OFFSET 0 LIMIT 1
+            """,
+            partition_key=partition_key_value,
+            max_item_count=1)
+
+        function_mapper = self.get_mapper_or_dict(mapper)
+        return function_mapper(next(result))
+
     def validate_data(self, data):
         if data.get('end_date') is not None:
             if data['end_date'] <= data.get('start_date'):
@@ -155,6 +173,9 @@ class TimeEntriesCosmosDBDao(TimeEntriesDao, CosmosDBDao):
     def delete(self, id):
         self.repository.delete(id, partition_key_value=self.partition_key_value,
                                peeker=self.check_whether_current_user_owns_item)
+
+    def find_running(self):
+        return self.repository.find_running(partition_key_value=self.partition_key_value)
 
 
 def create_dao() -> TimeEntriesDao:

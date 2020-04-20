@@ -77,7 +77,8 @@ def handle_cosmos_resource_exists_error(error):
 
 
 @api.errorhandler(CosmosResourceNotFoundError)
-def handle_cosmos_resource_not_found_error(error):
+@api.errorhandler(StopIteration)
+def handle_not_found_errors(error):
     return {'message': 'It was not found'}, HTTPStatus.NOT_FOUND
 
 

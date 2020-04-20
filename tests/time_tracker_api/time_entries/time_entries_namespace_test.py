@@ -25,7 +25,8 @@ valid_time_entry_input = {
 fake_time_entry = ({
     "id": fake.random_int(1, 9999),
     "running": True,
-}).update(valid_time_entry_input)
+})
+fake_time_entry.update(valid_time_entry_input)
 
 
 def test_create_time_entry_with_invalid_date_range_should_raise_bad_request_error(client: FlaskClient,
@@ -309,3 +310,29 @@ def test_restart_time_entry_with_id_with_invalid_format(client: FlaskClient, moc
                                                    changes={"end_date": None},
                                                    partition_key_value=current_user_tenant_id(),
                                                    peeker=ANY)
+
+
+def test_get_running_should_call_find_running(client: FlaskClient, mocker: MockFixture):
+    from time_tracker_api.time_entries.time_entries_namespace import time_entries_dao
+    repository_update_mock = mocker.patch.object(time_entries_dao.repository,
+                                                 'find_running',
+                                                 return_value=fake_time_entry)
+
+    response = client.get("/time-entries/running", follow_redirects=True)
+
+    assert HTTPStatus.OK == response.status_code
+    assert json.loads(response.data) is not None
+    repository_update_mock.assert_called_once_with(partition_key_value=current_user_tenant_id())
+
+
+def test_get_running_should_return_not_found_if_find_running_throws_StopIteration(client: FlaskClient,
+                                                                                  mocker: MockFixture):
+    from time_tracker_api.time_entries.time_entries_namespace import time_entries_dao
+    repository_update_mock = mocker.patch.object(time_entries_dao.repository,
+                                                 'find_running',
+                                                 side_effect=StopIteration)
+
+    response = client.get("/time-entries/running", follow_redirects=True)
+
+    assert HTTPStatus.NOT_FOUND == response.status_code
+    repository_update_mock.assert_called_once_with(partition_key_value=current_user_tenant_id())

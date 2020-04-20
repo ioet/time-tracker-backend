@@ -78,3 +78,19 @@ def test_find_interception_should_ignore_id_of_existing_item(owner_id: str,
         assert not any([existing_item.id == item.id for item in non_colliding_result])
     finally:
         time_entry_repository.delete_permanently(existing_item.id, partition_key_value=existing_item.tenant_id)
+
+
+def test_find_running_should_return_running_time_entry(running_time_entry,
+                                                       time_entry_repository: TimeEntryCosmosDBRepository):
+   found_time_entry = time_entry_repository.find_running(partition_key_value=running_time_entry.tenant_id)
+
+   assert found_time_entry is not None
+   assert found_time_entry.id == running_time_entry.id
+
+
+def test_find_running_should_not_find_any_item(tenant_id: str,
+                                               time_entry_repository: TimeEntryCosmosDBRepository):
+    try:
+        time_entry_repository.find_running(partition_key_value=tenant_id)
+    except Exception as e:
+        assert type(e) is StopIteration

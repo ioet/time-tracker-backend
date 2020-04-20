@@ -3,7 +3,7 @@ from faker import Faker
 from flask import Flask
 from flask.testing import FlaskClient
 
-from commons.data_access_layer.cosmos_db import CosmosDBRepository
+from commons.data_access_layer.cosmos_db import CosmosDBRepository, datetime_str, current_datetime
 from time_tracker_api import create_app
 from time_tracker_api.time_entries.time_entries_model import TimeEntryCosmosDBRepository
 
@@ -128,6 +128,23 @@ def another_item(cosmos_db_repository: CosmosDBRepository, tenant_id: str) -> di
     return cosmos_db_repository.create(sample_item_data)
 
 
-@pytest.yield_fixture(scope="module")
+@pytest.fixture(scope="module")
 def time_entry_repository() -> TimeEntryCosmosDBRepository:
     return TimeEntryCosmosDBRepository()
+
+
+@pytest.yield_fixture(scope="module")
+def running_time_entry(time_entry_repository: TimeEntryCosmosDBRepository,
+                       owner_id: str,
+                       tenant_id: str):
+    created_time_entry = time_entry_repository.create({
+        "project_id": fake.uuid4(),
+        "start_date": datetime_str(current_datetime()),
+        "owner_id": owner_id,
+        "tenant_id": tenant_id
+    })
+
+    yield created_time_entry
+
+    time_entry_repository.delete(id=created_time_entry.id,
+                                 partition_key_value=tenant_id)
