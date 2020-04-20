@@ -15,13 +15,33 @@ api = Api(
     description="API for the TimeTracker project"
 )
 
+# For matching UUIDs
+UUID_REGEX = '[0-9a-f]{8}\-[0-9a-f]{4}\-4[0-9a-f]{3}\-[89ab][0-9a-f]{3}\-[0-9a-f]{12}'
+
 # Common models structure
 common_fields = {
+    'id': fields.String(
+        title='Identifier',
+        readOnly=True,
+        required=True,
+        description='The unique identifier',
+        pattern=UUID_REGEX,
+        example=faker.uuid4(),
+    ),
+    'tenant_id': fields.String(
+        title='Identifier of Tenant',
+        readOnly=True,
+        required=True,
+        description='Tenant it belongs to',
+        # pattern=UUID_REGEX, This must be confirmed
+        example=faker.uuid4(),
+    ),
     'deleted': fields.String(
         readOnly=True,
         required=True,
         title='Last event Identifier',
         description='Last event over this resource',
+        pattern=UUID_REGEX,
     ),
 }
 
