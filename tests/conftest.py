@@ -117,6 +117,17 @@ def sample_item(cosmos_db_repository: CosmosDBRepository, tenant_id: str) -> dic
     return cosmos_db_repository.create(sample_item_data)
 
 
+@pytest.fixture(scope="function")
+def another_item(cosmos_db_repository: CosmosDBRepository, tenant_id: str) -> dict:
+    sample_item_data = dict(id=fake.uuid4(),
+                            name=fake.name(),
+                            email=fake.safe_email(),
+                            age=fake.pyint(min_value=10, max_value=80),
+                            tenant_id=tenant_id)
+
+    return cosmos_db_repository.create(sample_item_data)
+
+
 @pytest.yield_fixture(scope="module")
-def time_entry_repository(cosmos_db_repository: CosmosDBRepository) -> TimeEntryCosmosDBRepository:
+def time_entry_repository() -> TimeEntryCosmosDBRepository:
     return TimeEntryCosmosDBRepository()

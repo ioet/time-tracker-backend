@@ -6,7 +6,7 @@ from flask_restplus._http import HTTPStatus
 
 from commons.data_access_layer.cosmos_db import current_datetime, datetime_str
 from commons.data_access_layer.database import COMMENTS_MAX_LENGTH
-from time_tracker_api.api import common_fields
+from time_tracker_api.api import common_fields, UUID_REGEX
 from time_tracker_api.time_entries.time_entries_model import create_dao
 
 faker = Faker()
@@ -19,12 +19,21 @@ time_entry_input = ns.model('TimeEntryInput', {
         title='Project',
         required=True,
         description='The id of the selected project',
+        pattern=UUID_REGEX,
         example=faker.uuid4(),
+    ),
+    'start_date': fields.DateTime(
+        dt_format='iso8601',
+        title='Start date',
+        required=True,
+        description='When the user started doing this activity',
+        example=datetime_str(current_datetime() - timedelta(days=1)),
     ),
     'activity_id': fields.String(
         title='Activity',
-        required=True,
+        required=False,
         description='The id of the selected activity',
+        pattern=UUID_REGEX,
         example=faker.uuid4(),
     ),
     'description': fields.String(
@@ -33,13 +42,6 @@ time_entry_input = ns.model('TimeEntryInput', {
         description='Comments about the time entry',
         example=faker.paragraph(nb_sentences=2),
         max_length=COMMENTS_MAX_LENGTH,
-    ),
-    'start_date': fields.DateTime(
-        dt_format='iso8601',
-        title='Start date',
-        required=True,
-        description='When the user started doing this activity',
-        example=datetime_str(current_datetime() - timedelta(days=1)),
     ),
     'end_date': fields.DateTime(
         dt_format='iso8601',
@@ -50,7 +52,9 @@ time_entry_input = ns.model('TimeEntryInput', {
     ),
     'uri': fields.String(
         title='Uniform Resource identifier',
-        description='Either identifier or locator',
+        description='Either identifier or locator of a resource in the Internet that helps to understand'
+                    ' what this time entry was about. For example, A Jira ticket, a Github issue, a Google document.',
+        required=False,
         example=faker.random_element([
             'https://github.com/ioet/time-tracker-backend/issues/51',
             '#54',
@@ -75,24 +79,11 @@ time_entry_input = ns.model('TimeEntryInput', {
 })
 
 time_entry_response_fields = {
-    'id': fields.String(
-        readOnly=True,
-        title='Identifier',
-        description='The unique identifier',
-        example=faker.uuid4(),
-    ),
     'running': fields.Boolean(
         readOnly=True,
         title='Is it running?',
         description='Whether this time entry is currently running or not',
         example=faker.boolean(),
-    ),
-    'tenant_id': fields.String(
-        required=True,
-        readOnly=True,
-        title='Identifier of Tenant',
-        description='Tenant this project belongs to',
-        example=faker.uuid4(),
     ),
     'owner_id': fields.String(
         required=True,

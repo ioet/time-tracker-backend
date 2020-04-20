@@ -11,7 +11,7 @@ from flask import Flask
 from werkzeug.exceptions import HTTPException
 
 from commons.data_access_layer.database import CRUDDao
-from time_tracker_api.security import current_user_tenant_id, current_user_id
+from time_tracker_api.security import current_user_tenant_id
 
 
 class CosmosDBFacade:
@@ -105,10 +105,26 @@ class CosmosDBRepository:
         return ''
 
     @staticmethod
-    def create_sql_condition_for_owner_id(owner_id: str, container_name='c') -> str:
-        if owner_id:
-            return 'AND %s.owner_id=@owner_id' % container_name
-        return ''
+    def create_sql_where_conditions(conditions: dict, container_name='c') -> str:
+        where_conditions = []
+        for k in conditions.keys():
+            where_conditions.append('{c}.{var} = @{var}'.format(c=container_name, var=k))
+
+        if len(where_conditions) > 0:
+            return "AND {where_conditions_clause}".format(
+                where_conditions_clause=" AND ".join(where_conditions))
+        else:
+            return ""
+
+    @staticmethod
+    def append_conditions_values(params: list, conditions: dict) -> dict:
+        for k, v in conditions.items():
+            params.append({
+                "name": "@%s" % k,
+                "value": v
+            })
+
+        return params
 
     @staticmethod
     def check_visibility(item, throw_not_found_if_deleted):
@@ -123,39 +139,41 @@ class CosmosDBRepository:
         function_mapper = self.get_mapper_or_dict(mapper)
         return function_mapper(self.container.create_item(body=data))
 
-    def find(self, id: str, partition_key_value, visible_only=True, mapper: Callable = None):
+    def find(self, id: str, partition_key_value, peeker: 'function' = None, visible_only=True, mapper: Callable = None):
         found_item = self.container.read_item(id, partition_key_value)
+        if peeker:
+            peeker(found_item)
+
         function_mapper = self.get_mapper_or_dict(mapper)
         return function_mapper(self.check_visibility(found_item, visible_only))
 
-    def find_all(self, partition_key_value: str, owner_id=None, max_count=None, offset=0,
+    def find_all(self, partition_key_value: str, conditions: dict = {}, max_count=None, offset=0,
                  visible_only=True, mapper: Callable = None):
         # TODO Use the tenant_id param and change container alias
         max_count = self.get_page_size_or(max_count)
-        result = self.container.query_items(
-            query="""
+        params = self.append_conditions_values([
+            {"name": "@partition_key_value", "value": partition_key_value},
+            {"name": "@offset", "value": offset},
+            {"name": "@max_count", "value": max_count},
+        ], conditions)
+        result = self.container.query_items(query="""
             SELECT * FROM c WHERE c.{partition_key_attribute}=@partition_key_value
-            {owner_condition} {visibility_condition}  {order_clause}
+            {conditions_clause} {visibility_condition} {order_clause}
             OFFSET @offset LIMIT @max_count
             """.format(partition_key_attribute=self.partition_key_attribute,
                        visibility_condition=self.create_sql_condition_for_visibility(visible_only),
-                       owner_condition=self.create_sql_condition_for_owner_id(owner_id),
+                       conditions_clause=self.create_sql_where_conditions(conditions),
                        order_clause=self.create_sql_order_clause()),
-            parameters=[
-                {"name": "@partition_key_value", "value": partition_key_value},
-                {"name": "@offset", "value": offset},
-                {"name": "@max_count", "value": max_count},
-                {"name": "@owner_id", "value": owner_id},
-            ],
-            partition_key=partition_key_value,
-            max_item_count=max_count)
+                                            parameters=params,
+                                            partition_key=partition_key_value,
+                                            max_item_count=max_count)
 
         function_mapper = self.get_mapper_or_dict(mapper)
         return list(map(function_mapper, result))
 
     def partial_update(self, id: str, changes: dict, partition_key_value: str,
-                       visible_only=True, mapper: Callable = None):
-        item_data = self.find(id, partition_key_value, visible_only=visible_only, mapper=dict)
+                       peeker: 'function' = None, visible_only=True, mapper: Callable = None):
+        item_data = self.find(id, partition_key_value, peeker=peeker, visible_only=visible_only, mapper=dict)
         item_data.update(changes)
         return self.update(id, item_data, mapper=mapper)
 
@@ -164,10 +182,11 @@ class CosmosDBRepository:
         function_mapper = self.get_mapper_or_dict(mapper)
         return function_mapper(self.container.replace_item(id, body=item_data))
 
-    def delete(self, id: str, partition_key_value: str, mapper: Callable = None):
+    def delete(self, id: str, partition_key_value: str,
+               peeker: 'function' = None, mapper: Callable = None):
         return self.partial_update(id, {
             'deleted': str(uuid.uuid4())
-        }, partition_key_value, visible_only=True, mapper=mapper)
+        }, partition_key_value, peeker=peeker, visible_only=True, mapper=mapper)
 
     def delete_permanently(self, id: str, partition_key_value: str) -> None:
         self.container.delete_item(id, partition_key_value)
@@ -190,30 +209,21 @@ class CosmosDBRepository:
     def create_sql_order_clause(self):
         if len(self.order_fields) > 0:
             return "ORDER BY c.{}".format(", c.".join(self.order_fields))
-        else:
-            return ""
+        return ""
 
 
 class CosmosDBDao(CRUDDao):
     def __init__(self, repository: CosmosDBRepository):
         self.repository = repository
 
-    @property
-    def partition_key_value(self):
-        return current_user_tenant_id()
-
     def get_all(self) -> list:
-        tenant_id: str = self.partition_key_value
-        owner_id = current_user_id()
-        return self.repository.find_all(partition_key_value=tenant_id, owner_id=owner_id)
+        return self.repository.find_all(partition_key_value=self.partition_key_value)
 
     def get(self, id):
-        tenant_id: str = self.partition_key_value
-        return self.repository.find(id, partition_key_value=tenant_id)
+        return self.repository.find(id, partition_key_value=self.partition_key_value)
 
     def create(self, data: dict):
         data[self.repository.partition_key_attribute] = self.partition_key_value
-        data['owner_id'] = current_user_id()
         return self.repository.create(data)
 
     def update(self, id, data: dict):
@@ -222,8 +232,11 @@ class CosmosDBDao(CRUDDao):
                                               partition_key_value=self.partition_key_value)
 
     def delete(self, id):
-        tenant_id: str = current_user_tenant_id()
-        self.repository.delete(id, partition_key_value=tenant_id)
+        self.repository.delete(id, partition_key_value=self.partition_key_value)
+
+    @property
+    def partition_key_value(self):
+        return current_user_tenant_id()
 
 
 class CustomError(HTTPException):

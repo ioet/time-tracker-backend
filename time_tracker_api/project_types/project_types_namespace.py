@@ -2,7 +2,7 @@ from faker import Faker
 from flask_restplus import Namespace, Resource, fields
 from flask_restplus._http import HTTPStatus
 
-from time_tracker_api.api import common_fields
+from time_tracker_api.api import common_fields, UUID_REGEX
 from time_tracker_api.project_types.project_types_model import create_dao
 
 faker = Faker()
@@ -12,45 +12,37 @@ ns = Namespace('project-types', description='API for project types')
 # ProjectType Model
 project_type_input = ns.model('ProjectTypeInput', {
     'name': fields.String(
-        required=True,
         title='Name',
+        required=True,
         max_length=50,
         description='Name of the project type',
         example=faker.random_element(["Customer","Training","Internal"]),
     ),
     'description': fields.String(
         title='Description',
+        required=False,
         max_length=250,
-        description='Description about the project type',
+        description='Comments about the project type',
         example=faker.paragraph(),
     ),
     'customer_id': fields.String(
         title='Identifier of the Customer',
-        description='Customer this project type belongs to',
+        required=False,
+        description='Customer this project type belongs to. '
+                    'If not specified, it will be considered an internal project of the tenant.',
+        pattern=UUID_REGEX,
         example=faker.uuid4(),
     ),
     'parent_id': fields.String(
-        title='Identifier of Parent of the project type',
-        description='Defines a self reference of the model ProjectType',
+        title='Identifier of the parent project type',
+        required=False,
+        description='This parent node allows to created a tree-like structure for project types',
+        pattern=UUID_REGEX,
         example=faker.uuid4(),
     ),
 })
 
-project_type_response_fields = {
-    'id': fields.String(
-        readOnly=True,
-        required=True,
-        title='Identifier',
-        description='The unique identifier',
-        example=faker.uuid4(),
-    ),
-    'tenant_id': fields.String(
-        required=True,
-        title='Identifier of Tenant',
-        description='Tenant this project type belongs to',
-        example=faker.uuid4(),
-    ),
-}
+project_type_response_fields = {}
 project_type_response_fields.update(common_fields)
 
 project_type = ns.inherit(

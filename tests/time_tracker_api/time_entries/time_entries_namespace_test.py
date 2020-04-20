@@ -113,7 +113,9 @@ def test_get_time_entry_should_succeed_with_valid_id(client: FlaskClient, mocker
 
     assert HTTPStatus.OK == response.status_code
     fake_time_entry == json.loads(response.data)
-    repository_find_mock.assert_called_once_with(str(valid_id), partition_key_value=current_user_tenant_id())
+    repository_find_mock.assert_called_once_with(str(valid_id),
+                                                 partition_key_value=current_user_tenant_id(),
+                                                 peeker=ANY)
 
 
 def test_get_time_entry_should_response_with_unprocessable_entity_for_invalid_id_format(client: FlaskClient,
@@ -130,7 +132,9 @@ def test_get_time_entry_should_response_with_unprocessable_entity_for_invalid_id
     response = client.get("/time-entries/%s" % invalid_id, follow_redirects=True)
 
     assert HTTPStatus.UNPROCESSABLE_ENTITY == response.status_code
-    repository_find_mock.assert_called_once_with(str(invalid_id), partition_key_value=current_user_tenant_id())
+    repository_find_mock.assert_called_once_with(str(invalid_id),
+                                                 partition_key_value=current_user_tenant_id(),
+                                                 peeker=ANY)
 
 
 def test_update_time_entry_should_succeed_with_valid_data(client: FlaskClient, mocker: MockFixture):
@@ -148,7 +152,8 @@ def test_update_time_entry_should_succeed_with_valid_data(client: FlaskClient, m
     fake_time_entry == json.loads(response.data)
     repository_update_mock.assert_called_once_with(str(valid_id),
                                                    changes=valid_time_entry_input,
-                                                   partition_key_value=current_user_tenant_id())
+                                                   partition_key_value=current_user_tenant_id(),
+                                                   peeker=ANY)
 
 
 def test_update_time_entry_should_reject_bad_request(client: FlaskClient, mocker: MockFixture):
@@ -185,7 +190,8 @@ def test_update_time_entry_should_return_not_found_with_invalid_id(client: Flask
     assert HTTPStatus.NOT_FOUND == response.status_code
     repository_update_mock.assert_called_once_with(str(invalid_id),
                                                    changes=valid_time_entry_input,
-                                                   partition_key_value=current_user_tenant_id())
+                                                   partition_key_value=current_user_tenant_id(),
+                                                   peeker=ANY)
 
 
 def test_delete_time_entry_should_succeed_with_valid_id(client: FlaskClient, mocker: MockFixture):
@@ -200,7 +206,8 @@ def test_delete_time_entry_should_succeed_with_valid_id(client: FlaskClient, moc
     assert HTTPStatus.NO_CONTENT == response.status_code
     assert b'' == response.data
     repository_remove_mock.assert_called_once_with(str(valid_id),
-                                                   partition_key_value=current_user_tenant_id())
+                                                   partition_key_value=current_user_tenant_id(),
+                                                   peeker=ANY)
 
 
 def test_delete_time_entry_should_return_not_found_with_invalid_id(client: FlaskClient,
@@ -216,7 +223,8 @@ def test_delete_time_entry_should_return_not_found_with_invalid_id(client: Flask
 
     assert HTTPStatus.NOT_FOUND == response.status_code
     repository_remove_mock.assert_called_once_with(str(invalid_id),
-                                                   partition_key_value=current_user_tenant_id())
+                                                   partition_key_value=current_user_tenant_id(),
+                                                   peeker=ANY)
 
 
 def test_delete_time_entry_should_return_unprocessable_entity_for_invalid_id_format(client: FlaskClient,
@@ -232,7 +240,8 @@ def test_delete_time_entry_should_return_unprocessable_entity_for_invalid_id_for
 
     assert HTTPStatus.UNPROCESSABLE_ENTITY == response.status_code
     repository_remove_mock.assert_called_once_with(str(invalid_id),
-                                                   partition_key_value=current_user_tenant_id())
+                                                   partition_key_value=current_user_tenant_id(),
+                                                   peeker=ANY)
 
 
 def test_stop_time_entry_with_valid_id(client: FlaskClient, mocker: MockFixture):
@@ -247,7 +256,8 @@ def test_stop_time_entry_with_valid_id(client: FlaskClient, mocker: MockFixture)
     assert HTTPStatus.OK == response.status_code
     repository_update_mock.assert_called_once_with(str(valid_id),
                                                    changes={"end_date": mocker.ANY},
-                                                   partition_key_value=current_user_tenant_id())
+                                                   partition_key_value=current_user_tenant_id(),
+                                                   peeker=ANY)
 
 
 def test_stop_time_entry_with_id_with_invalid_format(client: FlaskClient, mocker: MockFixture):
@@ -263,7 +273,8 @@ def test_stop_time_entry_with_id_with_invalid_format(client: FlaskClient, mocker
     assert HTTPStatus.UNPROCESSABLE_ENTITY == response.status_code
     repository_update_mock.assert_called_once_with(invalid_id,
                                                    changes={"end_date": ANY},
-                                                   partition_key_value=current_user_tenant_id())
+                                                   partition_key_value=current_user_tenant_id(),
+                                                   peeker=ANY)
 
 
 def test_restart_time_entry_with_valid_id(client: FlaskClient, mocker: MockFixture):
@@ -278,7 +289,8 @@ def test_restart_time_entry_with_valid_id(client: FlaskClient, mocker: MockFixtu
     assert HTTPStatus.OK == response.status_code
     repository_update_mock.assert_called_once_with(str(valid_id),
                                                    changes={"end_date": None},
-                                                   partition_key_value=current_user_tenant_id())
+                                                   partition_key_value=current_user_tenant_id(),
+                                                   peeker=ANY)
 
 
 def test_restart_time_entry_with_id_with_invalid_format(client: FlaskClient, mocker: MockFixture):
@@ -286,7 +298,8 @@ def test_restart_time_entry_with_id_with_invalid_format(client: FlaskClient, moc
     from werkzeug.exceptions import UnprocessableEntity
     repository_update_mock = mocker.patch.object(time_entries_dao.repository,
                                                  'partial_update',
-                                                 side_effect=UnprocessableEntity)
+                                                 side_effect=UnprocessableEntity,
+                                                 peeker=ANY)
     invalid_id = fake.word()
 
     response = client.post("/time-entries/%s/restart" % invalid_id, follow_redirects=True)
@@ -294,4 +307,5 @@ def test_restart_time_entry_with_id_with_invalid_format(client: FlaskClient, moc
     assert HTTPStatus.UNPROCESSABLE_ENTITY == response.status_code
     repository_update_mock.assert_called_once_with(invalid_id,
                                                    changes={"end_date": None},
-                                                   partition_key_value=current_user_tenant_id())
+                                                   partition_key_value=current_user_tenant_id(),
+                                                   peeker=ANY)

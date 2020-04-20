@@ -12,35 +12,22 @@ ns = Namespace('customers', description='API for customers')
 # Customer Model
 customer_input = ns.model('CustomerInput', {
     'name': fields.String(
-        required=True,
         title='Name',
+        required=True,
         max_length=50,
         description='Name of the customer',
         example=faker.company(),
     ),
     'description': fields.String(
         title='Description',
+        required=False,
         max_length=250,
         description='Description about the customer',
         example=faker.paragraph(),
     ),
 })
 
-customer_response_fields = {
-    'id': fields.String(
-        readOnly=True,
-        required=True,
-        title='Identifier',
-        description='The unique identifier',
-        example=faker.uuid4(),
-    ),
-    'tenant_id': fields.String(
-        required=True,
-        title='Identifier of Tenant',
-        description='Tenant this customer belongs to',
-        example=faker.uuid4(),
-    ),
-}
+customer_response_fields = {}
 customer_response_fields.update(common_fields)
 
 customer = ns.inherit(

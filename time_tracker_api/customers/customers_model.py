@@ -15,7 +15,7 @@ container_definition = {
     'partition_key': PartitionKey(path='/tenant_id'),
     'unique_key_policy': {
         'uniqueKeys': [
-            {'paths': ['/name']},
+            {'paths': ['/name', '/deleted']},
         ]
     }
 }
