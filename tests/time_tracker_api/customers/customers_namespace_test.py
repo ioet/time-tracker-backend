@@ -3,6 +3,7 @@ from flask import json
 from flask.testing import FlaskClient
 from flask_restplus._http import HTTPStatus
 from pytest_mock import MockFixture
+from werkzeug.datastructures import ImmutableMultiDict
 
 fake = Faker()
 
@@ -67,6 +68,20 @@ def test_list_all_customers(client: FlaskClient,
     json_data = json.loads(response.data)
     assert [] == json_data
     repository_find_all_mock.assert_called_once()
+
+def test_list_all_customers_with_conditions(client: FlaskClient, mocker: MockFixture):
+    from time_tracker_api.customers.customers_namespace import customer_dao
+    repository_find_all_mock = mocker.patch.object(customer_dao.repository,
+                                                   'find_all',
+                                                   return_value=[])
+
+    response = client.get("/customers?a=b", follow_redirects=True)
+
+    assert HTTPStatus.OK == response.status_code
+    json_data = json.loads(response.data)
+    assert [] == json_data
+    repository_find_all_mock.assert_called_once_with(conditions=ImmutableMultiDict({'a': 'b'}),
+                                                     partition_key_value='ioet')
 
 
 def test_get_customer_should_succeed_with_valid_id(client: FlaskClient,

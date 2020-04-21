@@ -1,6 +1,7 @@
 from faker import Faker
 from flask_restplus import Namespace, Resource, fields
 from flask_restplus._http import HTTPStatus
+from flask import request
 
 from time_tracker_api.api import common_fields, UUID_REGEX
 from time_tracker_api.projects.projects_model import create_dao
@@ -61,7 +62,7 @@ class Projects(Resource):
     @ns.marshal_list_with(project)
     def get(self):
         """List all projects"""
-        return project_dao.get_all()
+        return project_dao.get_all(conditions=request.args)
 
     @ns.doc('create_project')
     @ns.response(HTTPStatus.CONFLICT, 'This project already exists')

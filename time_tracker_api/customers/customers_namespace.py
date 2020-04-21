@@ -1,6 +1,7 @@
 from faker import Faker
 from flask_restplus import Namespace, Resource, fields
 from flask_restplus._http import HTTPStatus
+from flask import request
 
 from time_tracker_api.api import common_fields
 from time_tracker_api.customers.customers_model import create_dao
@@ -45,7 +46,7 @@ class Customers(Resource):
     @ns.marshal_list_with(customer)
     def get(self):
         """List all customers"""
-        return customer_dao.get_all()
+        return customer_dao.get_all(conditions=request.args)
 
     @ns.doc('create_customer')
     @ns.response(HTTPStatus.CONFLICT, 'This customer already exists')

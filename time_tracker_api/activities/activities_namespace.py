@@ -1,6 +1,7 @@
 from faker import Faker
 from flask_restplus import fields, Resource, Namespace
 from flask_restplus._http import HTTPStatus
+from flask import request
 
 from time_tracker_api.activities.activities_model import create_dao
 from time_tracker_api.api import common_fields
@@ -44,7 +45,7 @@ class Activities(Resource):
     @ns.marshal_list_with(activity)
     def get(self):
         """List all activities"""
-        return activity_dao.get_all()
+        return activity_dao.get_all(conditions=request.args)
 
     @ns.doc('create_activity')
     @ns.response(HTTPStatus.CONFLICT, 'This activity already exists')

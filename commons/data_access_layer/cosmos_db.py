@@ -217,8 +217,8 @@ class CosmosDBDao(CRUDDao):
     def __init__(self, repository: CosmosDBRepository):
         self.repository = repository
 
-    def get_all(self) -> list:
-        return self.repository.find_all(partition_key_value=self.partition_key_value)
+    def get_all(self, conditions: []) -> list:
+        return self.repository.find_all(partition_key_value=self.partition_key_value, conditions= conditions)
 
     def get(self, id):
         return self.repository.find(id, partition_key_value=self.partition_key_value)
