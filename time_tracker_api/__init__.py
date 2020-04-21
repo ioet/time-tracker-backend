@@ -46,6 +46,8 @@ def init_app(app: Flask):
         app.logger.setLevel(logging.INFO)
         add_debug_toolbar(app)
 
+    add_werkzeug_proxy_fix(app)
+
     cors_origins = app.config.get('CORS_ORIGINS')
     if cors_origins:
         enable_cors(app, cors_origins)
@@ -74,3 +76,9 @@ def enable_cors(app: Flask, cors_origins: str):
     cors_origins_list = cors_origins.split(",")
     CORS(app, resources={r"/*": {"origins": cors_origins_list}})
     app.logger.info("Set CORS access to [%s]" % cors_origins)
+
+
+def add_werkzeug_proxy_fix(app: Flask):
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+    app.logger.info("Add ProxyFix to serve swagger.json over https.")
