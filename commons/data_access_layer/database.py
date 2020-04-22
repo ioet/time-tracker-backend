@@ -36,7 +36,6 @@ class CRUDDao(abc.ABC):
 
 
 def init_app(app: Flask) -> None:
-    init_sql(app)  # TODO Delete after the migration to Cosmos DB has finished.
     init_cosmos_db(app)
 
 

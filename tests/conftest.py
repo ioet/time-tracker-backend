@@ -7,43 +7,13 @@ from flask import Flask, url_for
 from flask.testing import FlaskClient
 
 from commons.data_access_layer.cosmos_db import CosmosDBRepository, datetime_str, current_datetime
+from commons.data_access_layer.database import init_sql
 from time_tracker_api import create_app
 from time_tracker_api.security import get_or_generate_dev_secret_key
 from time_tracker_api.time_entries.time_entries_model import TimeEntryCosmosDBRepository
 
 fake = Faker()
 Faker.seed()
-
-TEST_USER = {
-    "name": "testuser@ioet.com",
-    "password": "secret"
-}
-
-
-class User:
-    def __init__(self, username, password):
-        self.username = username
-        self.password = password
-
-
-class AuthActions:
-    """Auth actions container in tests"""
-
-    def __init__(self, app, client):
-        self._app = app
-        self._client = client
-
-    # def login(self, username=TEST_USER["name"],
-    #           password=TEST_USER["password"]):
-    #     login_url = url_for("security.login", self._app)
-    #     return open_with_basic_auth(self._client,
-    #                                 login_url,
-    #                                 username,
-    #                                 password)
-    #
-    # def logout(self):
-    #     return self._client.get(url_for("security.logout", self._app),
-    #                             follow_redirects=True)
 
 
 @pytest.fixture(scope='session')
@@ -58,9 +28,12 @@ def client(app: Flask) -> FlaskClient:
 
 
 @pytest.fixture(scope="module")
-def sql_model_class():
-    from commons.data_access_layer.sql import db, AuditedSQLModel
-    class PersonSQLModel(db.Model, AuditedSQLModel):
+def sql_model_class(app: Flask):
+    with app.app_context():
+        init_sql(app)
+
+    from commons.data_access_layer.sql import db
+    class PersonSQLModel(db.Model):
         __tablename__ = 'test'
         id = db.Column(db.Integer, primary_key=True)
         name = db.Column(db.String(80), unique=False, nullable=False)
@@ -186,11 +159,11 @@ def running_time_entry(time_entry_repository: TimeEntryCosmosDBRepository,
 
 
 @pytest.fixture(scope="session")
-def valid_jwt(app: Flask) -> str:
+def valid_jwt(app: Flask, tenant_id: str, owner_id: str) -> str:
     expiration_time = datetime.utcnow() + timedelta(seconds=3600)
     return jwt.encode({
-        "iss": "https://securityioet.b2clogin.com/%s/v2.0/" % fake.uuid4(),
-        "oid": fake.uuid4(),
+        "iss": "https://securityioet.b2clogin.com/%s/v2.0/" % tenant_id,
+        "oid": owner_id,
         'exp': expiration_time
     }, key=get_or_generate_dev_secret_key()).decode("UTF-8")
 
