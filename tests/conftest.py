@@ -1,14 +1,49 @@
+from datetime import datetime, timedelta
+
+import jwt
 import pytest
 from faker import Faker
-from flask import Flask
+from flask import Flask, url_for
 from flask.testing import FlaskClient
 
 from commons.data_access_layer.cosmos_db import CosmosDBRepository, datetime_str, current_datetime
 from time_tracker_api import create_app
+from time_tracker_api.security import get_or_generate_dev_secret_key
 from time_tracker_api.time_entries.time_entries_model import TimeEntryCosmosDBRepository
 
 fake = Faker()
 Faker.seed()
+
+TEST_USER = {
+    "name": "testuser@ioet.com",
+    "password": "secret"
+}
+
+
+class User:
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+
+
+class AuthActions:
+    """Auth actions container in tests"""
+
+    def __init__(self, app, client):
+        self._app = app
+        self._client = client
+
+    # def login(self, username=TEST_USER["name"],
+    #           password=TEST_USER["password"]):
+    #     login_url = url_for("security.login", self._app)
+    #     return open_with_basic_auth(self._client,
+    #                                 login_url,
+    #                                 username,
+    #                                 password)
+    #
+    # def logout(self):
+    #     return self._client.get(url_for("security.logout", self._app),
+    #                             follow_redirects=True)
 
 
 @pytest.fixture(scope='session')
@@ -148,3 +183,18 @@ def running_time_entry(time_entry_repository: TimeEntryCosmosDBRepository,
 
     time_entry_repository.delete(id=created_time_entry.id,
                                  partition_key_value=tenant_id)
+
+
+@pytest.fixture(scope="session")
+def valid_jwt(app: Flask) -> str:
+    expiration_time = datetime.utcnow() + timedelta(seconds=3600)
+    return jwt.encode({
+        "iss": "https://securityioet.b2clogin.com/%s/v2.0/" % fake.uuid4(),
+        "oid": fake.uuid4(),
+        'exp': expiration_time
+    }, key=get_or_generate_dev_secret_key()).decode("UTF-8")
+
+
+@pytest.fixture(scope="session")
+def valid_header(valid_jwt: str) -> dict:
+    return {'Authorization': "Bearer %s" % valid_jwt}

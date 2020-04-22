@@ -5,6 +5,7 @@ from flask_restplus import Api, fields
 from flask_restplus._http import HTTPStatus
 
 from commons.data_access_layer.cosmos_db import CustomError
+from time_tracker_api import security
 from time_tracker_api.version import __version__
 
 faker = Faker()
@@ -12,7 +13,9 @@ faker = Faker()
 api = Api(
     version=__version__,
     title="TimeTracker API",
-    description="API for the TimeTracker project"
+    description="API for the TimeTracker project",
+    authorizations=security.authorizations,
+    security="TimeTracker JWT",
 )
 
 # For matching UUIDs

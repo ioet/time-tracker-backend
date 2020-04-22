@@ -19,13 +19,18 @@ fake_activity = ({
 }).update(valid_activity_data)
 
 
-def test_create_activity_should_succeed_with_valid_request(client: FlaskClient, mocker: MockFixture):
+def test_create_activity_should_succeed_with_valid_request(client: FlaskClient,
+                                                           mocker: MockFixture,
+                                                           valid_header: dict):
     from time_tracker_api.activities.activities_namespace import activity_dao
     repository_create_mock = mocker.patch.object(activity_dao.repository,
                                                  'create',
                                                  return_value=fake_activity)
 
-    response = client.post("/activities", json=valid_activity_data, follow_redirects=True)
+    response = client.post("/activities",
+                           headers=valid_header,
+                           json=valid_activity_data,
+                           follow_redirects=True)
 
     assert HTTPStatus.CREATED == response.status_code
     repository_create_mock.assert_called_once()
@@ -57,7 +62,9 @@ def test_list_all_activities(client: FlaskClient, mocker: MockFixture):
     repository_find_all_mock.assert_called_once()
 
 
-def test_get_activity_should_succeed_with_valid_id(client: FlaskClient, mocker: MockFixture):
+def test_get_activity_should_succeed_with_valid_id(client: FlaskClient,
+                                                   mocker: MockFixture,
+                                                   valid_header: dict):
     from time_tracker_api.activities.activities_namespace import activity_dao
 
     valid_id = fake.random_int(1, 9999)
@@ -66,7 +73,9 @@ def test_get_activity_should_succeed_with_valid_id(client: FlaskClient, mocker: 
                                                'find',
                                                return_value=fake_activity)
 
-    response = client.get("/activities/%s" % valid_id, follow_redirects=True)
+    response = client.get("/activities/%s" % valid_id,
+                          headers=valid_header,
+                          follow_redirects=True)
 
     assert HTTPStatus.OK == response.status_code
     fake_activity == json.loads(response.data)
@@ -74,7 +83,9 @@ def test_get_activity_should_succeed_with_valid_id(client: FlaskClient, mocker: 
                                                  partition_key_value=current_user_tenant_id())
 
 
-def test_get_activity_should_return_not_found_with_invalid_id(client: FlaskClient, mocker: MockFixture):
+def test_get_activity_should_return_not_found_with_invalid_id(client: FlaskClient,
+                                                              mocker: MockFixture,
+                                                              valid_header: dict):
     from time_tracker_api.activities.activities_namespace import activity_dao
     from werkzeug.exceptions import NotFound
 
@@ -84,7 +95,9 @@ def test_get_activity_should_return_not_found_with_invalid_id(client: FlaskClien
                                                'find',
                                                side_effect=NotFound)
 
-    response = client.get("/activities/%s" % invalid_id, follow_redirects=True)
+    response = client.get("/activities/%s" % invalid_id,
+                          headers=valid_header,
+                          follow_redirects=True)
 
     assert HTTPStatus.NOT_FOUND == response.status_code
     repository_find_mock.assert_called_once_with(str(invalid_id),
