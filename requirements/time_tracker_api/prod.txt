@@ -26,8 +26,11 @@ Flask-Script==2.0.6
 #Semantic versioning
 python-semantic-release==5.2.0
 
-# The Debug Toolbar
+#The Debug Toolbar
 Flask-DebugToolbar==0.11.0
 
 #CORS
 flask-cors==3.0.8
+
+#JWT
+PyJWT==1.7.1

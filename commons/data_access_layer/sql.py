@@ -4,10 +4,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 from commons.data_access_layer.database import CRUDDao, ID_MAX_LENGTH
-from time_tracker_api.security import current_user_id
 
 db: SQLAlchemy = None
-AuditedSQLModel = None
 
 
 def handle_commit_issues(f):
@@ -24,16 +22,6 @@ def handle_commit_issues(f):
 def init_app(app: Flask) -> None:
     global db
     db = SQLAlchemy(app)
-
-    global AuditedSQLModel
-
-    class AuditedSQLModelClass():
-        created_at = db.Column(db.DateTime, server_default=db.func.now())
-        updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
-        created_by = db.Column(db.String(ID_MAX_LENGTH), default=current_user_id)
-        updated_by = db.Column(db.String(ID_MAX_LENGTH), onupdate=current_user_id)
-
-    AuditedSQLModel = AuditedSQLModelClass
 
 
 class SQLRepository():

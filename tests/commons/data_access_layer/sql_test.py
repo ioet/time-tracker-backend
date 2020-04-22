@@ -16,10 +16,6 @@ def test_create(sql_repository):
 
     assert result is not None
     assert result.id is not None
-    assert result.created_at is not None
-    assert result.created_by is not None
-    assert result.updated_at is None
-    assert result.updated_by is None
 
     existing_elements_registry.append(result)
 
@@ -43,9 +39,6 @@ def test_update(sql_repository):
     assert updated_element.id == existing_element.id
     assert updated_element.name == "Jon Snow"
     assert updated_element.age == 34
-    assert updated_element.updated_at is not None
-    assert updated_element.updated_at > updated_element.created_at
-    assert updated_element.updated_by is not None
 
 
 def test_find_all(sql_repository):

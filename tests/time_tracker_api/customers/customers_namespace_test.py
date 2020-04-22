@@ -4,8 +4,6 @@ from flask.testing import FlaskClient
 from flask_restplus._http import HTTPStatus
 from pytest_mock import MockFixture
 
-from time_tracker_api.security import current_user_tenant_id
-
 fake = Faker()
 
 valid_customer_data = {
@@ -15,41 +13,55 @@ valid_customer_data = {
 }
 
 fake_customer = ({
-    "id": fake.random_int(1, 9999)
+    "id": fake.random_int(1, 9999),
 }).update(valid_customer_data)
 
 
-def test_create_customer_should_succeed_with_valid_request(client: FlaskClient, mocker: MockFixture):
+def test_create_customer_should_succeed_with_valid_request(client: FlaskClient,
+                                                           mocker: MockFixture,
+                                                           valid_header: dict):
     from time_tracker_api.customers.customers_namespace import customer_dao
     repository_create_mock = mocker.patch.object(customer_dao.repository,
                                                  'create',
                                                  return_value=fake_customer)
 
-    response = client.post("/customers", json=valid_customer_data, follow_redirects=True)
+    response = client.post("/customers",
+                           headers=valid_header,
+                           json=valid_customer_data,
+                           follow_redirects=True)
 
     assert HTTPStatus.CREATED == response.status_code
     repository_create_mock.assert_called_once()
 
 
-def test_create_customer_should_reject_bad_request(client: FlaskClient, mocker: MockFixture):
+def test_create_customer_should_reject_bad_request(client: FlaskClient,
+                                                   mocker: MockFixture,
+                                                   valid_header: dict):
     from time_tracker_api.customers.customers_namespace import customer_dao
     repository_create_mock = mocker.patch.object(customer_dao.repository,
                                                  'create',
                                                  return_value=fake_customer)
 
-    response = client.post("/customers", json=None, follow_redirects=True)
+    response = client.post("/customers",
+                           headers=valid_header,
+                           json=None,
+                           follow_redirects=True)
 
     assert HTTPStatus.BAD_REQUEST == response.status_code
     repository_create_mock.assert_not_called()
 
 
-def test_list_all_customers(client: FlaskClient, mocker: MockFixture):
+def test_list_all_customers(client: FlaskClient,
+                            mocker: MockFixture,
+                            valid_header: dict):
     from time_tracker_api.customers.customers_namespace import customer_dao
     repository_find_all_mock = mocker.patch.object(customer_dao.repository,
                                                    'find_all',
                                                    return_value=[])
 
-    response = client.get("/customers", follow_redirects=True)
+    response = client.get("/customers",
+                          headers=valid_header,
+                          follow_redirects=True)
 
     assert HTTPStatus.OK == response.status_code
     json_data = json.loads(response.data)
@@ -57,7 +69,10 @@ def test_list_all_customers(client: FlaskClient, mocker: MockFixture):
     repository_find_all_mock.assert_called_once()
 
 
-def test_get_customer_should_succeed_with_valid_id(client: FlaskClient, mocker: MockFixture):
+def test_get_customer_should_succeed_with_valid_id(client: FlaskClient,
+                                                   mocker: MockFixture,
+                                                   tenant_id: str,
+                                                   valid_header: dict):
     from time_tracker_api.customers.customers_namespace import customer_dao
 
     valid_id = fake.random_int(1, 9999)
@@ -66,15 +81,20 @@ def test_get_customer_should_succeed_with_valid_id(client: FlaskClient, mocker: 
                                                'find',
                                                return_value=fake_customer)
 
-    response = client.get("/customers/%s" % valid_id, follow_redirects=True)
+    response = client.get("/customers/%s" % valid_id,
+                          headers=valid_header,
+                          follow_redirects=True)
 
     assert HTTPStatus.OK == response.status_code
     fake_customer == json.loads(response.data)
     repository_find_mock.assert_called_once_with(str(valid_id),
-                                                 partition_key_value=current_user_tenant_id())
+                                                 partition_key_value=tenant_id)
 
 
-def test_get_customer_should_return_not_found_with_invalid_id(client: FlaskClient, mocker: MockFixture):
+def test_get_customer_should_return_not_found_with_invalid_id(client: FlaskClient,
+                                                              mocker: MockFixture,
+                                                              tenant_id: str,
+                                                              valid_header: dict):
     from time_tracker_api.customers.customers_namespace import customer_dao
     from werkzeug.exceptions import NotFound
 
@@ -84,14 +104,19 @@ def test_get_customer_should_return_not_found_with_invalid_id(client: FlaskClien
                                                'find',
                                                side_effect=NotFound)
 
-    response = client.get("/customers/%s" % invalid_id, follow_redirects=True)
+    response = client.get("/customers/%s" % invalid_id,
+                          headers=valid_header,
+                          follow_redirects=True)
 
     assert HTTPStatus.NOT_FOUND == response.status_code
     repository_find_mock.assert_called_once_with(str(invalid_id),
-                                                 partition_key_value=current_user_tenant_id())
+                                                 partition_key_value=tenant_id)
 
 
-def test_get_customer_should_return_422_for_invalid_id_format(client: FlaskClient, mocker: MockFixture):
+def test_get_customer_should_return_422_for_invalid_id_format(client: FlaskClient,
+                                                              mocker: MockFixture,
+                                                              tenant_id: str,
+                                                              valid_header: dict):
     from time_tracker_api.customers.customers_namespace import customer_dao
     from werkzeug.exceptions import UnprocessableEntity
 
@@ -101,14 +126,19 @@ def test_get_customer_should_return_422_for_invalid_id_format(client: FlaskClien
                                                'find',
                                                side_effect=UnprocessableEntity)
 
-    response = client.get("/customers/%s" % invalid_id, follow_redirects=True)
+    response = client.get("/customers/%s" % invalid_id,
+                          headers=valid_header,
+                          follow_redirects=True)
 
     assert HTTPStatus.UNPROCESSABLE_ENTITY == response.status_code
     repository_find_mock.assert_called_once_with(str(invalid_id),
-                                                 partition_key_value=current_user_tenant_id())
+                                                 partition_key_value=tenant_id)
 
 
-def test_update_customer_should_succeed_with_valid_data(client: FlaskClient, mocker: MockFixture):
+def test_update_customer_should_succeed_with_valid_data(client: FlaskClient,
+                                                        mocker: MockFixture,
+                                                        tenant_id: str,
+                                                        valid_header: dict):
     from time_tracker_api.customers.customers_namespace import customer_dao
 
     repository_update_mock = mocker.patch.object(customer_dao.repository,
@@ -116,29 +146,40 @@ def test_update_customer_should_succeed_with_valid_data(client: FlaskClient, moc
                                                  return_value=fake_customer)
 
     valid_id = fake.random_int(1, 9999)
-    response = client.put("/customers/%s" % valid_id, json=valid_customer_data, follow_redirects=True)
+    response = client.put("/customers/%s" % valid_id,
+                          headers=valid_header,
+                          json=valid_customer_data,
+                          follow_redirects=True)
 
     assert HTTPStatus.OK == response.status_code
     fake_customer == json.loads(response.data)
     repository_update_mock.assert_called_once_with(str(valid_id),
                                                    changes=valid_customer_data,
-                                                   partition_key_value=current_user_tenant_id())
+                                                   partition_key_value=tenant_id)
 
 
-def test_update_customer_should_reject_bad_request(client: FlaskClient, mocker: MockFixture):
+def test_update_customer_should_reject_bad_request(client: FlaskClient,
+                                                   mocker: MockFixture,
+                                                   valid_header: dict):
     from time_tracker_api.customers.customers_namespace import customer_dao
     repository_update_mock = mocker.patch.object(customer_dao.repository,
                                                  'partial_update',
                                                  return_value=fake_customer)
 
     valid_id = fake.random_int(1, 9999)
-    response = client.put("/customers/%s" % valid_id, json=None, follow_redirects=True)
+    response = client.put("/customers/%s" % valid_id,
+                          headers=valid_header,
+                          json=None,
+                          follow_redirects=True)
 
     assert HTTPStatus.BAD_REQUEST == response.status_code
     repository_update_mock.assert_not_called()
 
 
-def test_update_customer_should_return_not_found_with_invalid_id(client: FlaskClient, mocker: MockFixture):
+def test_update_customer_should_return_not_found_with_invalid_id(client: FlaskClient,
+                                                                 mocker: MockFixture,
+                                                                 tenant_id: str,
+                                                                 valid_header: dict):
     from time_tracker_api.customers.customers_namespace import customer_dao
     from werkzeug.exceptions import NotFound
 
@@ -149,16 +190,20 @@ def test_update_customer_should_return_not_found_with_invalid_id(client: FlaskCl
                                                  side_effect=NotFound)
 
     response = client.put("/customers/%s" % invalid_id,
+                          headers=valid_header,
                           json=valid_customer_data,
                           follow_redirects=True)
 
     assert HTTPStatus.NOT_FOUND == response.status_code
     repository_update_mock.assert_called_once_with(str(invalid_id),
                                                    changes=valid_customer_data,
-                                                   partition_key_value=current_user_tenant_id())
+                                                   partition_key_value=tenant_id)
 
 
-def test_delete_customer_should_succeed_with_valid_id(client: FlaskClient, mocker: MockFixture):
+def test_delete_customer_should_succeed_with_valid_id(client: FlaskClient,
+                                                      mocker: MockFixture,
+                                                      tenant_id: str,
+                                                      valid_header: dict):
     from time_tracker_api.customers.customers_namespace import customer_dao
 
     valid_id = fake.random_int(1, 9999)
@@ -167,15 +212,20 @@ def test_delete_customer_should_succeed_with_valid_id(client: FlaskClient, mocke
                                                  'delete',
                                                  return_value=None)
 
-    response = client.delete("/customers/%s" % valid_id, follow_redirects=True)
+    response = client.delete("/customers/%s" % valid_id,
+                             headers=valid_header,
+                             follow_redirects=True)
 
     assert HTTPStatus.NO_CONTENT == response.status_code
     assert b'' == response.data
     repository_remove_mock.assert_called_once_with(str(valid_id),
-                                                   partition_key_value=current_user_tenant_id())
+                                                   partition_key_value=tenant_id)
 
 
-def test_delete_customer_should_return_not_found_with_invalid_id(client: FlaskClient, mocker: MockFixture):
+def test_delete_customer_should_return_not_found_with_invalid_id(client: FlaskClient,
+                                                                 mocker: MockFixture,
+                                                                 tenant_id: str,
+                                                                 valid_header: dict):
     from time_tracker_api.customers.customers_namespace import customer_dao
     from werkzeug.exceptions import NotFound
 
@@ -185,14 +235,19 @@ def test_delete_customer_should_return_not_found_with_invalid_id(client: FlaskCl
                                                  'delete',
                                                  side_effect=NotFound)
 
-    response = client.delete("/customers/%s" % invalid_id, follow_redirects=True)
+    response = client.delete("/customers/%s" % invalid_id,
+                             headers=valid_header,
+                             follow_redirects=True)
 
     assert HTTPStatus.NOT_FOUND == response.status_code
     repository_remove_mock.assert_called_once_with(str(invalid_id),
-                                                   partition_key_value=current_user_tenant_id())
+                                                   partition_key_value=tenant_id)
 
 
-def test_delete_customer_should_return_422_for_invalid_id_format(client: FlaskClient, mocker: MockFixture):
+def test_delete_customer_should_return_422_for_invalid_id_format(client: FlaskClient,
+                                                                 mocker: MockFixture,
+                                                                 tenant_id: str,
+                                                                 valid_header: dict):
     from time_tracker_api.customers.customers_namespace import customer_dao
     from werkzeug.exceptions import UnprocessableEntity
 
@@ -202,8 +257,10 @@ def test_delete_customer_should_return_422_for_invalid_id_format(client: FlaskCl
                                                  'delete',
                                                  side_effect=UnprocessableEntity)
 
-    response = client.delete("/customers/%s" % invalid_id, follow_redirects=True)
+    response = client.delete("/customers/%s" % invalid_id,
+                             headers=valid_header,
+                             follow_redirects=True)
 
     assert HTTPStatus.UNPROCESSABLE_ENTITY == response.status_code
     repository_remove_mock.assert_called_once_with(str(invalid_id),
-                                                   partition_key_value=current_user_tenant_id())
+                                                   partition_key_value=tenant_id)

@@ -1,12 +1,12 @@
 import os
 
-from time_tracker_api.security import generate_dev_secret_key
+from time_tracker_api.security import get_or_generate_dev_secret_key
 
 DISABLE_STR_VALUES = ("false", "0", "disabled")
 
 
 class Config:
-    SECRET_KEY = generate_dev_secret_key()
+    SECRET_KEY = get_or_generate_dev_secret_key()
     SQL_DATABASE_URI = os.environ.get('SQL_DATABASE_URI')
     PROPAGATE_EXCEPTIONS = True
     RESTPLUS_VALIDATE = True
