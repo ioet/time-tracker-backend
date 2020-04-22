@@ -4,7 +4,7 @@ from faker import Faker
 from flask_restplus import fields, Resource, Namespace
 from flask_restplus._http import HTTPStatus
 
-from commons.data_access_layer.cosmos_db import current_datetime, datetime_str
+from commons.data_access_layer.cosmos_db import current_datetime, datetime_str, current_datetime_str
 from commons.data_access_layer.database import COMMENTS_MAX_LENGTH
 from time_tracker_api.api import common_fields, UUID_REGEX
 from time_tracker_api.time_entries.time_entries_model import create_dao
@@ -25,7 +25,7 @@ time_entry_input = ns.model('TimeEntryInput', {
     'start_date': fields.DateTime(
         dt_format='iso8601',
         title='Start date',
-        required=True,
+        required=False,
         description='When the user started doing this activity',
         example=datetime_str(current_datetime() - timedelta(days=1)),
     ),
@@ -48,7 +48,7 @@ time_entry_input = ns.model('TimeEntryInput', {
         title='End date',
         required=False,
         description='When the user ended doing this activity',
-        example=datetime_str(current_datetime()),
+        example=current_datetime_str(),
     ),
     'uri': fields.String(
         title='Uniform Resource identifier',
@@ -165,7 +165,7 @@ class StopTimeEntry(Resource):
     def post(self, id):
         """Stop a running time entry"""
         return time_entries_dao.update(id, {
-            'end_date': datetime_str(current_datetime())
+            'end_date': current_datetime_str()
         })
 
 

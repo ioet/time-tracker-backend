@@ -48,7 +48,7 @@ def test_find_interception_with_date_range_should_find(start_date: datetime,
                                                                          partition_key_value=tenant_id)
 
         assert result is not None
-        assert len(result) >= 0
+        assert len(result) > 0
         assert any([existing_item.id == item.id for item in result])
     finally:
         time_entry_repository.delete_permanently(existing_item.id, partition_key_value=existing_item.tenant_id)
