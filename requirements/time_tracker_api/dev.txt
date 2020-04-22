@@ -13,3 +13,6 @@ pytest-mock==2.0.0
 
 # Coverage
 coverage==4.5.1
+
+# Git hooks
+pre-commit==2.2.0

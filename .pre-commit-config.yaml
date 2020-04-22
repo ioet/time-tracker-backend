@@ -1,0 +1,8 @@
+repos:
+- repo: local
+  hooks:
+  - id: semantic-commit-msg
+    name: Check semantic commit message format
+    entry: python ./commons/git_hooks/enforce_semantic_commit_msg.py
+    language: python
+    stages : [commit-msg]
