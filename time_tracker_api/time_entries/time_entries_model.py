@@ -111,9 +111,11 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         result = self.container.query_items(
             query="""
                   SELECT * from c
-                  WHERE NOT IS_DEFINED(c.end_date) OR c.end_date = null
+                  WHERE (NOT IS_DEFINED(c.end_date) OR c.end_date = null) {visibility_condition}
                   OFFSET 0 LIMIT 1
-            """,
+            """.format(
+                visibility_condition=self.create_sql_condition_for_visibility(True),
+            ),
             partition_key=partition_key_value,
             max_item_count=1)
 
