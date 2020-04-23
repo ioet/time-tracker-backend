@@ -390,6 +390,7 @@ def test_restart_time_entry_with_id_with_invalid_format(client: FlaskClient,
 def test_get_running_should_call_find_running(client: FlaskClient,
                                               mocker: MockFixture,
                                               valid_header: dict,
+                                              owner_id: str,
                                               tenant_id: str):
     from time_tracker_api.time_entries.time_entries_namespace import time_entries_dao
     repository_update_mock = mocker.patch.object(time_entries_dao.repository,
@@ -402,12 +403,14 @@ def test_get_running_should_call_find_running(client: FlaskClient,
 
     assert HTTPStatus.OK == response.status_code
     assert json.loads(response.data) is not None
-    repository_update_mock.assert_called_once_with(partition_key_value=tenant_id)
+    repository_update_mock.assert_called_once_with(partition_key_value=tenant_id,
+                                                   owner_id=owner_id)
 
 
 def test_get_running_should_return_not_found_if_find_running_throws_StopIteration(client: FlaskClient,
                                                                                   mocker: MockFixture,
                                                                                   valid_header: dict,
+                                                                                  owner_id: str,
                                                                                   tenant_id: str):
     from time_tracker_api.time_entries.time_entries_namespace import time_entries_dao
     repository_update_mock = mocker.patch.object(time_entries_dao.repository,
@@ -419,4 +422,5 @@ def test_get_running_should_return_not_found_if_find_running_throws_StopIteratio
                           follow_redirects=True)
 
     assert HTTPStatus.NOT_FOUND == response.status_code
-    repository_update_mock.assert_called_once_with(partition_key_value=tenant_id)
+    repository_update_mock.assert_called_once_with(partition_key_value=tenant_id,
+                                                   owner_id=owner_id)

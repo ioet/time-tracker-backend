@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import timedelta
 from typing import Callable
 
 import pytest
@@ -7,7 +8,8 @@ from faker import Faker
 from flask_restplus._http import HTTPStatus
 from pytest import fail
 
-from commons.data_access_layer.cosmos_db import CosmosDBRepository, CosmosDBModel, CustomError
+from commons.data_access_layer.cosmos_db import CosmosDBRepository, CosmosDBModel, CustomError, current_datetime, \
+    datetime_str
 
 fake = Faker()
 Faker.seed()
@@ -557,7 +559,7 @@ def test_repository_create_sql_where_conditions_with_no_values(cosmos_db_reposit
 
 
 def test_repository_append_conditions_values(cosmos_db_repository: CosmosDBRepository):
-    result = cosmos_db_repository.append_conditions_values([], {'owner_id': 'mark', 'customer_id': 'ioet'})
+    result = cosmos_db_repository.generate_condition_values({'owner_id': 'mark', 'customer_id': 'ioet'})
 
     assert result is not None
     assert result == [{'name': '@owner_id', 'value': 'mark'},
@@ -586,3 +588,17 @@ def test_find_should_call_picker_if_it_was_specified(cosmos_db_repository: Cosmo
     except Exception as e:
         assert e.code == HTTPStatus.BAD_REQUEST
         assert e.description == "Anything"
+
+
+def test_datetime_str_comparison():
+    now = current_datetime()
+    now_str = datetime_str(now)
+
+    assert now_str > datetime_str(now - timedelta(microseconds=1))
+    assert now_str < datetime_str(now + timedelta(microseconds=1))
+
+    assert now_str > datetime_str(now - timedelta(seconds=1))
+    assert now_str < datetime_str(now + timedelta(seconds=1))
+
+    assert now_str > datetime_str(now - timedelta(days=1))
+    assert now_str < datetime_str(now + timedelta(days=1))
