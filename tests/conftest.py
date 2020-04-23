@@ -167,7 +167,7 @@ def running_time_entry(time_entry_repository: TimeEntryCosmosDBRepository,
 def valid_jwt(app: Flask, tenant_id: str, owner_id: str) -> str:
     expiration_time = datetime.utcnow() + timedelta(seconds=3600)
     return jwt.encode({
-        "iss": "https://securityioet.b2clogin.com/%s/v2.0/" % tenant_id,
+        "iss": "https://ioetec.b2clogin.com/%s/v2.0/" % tenant_id,
         "oid": owner_id,
         'exp': expiration_time
     }, key=get_or_generate_dev_secret_key()).decode("UTF-8")

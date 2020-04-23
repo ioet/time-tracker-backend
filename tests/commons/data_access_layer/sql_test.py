@@ -56,10 +56,10 @@ def test_find_all_that_contains_property_with_string_case_insensitive(sql_reposi
     existing_elements_registry.append(new_element)
 
     search_snow_result = sql_repository.find_all_contain_str('name', 'Snow')
-    assert len(search_snow_result) == 2
+    assert 2 == len(search_snow_result)
 
     search_jon_result = sql_repository.find_all_contain_str('name', 'Jon')
-    assert len(search_jon_result) == 1
+    assert 1 == len(search_jon_result)
 
     search_ram_result = sql_repository.find_all_contain_str('name', fake_name)
     assert search_ram_result[0].name == new_element['name']

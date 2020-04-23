@@ -37,7 +37,7 @@ class CosmosDBFacade:
                 raise EnvironmentError("DATABASE_MASTER_KEY is not defined in the environment")
 
             client = cosmos_client.CosmosClient(account_uri, {'masterKey': master_key},
-                                                user_agent="CosmosDBDotnetQuickstart",
+                                                user_agent="TimeTrackerAPI",
                                                 user_agent_overwrite=True)
         else:
             client = cosmos_client.CosmosClient.from_connection_string(db_uri)
@@ -108,7 +108,7 @@ class CosmosDBRepository:
     def create_sql_where_conditions(conditions: dict, container_name='c') -> str:
         where_conditions = []
         for k in conditions.keys():
-            where_conditions.append('{c}.{var} = @{var}'.format(c=container_name, var=k))
+            where_conditions.append(f'{container_name}.{k} = @{k}')
 
         if len(where_conditions) > 0:
             return "AND {where_conditions_clause}".format(
@@ -117,14 +117,15 @@ class CosmosDBRepository:
             return ""
 
     @staticmethod
-    def append_conditions_values(params: list, conditions: dict) -> dict:
+    def generate_condition_values(conditions: dict) -> dict:
+        result = []
         for k, v in conditions.items():
-            params.append({
+            result.append({
                 "name": "@%s" % k,
                 "value": v
             })
 
-        return params
+        return result
 
     @staticmethod
     def check_visibility(item, throw_not_found_if_deleted):
@@ -152,11 +153,12 @@ class CosmosDBRepository:
                  visible_only=True, mapper: Callable = None):
         # TODO Use the tenant_id param and change container alias
         max_count = self.get_page_size_or(max_count)
-        params = self.append_conditions_values([
+        params = [
             {"name": "@partition_key_value", "value": partition_key_value},
             {"name": "@offset", "value": offset},
             {"name": "@max_count", "value": max_count},
-        ], conditions)
+        ]
+        params.extend(self.generate_condition_values(conditions))
         result = self.container.query_items(query="""
             SELECT * FROM c WHERE c.{partition_key_attribute}=@partition_key_value
             {conditions_clause} {visibility_condition} {order_clause}

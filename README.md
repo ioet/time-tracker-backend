@@ -66,6 +66,31 @@ automatically [pip](https://pip.pypa.io/en/stable/) as well.
 - Open `http://127.0.0.1:5000/` in a browser. You will find in the presented UI 
 a link to the swagger.json with the definition of the api.
 
+### Security
+In this API we are requiring authenticated users using JWT. To do so, we are using the library 
+[PyJWT](https://pypi.org/project/PyJWT/), so in every request to the API we expect a header `Authorization` with a format 
+like:
+
+>Bearer <JWT>
+
+In the Swagger UI, you will now see a new button called "Authorize":
+![image](https://user-images.githubusercontent.com/6514740/80011459-841f7580-8491-11ea-9c23-5bfb8822afe6.png)
+
+when you click it then you will be notified that you must enter the content of the Authorization header, as mentioned 
+before:
+![image](https://user-images.githubusercontent.com/6514740/80011702-d95b8700-8491-11ea-973a-8aaf3cdadb00.png)
+
+Click "Authorize" and then close that dialog. From that moment forward you will not have to do it anymore because the 
+Swagger UI will use that JWT in every call, e.g.
+![image](https://user-images.githubusercontent.com/6514740/80011852-0e67d980-8492-11ea-9dd3-2b1efeaa57d8.png)
+
+If you want to check out the data (claims) that your JWT contains, you can also use the CLI of 
+[PyJWT](https://pypi.org/project/PyJWT/):
+```
+pyjwt decode --no-verify "<JWT>"
+```
+
+Bear in mind that this API is not in charge of verifying the authenticity of the JWT, but the API Management.
 
 ### Important notes
 Due to the used technology and particularities on the implementation of this API, it is important that you respect the
@@ -164,13 +189,17 @@ python cli.py gen_swagger_json -f ~/Downloads/swagger.json
 ## Semantic versioning
 
 ### Style
-We use [angular commit message style](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits) as the standard commit message style.
+We use [angular commit message style](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits) as the 
+standard commit message style.
 
 ### Release
-1. The release is automatically done by the [TimeTracker CI](https://dev.azure.com/IOET-DevOps/TimeTracker-API/_build?definitionId=1&_a=summary) although can also be done manually. The variable `GH_TOKEN` is required to post releases to Github. The `GH_TOKEN` can be generated following [these steps](https://help.github.com/es/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line).
+1. The release is automatically done by the [TimeTracker CI](https://dev.azure.com/IOET-DevOps/TimeTracker-API/_build?definitionId=1&_a=summary) 
+although can also be done manually. The variable `GH_TOKEN` is required to post releases to Github. The `GH_TOKEN` can 
+be generated following [these steps](https://help.github.com/es/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line).
 
 2. We use the command `semantic-release publish` after a successful PR to make a release. Check the library
-[python-semantic-release](https://python-semantic-release.readthedocs.io/en/latest/commands.html#publish) for details of underlying operations.
+[python-semantic-release](https://python-semantic-release.readthedocs.io/en/latest/commands.html#publish) for details of 
+underlying operations.
 
 ## Run as docker container
 1. Build image

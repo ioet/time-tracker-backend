@@ -88,20 +88,22 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
     def find_interception_with_date_range(self, start_date, end_date, owner_id, partition_key_value,
                                           ignore_id=None, visible_only=True, mapper: Callable = None):
-        conditions = {"owner_id": owner_id}
-        params = self.append_conditions_values([
-            {"name": "@partition_key_value", "value": partition_key_value},
+        conditions = {
+            "owner_id": owner_id,
+            "tenant_id": partition_key_value,
+        }
+        params = [
             {"name": "@start_date", "value": start_date},
             {"name": "@end_date", "value": end_date or current_datetime_str()},
             {"name": "@ignore_id", "value": ignore_id},
-        ], conditions)
+        ]
+        params.extend(self.generate_condition_values(conditions))
         result = self.container.query_items(
             query="""
-            SELECT * FROM c WHERE c.tenant_id=@partition_key_value  
-             AND ((c.start_date BETWEEN @start_date AND @end_date) OR (c.end_date BETWEEN @start_date AND @end_date))
+            SELECT * FROM c WHERE ((c.start_date BETWEEN @start_date AND @end_date) 
+              OR (c.end_date BETWEEN @start_date AND @end_date))
              {conditions_clause} {ignore_id_condition} {visibility_condition} {order_clause}
-            """.format(partition_key_attribute=self.partition_key_attribute,
-                       ignore_id_condition=self.create_sql_ignore_id_condition(ignore_id),
+            """.format(ignore_id_condition=self.create_sql_ignore_id_condition(ignore_id),
                        visibility_condition=self.create_sql_condition_for_visibility(visible_only),
                        conditions_clause=self.create_sql_where_conditions(conditions),
                        order_clause=self.create_sql_order_clause()),
@@ -111,15 +113,22 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         function_mapper = self.get_mapper_or_dict(mapper)
         return list(map(function_mapper, result))
 
-    def find_running(self, partition_key_value: str, mapper: Callable = None):
+    def find_running(self, partition_key_value: str, owner_id: str, mapper: Callable = None):
+        conditions = {
+            "owner_id": owner_id,
+            "tenant_id": partition_key_value,
+        }
         result = self.container.query_items(
             query="""
                   SELECT * from c
-                  WHERE (NOT IS_DEFINED(c.end_date) OR c.end_date = null) {visibility_condition}
+                  WHERE (NOT IS_DEFINED(c.end_date) OR c.end_date = null) 
+                  {conditions_clause} {visibility_condition}
                   OFFSET 0 LIMIT 1
             """.format(
                 visibility_condition=self.create_sql_condition_for_visibility(True),
+                conditions_clause=self.create_sql_where_conditions(conditions),
             ),
+            parameters=self.generate_condition_values(conditions),
             partition_key=partition_key_value,
             max_item_count=1)
 
@@ -183,7 +192,8 @@ class TimeEntriesCosmosDBDao(TimeEntriesDao, CosmosDBDao):
                                peeker=self.check_whether_current_user_owns_item)
 
     def find_running(self):
-        return self.repository.find_running(partition_key_value=self.partition_key_value)
+        return self.repository.find_running(partition_key_value=self.partition_key_value,
+                                            owner_id=self.current_user_id())
 
 
 def create_dao() -> TimeEntriesDao:

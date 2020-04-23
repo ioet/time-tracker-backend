@@ -1,3 +1,5 @@
+import pytest
+
 from time_tracker_api.security import parse_jwt, parse_tenant_id_from_iss_claim
 
 
@@ -14,8 +16,11 @@ def test_parse_jwt_with_invalid_input():
     assert result is None
 
 
-def test_parse_tenant_id_from_iss_claim_with_valid_input():
-    valid_iss_claim = "https://securityioet.b2clogin.com/b21c4e98-c4bf-420f-9d76-e51c2515c7a4/v2.0/"
+@pytest.mark.parametrize(
+    'domain_prefix', ['securityioet', 'ioetec', 'anything-else']
+)
+def test_parse_tenant_id_from_iss_claim_with_valid_input(domain_prefix):
+    valid_iss_claim = f'https://{domain_prefix}.b2clogin.com/b21c4e98-c4bf-420f-9d76-e51c2515c7a4/v2.0/'
 
     result = parse_tenant_id_from_iss_claim(valid_iss_claim)
 
