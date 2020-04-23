@@ -1,7 +1,7 @@
 from azure.cosmos.exceptions import CosmosResourceExistsError, CosmosResourceNotFoundError, CosmosHttpResponseError
 from faker import Faker
 from flask import current_app as app
-from flask_restplus import Api, fields
+from flask_restplus import Api, fields, reqparse
 from flask_restplus._http import HTTPStatus
 
 from commons.data_access_layer.cosmos_db import CustomError
@@ -17,6 +17,14 @@ api = Api(
     authorizations=security.authorizations,
     security="TimeTracker JWT",
 )
+
+# Filters
+def create_attributes_filter(attributes_filter):
+    filter_attributes_parser = reqparse.RequestParser()
+    for attribute in attributes_filter:
+        filter_attributes_parser.add_argument(f'filters[{attribute}]', location='args')
+
+    return filter_attributes_parser
 
 # For matching UUIDs
 UUID_REGEX = '[0-9a-f]{8}\-[0-9a-f]{4}\-4[0-9a-f]{3}\-[89ab][0-9a-f]{3}\-[0-9a-f]{12}'
