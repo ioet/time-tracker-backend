@@ -46,7 +46,9 @@ automatically [pip](https://pip.pypa.io/en/stable/) as well.
     
     
     Remember to do it with Python 3.
-    
+
+- Run `pre-commit install`. For more details, check out Development > Git hooks.
+
 ### How to use it
 - Set the env var `FLASK_APP` to `time_tracker_api` and start the app:
 
@@ -73,6 +75,16 @@ following notes regarding to the manipulation of the data from and towards the A
 DateTime strings in Azure Cosmos DB is `YYYY-MM-DDThh:mm:ss.fffffffZ` which follows the ISO 8601 **UTC standard**.
 
 ## Development
+
+### Git hooks
+We use [pre-commit](https://github.com/pre-commit/pre-commit) library to manage local git hooks, as developers we just need to run in our virtual environment:
+
+```
+pre-commit install
+```
+With this command the library will take configuration from `.pre-commit-config.yaml` and will set up the hooks by us. 
+
+Currently, we only have a hook to enforce semantic commit message.
 
 ### Test
 We are using [Pytest](https://docs.pytest.org/en/latest/index.html) for tests. The tests are located in the package 
