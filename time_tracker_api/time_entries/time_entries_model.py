@@ -5,8 +5,8 @@ from typing import List, Callable
 from azure.cosmos import PartitionKey
 from flask_restplus._http import HTTPStatus
 
-from commons.data_access_layer.cosmos_db import CosmosDBDao, CosmosDBRepository, CustomError, CosmosDBModel, \
-    current_datetime, datetime_str
+from commons.data_access_layer.cosmos_db import CosmosDBDao, CosmosDBRepository, CustomError, current_datetime_str, \
+    CosmosDBModel
 from commons.data_access_layer.database import CRUDDao
 from time_tracker_api.security import current_user_id
 
@@ -34,15 +34,15 @@ container_definition = {
 
 @dataclass()
 class TimeEntryCosmosDBModel(CosmosDBModel):
-    id: str
-    description: str
     project_id: str
-    activity_id: str
+    start_date: str
     owner_id: str
+    id: str
     tenant_id: str
+    description: str = field(default=None)
+    activity_id: str = field(default=None)
     uri: str = field(default=None)
     technologies: List[str] = field(default_factory=list)
-    start_date: str = field(default_factory=current_datetime)
     end_date: str = field(default=None)
     deleted: str = field(default=None)
 
@@ -76,6 +76,10 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
     def on_create(self, new_item_data: dict):
         CosmosDBRepository.on_create(self, new_item_data)
+
+        if new_item_data.get("start_date") is None:
+            new_item_data['start_date'] = current_datetime_str()
+
         self.validate_data(new_item_data)
 
     def on_update(self, updated_item_data: dict):
@@ -88,7 +92,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         params = self.append_conditions_values([
             {"name": "@partition_key_value", "value": partition_key_value},
             {"name": "@start_date", "value": start_date},
-            {"name": "@end_date", "value": end_date or datetime_str(current_datetime())},
+            {"name": "@end_date", "value": end_date or current_datetime_str()},
             {"name": "@ignore_id", "value": ignore_id},
         ], conditions)
         result = self.container.query_items(
@@ -123,15 +127,17 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         return function_mapper(next(result))
 
     def validate_data(self, data):
+        start_date = data.get('start_date')
+
         if data.get('end_date') is not None:
-            if data['end_date'] <= data.get('start_date'):
+            if data['end_date'] <= start_date:
                 raise CustomError(HTTPStatus.BAD_REQUEST,
                                   description="You must end the time entry after it started")
-            if data['end_date'] >= datetime_str(current_datetime()):
+            if data['end_date'] >= current_datetime_str():
                 raise CustomError(HTTPStatus.BAD_REQUEST,
                                   description="You cannot end a time entry in the future")
 
-        collision = self.find_interception_with_date_range(start_date=data.get('start_date'),
+        collision = self.find_interception_with_date_range(start_date=start_date,
                                                            end_date=data.get('end_date'),
                                                            owner_id=data.get('owner_id'),
                                                            partition_key_value=data.get('tenant_id'),

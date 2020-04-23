@@ -137,7 +137,13 @@ def another_item(cosmos_db_repository: CosmosDBRepository, tenant_id: str) -> di
 
 
 @pytest.fixture(scope="module")
-def time_entry_repository() -> TimeEntryCosmosDBRepository:
+def time_entry_repository(app: Flask) -> TimeEntryCosmosDBRepository:
+    with app.app_context():
+        from commons.data_access_layer.cosmos_db import init_app, cosmos_helper
+
+        if cosmos_helper is None:
+            init_app(app)
+
     return TimeEntryCosmosDBRepository()
 
 
@@ -147,7 +153,6 @@ def running_time_entry(time_entry_repository: TimeEntryCosmosDBRepository,
                        tenant_id: str):
     created_time_entry = time_entry_repository.create({
         "project_id": fake.uuid4(),
-        "start_date": datetime_str(current_datetime()),
         "owner_id": owner_id,
         "tenant_id": tenant_id
     })

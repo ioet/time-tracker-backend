@@ -139,7 +139,8 @@ class CosmosDBRepository:
         function_mapper = self.get_mapper_or_dict(mapper)
         return function_mapper(self.container.create_item(body=data))
 
-    def find(self, id: str, partition_key_value, peeker: 'function' = None, visible_only=True, mapper: Callable = None):
+    def find(self, id: str, partition_key_value, peeker: 'function' = None,
+             visible_only=True, mapper: Callable = None):
         found_item = self.container.read_item(id, partition_key_value)
         if peeker:
             peeker(found_item)
@@ -201,7 +202,7 @@ class CosmosDBRepository:
 
     def on_create(self, new_item_data: dict):
         if new_item_data.get('id') is None:
-            new_item_data['id'] = str(uuid.uuid4())
+            new_item_data['id'] = generate_uuid4()
 
     def on_update(self, update_item_data: dict):
         pass
@@ -245,15 +246,23 @@ class CustomError(HTTPException):
         self.description = description
 
 
-def current_datetime():
+def current_datetime() -> datetime:
     return datetime.utcnow()
 
 
-def datetime_str(value: datetime):
+def datetime_str(value: datetime) -> str:
     if value is not None:
         return value.isoformat()
     else:
         return None
+
+
+def current_datetime_str() -> str:
+    return datetime_str(current_datetime())
+
+
+def generate_uuid4() -> str:
+    return str(uuid.uuid4())
 
 
 def init_app(app: Flask) -> None:
