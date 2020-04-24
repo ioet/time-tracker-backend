@@ -176,7 +176,8 @@ class CosmosDBRepository:
 
     def partial_update(self, id: str, changes: dict, partition_key_value: str,
                        peeker: 'function' = None, visible_only=True, mapper: Callable = None):
-        item_data = self.find(id, partition_key_value, peeker=peeker, visible_only=visible_only, mapper=dict)
+        item_data = self.find(id, partition_key_value, peeker=peeker,
+                              visible_only=visible_only, mapper=dict)
         item_data.update(changes)
         return self.update(id, item_data, mapper=mapper)
 
@@ -219,8 +220,9 @@ class CosmosDBDao(CRUDDao):
     def __init__(self, repository: CosmosDBRepository):
         self.repository = repository
 
-    def get_all(self) -> list:
-        return self.repository.find_all(partition_key_value=self.partition_key_value)
+    def get_all(self, conditions: dict = {}) -> list:
+        return self.repository.find_all(partition_key_value=self.partition_key_value,
+                                        conditions=conditions)
 
     def get(self, id):
         return self.repository.find(id, partition_key_value=self.partition_key_value)

@@ -3,7 +3,6 @@ import os
 
 from flask import Flask
 
-
 flask_app: Flask = None
 
 

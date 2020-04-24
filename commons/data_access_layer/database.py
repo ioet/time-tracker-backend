@@ -15,7 +15,7 @@ ID_MAX_LENGTH = 64
 
 class CRUDDao(abc.ABC):
     @abc.abstractmethod
-    def get_all(self):
+    def get_all(self, conditions: dict):
         raise NotImplementedError  # pragma: no cover
 
     @abc.abstractmethod

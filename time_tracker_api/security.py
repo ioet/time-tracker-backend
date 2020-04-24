@@ -24,8 +24,10 @@ authorizations = {
     }
 }
 
-iss_claim_pattern = re.compile(
-    r"(.*).b2clogin.com/(?P<tenant_id>[0-9a-f]{8}\-[0-9a-f]{4}\-4[0-9a-f]{3}\-[89ab][0-9a-f]{3}\-[0-9a-f]{12})")
+# For matching UUIDs
+UUID_REGEX = '[0-9a-f]{8}\-[0-9a-f]{4}\-4[0-9a-f]{3}\-[89ab][0-9a-f]{3}\-[0-9a-f]{12}'
+
+iss_claim_pattern = re.compile(r"(.*).b2clogin.com/(?P<tenant_id>%s)" % UUID_REGEX)
 
 
 def current_user_id() -> str:

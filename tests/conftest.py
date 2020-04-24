@@ -3,10 +3,10 @@ from datetime import datetime, timedelta
 import jwt
 import pytest
 from faker import Faker
-from flask import Flask, url_for
+from flask import Flask
 from flask.testing import FlaskClient
 
-from commons.data_access_layer.cosmos_db import CosmosDBRepository, datetime_str, current_datetime
+from commons.data_access_layer.cosmos_db import CosmosDBRepository
 from commons.data_access_layer.database import init_sql
 from time_tracker_api import create_app
 from time_tracker_api.security import get_or_generate_dev_secret_key
@@ -160,7 +160,7 @@ def running_time_entry(time_entry_repository: TimeEntryCosmosDBRepository,
     yield created_time_entry
 
     time_entry_repository.delete_permanently(id=created_time_entry.id,
-                                 partition_key_value=tenant_id)
+                                             partition_key_value=tenant_id)
 
 
 @pytest.fixture(scope="session")

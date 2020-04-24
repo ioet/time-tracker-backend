@@ -67,7 +67,8 @@ def test_list_all_activities(client: FlaskClient,
     assert HTTPStatus.OK == response.status_code
     json_data = json.loads(response.data)
     assert [] == json_data
-    repository_find_all_mock.assert_called_once_with(partition_key_value=tenant_id)
+    repository_find_all_mock.assert_called_once_with(partition_key_value=tenant_id,
+                                                     conditions={})
 
 
 def test_get_activity_should_succeed_with_valid_id(client: FlaskClient,
