@@ -2,8 +2,9 @@ from faker import Faker
 from flask_restplus import Namespace, Resource, fields
 from flask_restplus._http import HTTPStatus
 
-from time_tracker_api.api import common_fields, UUID_REGEX
+from time_tracker_api.api import common_fields, create_attributes_filter
 from time_tracker_api.project_types.project_types_model import create_dao
+from time_tracker_api.security import UUID_REGEX
 
 faker = Faker()
 
@@ -16,7 +17,7 @@ project_type_input = ns.model('ProjectTypeInput', {
         required=True,
         max_length=50,
         description='Name of the project type',
-        example=faker.random_element(["Customer","Training","Internal"]),
+        example=faker.random_element(["Customer", "Training", "Internal"]),
     ),
     'description': fields.String(
         title='Description',
@@ -53,14 +54,21 @@ project_type = ns.inherit(
 
 project_type_dao = create_dao()
 
+attributes_filter = create_attributes_filter(ns, project_type, [
+    "customer_id",
+    "parent_id",
+])
+
 
 @ns.route('')
 class ProjectTypes(Resource):
     @ns.doc('list_project_types')
+    @ns.expect(attributes_filter)
     @ns.marshal_list_with(project_type)
     def get(self):
         """List all project types"""
-        return project_type_dao.get_all()
+        conditions = attributes_filter.parse_args()
+        return project_type_dao.get_all(conditions=conditions)
 
     @ns.doc('create_project_type')
     @ns.response(HTTPStatus.CONFLICT, 'This project type already exists')

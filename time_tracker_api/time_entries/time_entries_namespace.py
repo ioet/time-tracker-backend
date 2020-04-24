@@ -6,7 +6,8 @@ from flask_restplus._http import HTTPStatus
 
 from commons.data_access_layer.cosmos_db import current_datetime, datetime_str, current_datetime_str
 from commons.data_access_layer.database import COMMENTS_MAX_LENGTH
-from time_tracker_api.api import common_fields, UUID_REGEX
+from time_tracker_api.api import common_fields, create_attributes_filter
+from time_tracker_api.security import UUID_REGEX
 from time_tracker_api.time_entries.time_entries_model import create_dao
 
 faker = Faker()
@@ -103,6 +104,12 @@ time_entry = ns.inherit(
 
 time_entries_dao = create_dao()
 
+attributes_filter = create_attributes_filter(ns, time_entry, [
+    "project_id",
+    "activity_id",
+    "uri",
+])
+
 
 @ns.route('')
 class TimeEntries(Resource):
@@ -110,7 +117,8 @@ class TimeEntries(Resource):
     @ns.marshal_list_with(time_entry)
     def get(self):
         """List all time entries"""
-        return time_entries_dao.get_all()
+        conditions = attributes_filter.parse_args()
+        return time_entries_dao.get_all(conditions=conditions)
 
     @ns.doc('create_time_entry')
     @ns.expect(time_entry_input)

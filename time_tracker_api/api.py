@@ -1,11 +1,14 @@
 from azure.cosmos.exceptions import CosmosResourceExistsError, CosmosResourceNotFoundError, CosmosHttpResponseError
 from faker import Faker
 from flask import current_app as app
-from flask_restplus import Api, fields
+from flask_restplus import Api, fields, Model
+from flask_restplus import namespace
 from flask_restplus._http import HTTPStatus
+from flask_restplus.reqparse import RequestParser
 
 from commons.data_access_layer.cosmos_db import CustomError
 from time_tracker_api import security
+from time_tracker_api.security import UUID_REGEX
 from time_tracker_api.version import __version__
 
 faker = Faker()
@@ -18,8 +21,22 @@ api = Api(
     security="TimeTracker JWT",
 )
 
-# For matching UUIDs
-UUID_REGEX = '[0-9a-f]{8}\-[0-9a-f]{4}\-4[0-9a-f]{3}\-[89ab][0-9a-f]{3}\-[0-9a-f]{12}'
+
+# Filters
+def create_attributes_filter(ns: namespace, model: Model, filter_attrib_names: list) -> RequestParser:
+    attribs_parser = ns.parser()
+    model_attributes = model.resolved
+    for attrib in filter_attrib_names:
+        if attrib not in model_attributes:
+            raise ValueError(f"{attrib} is not a valid filter attribute for {model.name}")
+
+        attribs_parser.add_argument(attrib, required=False,
+                                    store_missing=False,
+                                    help="(Filter) %s " % model_attributes[attrib].description,
+                                    location='args')
+
+    return attribs_parser
+
 
 # Common models structure
 common_fields = {

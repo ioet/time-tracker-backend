@@ -167,9 +167,10 @@ class TimeEntriesCosmosDBDao(TimeEntriesDao, CosmosDBDao):
             raise CustomError(HTTPStatus.FORBIDDEN,
                               "The current user is not the owner of this time entry")
 
-    def get_all(self) -> list:
+    def get_all(self, conditions: dict = {}) -> list:
+        conditions.update({"owner_id": self.current_user_id()})
         return self.repository.find_all(partition_key_value=self.partition_key_value,
-                                        conditions={"owner_id": self.current_user_id()})
+                                        conditions=conditions)
 
     def get(self, id):
         return self.repository.find(id,
