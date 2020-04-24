@@ -42,7 +42,7 @@ def test_create_project_type_should_reject_bad_request(client: FlaskClient,
     from time_tracker_api.project_types.project_types_namespace import project_type_dao
     invalid_project_type_data = valid_project_type_data.copy()
     invalid_project_type_data.update({
-        "parent_id": None,
+        "name": None,
     })
     repository_create_mock = mocker.patch.object(project_type_dao.repository,
                                                  'create',
@@ -166,7 +166,7 @@ def test_update_project_should_reject_bad_request(client: FlaskClient,
     from time_tracker_api.project_types.project_types_namespace import project_type_dao
     invalid_project_type_data = valid_project_type_data.copy()
     invalid_project_type_data.update({
-        "parent_id": None,
+        "name": None,
     })
     repository_update_mock = mocker.patch.object(project_type_dao.repository,
                                                  'partial_update',

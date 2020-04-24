@@ -38,30 +38,37 @@ def create_attributes_filter(ns: namespace, model: Model, filter_attrib_names: l
     return attribs_parser
 
 
-# Common models structure
+# Custom fields
+class NullableString(fields.String):
+    __schema_type__ = ['string', 'null']
+
+
+class UUID(NullableString):
+    def __init__(self, *args, **kwargs):
+        super(UUID, self).__init__(*args, **kwargs)
+        self.pattern = UUID_REGEX
+
+
 common_fields = {
-    'id': fields.String(
+    'id': UUID(
         title='Identifier',
         readOnly=True,
         required=True,
         description='The unique identifier',
-        pattern=UUID_REGEX,
         example=faker.uuid4(),
     ),
-    'tenant_id': fields.String(
+    'tenant_id': UUID(
         title='Identifier of Tenant',
         readOnly=True,
         required=True,
         description='Tenant it belongs to',
-        # pattern=UUID_REGEX, This must be confirmed
         example=faker.uuid4(),
     ),
-    'deleted': fields.String(
+    'deleted': UUID(
         readOnly=True,
         required=True,
         title='Last event Identifier',
         description='Last event over this resource',
-        pattern=UUID_REGEX,
     ),
 }
 

@@ -7,7 +7,7 @@ from flask.testing import FlaskClient
 from flask_restplus._http import HTTPStatus
 from pytest_mock import MockFixture
 
-from commons.data_access_layer.cosmos_db import current_datetime
+from commons.data_access_layer.cosmos_db import current_datetime, current_datetime_str
 
 fake = Faker()
 
@@ -16,14 +16,14 @@ valid_time_entry_input = {
     "project_id": fake.uuid4(),
     "activity_id": fake.uuid4(),
     "description": fake.paragraph(nb_sentences=2),
-    "start_date": str(yesterday.isoformat()),
-    "owner_id": fake.uuid4(),
-    "tenant_id": fake.uuid4()
+    "start_date": current_datetime_str(),
 }
 
 fake_time_entry = ({
     "id": fake.random_int(1, 9999),
     "running": True,
+    "owner_id": fake.uuid4(),
+    "tenant_id": fake.uuid4(),
 })
 fake_time_entry.update(valid_time_entry_input)
 
@@ -86,21 +86,20 @@ def test_create_time_entry_should_succeed_with_valid_request(client: FlaskClient
     repository_create_mock.assert_called_once()
 
 
-def test_create_time_entry_should_reject_bad_request(client: FlaskClient,
-                                                     mocker: MockFixture,
-                                                     valid_header: dict):
+def test_create_time_entry_with_missing_req_field_should_return_bad_request(client: FlaskClient,
+                                                                            mocker: MockFixture,
+                                                                            valid_header: dict):
     from time_tracker_api.time_entries.time_entries_namespace import time_entries_dao
-    invalid_time_entry_input = valid_time_entry_input.copy()
-    invalid_time_entry_input.update({
-        "project_id": None,
-    })
     repository_create_mock = mocker.patch.object(time_entries_dao.repository,
                                                  'create',
                                                  return_value=fake_time_entry)
 
     response = client.post("/time-entries",
                            headers=valid_header,
-                           json=invalid_time_entry_input,
+                           json={
+                               "activity_id": fake.uuid4(),
+                               "start_date": current_datetime_str(),
+                           },
                            follow_redirects=True)
 
     assert HTTPStatus.BAD_REQUEST == response.status_code

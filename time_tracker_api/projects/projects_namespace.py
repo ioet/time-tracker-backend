@@ -1,14 +1,13 @@
 from faker import Faker
-from flask_restplus import Namespace, Resource, fields
+from flask_restplus import Resource, fields
 from flask_restplus._http import HTTPStatus
 
-from time_tracker_api.api import common_fields, create_attributes_filter
+from time_tracker_api.api import common_fields, create_attributes_filter, UUID, api
 from time_tracker_api.projects.projects_model import create_dao
-from time_tracker_api.security import UUID_REGEX
 
 faker = Faker()
 
-ns = Namespace('projects', description='API for projects (clients)')
+ns = api.namespace('projects', description='Namespace of the API for projects')
 
 # Project Model
 project_input = ns.model('ProjectInput', {
@@ -26,19 +25,17 @@ project_input = ns.model('ProjectInput', {
         description='Description about the project',
         example=faker.paragraph(),
     ),
-    'customer_id': fields.String(
+    'customer_id': UUID(
         title='Identifier of the Customer',
         required=False,
         description='Customer this project type belongs to. '
                     'If not specified, it will be considered an internal project of the tenant.',
-        pattern=UUID_REGEX,
         example=faker.uuid4(),
     ),
-    'project_type_id': fields.String(
+    'project_type_id': UUID(
         title='Identifier of the project type',
         required=False,
         description='Id of the project type it belongs. This allows grouping the projects.',
-        pattern=UUID_REGEX,
         example=faker.uuid4(),
     ),
 })
