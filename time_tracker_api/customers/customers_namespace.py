@@ -1,13 +1,13 @@
 from faker import Faker
-from flask_restplus import Namespace, Resource, fields
+from flask_restplus import Resource, fields
 from flask_restplus._http import HTTPStatus
 
-from time_tracker_api.api import common_fields
+from time_tracker_api.api import common_fields, api
 from time_tracker_api.customers.customers_model import create_dao
 
 faker = Faker()
 
-ns = Namespace('customers', description='API for customers')
+ns = api.namespace('customers', description='Namespace of the API for customers')
 
 # Customer Model
 customer_input = ns.model('CustomerInput', {

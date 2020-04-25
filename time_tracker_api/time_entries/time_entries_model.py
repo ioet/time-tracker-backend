@@ -85,6 +85,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
     def on_update(self, updated_item_data: dict):
         CosmosDBRepository.on_update(self, updated_item_data)
         self.validate_data(updated_item_data)
+        self.replace_empty_value_per_none(updated_item_data)
 
     def find_interception_with_date_range(self, start_date, end_date, owner_id, partition_key_value,
                                           ignore_id=None, visible_only=True, mapper: Callable = None):

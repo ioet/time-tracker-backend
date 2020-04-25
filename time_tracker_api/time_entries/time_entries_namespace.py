@@ -1,26 +1,24 @@
 from datetime import timedelta
 
 from faker import Faker
-from flask_restplus import fields, Resource, Namespace
+from flask_restplus import fields, Resource
 from flask_restplus._http import HTTPStatus
 
 from commons.data_access_layer.cosmos_db import current_datetime, datetime_str, current_datetime_str
 from commons.data_access_layer.database import COMMENTS_MAX_LENGTH
-from time_tracker_api.api import common_fields, create_attributes_filter
-from time_tracker_api.security import UUID_REGEX
+from time_tracker_api.api import common_fields, create_attributes_filter, api, UUID
 from time_tracker_api.time_entries.time_entries_model import create_dao
 
 faker = Faker()
 
-ns = Namespace('time-entries', description='API for time entries')
+ns = api.namespace('time-entries', description='Namespace of the API for time entries')
 
 # TimeEntry Model
 time_entry_input = ns.model('TimeEntryInput', {
-    'project_id': fields.String(
+    'project_id': UUID(
         title='Project',
         required=True,
         description='The id of the selected project',
-        pattern=UUID_REGEX,
         example=faker.uuid4(),
     ),
     'start_date': fields.DateTime(
@@ -30,11 +28,10 @@ time_entry_input = ns.model('TimeEntryInput', {
         description='When the user started doing this activity',
         example=datetime_str(current_datetime() - timedelta(days=1)),
     ),
-    'activity_id': fields.String(
+    'activity_id': UUID(
         title='Activity',
         required=False,
         description='The id of the selected activity',
-        pattern=UUID_REGEX,
         example=faker.uuid4(),
     ),
     'description': fields.String(
@@ -86,7 +83,7 @@ time_entry_response_fields = {
         description='Whether this time entry is currently running or not',
         example=faker.boolean(),
     ),
-    'owner_id': fields.String(
+    'owner_id': UUID(
         required=True,
         readOnly=True,
         title='Owner of time entry',
