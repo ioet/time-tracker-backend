@@ -132,8 +132,13 @@ class CosmosDBRepository:
         if throw_not_found_if_deleted and item.get('deleted') is not None:
             raise exceptions.CosmosResourceNotFoundError(message='Deleted item',
                                                          status_code=404)
-
         return item
+
+    @staticmethod
+    def replace_empty_value_per_none(item_data: dict) -> dict:
+        for k, v in item_data.items():
+            if isinstance(v, str) and len(v) == 0:
+                item_data[k] = None
 
     def create(self, data: dict, mapper: Callable = None):
         self.on_create(data)
@@ -206,6 +211,8 @@ class CosmosDBRepository:
     def on_create(self, new_item_data: dict):
         if new_item_data.get('id') is None:
             new_item_data['id'] = generate_uuid4()
+
+        self.replace_empty_value_per_none(new_item_data)
 
     def on_update(self, update_item_data: dict):
         pass

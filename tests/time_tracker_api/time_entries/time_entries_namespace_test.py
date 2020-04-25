@@ -5,7 +5,7 @@ from faker import Faker
 from flask import json
 from flask.testing import FlaskClient
 from flask_restplus._http import HTTPStatus
-from pytest_mock import MockFixture
+from pytest_mock import MockFixture, pytest
 
 from commons.data_access_layer.cosmos_db import current_datetime, current_datetime_str
 
@@ -423,3 +423,50 @@ def test_get_running_should_return_not_found_if_find_running_throws_StopIteratio
     assert HTTPStatus.NOT_FOUND == response.status_code
     repository_update_mock.assert_called_once_with(partition_key_value=tenant_id,
                                                    owner_id=owner_id)
+
+@pytest.mark.parametrize(
+    'invalid_uuid', ["zxy", "zxy%s" % fake.uuid4(), "%szxy" % fake.uuid4(), "  "]
+)
+def test_create_with_invalid_uuid_format_should_return_bad_request(client: FlaskClient,
+                                                                   mocker: MockFixture,
+                                                                   valid_header: dict,
+                                                                   invalid_uuid: str):
+    from time_tracker_api.time_entries.time_entries_namespace import time_entries_dao
+    repository_container_create_item_mock = mocker.patch.object(time_entries_dao.repository.container,
+                                                                'create_item',
+                                                                return_value=fake_time_entry)
+    invalid_time_entry_input = {
+        "project_id": fake.uuid4(),
+        "activity_id": invalid_uuid,
+    }
+    response = client.post("/time-entries",
+                           headers=valid_header,
+                           json=invalid_time_entry_input,
+                           follow_redirects=True)
+
+    assert HTTPStatus.BAD_REQUEST == response.status_code
+    repository_container_create_item_mock.assert_not_called()
+
+@pytest.mark.parametrize(
+    'valid_uuid', ["", fake.uuid4()]
+)
+def test_create_with_valid_uuid_format_should_return_created(client: FlaskClient,
+                                                                   mocker: MockFixture,
+                                                                   valid_header: dict,
+                                                                   valid_uuid: str):
+    from time_tracker_api.time_entries.time_entries_namespace import time_entries_dao
+    repository_container_create_item_mock = mocker.patch.object(time_entries_dao.repository.container,
+                                                                'create_item',
+                                                                return_value=fake_time_entry)
+    invalid_time_entry_input = {
+        "project_id": fake.uuid4(),
+        "activity_id": valid_uuid,
+    }
+    response = client.post("/time-entries",
+                           headers=valid_header,
+                           json=invalid_time_entry_input,
+                           follow_redirects=True)
+
+    assert HTTPStatus.CREATED == response.status_code
+    repository_container_create_item_mock.assert_called()
+

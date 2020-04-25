@@ -602,3 +602,28 @@ def test_datetime_str_comparison():
 
     assert now_str > datetime_str(now - timedelta(days=1))
     assert now_str < datetime_str(now + timedelta(days=1))
+
+
+def test_replace_empty_value_per_none(tenant_id: str):
+    initial_value = dict(id=fake.uuid4(),
+                 name=fake.name(),
+                 empty_str_attrib="",
+                 array_attrib=[1, 2, 3],
+                 empty_array_attrib=[],
+                 description="    ",
+                 age=fake.pyint(min_value=10, max_value=80),
+                 size=0,
+                 tenant_id=tenant_id)
+
+    input = initial_value.copy()
+
+    CosmosDBRepository.replace_empty_value_per_none(input)
+
+    assert input["name"] == initial_value["name"]
+    assert input["empty_str_attrib"] is None
+    assert input["array_attrib"] == initial_value["array_attrib"]
+    assert input["empty_array_attrib"] == initial_value["empty_array_attrib"]
+    assert input["description"] == initial_value["description"]
+    assert input["age"] == initial_value["age"]
+    assert input["size"] == initial_value["size"]
+    assert input["tenant_id"] == initial_value["tenant_id"]

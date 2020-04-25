@@ -46,7 +46,7 @@ class NullableString(fields.String):
 class UUID(NullableString):
     def __init__(self, *args, **kwargs):
         super(UUID, self).__init__(*args, **kwargs)
-        self.pattern = UUID_REGEX
+        self.pattern = r"^(|%s)$" % UUID_REGEX
 
 
 common_fields = {
