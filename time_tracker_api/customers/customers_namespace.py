@@ -2,7 +2,7 @@ from faker import Faker
 from flask_restplus import Resource, fields
 from flask_restplus._http import HTTPStatus
 
-from time_tracker_api.api import common_fields, api
+from time_tracker_api.api import common_fields, api, remove_required_constraint
 from time_tracker_api.customers.customers_model import create_dao
 
 faker = Faker()
@@ -74,7 +74,7 @@ class Customer(Resource):
     @ns.response(HTTPStatus.BAD_REQUEST, 'Invalid format or structure '
                                          'of the attributes of the customer')
     @ns.response(HTTPStatus.CONFLICT, 'A customer already exists with this new data')
-    @ns.expect(customer_input)
+    @ns.expect(remove_required_constraint(customer_input))
     @ns.marshal_with(customer)
     def put(self, id):
         """Update a customer"""

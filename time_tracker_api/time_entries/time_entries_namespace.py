@@ -6,7 +6,8 @@ from flask_restplus._http import HTTPStatus
 
 from commons.data_access_layer.cosmos_db import current_datetime, datetime_str, current_datetime_str
 from commons.data_access_layer.database import COMMENTS_MAX_LENGTH
-from time_tracker_api.api import common_fields, create_attributes_filter, api, UUID, NullableString
+from time_tracker_api.api import common_fields, create_attributes_filter, api, UUID, NullableString, \
+    remove_required_constraint
 from time_tracker_api.time_entries.time_entries_model import create_dao
 
 faker = Faker()
@@ -146,7 +147,7 @@ class TimeEntry(Resource):
                                          'of the attributes of the time entry')
     @ns.response(HTTPStatus.CONFLICT, 'A time entry already exists with this new data or there'
                                       ' is a bad reference for the project or activity')
-    @ns.expect(time_entry_input)
+    @ns.expect(remove_required_constraint(time_entry_input))
     @ns.marshal_with(time_entry)
     def put(self, id):
         """Update a time entry"""

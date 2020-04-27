@@ -1,6 +1,6 @@
 from azure.cosmos.exceptions import CosmosResourceExistsError, CosmosResourceNotFoundError, CosmosHttpResponseError
 from faker import Faker
-from flask import current_app as app
+from flask import current_app as app, Flask
 from flask_restplus import Api, fields, Model
 from flask_restplus import namespace
 from flask_restplus._http import HTTPStatus
@@ -22,7 +22,14 @@ api = Api(
 )
 
 
-# Filters
+def remove_required_constraint(model: Model):
+    result = model.resolved
+    for attrib in result:
+        result[attrib].required = False
+
+    return result
+
+
 def create_attributes_filter(ns: namespace, model: Model, filter_attrib_names: list) -> RequestParser:
     attribs_parser = ns.parser()
     model_attributes = model.resolved
@@ -72,26 +79,30 @@ common_fields = {
     ),
 }
 
-# APIs
-from time_tracker_api.projects import projects_namespace
 
-api.add_namespace(projects_namespace.ns)
+def init_app(app: Flask):
+    api.init_app(app)
 
-from time_tracker_api.activities import activities_namespace
+    from time_tracker_api.projects import projects_namespace
 
-api.add_namespace(activities_namespace.ns)
+    api.add_namespace(projects_namespace.ns)
 
-from time_tracker_api.time_entries import time_entries_namespace
+    from time_tracker_api.activities import activities_namespace
 
-api.add_namespace(time_entries_namespace.ns)
+    api.add_namespace(activities_namespace.ns)
 
-from time_tracker_api.project_types import project_types_namespace
+    from time_tracker_api.time_entries import time_entries_namespace
 
-api.add_namespace(project_types_namespace.ns)
+    api.add_namespace(time_entries_namespace.ns)
 
-from time_tracker_api.customers import customers_namespace
+    from time_tracker_api.project_types import project_types_namespace
 
-api.add_namespace(customers_namespace.ns)
+    api.add_namespace(project_types_namespace.ns)
+
+    from time_tracker_api.customers import customers_namespace
+
+    api.add_namespace(customers_namespace.ns)
+
 
 """
 Error handlers
