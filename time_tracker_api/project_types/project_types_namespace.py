@@ -2,7 +2,7 @@ from faker import Faker
 from flask_restplus import Resource, fields
 from flask_restplus._http import HTTPStatus
 
-from time_tracker_api.api import common_fields, create_attributes_filter, api, UUID
+from time_tracker_api.api import common_fields, create_attributes_filter, api, UUID, remove_required_constraint
 from time_tracker_api.project_types.project_types_model import create_dao
 
 faker = Faker()
@@ -94,7 +94,7 @@ class ProjectType(Resource):
     @ns.response(HTTPStatus.BAD_REQUEST, 'Invalid format or structure '
                                          'of the attributes of the project type')
     @ns.response(HTTPStatus.CONFLICT, 'A project type already exists with this new data')
-    @ns.expect(project_type_input)
+    @ns.expect(remove_required_constraint(project_type_input))
     @ns.marshal_with(project_type)
     def put(self, id):
         """Update a project type"""

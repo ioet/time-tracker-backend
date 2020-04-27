@@ -3,7 +3,7 @@ from flask_restplus import fields, Resource
 from flask_restplus._http import HTTPStatus
 
 from time_tracker_api.activities.activities_model import create_dao
-from time_tracker_api.api import common_fields, api
+from time_tracker_api.api import common_fields, api, remove_required_constraint
 
 faker = Faker()
 
@@ -68,7 +68,7 @@ class Activity(Resource):
         return activity_dao.get(id)
 
     @ns.doc('update_activity')
-    @ns.expect(activity_input)
+    @ns.expect(remove_required_constraint(activity_input))
     @ns.response(HTTPStatus.BAD_REQUEST, 'Invalid format or structure of the activity')
     @ns.response(HTTPStatus.CONFLICT, 'An activity already exists with this new data')
     @ns.marshal_with(activity)

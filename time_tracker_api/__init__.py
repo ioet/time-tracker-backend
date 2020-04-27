@@ -38,8 +38,8 @@ def init_app(app: Flask):
     from commons.data_access_layer.database import init_app as init_database
     init_database(app)
 
-    from time_tracker_api.api import api
-    api.init_app(app)
+    from time_tracker_api.api import init_app
+    init_app(app)
 
     if app.config.get('DEBUG'):
         app.logger.setLevel(logging.INFO)
