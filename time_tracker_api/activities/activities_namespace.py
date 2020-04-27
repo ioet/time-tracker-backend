@@ -3,7 +3,7 @@ from flask_restplus import fields, Resource
 from flask_restplus._http import HTTPStatus
 
 from time_tracker_api.activities.activities_model import create_dao
-from time_tracker_api.api import common_fields, api, remove_required_constraint
+from time_tracker_api.api import common_fields, api, remove_required_constraint, NullableString
 
 faker = Faker()
 
@@ -18,7 +18,7 @@ activity_input = ns.model('ActivityInput', {
         description='Canonical name of the activity',
         example=faker.word(['Development', 'Training']),
     ),
-    'description': fields.String(
+    'description': NullableString(
         title='Description',
         required=False,
         description='Comments about the activity',

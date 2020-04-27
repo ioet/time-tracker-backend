@@ -35,7 +35,7 @@ time_entry_input = ns.model('TimeEntryInput', {
         description='The id of the selected activity',
         example=faker.uuid4(),
     ),
-    'description': fields.String(
+    'description': NullableString(
         title='Comments',
         required=False,
         description='Comments about the time entry',

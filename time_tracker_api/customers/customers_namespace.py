@@ -2,7 +2,7 @@ from faker import Faker
 from flask_restplus import Resource, fields
 from flask_restplus._http import HTTPStatus
 
-from time_tracker_api.api import common_fields, api, remove_required_constraint
+from time_tracker_api.api import common_fields, api, remove_required_constraint, NullableString
 from time_tracker_api.customers.customers_model import create_dao
 
 faker = Faker()
@@ -18,7 +18,7 @@ customer_input = ns.model('CustomerInput', {
         description='Name of the customer',
         example=faker.company(),
     ),
-    'description': fields.String(
+    'description': NullableString(
         title='Description',
         required=False,
         max_length=250,
