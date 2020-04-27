@@ -6,7 +6,7 @@ from flask_restplus._http import HTTPStatus
 
 from commons.data_access_layer.cosmos_db import current_datetime, datetime_str, current_datetime_str
 from commons.data_access_layer.database import COMMENTS_MAX_LENGTH
-from time_tracker_api.api import common_fields, create_attributes_filter, api, UUID
+from time_tracker_api.api import common_fields, create_attributes_filter, api, UUID, NullableString
 from time_tracker_api.time_entries.time_entries_model import create_dao
 
 faker = Faker()
@@ -48,7 +48,7 @@ time_entry_input = ns.model('TimeEntryInput', {
         description='When the user ended doing this activity',
         example=current_datetime_str(),
     ),
-    'uri': fields.String(
+    'uri': NullableString(
         title='Uniform Resource identifier',
         description='Either identifier or locator of a resource in the Internet that helps to understand'
                     ' what this time entry was about. For example, A Jira ticket, a Github issue, a Google document.',
