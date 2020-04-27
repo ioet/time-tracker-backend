@@ -2,7 +2,8 @@ from faker import Faker
 from flask_restplus import Resource, fields
 from flask_restplus._http import HTTPStatus
 
-from time_tracker_api.api import common_fields, create_attributes_filter, api, UUID, remove_required_constraint
+from time_tracker_api.api import common_fields, create_attributes_filter, api, UUID, remove_required_constraint, \
+    NullableString
 from time_tracker_api.project_types.project_types_model import create_dao
 
 faker = Faker()
@@ -18,7 +19,7 @@ project_type_input = ns.model('ProjectTypeInput', {
         description='Name of the project type',
         example=faker.random_element(["Customer", "Training", "Internal"]),
     ),
-    'description': fields.String(
+    'description': NullableString(
         title='Description',
         required=False,
         max_length=250,
