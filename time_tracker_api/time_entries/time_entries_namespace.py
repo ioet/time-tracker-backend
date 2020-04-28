@@ -108,10 +108,20 @@ attributes_filter = create_attributes_filter(ns, time_entry, [
     "uri",
 ])
 
+# custom attributes filter
+attributes_filter.add_argument('month', required=False,
+                                    store_missing=False,
+                                    help="(Filter) month to filter",
+                                    location='args')
+attributes_filter.add_argument('year', required=False,
+                                    store_missing=False,
+                                    help="(Filter) year to filter",
+                                    location='args')
 
 @ns.route('')
 class TimeEntries(Resource):
     @ns.doc('list_time_entries')
+    @ns.expect(attributes_filter)
     @ns.marshal_list_with(time_entry)
     def get(self):
         """List all time entries"""

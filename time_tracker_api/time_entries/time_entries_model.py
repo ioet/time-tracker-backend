@@ -1,6 +1,7 @@
 import abc
 from dataclasses import dataclass, field
-from typing import List, Callable
+from typing import List, Callable, Tuple
+from datetime import datetime
 
 from azure.cosmos import PartitionKey
 from flask_restplus._http import HTTPStatus
@@ -73,6 +74,35 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             return ''
         else:
             return "AND c.id!=@ignore_id"
+
+    @staticmethod
+    def create_sql_date_range_filter(custom_args: dict) -> str:
+        if 'start_date' and 'end_date' in custom_args:
+            return """
+            ((c.start_date BETWEEN @start_date AND @end_date) OR
+             (c.end_date BETWEEN @start_date AND @end_date))
+            """
+        else:
+            return ''
+
+    def find_all(self, partition_key_value: str, conditions: dict, custom_args: dict):
+        custom_conditions = []
+        custom_conditions.append(
+            self.create_sql_date_range_filter(custom_args)
+        )
+
+        custom_params = [
+            {"name": "@start_date", "value": custom_args.get('start_date')},
+            {"name": "@end_date", "value": custom_args.get('end_date')},
+        ]
+
+        return CosmosDBRepository.find_all(
+            self,
+            partition_key_value=partition_key_value,
+            conditions=conditions,
+            custom_conditions=custom_conditions,
+            custom_params=custom_params
+        )
 
     def on_create(self, new_item_data: dict):
         CosmosDBRepository.on_create(self, new_item_data)
@@ -157,6 +187,32 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
                               description="There is another time entry in that date range")
 
 
+def get_last_day_of_month(year: int, month: int) -> int:
+    from calendar import monthrange
+    return monthrange(year=year, month=month)[1]
+
+
+def get_current_year() -> int:
+    return datetime.now().year
+
+
+def get_current_month() -> int:
+    return datetime.now().month
+
+
+def get_date_range_of_month(
+    year: int,
+    month: int
+) -> Tuple[datetime, datetime]:
+    first_day_of_month = 1
+    start_date = datetime(year=year, month=month, day=first_day_of_month)
+
+    # TODO : fix bound as this would exclude the last day
+    last_day_of_month = get_last_day_of_month(year=year, month=month)
+    end_date = datetime(year=year, month=month, day=last_day_of_month)
+    return start_date, end_date
+
+
 class TimeEntriesCosmosDBDao(TimeEntriesDao, CosmosDBDao):
     def __init__(self, repository):
         CosmosDBDao.__init__(self, repository)
@@ -170,8 +226,29 @@ class TimeEntriesCosmosDBDao(TimeEntriesDao, CosmosDBDao):
 
     def get_all(self, conditions: dict = {}) -> list:
         conditions.update({"owner_id": self.current_user_id()})
+
+        if 'month' and 'year' in conditions:
+            month = int(conditions.get("month"))
+            year = int(conditions.get("year"))
+            conditions.pop('month')
+            conditions.pop('year')
+        elif 'month' in conditions:
+            month = int(conditions.get("month"))
+            year = get_current_year()
+            conditions.pop('month')
+        else:
+            month = get_current_month()
+            year = get_current_year()
+
+        start_date, end_date = get_date_range_of_month(year, month)
+
+        custom_args = {
+            'start_date': start_date.isoformat(),
+            'end_date': end_date.isoformat()
+        }
         return self.repository.find_all(partition_key_value=self.partition_key_value,
-                                        conditions=conditions)
+                                        conditions=conditions,
+                                        custom_args=custom_args)
 
     def get(self, id):
         return self.repository.find(id,

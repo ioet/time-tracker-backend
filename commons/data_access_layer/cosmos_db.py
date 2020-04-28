@@ -2,7 +2,7 @@ import dataclasses
 import logging
 import uuid
 from datetime import datetime
-from typing import Callable
+from typing import Callable, List
 
 import azure.cosmos.cosmos_client as cosmos_client
 import azure.cosmos.exceptions as exceptions
@@ -117,6 +117,17 @@ class CosmosDBRepository:
             return ""
 
     @staticmethod
+    def create_sql_custom_conditions(custom_conditions: List[str]) -> str:
+        if len(custom_conditions) > 0:
+            return """
+            AND {custom_conditions_clause}
+            """.format(
+                custom_conditions_clause=" AND ".join(custom_conditions)
+            )
+        else:
+            return ''
+
+    @staticmethod
     def generate_condition_values(conditions: dict) -> dict:
         result = []
         for k, v in conditions.items():
@@ -154,8 +165,8 @@ class CosmosDBRepository:
         function_mapper = self.get_mapper_or_dict(mapper)
         return function_mapper(self.check_visibility(found_item, visible_only))
 
-    def find_all(self, partition_key_value: str, conditions: dict = {}, max_count=None, offset=0,
-                 visible_only=True, mapper: Callable = None):
+    def find_all(self, partition_key_value: str, conditions: dict = {}, custom_conditions: List[str] = [],
+                 custom_params: dict = {}, max_count=None, offset=0, visible_only=True, mapper: Callable = None):
         # TODO Use the tenant_id param and change container alias
         max_count = self.get_page_size_or(max_count)
         params = [
@@ -164,13 +175,15 @@ class CosmosDBRepository:
             {"name": "@max_count", "value": max_count},
         ]
         params.extend(self.generate_condition_values(conditions))
+        params.extend(custom_params)
         result = self.container.query_items(query="""
             SELECT * FROM c WHERE c.{partition_key_attribute}=@partition_key_value
-            {conditions_clause} {visibility_condition} {order_clause}
+            {conditions_clause} {visibility_condition} {custom_conditions_clause} {order_clause}
             OFFSET @offset LIMIT @max_count
             """.format(partition_key_attribute=self.partition_key_attribute,
                        visibility_condition=self.create_sql_condition_for_visibility(visible_only),
                        conditions_clause=self.create_sql_where_conditions(conditions),
+                       custom_conditions_clause=self.create_sql_custom_conditions(custom_conditions),
                        order_clause=self.create_sql_order_clause()),
                                             parameters=params,
                                             partition_key=partition_key_value,
