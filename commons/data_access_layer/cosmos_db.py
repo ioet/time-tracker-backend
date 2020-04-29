@@ -139,6 +139,7 @@ class CosmosDBRepository:
             if isinstance(v, str) and len(v) == 0:
                 item_data[k] = None
 
+    @staticmethod
     def attach_context(data: dict, event_context: EventContext):
         data["_last_event_ctx"] = {
             "user_id": event_context.user_id,
@@ -194,21 +195,20 @@ class CosmosDBRepository:
                        peeker: 'function' = None, visible_only=True, mapper: Callable = None):
         item_data = self.find(id, event_context, peeker=peeker, visible_only=visible_only, mapper=dict)
         item_data.update(changes)
-        return self.update(id, item_data, event_context=event_context, mapper=mapper)
+        return self.update(id, item_data, event_context, mapper=mapper)
 
     def update(self, id: str, item_data: dict, event_context: EventContext,
                mapper: Callable = None):
-        self.on_update(item_data)
+        self.on_update(item_data, event_context)
         function_mapper = self.get_mapper_or_dict(mapper)
         self.attach_context(item_data, event_context)
         return function_mapper(self.container.replace_item(id, body=item_data))
 
     def delete(self, id: str, event_context: EventContext,
                peeker: 'function' = None, mapper: Callable = None):
-        partition_key_value = self.find_partition_key_value(event_context)
         return self.partial_update(id, {
-            'deleted': str(uuid.uuid4())
-        }, partition_key_value, peeker=peeker, visible_only=True, mapper=mapper)
+            'deleted': generate_uuid4()
+        }, event_context, peeker=peeker, visible_only=True, mapper=mapper)
 
     def delete_permanently(self, id: str, partition_key_value: str) -> None:
         self.container.delete_item(id, partition_key_value)
@@ -232,7 +232,7 @@ class CosmosDBRepository:
 
         self.replace_empty_value_per_none(new_item_data)
 
-    def on_update(self, update_item_data: dict):
+    def on_update(self, update_item_data: dict, event_context: EventContext):
         pass
 
     def create_sql_order_clause(self):
@@ -247,24 +247,23 @@ class CosmosDBDao(CRUDDao):
 
     def get_all(self, conditions: dict = {}) -> list:
         event_ctx = self.create_event_context("read-many")
-        return self.repository.find_all(event_context=event_ctx,
-                                        conditions=conditions)
+        return self.repository.find_all(event_ctx, conditions=conditions)
 
     def get(self, id):
         event_ctx = self.create_event_context("read")
-        return self.repository.find(id, event_context=event_ctx)
+        return self.repository.find(id, event_ctx)
 
     def create(self, data: dict):
         event_ctx = self.create_event_context("create")
-        return self.repository.create(data, event_context=event_ctx)
+        return self.repository.create(data, event_ctx)
 
     def update(self, id, data: dict):
         event_ctx = self.create_event_context("update")
-        return self.repository.partial_update(id, changes=data, event_context=event_ctx)
+        return self.repository.partial_update(id, data, event_ctx)
 
     def delete(self, id):
-        event_ctx = self.create_event_context("update")
-        self.repository.delete(id, event_context=event_ctx)
+        event_ctx = self.create_event_context("delete")
+        self.repository.delete(id, event_ctx)
 
     @property
     def find_partition_key_value(self, event_context: EventContext):
