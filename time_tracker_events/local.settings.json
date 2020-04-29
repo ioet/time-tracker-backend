@@ -1,0 +1,8 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "AzureWebJobsStorage": "{AzureWebJobsStorage}",
+    "COSMOS_DATABASE_URI": "AccountEndpoint=https://time-tracker-db.documents.azure.com:443/;AccountKey=6lyRD8ma0VQjcMbeSMFOTDGwNDptcEGfngp3c9DStNAMCNh2MRbkNWmRinoNvuB6aH51EMEkgeP5WfW3VZiV9g==;"
+  }
+}

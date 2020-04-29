@@ -10,8 +10,7 @@ from azure.cosmos import ContainerProxy, PartitionKey
 from flask import Flask
 from werkzeug.exceptions import HTTPException
 
-from commons.data_access_layer.database import CRUDDao
-from time_tracker_api.security import current_user_tenant_id
+from commons.data_access_layer.database import CRUDDao, EventContext
 
 
 class CosmosDBFacade:
@@ -140,13 +139,25 @@ class CosmosDBRepository:
             if isinstance(v, str) and len(v) == 0:
                 item_data[k] = None
 
-    def create(self, data: dict, mapper: Callable = None):
-        self.on_create(data)
+    def attach_context(data: dict, event_context: EventContext):
+        data["_last_event_ctx"] = {
+            "user_id": event_context.user_id,
+            "tenant_id": event_context.tenant_id,
+            "action": event_context.action,
+            "description": event_context.description,
+            "container_id": event_context.container_id,
+            "session_id": event_context.session_id,
+        }
+
+    def create(self, data: dict, event_context: EventContext, mapper: Callable = None):
+        self.on_create(data, event_context)
         function_mapper = self.get_mapper_or_dict(mapper)
+        self.attach_context(data, event_context)
         return function_mapper(self.container.create_item(body=data))
 
-    def find(self, id: str, partition_key_value, peeker: 'function' = None,
+    def find(self, id: str, event_context: EventContext, peeker: 'function' = None,
              visible_only=True, mapper: Callable = None):
+        partition_key_value = self.find_partition_key_value(event_context)
         found_item = self.container.read_item(id, partition_key_value)
         if peeker:
             peeker(found_item)
@@ -154,9 +165,9 @@ class CosmosDBRepository:
         function_mapper = self.get_mapper_or_dict(mapper)
         return function_mapper(self.check_visibility(found_item, visible_only))
 
-    def find_all(self, partition_key_value: str, conditions: dict = {}, max_count=None, offset=0,
-                 visible_only=True, mapper: Callable = None):
-        # TODO Use the tenant_id param and change container alias
+    def find_all(self, event_context: EventContext, conditions: dict = {}, max_count=None,
+                 offset=0, visible_only=True, mapper: Callable = None):
+        partition_key_value = self.find_partition_key_value(event_context)
         max_count = self.get_page_size_or(max_count)
         params = [
             {"name": "@partition_key_value", "value": partition_key_value},
@@ -179,26 +190,31 @@ class CosmosDBRepository:
         function_mapper = self.get_mapper_or_dict(mapper)
         return list(map(function_mapper, result))
 
-    def partial_update(self, id: str, changes: dict, partition_key_value: str,
+    def partial_update(self, id: str, changes: dict, event_context: EventContext,
                        peeker: 'function' = None, visible_only=True, mapper: Callable = None):
-        item_data = self.find(id, partition_key_value, peeker=peeker,
-                              visible_only=visible_only, mapper=dict)
+        item_data = self.find(id, event_context, peeker=peeker, visible_only=visible_only, mapper=dict)
         item_data.update(changes)
-        return self.update(id, item_data, mapper=mapper)
+        return self.update(id, item_data, event_context=event_context, mapper=mapper)
 
-    def update(self, id: str, item_data: dict, mapper: Callable = None):
+    def update(self, id: str, item_data: dict, event_context: EventContext,
+               mapper: Callable = None):
         self.on_update(item_data)
         function_mapper = self.get_mapper_or_dict(mapper)
+        self.attach_context(item_data, event_context)
         return function_mapper(self.container.replace_item(id, body=item_data))
 
-    def delete(self, id: str, partition_key_value: str,
+    def delete(self, id: str, event_context: EventContext,
                peeker: 'function' = None, mapper: Callable = None):
+        partition_key_value = self.find_partition_key_value(event_context)
         return self.partial_update(id, {
             'deleted': str(uuid.uuid4())
         }, partition_key_value, peeker=peeker, visible_only=True, mapper=mapper)
 
     def delete_permanently(self, id: str, partition_key_value: str) -> None:
         self.container.delete_item(id, partition_key_value)
+
+    def find_partition_key_value(self, event_context: EventContext):
+        return getattr(event_context, self.partition_key_attribute)
 
     def get_mapper_or_dict(self, alternative_mapper: Callable) -> Callable:
         return alternative_mapper or self.mapper or dict
@@ -208,9 +224,11 @@ class CosmosDBRepository:
         # or any other repository for the settings
         return custom_page_size or 100
 
-    def on_create(self, new_item_data: dict):
+    def on_create(self, new_item_data: dict, event_context: EventContext):
         if new_item_data.get('id') is None:
             new_item_data['id'] = generate_uuid4()
+
+        new_item_data[self.partition_key_attribute] = self.find_partition_key_value(event_context)
 
         self.replace_empty_value_per_none(new_item_data)
 
@@ -228,27 +246,35 @@ class CosmosDBDao(CRUDDao):
         self.repository = repository
 
     def get_all(self, conditions: dict = {}) -> list:
-        return self.repository.find_all(partition_key_value=self.partition_key_value,
+        event_ctx = self.create_event_context("read-many")
+        return self.repository.find_all(event_context=event_ctx,
                                         conditions=conditions)
 
     def get(self, id):
-        return self.repository.find(id, partition_key_value=self.partition_key_value)
+        event_ctx = self.create_event_context("read")
+        return self.repository.find(id, event_context=event_ctx)
 
     def create(self, data: dict):
-        data[self.repository.partition_key_attribute] = self.partition_key_value
-        return self.repository.create(data)
+        event_ctx = self.create_event_context("create")
+        return self.repository.create(data, event_context=event_ctx)
 
     def update(self, id, data: dict):
-        return self.repository.partial_update(id,
-                                              changes=data,
-                                              partition_key_value=self.partition_key_value)
+        event_ctx = self.create_event_context("update")
+        return self.repository.partial_update(id, changes=data, event_context=event_ctx)
 
     def delete(self, id):
-        self.repository.delete(id, partition_key_value=self.partition_key_value)
+        event_ctx = self.create_event_context("update")
+        self.repository.delete(id, event_context=event_ctx)
 
     @property
-    def partition_key_value(self):
-        return current_user_tenant_id()
+    def find_partition_key_value(self, event_context: EventContext):
+        return event_context.tenant_id
+
+    # Replace by decorator and put it in the repository
+    def create_event_context(self, action: str = None, description: str = None):
+        return EventContext(self.repository.container.id,
+                            action,
+                            description=description)
 
 
 class CustomError(HTTPException):

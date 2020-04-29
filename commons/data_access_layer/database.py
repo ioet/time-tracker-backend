@@ -9,6 +9,8 @@ import abc
 
 from flask import Flask
 
+from time_tracker_api.security import current_user_id, current_user_tenant_id
+
 COMMENTS_MAX_LENGTH = 500
 ID_MAX_LENGTH = 64
 
@@ -33,6 +35,33 @@ class CRUDDao(abc.ABC):
     @abc.abstractmethod
     def delete(self, id):
         raise NotImplementedError  # pragma: no cover
+
+
+class EventContext:
+    def __init__(self, container_id: str, action: str, description: str = None,
+                 user_id: str = None, tenant_id: str = None, session_id: str = None):
+        self.container_id = container_id
+        self.action = action
+        self.description = description
+        self._user_id = user_id
+        self._tenant_id = tenant_id
+        self._session_id = session_id
+
+    @property
+    def user_id(self) -> str:
+        if self._user_id is None:
+            self._user_id = current_user_id()
+        return self._user_id
+
+    @property
+    def tenant_id(self) -> str:
+        if self._tenant_id is None:
+            self._tenant_id = current_user_tenant_id()
+        return self._tenant_id
+
+    @property
+    def session_id(self) -> str:
+        return self._session_id
 
 
 def init_app(app: Flask) -> None:

@@ -1,0 +1,26 @@
+{
+  "scriptFile": "__init__.py",
+  "bindings": [
+    {
+      "type": "cosmosDBTrigger",
+      "name": "documents",
+      "direction": "in",
+      "leaseCollectionName": "leases",
+      "connectionStringSetting": "COSMOS_DATABASE_URI",
+      "databaseName": "time-tracker-db",
+      "collectionName": "activity",
+      "createLeaseCollectionIfNotExists": "true"
+    },
+    {
+      "direction": "out",
+      "type": "cosmosDB",
+      "name": "events",
+      "databaseName": "time-tracker-db",
+      "collectionName": "event",
+      "leaseCollectionName": "leases",
+      "createLeaseCollectionIfNotExists": true,
+      "connectionStringSetting": "COSMOS_DATABASE_URI",
+      "createIfNotExists": true
+    }
+  ]
+}
