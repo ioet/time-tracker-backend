@@ -8,6 +8,7 @@ from flask_restplus._http import HTTPStatus
 from pytest_mock import MockFixture, pytest
 
 from commons.data_access_layer.cosmos_db import current_datetime, current_datetime_str
+from time_tracker_api.time_entries.time_entries_model import TimeEntriesCosmosDBDao
 
 fake = Faker()
 
@@ -289,8 +290,8 @@ def test_stop_time_entry_with_valid_id(client: FlaskClient, mocker: MockFixture,
                            follow_redirects=True)
 
     assert HTTPStatus.OK == response.status_code
-    repository_update_mock.assert_called_once_with(str(valid_id), {"end_date": mocker.ANY},
-                                                   ANY, peeker=ANY)
+    repository_update_mock.assert_called_once_with(str(valid_id), {"end_date": mocker.ANY}, ANY,
+                                                   peeker=TimeEntriesCosmosDBDao.checks_owner_and_is_not_stopped)
 
 
 def test_stop_time_entry_with_id_with_invalid_format(client: FlaskClient,
@@ -308,8 +309,8 @@ def test_stop_time_entry_with_id_with_invalid_format(client: FlaskClient,
                            follow_redirects=True)
 
     assert HTTPStatus.UNPROCESSABLE_ENTITY == response.status_code
-    repository_update_mock.assert_called_once_with(invalid_id, {"end_date": ANY},
-                                                   ANY, peeker=ANY)
+    repository_update_mock.assert_called_once_with(invalid_id, {"end_date": ANY}, ANY,
+                                                   peeker=TimeEntriesCosmosDBDao.checks_owner_and_is_not_stopped)
 
 
 def test_restart_time_entry_with_valid_id(client: FlaskClient,

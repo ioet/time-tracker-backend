@@ -15,11 +15,9 @@ SUCCESS_MSG = "Commit succeed!. Semantic commit message is correct."
 
 COMMIT_MSG_REGEX = r'(build|ci|docs|feat|fix|perf|refactor|style|test|chore|revert)(\([\w\-]+\))?:\s.*'
 
-
 # Get the commit message file
 commit_msg_file = open(sys.argv[1])  # The first argument is the file
 commit_msg = commit_msg_file.read()
-
 
 if re.match(COMMIT_MSG_REGEX, commit_msg) is None:
     print(ERROR_MSG)

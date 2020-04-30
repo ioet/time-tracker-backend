@@ -1,5 +1,6 @@
-from setuptools import setup, find_packages
 import sys
+
+from setuptools import setup, find_packages
 
 
 def get_version() -> str:

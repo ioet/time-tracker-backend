@@ -9,7 +9,8 @@
       "connectionStringSetting": "COSMOS_DATABASE_URI",
       "databaseName": "time-tracker-db",
       "collectionName": "activity",
-      "createLeaseCollectionIfNotExists": "true"
+      "createLeaseCollectionIfNotExists": "true",
+      "leaseCollectionPrefix": "activity_"
     },
     {
       "direction": "out",

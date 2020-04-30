@@ -33,3 +33,6 @@ swagger.json
 
 # Local migration files
 migration_status.csv
+
+# Mac
+.DS_Store

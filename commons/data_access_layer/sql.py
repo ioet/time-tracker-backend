@@ -1,9 +1,7 @@
-from datetime import datetime
-
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-from commons.data_access_layer.database import CRUDDao, ID_MAX_LENGTH
+from commons.data_access_layer.database import CRUDDao
 
 db: SQLAlchemy = None
 
