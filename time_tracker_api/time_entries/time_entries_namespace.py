@@ -163,7 +163,7 @@ class TimeEntry(Resource):
 
 @ns.route('/<string:id>/stop')
 @ns.response(HTTPStatus.NOT_FOUND, 'Running time entry not found')
-@ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, '"The specified time entry is already stopped')
+@ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'The specified time entry is already stopped')
 @ns.param('id', 'The unique identifier of a running time entry')
 class StopTimeEntry(Resource):
     @ns.doc('stop_time_entry')

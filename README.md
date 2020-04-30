@@ -46,7 +46,10 @@ automatically [pip](https://pip.pypa.io/en/stable/) as well.
     * `prod`: For anything deployed
     
     
-    Remember to do it with Python 3.
+Remember to do it with Python 3.
+    
+Bear in mind that the requirements for `time_tracker_events`, must be located on its local requirements.txt, by 
+    [convention](https://docs.microsoft.com/en-us/azure/azure-functions/functions-reference-python#folder-structure).
 
 - Run `pre-commit install`. For more details, check out Development > Git hooks.
 
@@ -133,6 +136,16 @@ following notes regarding to the manipulation of the data from and towards the A
 
 - The [recommended](https://docs.microsoft.com/en-us/azure/cosmos-db/working-with-dates#storing-datetimes) format for 
 DateTime strings in Azure Cosmos DB is `YYYY-MM-DDThh:mm:ss.fffffffZ` which follows the ISO 8601 **UTC standard**.
+
+The Azure function project `time_tracker_events` also have some constraints to have into account. It is recommended that
+you read the [Azure Functions Python developer guide](https://docs.microsoft.com/en-us/azure/azure-functions/functions-reference-python#folder-structure).
+
+If you require to deploy `time_tracker_events` from your local machine to Azure Functions, you can execute:
+
+```bash
+func azure functionapp publish time-tracker-events  --build local
+```
+
 
 ## Development
 

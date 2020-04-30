@@ -1,7 +1,7 @@
 import azure.functions as func
 from faker import Faker
 
-from time_tracker_events.handle_events_trigger import main as main_handler
+from time_tracker_events.shared_code.handle_events_trigger import main as main_handler
 
 fake = Faker()
 

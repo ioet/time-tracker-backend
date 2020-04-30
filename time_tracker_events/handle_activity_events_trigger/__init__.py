@@ -1,3 +1,3 @@
-from ..handle_events_trigger import main as handler
+from ..shared_code import handle_events_trigger
 
-main = handler
+main = handle_events_trigger.main
