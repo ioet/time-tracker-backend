@@ -7,7 +7,8 @@ from flask_restplus._http import HTTPStatus
 
 from commons.data_access_layer.cosmos_db import CosmosDBDao, CosmosDBRepository, CustomError, current_datetime_str, \
     CosmosDBModel
-from commons.data_access_layer.database import CRUDDao, EventContext
+from commons.data_access_layer.database import EventContext
+from time_tracker_api.database import CRUDDao, APICosmosDBDao
 from time_tracker_api.security import current_user_id
 
 
@@ -157,7 +158,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
                               description="There is another time entry in that date range")
 
 
-class TimeEntriesCosmosDBDao(TimeEntriesDao, CosmosDBDao):
+class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
     def __init__(self, repository):
         CosmosDBDao.__init__(self, repository)
 

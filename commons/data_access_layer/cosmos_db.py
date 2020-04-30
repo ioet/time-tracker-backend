@@ -265,14 +265,8 @@ class CosmosDBDao(CRUDDao):
         event_ctx = self.create_event_context("delete")
         self.repository.delete(id, event_ctx)
 
-    @property
-    def find_partition_key_value(self, event_context: EventContext):
-        return event_context.tenant_id
-
-    # Replace by decorator and put it in the repository
     def create_event_context(self, action: str = None, description: str = None):
-        return EventContext(self.repository.container.id,
-                            action,
+        return EventContext(self.repository.container.id, action,
                             description=description)
 
 

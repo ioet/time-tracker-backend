@@ -7,8 +7,11 @@ To know more about protocols and subtyping check out PEP-0544
 """
 import abc
 
-COMMENTS_MAX_LENGTH = 500
-ID_MAX_LENGTH = 64
+from flask import Flask
+
+from commons.data_access_layer.cosmos_db import CosmosDBDao
+from commons.data_access_layer.database import EventContext
+from time_tracker_api.security import current_user_id, current_user_tenant_id
 
 
 class CRUDDao(abc.ABC):
@@ -33,36 +36,46 @@ class CRUDDao(abc.ABC):
         raise NotImplementedError  # pragma: no cover
 
 
-class EventContext():
+class ApiEventContext(EventContext):
     def __init__(self, container_id: str, action: str, description: str = None,
                  user_id: str = None, tenant_id: str = None, session_id: str = None):
-        self._container_id = container_id
-        self._action = action
-        self._description = description
+        super(ApiEventContext, self).__init__(container_id, action, description)
         self._user_id = user_id
         self._tenant_id = tenant_id
         self._session_id = session_id
 
     @property
-    def container_id(self):
-        return self._container_id
-
-    @property
-    def action(self):
-        return self._action
-
-    @property
-    def description(self):
-        return self._description
-
-    @property
-    def user_id(self):
+    def user_id(self) -> str:
+        if self._user_id is None:
+            self._user_id = current_user_id()
         return self._user_id
 
     @property
-    def tenant_id(self):
+    def tenant_id(self) -> str:
+        if self._tenant_id is None:
+            self._tenant_id = current_user_tenant_id()
         return self._tenant_id
 
     @property
-    def session_id(self):
+    def session_id(self) -> str:
         return self._session_id
+
+
+class APICosmosDBDao(CosmosDBDao):
+    def create_event_context(self, action: str = None, description: str = None):
+        return ApiEventContext(self.repository.container.id, action,
+                               description=description)
+
+
+def init_app(app: Flask) -> None:
+    init_cosmos_db(app)
+
+
+def init_sql(app: Flask) -> None:
+    from commons.data_access_layer.sql import init_app
+    init_app(app)
+
+
+def init_cosmos_db(app: Flask) -> None:
+    from commons.data_access_layer.cosmos_db import init_app
+    init_app(app)
