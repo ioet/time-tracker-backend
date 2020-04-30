@@ -1,0 +1,4 @@
+# time_tracker_events/requirements.txt
+
+# Azure Functions library
+azure-functions

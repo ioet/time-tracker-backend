@@ -1,0 +1,4 @@
+# requirements/time_tracker_events/prod.txt
+
+# Include the requirements of that folder, required there by convention
+-r ../../time_tracker_events/requirements.txt
