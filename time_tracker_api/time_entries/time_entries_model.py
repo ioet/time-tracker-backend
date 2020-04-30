@@ -7,7 +7,8 @@ from flask_restplus._http import HTTPStatus
 
 from commons.data_access_layer.cosmos_db import CosmosDBDao, CosmosDBRepository, CustomError, current_datetime_str, \
     CosmosDBModel, get_date_range_of_month, get_current_year, get_current_month
-from commons.data_access_layer.database import CRUDDao
+from commons.data_access_layer.database import EventContext
+from time_tracker_api.database import CRUDDao, APICosmosDBDao
 from time_tracker_api.security import current_user_id
 
 
@@ -18,6 +19,14 @@ class TimeEntriesDao(CRUDDao):
 
     @abc.abstractmethod
     def find_running(self):
+        pass
+
+    @abc.abstractmethod
+    def stop(self, id: str):
+        pass
+
+    @abc.abstractmethod
+    def restart(self, id: str):
         pass
 
 
@@ -84,7 +93,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         else:
             return ''
 
-    def find_all(self, partition_key_value: str, conditions: dict, date_range: dict):
+    def find_all(self, event_context: EventContext, conditions: dict, date_range: dict):
         custom_sql_conditions = []
         custom_sql_conditions.append(
             self.create_sql_date_range_filter(date_range)
@@ -94,30 +103,30 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
         return CosmosDBRepository.find_all(
             self,
-            partition_key_value=partition_key_value,
+            event_context=event_context,
             conditions=conditions,
             custom_sql_conditions=custom_sql_conditions,
             custom_params=custom_params
         )
-
-    def on_create(self, new_item_data: dict):
-        CosmosDBRepository.on_create(self, new_item_data)
+ 
+    def on_create(self, new_item_data: dict, event_context: EventContext):
+        CosmosDBRepository.on_create(self, new_item_data, event_context)
 
         if new_item_data.get("start_date") is None:
             new_item_data['start_date'] = current_datetime_str()
 
-        self.validate_data(new_item_data)
+        self.validate_data(new_item_data, event_context)
 
-    def on_update(self, updated_item_data: dict):
-        CosmosDBRepository.on_update(self, updated_item_data)
-        self.validate_data(updated_item_data)
+    def on_update(self, updated_item_data: dict, event_context: EventContext):
+        CosmosDBRepository.on_update(self, updated_item_data, event_context)
+        self.validate_data(updated_item_data, event_context)
         self.replace_empty_value_per_none(updated_item_data)
 
-    def find_interception_with_date_range(self, start_date, end_date, owner_id, partition_key_value,
+    def find_interception_with_date_range(self, start_date, end_date, owner_id, tenant_id,
                                           ignore_id=None, visible_only=True, mapper: Callable = None):
         conditions = {
             "owner_id": owner_id,
-            "tenant_id": partition_key_value,
+            "tenant_id": tenant_id,
         }
         params = [
             {"name": "@start_date", "value": start_date},
@@ -135,15 +144,15 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
                        conditions_clause=self.create_sql_where_conditions(conditions),
                        order_clause=self.create_sql_order_clause()),
             parameters=params,
-            partition_key=partition_key_value)
+            partition_key=tenant_id)
 
         function_mapper = self.get_mapper_or_dict(mapper)
         return list(map(function_mapper, result))
 
-    def find_running(self, partition_key_value: str, owner_id: str, mapper: Callable = None):
+    def find_running(self, tenant_id: str, owner_id: str, mapper: Callable = None):
         conditions = {
             "owner_id": owner_id,
-            "tenant_id": partition_key_value,
+            "tenant_id": tenant_id,
         }
         result = self.container.query_items(
             query="""
@@ -156,13 +165,13 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
                 conditions_clause=self.create_sql_where_conditions(conditions),
             ),
             parameters=self.generate_params(conditions),
-            partition_key=partition_key_value,
+            partition_key=tenant_id,
             max_item_count=1)
 
         function_mapper = self.get_mapper_or_dict(mapper)
         return function_mapper(next(result))
 
-    def validate_data(self, data):
+    def validate_data(self, data, event_context: EventContext):
         start_date = data.get('start_date')
 
         if data.get('end_date') is not None:
@@ -175,16 +184,15 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
         collision = self.find_interception_with_date_range(start_date=start_date,
                                                            end_date=data.get('end_date'),
-                                                           owner_id=data.get('owner_id'),
-                                                           partition_key_value=data.get('tenant_id'),
+                                                           owner_id=event_context.user_id,
+                                                           tenant_id=event_context.tenant_id,
                                                            ignore_id=data.get('id'))
         if len(collision) > 0:
             raise CustomError(HTTPStatus.UNPROCESSABLE_ENTITY,
                               description="There is another time entry in that date range")
 
 
-
-class TimeEntriesCosmosDBDao(TimeEntriesDao, CosmosDBDao):
+class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
     def __init__(self, repository):
         CosmosDBDao.__init__(self, repository)
 
@@ -195,8 +203,23 @@ class TimeEntriesCosmosDBDao(TimeEntriesDao, CosmosDBDao):
             raise CustomError(HTTPStatus.FORBIDDEN,
                               "The current user is not the owner of this time entry")
 
+    @classmethod
+    def checks_owner_and_is_not_stopped(cls, data: dict):
+        cls.check_whether_current_user_owns_item(data)
+
+        if data.get('end_date') is not None:
+            raise CustomError(HTTPStatus.UNPROCESSABLE_ENTITY, "The specified time entry is already stopped")
+
+    @classmethod
+    def checks_owner_and_is_not_started(cls, data: dict):
+        cls.check_whether_current_user_owns_item(data)
+
+        if data.get('end_date') is None:
+            raise CustomError(HTTPStatus.UNPROCESSABLE_ENTITY, "The specified time entry is already running")
+
     def get_all(self, conditions: dict = {}) -> list:
-        conditions.update({"owner_id": self.current_user_id()})
+        event_ctx = self.create_event_context("read-many")
+        conditions.update({"owner_id": event_ctx.user_id})
 
         if 'month' and 'year' in conditions:
             month = int(conditions.get("month"))
@@ -217,33 +240,42 @@ class TimeEntriesCosmosDBDao(TimeEntriesDao, CosmosDBDao):
             'start_date': start_date.isoformat(),
             'end_date': end_date.isoformat(),
         }
-        return self.repository.find_all(partition_key_value=self.partition_key_value,
+        return self.repository.find_all(event_ctx,
                                         conditions=conditions,
                                         date_range=date_range)
 
     def get(self, id):
-        return self.repository.find(id,
-                                    partition_key_value=self.partition_key_value,
-                                    peeker=self.check_whether_current_user_owns_item)
+        event_ctx = self.create_event_context("read")
+        return self.repository.find(id, event_ctx, peeker=self.check_whether_current_user_owns_item)
 
     def create(self, data: dict):
-        data[self.repository.partition_key_attribute] = self.partition_key_value
-        data["owner_id"] = self.current_user_id()
-        return self.repository.create(data)
+        event_ctx = self.create_event_context("create")
+        return self.repository.create(data, event_ctx)
 
-    def update(self, id, data: dict):
-        return self.repository.partial_update(id,
-                                              changes=data,
-                                              partition_key_value=self.partition_key_value,
+    def update(self, id, data: dict, description=None):
+        event_ctx = self.create_event_context("update", description)
+        return self.repository.partial_update(id, data, event_ctx,
                                               peeker=self.check_whether_current_user_owns_item)
 
+    def stop(self, id):
+        event_ctx = self.create_event_context("update", "Stop time entry")
+        return self.repository.partial_update(id, {
+            'end_date': current_datetime_str()
+        }, event_ctx, peeker=self.checks_owner_and_is_not_stopped)
+
+    def restart(self, id):
+        event_ctx = self.create_event_context("update", "Restart time entry")
+        return self.repository.partial_update(id, {
+            'end_date': None
+        }, event_ctx, peeker=self.checks_owner_and_is_not_started)
+
     def delete(self, id):
-        self.repository.delete(id, partition_key_value=self.partition_key_value,
-                               peeker=self.check_whether_current_user_owns_item)
+        event_ctx = self.create_event_context("delete")
+        self.repository.delete(id, event_ctx, peeker=self.check_whether_current_user_owns_item)
 
     def find_running(self):
-        return self.repository.find_running(partition_key_value=self.partition_key_value,
-                                            owner_id=self.current_user_id())
+        event_ctx = self.create_event_context("find_running")
+        return self.repository.find_running(event_ctx.tenant_id, event_ctx.user_id)
 
 
 def create_dao() -> TimeEntriesDao:

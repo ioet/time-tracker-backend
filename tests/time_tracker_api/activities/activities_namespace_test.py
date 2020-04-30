@@ -1,3 +1,5 @@
+from unittest.mock import ANY
+
 from faker import Faker
 from flask import json
 from flask.testing import FlaskClient
@@ -53,7 +55,6 @@ def test_create_activity_should_reject_bad_request(client: FlaskClient,
 
 def test_list_all_activities(client: FlaskClient,
                              mocker: MockFixture,
-                             tenant_id: str,
                              valid_header: dict):
     from time_tracker_api.activities.activities_namespace import activity_dao
     repository_find_all_mock = mocker.patch.object(activity_dao.repository,
@@ -67,13 +68,12 @@ def test_list_all_activities(client: FlaskClient,
     assert HTTPStatus.OK == response.status_code
     json_data = json.loads(response.data)
     assert [] == json_data
-    repository_find_all_mock.assert_called_once_with(partition_key_value=tenant_id,
-                                                     conditions={})
+
+    repository_find_all_mock.assert_called_once_with(ANY, conditions={})
 
 
 def test_get_activity_should_succeed_with_valid_id(client: FlaskClient,
                                                    mocker: MockFixture,
-                                                   tenant_id: str,
                                                    valid_header: dict):
     from time_tracker_api.activities.activities_namespace import activity_dao
 
@@ -89,12 +89,11 @@ def test_get_activity_should_succeed_with_valid_id(client: FlaskClient,
 
     assert HTTPStatus.OK == response.status_code
     fake_activity == json.loads(response.data)
-    repository_find_mock.assert_called_once_with(str(valid_id), partition_key_value=tenant_id)
+    repository_find_mock.assert_called_once_with(str(valid_id), ANY)
 
 
 def test_get_activity_should_return_not_found_with_invalid_id(client: FlaskClient,
                                                               mocker: MockFixture,
-                                                              tenant_id: str,
                                                               valid_header: dict):
     from time_tracker_api.activities.activities_namespace import activity_dao
     from werkzeug.exceptions import NotFound
@@ -110,8 +109,7 @@ def test_get_activity_should_return_not_found_with_invalid_id(client: FlaskClien
                           follow_redirects=True)
 
     assert HTTPStatus.NOT_FOUND == response.status_code
-    repository_find_mock.assert_called_once_with(str(invalid_id),
-                                                 partition_key_value=tenant_id)
+    repository_find_mock.assert_called_once_with(str(invalid_id), ANY)
 
 
 def test_get_activity_should_return_422_for_invalid_id_format(client: FlaskClient,
@@ -128,11 +126,9 @@ def test_get_activity_should_return_422_for_invalid_id_format(client: FlaskClien
     response = client.get("/activities/%s" % invalid_id, follow_redirects=True)
 
     assert HTTPStatus.UNPROCESSABLE_ENTITY == response.status_code
-    repository_find_mock.assert_not_called()
 
 
 def test_update_activity_should_succeed_with_valid_data(client: FlaskClient,
-                                                        tenant_id: str,
                                                         mocker: MockFixture,
                                                         valid_header: dict):
     from time_tracker_api.activities.activities_namespace import activity_dao
@@ -149,9 +145,7 @@ def test_update_activity_should_succeed_with_valid_data(client: FlaskClient,
 
     assert HTTPStatus.OK == response.status_code
     fake_activity == json.loads(response.data)
-    repository_update_mock.assert_called_once_with(str(valid_id),
-                                                   changes=valid_activity_data,
-                                                   partition_key_value=tenant_id)
+    repository_update_mock.assert_called_once_with(str(valid_id), valid_activity_data, ANY)
 
 
 def test_update_activity_should_reject_bad_request(client: FlaskClient,
@@ -173,7 +167,6 @@ def test_update_activity_should_reject_bad_request(client: FlaskClient,
 
 
 def test_update_activity_should_return_not_found_with_invalid_id(client: FlaskClient,
-                                                                 tenant_id: str,
                                                                  mocker: MockFixture,
                                                                  valid_header: dict):
     from time_tracker_api.activities.activities_namespace import activity_dao
@@ -191,14 +184,11 @@ def test_update_activity_should_return_not_found_with_invalid_id(client: FlaskCl
                           follow_redirects=True)
 
     assert HTTPStatus.NOT_FOUND == response.status_code
-    repository_update_mock.assert_called_once_with(str(invalid_id),
-                                                   changes=valid_activity_data,
-                                                   partition_key_value=tenant_id)
+    repository_update_mock.assert_called_once_with(str(invalid_id), valid_activity_data, ANY)
 
 
 def test_delete_activity_should_succeed_with_valid_id(client: FlaskClient,
                                                       mocker: MockFixture,
-                                                      tenant_id: str,
                                                       valid_header: dict):
     from time_tracker_api.activities.activities_namespace import activity_dao
 
@@ -214,13 +204,11 @@ def test_delete_activity_should_succeed_with_valid_id(client: FlaskClient,
 
     assert HTTPStatus.NO_CONTENT == response.status_code
     assert b'' == response.data
-    repository_remove_mock.assert_called_once_with(str(valid_id),
-                                                   partition_key_value=tenant_id)
+    repository_remove_mock.assert_called_once_with(str(valid_id), ANY)
 
 
 def test_delete_activity_should_return_not_found_with_invalid_id(client: FlaskClient,
                                                                  mocker: MockFixture,
-                                                                 tenant_id: str,
                                                                  valid_header: dict):
     from time_tracker_api.activities.activities_namespace import activity_dao
     from werkzeug.exceptions import NotFound
@@ -236,13 +224,11 @@ def test_delete_activity_should_return_not_found_with_invalid_id(client: FlaskCl
                              follow_redirects=True)
 
     assert HTTPStatus.NOT_FOUND == response.status_code
-    repository_remove_mock.assert_called_once_with(str(invalid_id),
-                                                   partition_key_value=tenant_id)
+    repository_remove_mock.assert_called_once_with(str(invalid_id), ANY)
 
 
 def test_delete_activity_should_return_422_for_invalid_id_format(client: FlaskClient,
                                                                  mocker: MockFixture,
-                                                                 tenant_id: str,
                                                                  valid_header: dict):
     from time_tracker_api.activities.activities_namespace import activity_dao
     from werkzeug.exceptions import UnprocessableEntity
@@ -258,5 +244,4 @@ def test_delete_activity_should_return_422_for_invalid_id_format(client: FlaskCl
                              follow_redirects=True)
 
     assert HTTPStatus.UNPROCESSABLE_ENTITY == response.status_code
-    repository_remove_mock.assert_called_once_with(str(invalid_id),
-                                                   partition_key_value=tenant_id)
+    repository_remove_mock.assert_called_once_with(str(invalid_id), ANY)

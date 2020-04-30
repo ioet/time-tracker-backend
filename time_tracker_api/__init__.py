@@ -35,7 +35,7 @@ def init_app_config(app: Flask, config_path: str, config_data: dict = None):
 
 
 def init_app(app: Flask):
-    from commons.data_access_layer.database import init_app as init_database
+    from time_tracker_api.database import init_app as init_database
     init_database(app)
 
     from time_tracker_api.api import init_app

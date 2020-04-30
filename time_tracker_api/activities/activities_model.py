@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from azure.cosmos import PartitionKey
 
 from commons.data_access_layer.cosmos_db import CosmosDBModel, CosmosDBDao, CosmosDBRepository
-from commons.data_access_layer.database import CRUDDao
+from time_tracker_api.database import CRUDDao, APICosmosDBDao
 
 
 class ActivityDao(CRUDDao):
@@ -43,7 +43,7 @@ def create_dao() -> ActivityDao:
     repository = CosmosDBRepository.from_definition(container_definition,
                                                     mapper=ActivityCosmosDBModel)
 
-    class ActivityCosmosDBDao(CosmosDBDao, ActivityDao):
+    class ActivityCosmosDBDao(APICosmosDBDao, ActivityDao):
         def __init__(self):
             CosmosDBDao.__init__(self, repository)
 
