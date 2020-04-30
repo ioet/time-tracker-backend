@@ -163,30 +163,26 @@ class TimeEntry(Resource):
 
 @ns.route('/<string:id>/stop')
 @ns.response(HTTPStatus.NOT_FOUND, 'Running time entry not found')
-@ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'The id has an invalid format')
+@ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, '"The specified time entry is already stopped')
 @ns.param('id', 'The unique identifier of a running time entry')
 class StopTimeEntry(Resource):
     @ns.doc('stop_time_entry')
     @ns.marshal_with(time_entry)
     def post(self, id):
         """Stop a running time entry"""
-        return time_entries_dao.update(id, {
-            'end_date': current_datetime_str()
-        })
+        return time_entries_dao.stop(id)
 
 
 @ns.route('/<string:id>/restart')
 @ns.response(HTTPStatus.NOT_FOUND, 'Stopped time entry not found')
-@ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'The id has an invalid format')
+@ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'The specified time entry is already running')
 @ns.param('id', 'The unique identifier of a stopped time entry')
 class RestartTimeEntry(Resource):
     @ns.doc('restart_time_entry')
     @ns.marshal_with(time_entry)
     def post(self, id):
         """Restart a time entry"""
-        return time_entries_dao.update(id, {
-            'end_date': None
-        })
+        return time_entries_dao.restart(id)
 
 
 @ns.route('/running')

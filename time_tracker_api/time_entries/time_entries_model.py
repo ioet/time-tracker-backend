@@ -21,6 +21,14 @@ class TimeEntriesDao(CRUDDao):
     def find_running(self):
         pass
 
+    @abc.abstractmethod
+    def stop(self, id: str):
+        pass
+
+    @abc.abstractmethod
+    def restart(self, id: str):
+        pass
+
 
 container_definition = {
     'id': 'time_entry',
@@ -169,6 +177,20 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
             raise CustomError(HTTPStatus.FORBIDDEN,
                               "The current user is not the owner of this time entry")
 
+    @classmethod
+    def checks_owner_and_is_not_stopped(cls, data: dict):
+        cls.check_whether_current_user_owns_item(data)
+
+        if data.get('end_date') is not None:
+            raise CustomError(HTTPStatus.UNPROCESSABLE_ENTITY, "The specified time entry is already stopped")
+
+    @classmethod
+    def checks_owner_and_is_not_started(cls, data: dict):
+        cls.check_whether_current_user_owns_item(data)
+
+        if data.get('end_date') is None:
+            raise CustomError(HTTPStatus.UNPROCESSABLE_ENTITY, "The specified time entry is already running")
+
     def get_all(self, conditions: dict = {}) -> list:
         event_ctx = self.create_event_context("read-many")
         conditions.update({"owner_id": event_ctx.user_id})
@@ -182,10 +204,22 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         event_ctx = self.create_event_context("create")
         return self.repository.create(data, event_ctx)
 
-    def update(self, id, data: dict):
-        event_ctx = self.create_event_context("update")
+    def update(self, id, data: dict, description=None):
+        event_ctx = self.create_event_context("update", description)
         return self.repository.partial_update(id, data, event_ctx,
                                               peeker=self.check_whether_current_user_owns_item)
+
+    def stop(self, id):
+        event_ctx = self.create_event_context("update", "Stop time entry")
+        return self.repository.partial_update(id, {
+            'end_date': current_datetime_str()
+        }, event_ctx, peeker=self.checks_owner_and_is_not_stopped)
+
+    def restart(self, id):
+        event_ctx = self.create_event_context("update", "Restart time entry")
+        return self.repository.partial_update(id, {
+            'end_date': None
+        }, event_ctx, peeker=self.checks_owner_and_is_not_started)
 
     def delete(self, id):
         event_ctx = self.create_event_context("delete")

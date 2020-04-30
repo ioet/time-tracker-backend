@@ -28,7 +28,7 @@ class CRUDDao(abc.ABC):
         raise NotImplementedError  # pragma: no cover
 
     @abc.abstractmethod
-    def update(self, id, data):
+    def update(self, id, data, description=None):
         raise NotImplementedError  # pragma: no cover
 
     @abc.abstractmethod
