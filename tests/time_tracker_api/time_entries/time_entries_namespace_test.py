@@ -7,7 +7,9 @@ from flask.testing import FlaskClient
 from flask_restplus._http import HTTPStatus
 from pytest_mock import MockFixture, pytest
 
-from commons.data_access_layer.cosmos_db import current_datetime, current_datetime_str
+from commons.data_access_layer.cosmos_db import current_datetime, \
+    current_datetime_str, get_date_range_of_month, get_current_month, \
+    get_current_year, datetime_str
 
 fake = Faker()
 
@@ -470,3 +472,44 @@ def test_create_with_valid_uuid_format_should_return_created(client: FlaskClient
     assert HTTPStatus.CREATED == response.status_code
     repository_container_create_item_mock.assert_called()
 
+
+@pytest.mark.parametrize(
+    'url,month,year',
+    [
+        ('/time-entries?month=4&year=2020', 4, 2020),
+        ('/time-entries?month=4', 4, get_current_year()),
+        ('/time-entries', get_current_month(), get_current_year())
+    ]
+)
+def test_find_all_is_called_with_generated_dates(client: FlaskClient,
+                                              mocker: MockFixture,
+                                              valid_header: dict,
+                                              tenant_id: str,
+                                              owner_id: str,
+                                              url: str,
+                                              month: int,
+                                              year: int):
+    from time_tracker_api.time_entries.time_entries_namespace import time_entries_dao
+    repository_find_all_mock = mocker.patch.object(time_entries_dao.repository,
+                                                   'find_all',
+                                                   return_value=fake_time_entry)
+
+    response = client.get(url,
+                          headers=valid_header,
+                          follow_redirects=True)
+
+    start_date, end_date = get_date_range_of_month(year, month)
+    custom_args = {
+        'start_date': datetime_str(start_date),
+        'end_date': datetime_str(end_date)
+    }
+
+    conditions = {
+        'owner_id': owner_id
+    }
+
+    assert HTTPStatus.OK == response.status_code
+    assert json.loads(response.data) is not None
+    repository_find_all_mock.assert_called_once_with(partition_key_value=tenant_id,
+                                                   conditions=conditions,
+                                                   custom_args=custom_args)

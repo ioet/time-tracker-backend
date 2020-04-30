@@ -2,7 +2,7 @@ import dataclasses
 import logging
 import uuid
 from datetime import datetime
-from typing import Callable, List
+from typing import Callable, List, Tuple
 
 import azure.cosmos.cosmos_client as cosmos_client
 import azure.cosmos.exceptions as exceptions
@@ -117,18 +117,15 @@ class CosmosDBRepository:
             return ""
 
     @staticmethod
-    def create_sql_custom_conditions(custom_conditions: List[str]) -> str:
-        if len(custom_conditions) > 0:
-            return """
-            AND {custom_conditions_clause}
-            """.format(
-                custom_conditions_clause=" AND ".join(custom_conditions)
-            )
+    def create_custom_sql_conditions(custom_sql_conditions: List[str]) -> str:
+        if len(custom_sql_conditions) > 0:
+            return "AND {custom_sql_conditions_clause}".format(
+                custom_sql_conditions_clause=" AND ".join(custom_sql_conditions))
         else:
             return ''
 
     @staticmethod
-    def generate_condition_values(conditions: dict) -> dict:
+    def generate_params(conditions: dict) -> dict:
         result = []
         for k, v in conditions.items():
             result.append({
@@ -165,7 +162,7 @@ class CosmosDBRepository:
         function_mapper = self.get_mapper_or_dict(mapper)
         return function_mapper(self.check_visibility(found_item, visible_only))
 
-    def find_all(self, partition_key_value: str, conditions: dict = {}, custom_conditions: List[str] = [],
+    def find_all(self, partition_key_value: str, conditions: dict = {}, custom_sql_conditions: List[str] = [],
                  custom_params: dict = {}, max_count=None, offset=0, visible_only=True, mapper: Callable = None):
         # TODO Use the tenant_id param and change container alias
         max_count = self.get_page_size_or(max_count)
@@ -174,16 +171,16 @@ class CosmosDBRepository:
             {"name": "@offset", "value": offset},
             {"name": "@max_count", "value": max_count},
         ]
-        params.extend(self.generate_condition_values(conditions))
+        params.extend(self.generate_params(conditions))
         params.extend(custom_params)
         result = self.container.query_items(query="""
             SELECT * FROM c WHERE c.{partition_key_attribute}=@partition_key_value
-            {conditions_clause} {visibility_condition} {custom_conditions_clause} {order_clause}
+            {conditions_clause} {visibility_condition} {custom_sql_conditions_clause} {order_clause}
             OFFSET @offset LIMIT @max_count
             """.format(partition_key_attribute=self.partition_key_attribute,
                        visibility_condition=self.create_sql_condition_for_visibility(visible_only),
                        conditions_clause=self.create_sql_where_conditions(conditions),
-                       custom_conditions_clause=self.create_sql_custom_conditions(custom_conditions),
+                       custom_sql_conditions_clause=self.create_custom_sql_conditions(custom_sql_conditions),
                        order_clause=self.create_sql_order_clause()),
                                             parameters=params,
                                             partition_key=partition_key_value,
@@ -292,3 +289,36 @@ def generate_uuid4() -> str:
 def init_app(app: Flask) -> None:
     global cosmos_helper
     cosmos_helper = CosmosDBFacade.from_flask_config(app)
+
+
+def get_last_day_of_month(year: int, month: int) -> int:
+    from calendar import monthrange
+    return monthrange(year=year, month=month)[1]
+
+
+def get_current_year() -> int:
+    return datetime.now().year
+
+
+def get_current_month() -> int:
+    return datetime.now().month
+
+
+def get_date_range_of_month(
+    year: int,
+    month: int
+) -> Tuple[datetime, datetime]:
+    first_day_of_month = 1
+    start_date = datetime(year=year, month=month, day=first_day_of_month)
+
+    last_day_of_month = get_last_day_of_month(year=year, month=month)
+    end_date = datetime(
+        year=year,
+        month=month,
+        day=last_day_of_month,
+        hour=23,
+        minute=59,
+        second=59,
+        microsecond=999999
+    )
+    return start_date, end_date

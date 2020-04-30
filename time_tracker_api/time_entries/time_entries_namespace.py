@@ -111,11 +111,11 @@ attributes_filter = create_attributes_filter(ns, time_entry, [
 # custom attributes filter
 attributes_filter.add_argument('month', required=False,
                                     store_missing=False,
-                                    help="(Filter) month to filter",
+                                    help="(Filter) Month to filter by",
                                     location='args')
 attributes_filter.add_argument('year', required=False,
                                     store_missing=False,
-                                    help="(Filter) year to filter",
+                                    help="(Filter) Year to filter by",
                                     location='args')
 
 @ns.route('')

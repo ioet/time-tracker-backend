@@ -1,13 +1,12 @@
 import abc
 from dataclasses import dataclass, field
-from typing import List, Callable, Tuple
-from datetime import datetime
+from typing import List, Callable
 
 from azure.cosmos import PartitionKey
 from flask_restplus._http import HTTPStatus
 
 from commons.data_access_layer.cosmos_db import CosmosDBDao, CosmosDBRepository, CustomError, current_datetime_str, \
-    CosmosDBModel
+    CosmosDBModel, get_date_range_of_month, get_current_year, get_current_month
 from commons.data_access_layer.database import CRUDDao
 from time_tracker_api.security import current_user_id
 
@@ -76,8 +75,8 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             return "AND c.id!=@ignore_id"
 
     @staticmethod
-    def create_sql_date_range_filter(custom_args: dict) -> str:
-        if 'start_date' and 'end_date' in custom_args:
+    def create_sql_date_range_filter(date_range: dict) -> str:
+        if 'start_date' and 'end_date' in date_range:
             return """
             ((c.start_date BETWEEN @start_date AND @end_date) OR
              (c.end_date BETWEEN @start_date AND @end_date))
@@ -85,22 +84,19 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         else:
             return ''
 
-    def find_all(self, partition_key_value: str, conditions: dict, custom_args: dict):
-        custom_conditions = []
-        custom_conditions.append(
-            self.create_sql_date_range_filter(custom_args)
+    def find_all(self, partition_key_value: str, conditions: dict, date_range: dict):
+        custom_sql_conditions = []
+        custom_sql_conditions.append(
+            self.create_sql_date_range_filter(date_range)
         )
 
-        custom_params = [
-            {"name": "@start_date", "value": custom_args.get('start_date')},
-            {"name": "@end_date", "value": custom_args.get('end_date')},
-        ]
+        custom_params = self.generate_params(date_range)
 
         return CosmosDBRepository.find_all(
             self,
             partition_key_value=partition_key_value,
             conditions=conditions,
-            custom_conditions=custom_conditions,
+            custom_sql_conditions=custom_sql_conditions,
             custom_params=custom_params
         )
 
@@ -128,7 +124,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             {"name": "@end_date", "value": end_date or current_datetime_str()},
             {"name": "@ignore_id", "value": ignore_id},
         ]
-        params.extend(self.generate_condition_values(conditions))
+        params.extend(self.generate_params(conditions))
         result = self.container.query_items(
             query="""
             SELECT * FROM c WHERE ((c.start_date BETWEEN @start_date AND @end_date) 
@@ -159,7 +155,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
                 visibility_condition=self.create_sql_condition_for_visibility(True),
                 conditions_clause=self.create_sql_where_conditions(conditions),
             ),
-            parameters=self.generate_condition_values(conditions),
+            parameters=self.generate_params(conditions),
             partition_key=partition_key_value,
             max_item_count=1)
 
@@ -186,31 +182,6 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             raise CustomError(HTTPStatus.UNPROCESSABLE_ENTITY,
                               description="There is another time entry in that date range")
 
-
-def get_last_day_of_month(year: int, month: int) -> int:
-    from calendar import monthrange
-    return monthrange(year=year, month=month)[1]
-
-
-def get_current_year() -> int:
-    return datetime.now().year
-
-
-def get_current_month() -> int:
-    return datetime.now().month
-
-
-def get_date_range_of_month(
-    year: int,
-    month: int
-) -> Tuple[datetime, datetime]:
-    first_day_of_month = 1
-    start_date = datetime(year=year, month=month, day=first_day_of_month)
-
-    # TODO : fix bound as this would exclude the last day
-    last_day_of_month = get_last_day_of_month(year=year, month=month)
-    end_date = datetime(year=year, month=month, day=last_day_of_month)
-    return start_date, end_date
 
 
 class TimeEntriesCosmosDBDao(TimeEntriesDao, CosmosDBDao):
@@ -242,13 +213,13 @@ class TimeEntriesCosmosDBDao(TimeEntriesDao, CosmosDBDao):
 
         start_date, end_date = get_date_range_of_month(year, month)
 
-        custom_args = {
+        date_range = {
             'start_date': start_date.isoformat(),
-            'end_date': end_date.isoformat()
+            'end_date': end_date.isoformat(),
         }
         return self.repository.find_all(partition_key_value=self.partition_key_value,
                                         conditions=conditions,
-                                        custom_args=custom_args)
+                                        date_range=date_range)
 
     def get(self, id):
         return self.repository.find(id,

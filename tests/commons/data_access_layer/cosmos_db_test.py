@@ -559,7 +559,7 @@ def test_repository_create_sql_where_conditions_with_no_values(cosmos_db_reposit
 
 
 def test_repository_append_conditions_values(cosmos_db_repository: CosmosDBRepository):
-    result = cosmos_db_repository.generate_condition_values({'owner_id': 'mark', 'customer_id': 'ioet'})
+    result = cosmos_db_repository.generate_params({'owner_id': 'mark', 'customer_id': 'ioet'})
 
     assert result is not None
     assert result == [{'name': '@owner_id', 'value': 'mark'},
