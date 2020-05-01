@@ -6,7 +6,7 @@ from azure.cosmos import PartitionKey
 from flask_restplus._http import HTTPStatus
 
 from commons.data_access_layer.cosmos_db import CosmosDBDao, CosmosDBRepository, CustomError, current_datetime_str, \
-    CosmosDBModel
+    CosmosDBModel, get_date_range_of_month, get_current_year, get_current_month
 from commons.data_access_layer.database import EventContext
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
 from time_tracker_api.security import current_user_id
@@ -83,6 +83,32 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         else:
             return "AND c.id!=@ignore_id"
 
+    @staticmethod
+    def create_sql_date_range_filter(date_range: dict) -> str:
+        if 'start_date' and 'end_date' in date_range:
+            return """
+            ((c.start_date BETWEEN @start_date AND @end_date) OR
+             (c.end_date BETWEEN @start_date AND @end_date))
+            """
+        else:
+            return ''
+
+    def find_all(self, event_context: EventContext, conditions: dict, date_range: dict):
+        custom_sql_conditions = []
+        custom_sql_conditions.append(
+            self.create_sql_date_range_filter(date_range)
+        )
+
+        custom_params = self.generate_params(date_range)
+
+        return CosmosDBRepository.find_all(
+            self,
+            event_context=event_context,
+            conditions=conditions,
+            custom_sql_conditions=custom_sql_conditions,
+            custom_params=custom_params
+        )
+ 
     def on_create(self, new_item_data: dict, event_context: EventContext):
         CosmosDBRepository.on_create(self, new_item_data, event_context)
 
@@ -107,7 +133,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             {"name": "@end_date", "value": end_date or current_datetime_str()},
             {"name": "@ignore_id", "value": ignore_id},
         ]
-        params.extend(self.generate_condition_values(conditions))
+        params.extend(self.generate_params(conditions))
         result = self.container.query_items(
             query="""
             SELECT * FROM c WHERE ((c.start_date BETWEEN @start_date AND @end_date) 
@@ -138,7 +164,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
                 visibility_condition=self.create_sql_condition_for_visibility(True),
                 conditions_clause=self.create_sql_where_conditions(conditions),
             ),
-            parameters=self.generate_condition_values(conditions),
+            parameters=self.generate_params(conditions),
             partition_key=tenant_id,
             max_item_count=1)
 
@@ -194,7 +220,11 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
     def get_all(self, conditions: dict = {}) -> list:
         event_ctx = self.create_event_context("read-many")
         conditions.update({"owner_id": event_ctx.user_id})
-        return self.repository.find_all(event_ctx, conditions=conditions)
+
+        date_range = self.handle_date_filter_args(args=conditions)
+        return self.repository.find_all(event_ctx,
+                                        conditions=conditions,
+                                        date_range=date_range)
 
     def get(self, id):
         event_ctx = self.create_event_context("read")
@@ -228,6 +258,22 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
     def find_running(self):
         event_ctx = self.create_event_context("find_running")
         return self.repository.find_running(event_ctx.tenant_id, event_ctx.user_id)
+
+    @staticmethod
+    def handle_date_filter_args(args: dict) -> dict:
+        if 'month' and 'year' in args:
+            month = int(args.get("month"))
+            year = int(args.get("year"))
+            args.pop('month')
+            args.pop('year')
+        elif 'month' in args:
+            month = int(args.get("month"))
+            year = get_current_year()
+            args.pop('month')
+        else:
+            month = get_current_month()
+            year = get_current_year()
+        return get_date_range_of_month(year, month)
 
 
 def create_dao() -> TimeEntriesDao:
