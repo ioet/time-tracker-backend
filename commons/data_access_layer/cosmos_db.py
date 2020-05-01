@@ -2,7 +2,7 @@ import dataclasses
 import logging
 import uuid
 from datetime import datetime
-from typing import Callable, List, Tuple
+from typing import Callable, List, Dict
 
 import azure.cosmos.cosmos_client as cosmos_client
 import azure.cosmos.exceptions as exceptions
@@ -326,7 +326,7 @@ def get_current_month() -> int:
 def get_date_range_of_month(
     year: int,
     month: int
-) -> Tuple[datetime, datetime]:
+) -> Dict[str, str]:
     first_day_of_month = 1
     start_date = datetime(year=year, month=month, day=first_day_of_month)
 
@@ -340,4 +340,8 @@ def get_date_range_of_month(
         second=59,
         microsecond=999999
     )
-    return start_date, end_date
+
+    return {
+        'start_date': datetime_str(start_date),
+        'end_date': datetime_str(end_date)
+    }

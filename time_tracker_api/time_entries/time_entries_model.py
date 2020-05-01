@@ -221,25 +221,7 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         event_ctx = self.create_event_context("read-many")
         conditions.update({"owner_id": event_ctx.user_id})
 
-        if 'month' and 'year' in conditions:
-            month = int(conditions.get("month"))
-            year = int(conditions.get("year"))
-            conditions.pop('month')
-            conditions.pop('year')
-        elif 'month' in conditions:
-            month = int(conditions.get("month"))
-            year = get_current_year()
-            conditions.pop('month')
-        else:
-            month = get_current_month()
-            year = get_current_year()
-
-        start_date, end_date = get_date_range_of_month(year, month)
-
-        date_range = {
-            'start_date': start_date.isoformat(),
-            'end_date': end_date.isoformat(),
-        }
+        date_range = self.handle_date_filter_args(args=conditions)
         return self.repository.find_all(event_ctx,
                                         conditions=conditions,
                                         date_range=date_range)
@@ -276,6 +258,22 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
     def find_running(self):
         event_ctx = self.create_event_context("find_running")
         return self.repository.find_running(event_ctx.tenant_id, event_ctx.user_id)
+
+    @staticmethod
+    def handle_date_filter_args(args: dict) -> dict:
+        if 'month' and 'year' in args:
+            month = int(args.get("month"))
+            year = int(args.get("year"))
+            args.pop('month')
+            args.pop('year')
+        elif 'month' in args:
+            month = int(args.get("month"))
+            year = get_current_year()
+            args.pop('month')
+        else:
+            month = get_current_month()
+            year = get_current_year()
+        return get_date_range_of_month(year, month)
 
 
 def create_dao() -> TimeEntriesDao:
