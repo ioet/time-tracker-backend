@@ -175,7 +175,7 @@ def running_time_entry(time_entry_repository: TimeEntryCosmosDBRepository,
     yield created_time_entry
 
     time_entry_repository.delete_permanently(id=created_time_entry.id,
-                                             partition_key_value=tenant_id)
+                                             event_context=event_context)
 
 
 @pytest.fixture(scope="session")

@@ -510,9 +510,10 @@ def test_partial_update_should_not_find_element_that_is_already_deleted(cosmos_d
 
 
 def test_delete_permanently_with_invalid_id_should_fail(cosmos_db_repository: CosmosDBRepository,
+                                                        event_context: EventContext,
                                                         tenant_id: str):
     try:
-        cosmos_db_repository.delete_permanently(fake.uuid4(), tenant_id)
+        cosmos_db_repository.delete_permanently(fake.uuid4(), event_context)
         fail('It should have not found the deleted item')
     except Exception as e:
         assert type(e) is CosmosResourceNotFoundError
@@ -527,7 +528,7 @@ def test_delete_permanently_with_valid_id_should_succeed(cosmos_db_repository: C
     assert found_item is not None
     assert found_item['id'] == sample_item['id']
 
-    cosmos_db_repository.delete_permanently(sample_item['id'], event_context.tenant_id)
+    cosmos_db_repository.delete_permanently(sample_item['id'], event_context)
 
     try:
         cosmos_db_repository.find(sample_item['id'], event_context)

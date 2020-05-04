@@ -220,7 +220,8 @@ class CosmosDBRepository:
             'deleted': generate_uuid4()
         }, event_context, peeker=peeker, visible_only=True, mapper=mapper)
 
-    def delete_permanently(self, id: str, partition_key_value: str) -> None:
+    def delete_permanently(self, id: str, event_context: EventContext) -> None:
+        partition_key_value = self.find_partition_key_value(event_context)
         self.container.delete_item(id, partition_key_value)
 
     def find_partition_key_value(self, event_context: EventContext):
