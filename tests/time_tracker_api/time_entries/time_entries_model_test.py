@@ -56,7 +56,7 @@ def test_find_interception_with_date_range_should_find(start_date: datetime,
         assert len(result) > 0
         assert any([existing_item.id == item.id for item in result])
     finally:
-        time_entry_repository.delete_permanently(existing_item.id, partition_key_value=existing_item.tenant_id)
+        time_entry_repository.delete_permanently(existing_item.id, event_ctx)
 
 
 def test_find_interception_should_ignore_id_of_existing_item(owner_id: str, tenant_id: str,
@@ -79,7 +79,7 @@ def test_find_interception_should_ignore_id_of_existing_item(owner_id: str, tena
         non_colliding_result is not None
         assert not any([existing_item.id == item.id for item in non_colliding_result])
     finally:
-        time_entry_repository.delete_permanently(existing_item.id, partition_key_value=existing_item.tenant_id)
+        time_entry_repository.delete_permanently(existing_item.id, event_ctx)
 
 
 def test_find_running_should_return_running_time_entry(running_time_entry,

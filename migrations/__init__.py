@@ -2,40 +2,14 @@ from azure.cosmos import PartitionKey
 from migrate_anything import configure
 from migrate_anything.storage import Storage
 
+from commons.data_access_layer.database import EventContext
+from commons.data_access_layer.cosmos_db import cosmos_helper, init_app, \
+    CosmosDBRepository
+
 from time_tracker_api import create_app
 
 
-class CustomStorage(object):
-    def __init__(self, file):
-        self.file = file
-
-    def save_migration(self, name, code):
-        with open(self.file, "a", encoding="utf-8") as file:
-            file.write("{},{}\n".format(name, code))
-
-    def list_migrations(self):
-        try:
-            with open(self.file, encoding="utf-8") as file:
-                return [
-                    line.split(",")
-                    for line in file.readlines()
-                    if line.strip()  # Skip empty lines
-                ]
-        except FileNotFoundError:
-            return []
-
-    def remove_migration(self, name):
-        migrations = [
-            migration for migration in self.list_migrations() if migration[0] != name
-        ]
-
-        with open(self.file, "w", encoding="utf-8") as file:
-            for row in migrations:
-                file.write("{},{}\n".format(*row))
-
-
 app = create_app('time_tracker_api.config.CLIConfig')
-from commons.data_access_layer.cosmos_db import cosmos_helper, init_app, CosmosDBRepository
 
 if cosmos_helper is None:
     init_app(app)
@@ -59,19 +33,38 @@ class CosmosDBStorage(Storage):
         self.repository = CosmosDBRepository.from_definition(migrations_definition)
 
     def save_migration(self, name, code):
-        self.repository.create({"id": name,
-                                "name": name,
-                                "code": code,
-                                "app_id": self.app_id})
+        event_ctx = self.create_event_context('create')
+        self.repository.create(
+            data={
+                "id": name,
+                "name": name,
+                "code": code,
+                "app_id": self.app_id
+            },
+            event_context=event_ctx,
+        )
 
     def list_migrations(self):
-        migrations = self.repository.find_all(self.app_id)
+        event_ctx = self.create_event_context('read-many')
+        migrations = self.repository.find_all(event_context=event_ctx)
         return [
             [item['name'], item['code']] for item in migrations
         ]
 
     def remove_migration(self, name):
-        self.repository.delete_permanently(name, self.app_id)
+        event_ctx = self.create_event_context('delete-permanently')
+        self.repository.delete_permanently(id=name, event_context=event_ctx)
 
+    def create_event_context(
+        self,
+        action: str = None,
+        description: str = None
+    ) -> EventContext:
+        return EventContext(
+            container_id=self.collection_id,
+            action=action,
+            description=description,
+            app_id=self.app_id
+        )
 
 configure(storage=CosmosDBStorage("migration", "time-tracker-api"))

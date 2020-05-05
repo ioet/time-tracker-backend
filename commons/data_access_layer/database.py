@@ -35,13 +35,15 @@ class CRUDDao(abc.ABC):
 
 class EventContext():
     def __init__(self, container_id: str, action: str, description: str = None,
-                 user_id: str = None, tenant_id: str = None, session_id: str = None):
+                 user_id: str = None, tenant_id: str = None, session_id: str = None,
+                 app_id: str = None):
         self._container_id = container_id
         self._action = action
         self._description = description
         self._user_id = user_id
         self._tenant_id = tenant_id
         self._session_id = session_id
+        self._app_id = app_id
 
     @property
     def container_id(self):
@@ -66,3 +68,7 @@ class EventContext():
     @property
     def session_id(self):
         return self._session_id
+
+    @property
+    def app_id(self):
+        return self._app_id
