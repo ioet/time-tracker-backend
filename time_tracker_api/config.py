@@ -12,6 +12,7 @@ class Config:
     RESTPLUS_VALIDATE = True
     DEBUG = True
     CORS_ORIGINS = "*"
+    ERROR_404_HELP = False
 
 
 class DevelopmentConfig(Config):
@@ -49,8 +50,13 @@ class ProductionConfig(Config):
 
 
 class AzureConfig(CosmosDB):
-    SQL_DATABASE_URI = os.environ.get('SQL_DATABASE_URI', os.environ.get('SQLCONNSTR_DATABASE_URI'))
-    COSMOS_DATABASE_URI = os.environ.get('COSMOS_DATABASE_URI', os.environ.get('CUSTOMCONNSTR_COSMOS_DATABASE_URI'))
+    SQL_DATABASE_URI = os.environ.get(
+        'SQL_DATABASE_URI', os.environ.get('SQLCONNSTR_DATABASE_URI')
+    )
+    COSMOS_DATABASE_URI = os.environ.get(
+        'COSMOS_DATABASE_URI',
+        os.environ.get('CUSTOMCONNSTR_COSMOS_DATABASE_URI'),
+    )
     SQLALCHEMY_DATABASE_URI = SQL_DATABASE_URI
 
 
