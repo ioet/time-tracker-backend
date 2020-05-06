@@ -264,7 +264,7 @@ docker run -p 5000:5000 time_tracker_api:local
 
 ## Migrations
 Looking for a DB-agnostic migration tool, the only choice I found was [migrate-anything](https://pypi.org/project/migrate-anything/).
-An specific requirement file was created to run the migrations in `requirements/migrations.txt`. This way we do not mix
+A specific requirement file was created to run the migrations in `requirements/migrations.txt`. This way we do not mix
 any possible vulnerable dependency brought by these dependencies to the environment `prod`. Therefore the dependencies
 to run the migrations shall be installed this way:
 
@@ -274,16 +274,16 @@ pip install -r requirements/migrations.txt
 ```
 
 All the migrations will be handled and created in the python package `migrations`. In order to create a migration we 
-must do it manually (for now) and prefixed by a number, e.g. `migrations/01-initialize-db.py` in order to warranty the 
+must do it manually (for now) and prefixed by a number, e.g. `migrations/01-initialize-db.py` in order to guarantee the 
 order of execution alphabetically.
 Inside every migration there is an `up` and `down` method. The `down` method is executed from the persisted migration in
-the database. Whe a `down` logic that used external dependencies was tested it failed, whilst I put that same logic in 
-the an `up` method it run correctly. In general the library seems to present [design issues](https://github.com/Lieturd/migrate-anything/issues/3).
+the database. When a `down` logic that used external dependencies was tested, it failed; whilst, I put that same logic in 
+the `up` method, it run correctly. In general, the library seems to present [design issues](https://github.com/Lieturd/migrate-anything/issues/3).
 Therefore, it is recommended to apply changes just in one direction: `up`.
 For more information, please check out [some examples](https://github.com/Lieturd/migrate-anything/tree/master/examples) 
-that illustrates the usage of this migration tool.
+that illustrate the usage of this migration tool.
 
-Basically, for running the migrations you must execute
+Basically, for running the migrations you must execute:
 
 ```bash
 migrate-anything migrations
