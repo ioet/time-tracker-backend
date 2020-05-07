@@ -1,9 +1,8 @@
 from dataclasses import dataclass
-
 from azure.cosmos import PartitionKey
-
 from commons.data_access_layer.cosmos_db import CosmosDBModel, CosmosDBDao, CosmosDBRepository
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
+from time_tracker_api.customers.customers_model import create_dao as customers_create_dao
 
 
 class ProjectDao(CRUDDao):
@@ -41,12 +40,29 @@ class ProjectCosmosDBModel(CosmosDBModel):
         return "the project \"%s\"" % self.name  # pragma: no cover
 
 
+class ProjectCosmosDBRepository(CosmosDBRepository):
+    def __init__(self):
+        CosmosDBRepository.__init__(self, container_id=container_definition['id'],
+                                    partition_key_attribute='tenant_id',
+                                    mapper=ProjectCosmosDBModel)
+
+
+class ProjectCosmosDBDao(APICosmosDBDao, ProjectDao):
+    def __init__(self, repository):
+        CosmosDBDao.__init__(self, repository)
+
+    def get_all(self, conditions: dict = None, **kwargs) -> list:
+        event_ctx = self.create_event_context("read-many")
+        customer_dao = customers_create_dao()
+        customers = customer_dao.get_all(visible_only=False)
+        projects = self.repository.find_all(event_ctx, **kwargs)
+        for project in projects:
+            print(project.__dict__)
+
+        return projects
+
+
 def create_dao() -> ProjectDao:
-    repository = CosmosDBRepository.from_definition(container_definition,
-                                                    mapper=ProjectCosmosDBModel)
+    repository = ProjectCosmosDBRepository()
 
-    class ProjectCosmosDBDao(APICosmosDBDao, ProjectDao):
-        def __init__(self):
-            CosmosDBDao.__init__(self, repository)
-
-    return ProjectCosmosDBDao()
+    return ProjectCosmosDBDao(repository)
