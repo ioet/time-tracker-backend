@@ -255,9 +255,9 @@ class CosmosDBDao(CRUDDao):
     def __init__(self, repository: CosmosDBRepository):
         self.repository = repository
 
-    def get_all(self, conditions: dict = {}) -> list:
+    def get_all(self, conditions: dict = {}, **kwargs) -> list:
         event_ctx = self.create_event_context("read-many")
-        return self.repository.find_all(event_ctx, conditions=conditions)
+        return self.repository.find_all(event_ctx, conditions=conditions, **kwargs)
 
     def get(self, id):
         event_ctx = self.create_event_context("read")
