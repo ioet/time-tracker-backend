@@ -379,6 +379,11 @@ class CustomError(HTTPException):
         self.description = description
 
 
+def init_app(app: Flask) -> None:
+    global cosmos_helper
+    cosmos_helper = CosmosDBFacade.from_flask_config(app)
+
+
 def current_datetime() -> datetime:
     return datetime.utcnow()
 
@@ -396,11 +401,6 @@ def current_datetime_str() -> str:
 
 def generate_uuid4() -> str:
     return str(uuid.uuid4())
-
-
-def init_app(app: Flask) -> None:
-    global cosmos_helper
-    cosmos_helper = CosmosDBFacade.from_flask_config(app)
 
 
 def get_last_day_of_month(year: int, month: int) -> int:
