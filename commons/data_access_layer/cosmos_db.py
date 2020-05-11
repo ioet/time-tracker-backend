@@ -60,7 +60,7 @@ class CosmosDBFacade:
 cosmos_helper: CosmosDBFacade = None
 
 
-class CosmosDBModel():
+class CosmosDBModel:
     def __init__(self, data):
         names = set([f.name for f in dataclasses.fields(self)])
         for k, v in data.items():
@@ -124,7 +124,7 @@ class CosmosDBRepository:
             return ''
 
     @staticmethod
-    def generate_params(conditions: dict) -> dict:
+    def generate_params(conditions: dict) -> list:
         result = []
         for k, v in conditions.items():
             result.append({
@@ -255,7 +255,8 @@ class CosmosDBDao(CRUDDao):
     def __init__(self, repository: CosmosDBRepository):
         self.repository = repository
 
-    def get_all(self, conditions: dict = {}, **kwargs) -> list:
+    def get_all(self, conditions: dict = None, **kwargs) -> list:
+        conditions = conditions if conditions else {}
         event_ctx = self.create_event_context("read-many")
         return self.repository.find_all(event_ctx, conditions=conditions, **kwargs)
 
