@@ -3,6 +3,7 @@ from azure.cosmos import PartitionKey
 from commons.data_access_layer.cosmos_db import CosmosDBModel, CosmosDBDao, CosmosDBRepository
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
 from time_tracker_api.customers.customers_model import create_dao as customers_create_dao
+from time_tracker_api.customers.customers_model import CustomerCosmosDBModel
 
 
 class ProjectDao(CRUDDao):
@@ -33,6 +34,12 @@ class ProjectCosmosDBModel(CosmosDBModel):
     def __init__(self, data):
         super(ProjectCosmosDBModel, self).__init__(data)  # pragma: no cover 
 
+    def __contains__(self, item):
+        if type(item) is CustomerCosmosDBModel:
+            return True if item.id == self.customer_id else False
+        else:
+            raise NotImplementedError
+
     def __repr__(self):
         return '<Project %r>' % self.name  # pragma: no cover
 
@@ -52,14 +59,26 @@ class ProjectCosmosDBDao(APICosmosDBDao, ProjectDao):
         CosmosDBDao.__init__(self, repository)
 
     def get_all(self, conditions: dict = None, **kwargs) -> list:
+        """
+        Get all the projects an active client has
+        :param (dict) conditions: Conditions for querying the database
+        :param (dict) kwargs: Pass arguments
+        :return (list): ProjectCosmosDBModel object list
+        """
         event_ctx = self.create_event_context("read-many")
         customer_dao = customers_create_dao()
-        customers = customer_dao.get_all(visible_only=False)
+        customers = customer_dao.get_all()
         projects = self.repository.find_all(event_ctx, **kwargs)
-        for project in projects:
-            print(project.__dict__)
+        active_projects = []
 
-        return projects
+        for project in projects:
+            find = False
+            for customer in customers:
+                if customer in project:
+                    find = True
+            if find:
+                active_projects.append(project)
+        return active_projects
 
 
 def create_dao() -> ProjectDao:
