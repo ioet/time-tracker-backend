@@ -256,7 +256,6 @@ class ActiveTimeEntry(Resource):
 )
 class WorkedTimeSummary(Resource):
     @ns.doc('summary_of_worked_time')
-    # @ns.marshal_with(time_entry)
     def get(self):
         """Find the summary of worked time"""
         return time_entries_dao.get_worked_time()

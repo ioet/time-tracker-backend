@@ -645,7 +645,9 @@ def test_summary_is_called_with_date_range_from_worked_time_module(
         time_entries_dao.repository, 'find_all', return_value=[]
     )
 
-    response = client.get('/time-entries/summary', headers=valid_header, follow_redirects=True)
+    response = client.get(
+        '/time-entries/summary', headers=valid_header, follow_redirects=True
+    )
 
     date_range = worked_time.date_range()
     conditions = {'owner_id': owner_id}

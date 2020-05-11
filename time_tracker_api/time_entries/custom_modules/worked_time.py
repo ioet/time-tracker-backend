@@ -14,8 +14,8 @@ def start_datetime_of_current_month() -> datetime:
 
 def start_datetime_of_current_week() -> datetime:
     today = current_datetime()
-    # WARNING : this gives monday datetime with hours at current hour
     monday = today - timedelta(days=today.weekday())
+    monday = monday.replace(hour=0, minute=0, second=0, microsecond=000000)
     return monday
 
 
