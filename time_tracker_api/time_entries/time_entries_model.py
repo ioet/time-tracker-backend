@@ -5,8 +5,6 @@ from typing import List, Callable
 from azure.cosmos import PartitionKey
 from flask_restplus._http import HTTPStatus
 
-from .custom_modules import worked_time
-
 from commons.data_access_layer.cosmos_db import (
     CosmosDBDao,
     CosmosDBRepository,
@@ -18,6 +16,8 @@ from commons.data_access_layer.cosmos_db import (
     get_current_month,
 )
 from commons.data_access_layer.database import EventContext
+
+from time_tracker_api.time_entries.custom_modules import worked_time
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
 from time_tracker_api.security import current_user_id
 
