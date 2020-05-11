@@ -39,6 +39,13 @@ project_input = ns.model('ProjectInput', {
         description='Id of the project type it belongs. This allows grouping the projects.',
         example=faker.uuid4(),
     ),
+    'technologies': fields.List(
+        fields.String,
+        title='List of technologies this project involves',
+        required=False,
+        description='List of technologies this project involves',
+        example="['python', 'restplus', 'openapi']",
+    )
 })
 
 project_response_fields = {}

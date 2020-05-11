@@ -30,6 +30,7 @@ class ProjectCosmosDBModel(CosmosDBModel):
     customer_id: str
     deleted: str
     tenant_id: str
+    technologies: list
 
     def __init__(self, data):
         super(ProjectCosmosDBModel, self).__init__(data)  # pragma: no cover 

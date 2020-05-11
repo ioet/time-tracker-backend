@@ -12,7 +12,9 @@ valid_project_data = {
     "name": fake.company(),
     "description": fake.paragraph(),
     'customer_id': fake.uuid4(),
-    'project_type_id': fake.uuid4()
+    'project_type_id': fake.uuid4(),
+    'technologies': ["python", "faker", "openapi"]
+
 }
 
 fake_project = ({
@@ -27,7 +29,6 @@ def test_create_project_should_succeed_with_valid_request(client: FlaskClient,
     repository_create_mock = mocker.patch.object(project_dao.repository,
                                                  'create',
                                                  return_value=fake_project)
-
     response = client.post("/projects",
                            headers=valid_header,
                            json=valid_project_data,
