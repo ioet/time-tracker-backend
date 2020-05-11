@@ -247,3 +247,15 @@ class ActiveTimeEntry(Resource):
     def get(self):
         """Find the time entry that is running"""
         return time_entries_dao.find_running()
+
+
+@ns.route('/summary')
+@ns.response(HTTPStatus.OK, 'Summary of worked time in the current month')
+@ns.response(
+    HTTPStatus.NOT_FOUND, 'There is no time entry in the current month'
+)
+class WorkedTimeSummary(Resource):
+    @ns.doc('summary_of_worked_time')
+    def get(self):
+        """Find the summary of worked time"""
+        return time_entries_dao.get_worked_time()

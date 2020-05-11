@@ -9,13 +9,15 @@ from commons.data_access_layer.cosmos_db import (
     CosmosDBDao,
     CosmosDBRepository,
     CustomError,
-    current_datetime_str,
     CosmosDBModel,
+    current_datetime_str,
     get_date_range_of_month,
     get_current_year,
     get_current_month,
 )
 from commons.data_access_layer.database import EventContext
+
+from time_tracker_api.time_entries.custom_modules import worked_time
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
 from time_tracker_api.security import current_user_id
 
@@ -105,7 +107,10 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             return ''
 
     def find_all(
-        self, event_context: EventContext, conditions: dict, date_range: dict
+        self,
+        event_context: EventContext,
+        conditions: dict = {},
+        date_range: dict = {},
     ):
         custom_sql_conditions = []
         custom_sql_conditions.append(
@@ -331,6 +336,19 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         return self.repository.find_running(
             event_ctx.tenant_id, event_ctx.user_id
         )
+
+    def get_worked_time(self, conditions: dict = {}):
+        event_ctx = self.create_event_context(
+            "read", "Summary of worked time in the current month"
+        )
+        conditions.update({"owner_id": event_ctx.user_id})
+
+        time_entries = self.repository.find_all(
+            event_ctx,
+            conditions=conditions,
+            date_range=worked_time.date_range(),
+        )
+        return worked_time.summary(time_entries)
 
     @staticmethod
     def handle_date_filter_args(args: dict) -> dict:
