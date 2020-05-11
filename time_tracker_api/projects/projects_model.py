@@ -72,12 +72,10 @@ class ProjectCosmosDBDao(APICosmosDBDao, ProjectDao):
         active_projects = []
 
         for project in projects:
-            find = False
             for customer in customers:
                 if customer in project:
-                    find = True
-            if find:
-                active_projects.append(project)
+                    active_projects.append(project)
+                    break
         return active_projects
 
 
