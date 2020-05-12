@@ -1,7 +1,7 @@
 import dataclasses
 import logging
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Callable, List, Dict
 
 import azure.cosmos.cosmos_client as cosmos_client
@@ -385,7 +385,7 @@ def init_app(app: Flask) -> None:
 
 
 def current_datetime() -> datetime:
-    return datetime.utcnow()
+    return datetime.now(timezone.utc)
 
 
 def datetime_str(value: datetime) -> str:
@@ -418,7 +418,7 @@ def get_current_month() -> int:
 
 def get_date_range_of_month(year: int, month: int) -> Dict[str, str]:
     first_day_of_month = 1
-    start_date = datetime(year=year, month=month, day=first_day_of_month)
+    start_date = datetime(year=year, month=month, day=first_day_of_month,tzinfo=timezone.utc)
 
     last_day_of_month = get_last_day_of_month(year=year, month=month)
     end_date = datetime(
@@ -429,6 +429,7 @@ def get_date_range_of_month(year: int, month: int) -> Dict[str, str]:
         minute=59,
         second=59,
         microsecond=999999,
+        tzinfo=timezone.utc
     )
 
     return {
