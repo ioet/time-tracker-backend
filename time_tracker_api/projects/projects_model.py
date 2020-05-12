@@ -68,15 +68,11 @@ class ProjectCosmosDBDao(APICosmosDBDao, ProjectDao):
         event_ctx = self.create_event_context("read-many")
         customer_dao = customers_create_dao()
         customers = customer_dao.get_all()
-        projects = self.repository.find_all(event_ctx, **kwargs)
-        active_projects = []
 
-        for project in projects:
-            for customer in customers:
-                if customer in project:
-                    active_projects.append(project)
-                    break
-        return active_projects
+        customers_id = [customer.id for customer in customers]
+        conditions = conditions if conditions else {}
+        custom_condition = "c.customer_id IN {}".format(str(tuple(customers_id)))
+        return self.repository.find_all(event_ctx, conditions,  custom_sql_conditions=[custom_condition], **kwargs)
 
 
 def create_dao() -> ProjectDao:
