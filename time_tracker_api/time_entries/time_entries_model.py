@@ -1,6 +1,7 @@
 import abc
 from dataclasses import dataclass, field
 from typing import List, Callable
+from flask import jsonify
 
 from azure.cosmos import PartitionKey
 from flask_restplus._http import HTTPStatus
@@ -18,6 +19,10 @@ from commons.data_access_layer.cosmos_db import (
 from commons.data_access_layer.database import EventContext
 
 from time_tracker_api.time_entries.custom_modules import worked_time
+from time_tracker_api.time_entries.custom_modules.utils import (
+    add_project_name_to_time_entries,
+)
+from time_tracker_api.projects import projects_model
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
 from time_tracker_api.security import current_user_id
 
@@ -106,6 +111,24 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         else:
             return ''
 
+    def find(
+        self,
+        id: str,
+        event_context: EventContext,
+        peeker: 'function' = None,
+        visible_only=True,
+        mapper: Callable = None,
+    ):
+        time_entry = CosmosDBRepository.find(
+            self, id, event_context, peeker, visible_only, mapper,
+        )
+
+        project_dao = projects_model.create_dao()
+        project = project_dao.get(time_entry.project_id)
+        setattr(time_entry, 'project_name', project.name)
+
+        return time_entry
+
     def find_all(
         self,
         event_context: EventContext,
@@ -119,13 +142,17 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
         custom_params = self.generate_params(date_range)
 
-        return CosmosDBRepository.find_all(
+        time_entries = CosmosDBRepository.find_all(
             self,
             event_context=event_context,
             conditions=conditions,
             custom_sql_conditions=custom_sql_conditions,
             custom_params=custom_params,
         )
+
+        projects = project_dao.get_all()
+        add_project_name_to_time_entries(time_entries, projects)
+        return time_entries
 
     def on_create(self, new_item_data: dict, event_context: EventContext):
         CosmosDBRepository.on_create(self, new_item_data, event_context)
