@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from commons.data_access_layer.cosmos_db import (
     current_datetime,
     current_datetime_str,
@@ -9,7 +9,7 @@ from commons.data_access_layer.cosmos_db import (
 
 
 def start_datetime_of_current_month() -> datetime:
-    return datetime(year=get_current_year(), month=get_current_month(), day=1,)
+    return datetime(year=get_current_year(), month=get_current_month(), day=1, tzinfo=timezone.utc)
 
 
 def start_datetime_of_current_week() -> datetime:
@@ -30,9 +30,12 @@ def start_datetime_of_current_month_str() -> str:
 
 
 def str_to_datetime(
-    value: str, conversion_format: str = '%Y-%m-%dT%H:%M:%S.%f'
+    value: str, conversion_format: str = '%Y-%m-%dT%H:%M:%S.%fZ'
 ) -> datetime:
-    return datetime.strptime(value, conversion_format)
+    if 'Z' in value:
+        return datetime.strptime(value, conversion_format).astimezone(timezone.utc)
+    else:
+        return datetime.fromisoformat(value).astimezone(timezone.utc)
 
 
 def date_range():
