@@ -114,7 +114,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         self,
         id: str,
         event_context: EventContext,
-        peeker: 'function' = None,
+        peeker: Callable = None,
         visible_only=True,
         mapper: Callable = None,
     ):
