@@ -33,7 +33,7 @@ class CRUDDao(abc.ABC):
         raise NotImplementedError  # pragma: no cover
 
 
-class EventContext():
+class EventContext:
     def __init__(self, container_id: str, action: str, description: str = None,
                  user_id: str = None, tenant_id: str = None, session_id: str = None,
                  app_id: str = None):

@@ -11,7 +11,7 @@ from flask import Flask
 
 from commons.data_access_layer.cosmos_db import CosmosDBDao
 from commons.data_access_layer.database import EventContext
-from time_tracker_api.security import current_user_id, current_user_tenant_id
+from time_tracker_api.security import current_user_id, current_user_tenant_id, current_role_user, roles
 
 
 class CRUDDao(abc.ABC):
@@ -37,10 +37,11 @@ class CRUDDao(abc.ABC):
 
 
 class ApiEventContext(EventContext):
-    def __init__(self, container_id: str, action: str, description: str = None,
-                 user_id: str = None, tenant_id: str = None, session_id: str = None):
+    def __init__(self, container_id: str, action: str, description: str = None, user_id: str = None,
+                 tenant_id: str = None, session_id: str = None, user_role: str = None):
         super(ApiEventContext, self).__init__(container_id, action, description)
         self._user_id = user_id
+        self._user_role = user_role
         self._tenant_id = tenant_id
         self._session_id = session_id
 
@@ -51,6 +52,10 @@ class ApiEventContext(EventContext):
         return self._user_id
 
     @property
+    def user_role(self) -> str:
+        return self._user_role if self._user_role else current_role_user()
+
+    @property
     def tenant_id(self) -> str:
         if self._tenant_id is None:
             self._tenant_id = current_user_tenant_id()
@@ -59,6 +64,10 @@ class ApiEventContext(EventContext):
     @property
     def session_id(self) -> str:
         return self._session_id
+
+    @property
+    def is_admin(self):
+        return True if self.user_role == roles.get("admin").get("name") else False
 
 
 class APICosmosDBDao(CosmosDBDao):

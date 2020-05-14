@@ -29,6 +29,13 @@ UUID_REGEX = '[0-9a-f]{8}\-[0-9a-f]{4}\-4[0-9a-f]{3}\-[89ab][0-9a-f]{3}\-[0-9a-f
 
 iss_claim_pattern = re.compile(r"(.*).b2clogin.com/(?P<tenant_id>%s)" % UUID_REGEX)
 
+default_role = frozenset({"client-role"})
+
+roles = {
+    "admin": {"name": "time-tracker-admin"},
+    "client": {"name": "client-role"}
+}
+
 
 def current_user_id() -> str:
     oid_claim = get_token_json().get("oid")
@@ -36,6 +43,11 @@ def current_user_id() -> str:
         abort(message='The claim "oid" is missing in the JWT', code=HTTPStatus.UNAUTHORIZED)
 
     return oid_claim
+
+
+def current_role_user() -> str:
+    role_user = get_token_json().get("extension_role", None)
+    return role_user if role_user else roles.get("client").get("name")
 
 
 def current_user_tenant_id() -> str:
