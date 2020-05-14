@@ -16,7 +16,7 @@ from time_tracker_api.security import current_user_id, current_user_tenant_id, c
 
 class CRUDDao(abc.ABC):
     @abc.abstractmethod
-    def get_all(self, conditions: dict):
+    def get_all(self, conditions: dict = None, **kwargs):
         raise NotImplementedError  # pragma: no cover
 
     @abc.abstractmethod

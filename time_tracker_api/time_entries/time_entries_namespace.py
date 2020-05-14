@@ -115,6 +115,13 @@ time_entry_response_fields = {
         description='User who owns the time entry',
         example=faker.uuid4(),
     ),
+    'project_name': fields.String(
+        required=True,
+        title='Project Name',
+        max_length=50,
+        description='Name of the project where time-entry was registered',
+        example=faker.word(['mobile app', 'web app']),
+    ),
 }
 time_entry_response_fields.update(common_fields)
 
