@@ -1,7 +1,6 @@
 import abc
 from dataclasses import dataclass, field
 from typing import List, Callable
-from flask import jsonify
 
 from azure.cosmos import PartitionKey
 from flask_restplus._http import HTTPStatus
@@ -115,7 +114,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         self,
         id: str,
         event_context: EventContext,
-        peeker: 'function' = None,
+        peeker: Callable = None,
         visible_only=True,
         mapper: Callable = None,
     ):
@@ -150,6 +149,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             custom_params=custom_params,
         )
 
+        project_dao = projects_model.create_dao()
         projects = project_dao.get_all()
         add_project_name_to_time_entries(time_entries, projects)
         return time_entries
