@@ -110,24 +110,6 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         else:
             return ''
 
-    def find(
-        self,
-        id: str,
-        event_context: EventContext,
-        peeker: Callable = None,
-        visible_only=True,
-        mapper: Callable = None,
-    ):
-        time_entry = CosmosDBRepository.find(
-            self, id, event_context, peeker, visible_only, mapper,
-        )
-
-        project_dao = projects_model.create_dao()
-        project = project_dao.get(time_entry.project_id)
-        setattr(time_entry, 'project_name', project.name)
-
-        return time_entry
-
     def find_all(
         self,
         event_context: EventContext,
@@ -141,18 +123,13 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
         custom_params = self.generate_params(date_range)
 
-        time_entries = CosmosDBRepository.find_all(
+        return CosmosDBRepository.find_all(
             self,
             event_context=event_context,
             conditions=conditions,
             custom_sql_conditions=custom_sql_conditions,
             custom_params=custom_params,
         )
-
-        project_dao = projects_model.create_dao()
-        projects = project_dao.get_all()
-        add_project_name_to_time_entries(time_entries, projects)
-        return time_entries
 
     def on_create(self, new_item_data: dict, event_context: EventContext):
         CosmosDBRepository.on_create(self, new_item_data, event_context)
@@ -310,15 +287,25 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         conditions.update({"owner_id": event_ctx.user_id})
 
         date_range = self.handle_date_filter_args(args=conditions)
-        return self.repository.find_all(
+        time_entries = self.repository.find_all(
             event_ctx, conditions=conditions, date_range=date_range
         )
 
+        project_dao = projects_model.create_dao()
+        projects = project_dao.get_all()
+        add_project_name_to_time_entries(time_entries, projects)
+        return time_entries
+
     def get(self, id):
         event_ctx = self.create_event_context("read")
-        return self.repository.find(
+        time_entry = self.repository.find(
             id, event_ctx, peeker=self.check_whether_current_user_owns_item
         )
+
+        project_dao = projects_model.create_dao()
+        project = project_dao.get(time_entry.project_id)
+        setattr(time_entry, 'project_name', project.name)
+        return time_entry
 
     def create(self, data: dict):
         event_ctx = self.create_event_context("create")
