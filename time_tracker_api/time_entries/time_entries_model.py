@@ -111,7 +111,6 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
     @staticmethod
     def create_sql_date_range_filter(date_range: dict) -> str:
-        print("data: {}".format(date_range))
         if 'start_date' and 'end_date' in date_range:
             return """
             ((c.start_date BETWEEN @start_date AND @end_date) OR
