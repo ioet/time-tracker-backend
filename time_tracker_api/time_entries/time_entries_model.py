@@ -21,6 +21,7 @@ from time_tracker_api.time_entries.custom_modules import worked_time
 from time_tracker_api.time_entries.custom_modules.utils import (
     add_project_name_to_time_entries,
 )
+from time_tracker_api.projects.projects_model import ProjectCosmosDBModel, create_dao as project_create_dao
 from time_tracker_api.projects import projects_model
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
 from time_tracker_api.security import current_user_id
@@ -74,6 +75,14 @@ class TimeEntryCosmosDBModel(CosmosDBModel):
     def running(self):
         return self.end_date is None
 
+    def __add__(self, other):
+        if type(other) is ProjectCosmosDBModel:
+            time_entry = self.__class__
+            time_entry.project_id = other.__dict__
+            return time_entry
+        else:
+            raise NotImplementedError
+
     def __repr__(self):
         return '<Time Entry %r>' % self.start_date  # pragma: no cover
 
@@ -102,6 +111,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
     @staticmethod
     def create_sql_date_range_filter(date_range: dict) -> str:
+        print("data: {}".format(date_range))
         if 'start_date' and 'end_date' in date_range:
             return """
             ((c.start_date BETWEEN @start_date AND @end_date) OR
@@ -134,13 +144,12 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         conditions: dict = {},
         date_range: dict = {},
     ):
-        custom_sql_conditions = []
-        custom_sql_conditions.append(
-            self.create_sql_date_range_filter(date_range)
-        )
+        custom_sql_conditions = [self.create_sql_date_range_filter(date_range)]
+
+        if event_context.is_admin:
+            conditions.pop("owner_id")
 
         custom_params = self.generate_params(date_range)
-
         time_entries = CosmosDBRepository.find_all(
             self,
             event_context=event_context,
@@ -149,9 +158,14 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             custom_params=custom_params,
         )
 
-        project_dao = projects_model.create_dao()
-        projects = project_dao.get_all()
-        add_project_name_to_time_entries(time_entries, projects)
+        if time_entries:
+            projects_id = [project.project_id for project in time_entries]
+            p_ids = str(tuple(projects_id)).replace(",", "") if len(projects_id) == 1 else str(tuple(projects_id))
+            custom_conditions = "c.id IN {}".format(p_ids)
+
+            project_dao = projects_model.create_dao()
+            projects = project_dao.get_all(custom_sql_conditions=[custom_conditions])
+            add_project_name_to_time_entries(time_entries, projects)
         return time_entries
 
     def on_create(self, new_item_data: dict, event_context: EventContext):
@@ -305,14 +319,18 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
                 "The specified time entry is already running",
             )
 
-    def get_all(self, conditions: dict = {}) -> list:
+    def get_all(self, conditions: dict = None, **kwargs) -> list:
         event_ctx = self.create_event_context("read-many")
         conditions.update({"owner_id": event_ctx.user_id})
 
-        date_range = self.handle_date_filter_args(args=conditions)
-        return self.repository.find_all(
-            event_ctx, conditions=conditions, date_range=date_range
-        )
+        if "start_date" and "end_date" in conditions:
+            date_range = conditions.copy()
+            date_range.pop("owner_id")
+            conditions.pop("start_date")
+            conditions.pop("end_date")
+        else:
+            date_range = self.handle_date_filter_args(args=conditions)
+        return self.repository.find_all(event_ctx, conditions=conditions, date_range=date_range)
 
     def get(self, id):
         event_ctx = self.create_event_context("read")
