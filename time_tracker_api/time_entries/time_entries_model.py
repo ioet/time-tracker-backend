@@ -120,24 +120,6 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         else:
             return ''
 
-    def find(
-        self,
-        id: str,
-        event_context: EventContext,
-        peeker: 'function' = None,
-        visible_only=True,
-        mapper: Callable = None,
-    ):
-        time_entry = CosmosDBRepository.find(
-            self, id, event_context, peeker, visible_only, mapper,
-        )
-
-        project_dao = projects_model.create_dao()
-        project = project_dao.get(time_entry.project_id)
-        setattr(time_entry, 'project_name', project.name)
-
-        return time_entry
-
     def find_all(
         self,
         event_context: EventContext,
@@ -334,9 +316,14 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
 
     def get(self, id):
         event_ctx = self.create_event_context("read")
-        return self.repository.find(
+        time_entry = self.repository.find(
             id, event_ctx, peeker=self.check_whether_current_user_owns_item
         )
+
+        project_dao = projects_model.create_dao()
+        project = project_dao.get(time_entry.project_id)
+        setattr(time_entry, 'project_name', project.name)
+        return time_entry
 
     def create(self, data: dict):
         event_ctx = self.create_event_context("create")

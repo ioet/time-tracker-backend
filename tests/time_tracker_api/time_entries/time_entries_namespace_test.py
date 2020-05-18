@@ -146,8 +146,8 @@ def test_list_all_time_entries(
         time_entries_dao,
     )
 
-    repository_find_all_mock = mocker.patch.object(
-        time_entries_dao.repository, 'find_all', return_value=[]
+    dao_get_all_mock = mocker.patch.object(
+        time_entries_dao, 'get_all', return_value=[]
     )
 
     response = client.get(
@@ -156,7 +156,7 @@ def test_list_all_time_entries(
 
     assert HTTPStatus.OK == response.status_code
     assert [] == json.loads(response.data)
-    repository_find_all_mock.assert_called_once()
+    dao_get_all_mock.assert_called_once()
 
 
 def test_get_time_entry_should_succeed_with_valid_id(
@@ -166,8 +166,8 @@ def test_get_time_entry_should_succeed_with_valid_id(
         time_entries_dao,
     )
 
-    repository_find_mock = mocker.patch.object(
-        time_entries_dao.repository, 'find', return_value=fake_time_entry
+    dao_get_mock = mocker.patch.object(
+        time_entries_dao, 'get', return_value={}
     )
 
     valid_id = fake.random_int(1, 9999)
@@ -179,9 +179,7 @@ def test_get_time_entry_should_succeed_with_valid_id(
 
     assert HTTPStatus.OK == response.status_code
     fake_time_entry == json.loads(response.data)
-    repository_find_mock.assert_called_once_with(
-        str(valid_id), ANY, peeker=ANY
-    )
+    dao_get_mock.assert_called_once_with(str(valid_id))
 
 
 def test_get_time_entry_should_response_with_unprocessable_entity_for_invalid_id_format(
@@ -614,20 +612,15 @@ def test_find_all_is_called_with_generated_dates(
         time_entries_dao,
     )
 
-    repository_find_all_mock = mocker.patch.object(
-        time_entries_dao.repository, 'find_all', return_value=[]
+    dao_get_all_mock = mocker.patch.object(
+        time_entries_dao, 'get_all', return_value=[]
     )
 
     response = client.get(url, headers=valid_header, follow_redirects=True)
 
-    date_range = get_date_range_of_month(year, month)
-    conditions = {'owner_id': owner_id}
-
     assert HTTPStatus.OK == response.status_code
     assert json.loads(response.data) is not None
-    repository_find_all_mock.assert_called_once_with(
-        ANY, conditions=conditions, date_range=date_range
-    )
+    dao_get_all_mock.assert_called_once()
 
 
 def test_summary_is_called_with_date_range_from_worked_time_module(

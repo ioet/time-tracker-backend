@@ -210,7 +210,7 @@ class CosmosDBRepository:
         self,
         id: str,
         event_context: EventContext,
-        peeker: 'function' = None,
+        peeker: Callable = None,
         visible_only=True,
         mapper: Callable = None,
     ):
@@ -268,7 +268,7 @@ class CosmosDBRepository:
         id: str,
         changes: dict,
         event_context: EventContext,
-        peeker: 'function' = None,
+        peeker: Callable = None,
         visible_only=True,
         mapper: Callable = None,
     ):
@@ -298,7 +298,7 @@ class CosmosDBRepository:
         self,
         id: str,
         event_context: EventContext,
-        peeker: 'function' = None,
+        peeker: Callable = None,
         mapper: Callable = None,
     ):
         return self.partial_update(
@@ -341,7 +341,9 @@ class CosmosDBDao(CRUDDao):
     def get_all(self, conditions: dict = None, **kwargs) -> list:
         conditions = conditions if conditions else {}
         event_ctx = self.create_event_context("read-many")
-        return self.repository.find_all(event_ctx, conditions=conditions, **kwargs)
+        return self.repository.find_all(
+            event_ctx, conditions=conditions, **kwargs
+        )
 
     def get(self, id):
         event_ctx = self.create_event_context("read")
@@ -399,6 +401,7 @@ def generate_uuid4() -> str:
 
 def get_last_day_of_month(year: int, month: int) -> int:
     from calendar import monthrange
+
     return monthrange(year=year, month=month)[1]
 
 
@@ -412,7 +415,9 @@ def get_current_month() -> int:
 
 def get_date_range_of_month(year: int, month: int) -> Dict[str, str]:
     first_day_of_month = 1
-    start_date = datetime(year=year, month=month, day=first_day_of_month,tzinfo=timezone.utc)
+    start_date = datetime(
+        year=year, month=month, day=first_day_of_month, tzinfo=timezone.utc
+    )
 
     last_day_of_month = get_last_day_of_month(year=year, month=month)
     end_date = datetime(
@@ -423,7 +428,7 @@ def get_date_range_of_month(year: int, month: int) -> Dict[str, str]:
         minute=59,
         second=59,
         microsecond=999999,
-        tzinfo=timezone.utc
+        tzinfo=timezone.utc,
     )
 
     return {
