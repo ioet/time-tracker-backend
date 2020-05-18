@@ -29,8 +29,6 @@ UUID_REGEX = '[0-9a-f]{8}\-[0-9a-f]{4}\-4[0-9a-f]{3}\-[89ab][0-9a-f]{3}\-[0-9a-f
 
 iss_claim_pattern = re.compile(r"(.*).b2clogin.com/(?P<tenant_id>%s)" % UUID_REGEX)
 
-default_role = frozenset({"client-role"})
-
 roles = {
     "admin": {"name": "time-tracker-admin"},
     "client": {"name": "client-role"}
