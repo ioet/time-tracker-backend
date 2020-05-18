@@ -233,7 +233,6 @@ class CosmosDBRepository:
         ]
         params.extend(self.generate_params(conditions))
         params.extend(custom_params)
-        print("before query")
         query_str = """
             SELECT * FROM c
             WHERE c.{partition_key_attribute}=@partition_key_value
