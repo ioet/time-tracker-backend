@@ -222,17 +222,8 @@ class CosmosDBRepository:
         function_mapper = self.get_mapper_or_dict(mapper)
         return function_mapper(self.check_visibility(found_item, visible_only))
 
-    def find_all(
-        self,
-        event_context: EventContext,
-        conditions: dict = {},
-        custom_sql_conditions: List[str] = [],
-        custom_params: dict = {},
-        max_count=None,
-        offset=0,
-        visible_only=True,
-        mapper: Callable = None,
-    ):
+    def find_all(self, event_context: EventContext, conditions: dict = {}, custom_sql_conditions: List[str] = [],
+                 custom_params: dict = {}, max_count=None, offset=0, visible_only=True, mapper: Callable = None):
         partition_key_value = self.find_partition_key_value(event_context)
         max_count = self.get_page_size_or(max_count)
         params = [
@@ -242,8 +233,7 @@ class CosmosDBRepository:
         ]
         params.extend(self.generate_params(conditions))
         params.extend(custom_params)
-        result = self.container.query_items(
-            query="""
+        query_str = """
             SELECT * FROM c
             WHERE c.{partition_key_attribute}=@partition_key_value
             {conditions_clause}
@@ -261,7 +251,10 @@ class CosmosDBRepository:
                     custom_sql_conditions
                 ),
                 order_clause=self.create_sql_order_clause(),
-            ),
+            )
+
+        result = self.container.query_items(
+            query=query_str,
             parameters=params,
             partition_key=partition_key_value,
             max_item_count=max_count,

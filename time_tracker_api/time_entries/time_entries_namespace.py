@@ -151,6 +151,21 @@ attributes_filter.add_argument(
     location='args',
 )
 
+attributes_filter.add_argument(
+    'start_date',
+    required=False,
+    store_missing=False,
+    help="(Filter) Start to filter by",
+    location='args',
+)
+attributes_filter.add_argument(
+    'end_date',
+    required=False,
+    store_missing=False,
+    help="(Filter) End time to filter by",
+    location='args',
+)
+
 
 @ns.route('')
 class TimeEntries(Resource):

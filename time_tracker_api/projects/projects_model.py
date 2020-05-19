@@ -73,7 +73,11 @@ class ProjectCosmosDBDao(APICosmosDBDao, ProjectDao):
         customers_id = [customer.id for customer in customers]
         conditions = conditions if conditions else {}
         custom_condition = "c.customer_id IN {}".format(str(tuple(customers_id)))
-        return self.repository.find_all(event_ctx, conditions,  custom_sql_conditions=[custom_condition], **kwargs)
+        if "custom_sql_conditions" in kwargs:
+            kwargs["custom_sql_conditions"].append(custom_condition)
+        else:
+            kwargs["custom_sql_conditions"] = [custom_condition]
+        return self.repository.find_all(event_ctx, conditions, **kwargs)
 
 
 def create_dao() -> ProjectDao:
