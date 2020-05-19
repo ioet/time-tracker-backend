@@ -129,6 +129,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
         if event_context.is_admin:
             conditions.pop("owner_id")
+            # TODO should be removed when implementing a role-based permission module ↑
 
         custom_params = self.generate_params(date_range)
         time_entries = CosmosDBRepository.find_all(
@@ -143,7 +144,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             projects_id = [project.project_id for project in time_entries]
             p_ids = str(tuple(projects_id)).replace(",", "") if len(projects_id) == 1 else str(tuple(projects_id))
             custom_conditions = "c.id IN {}".format(p_ids)
-
+            # TODO this must be refactored to be used from the utils module ↑
             project_dao = projects_model.create_dao()
             projects = project_dao.get_all(custom_sql_conditions=[custom_conditions])
             add_project_name_to_time_entries(time_entries, projects)
@@ -304,13 +305,7 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         event_ctx = self.create_event_context("read-many")
         conditions.update({"owner_id": event_ctx.user_id})
 
-        if "start_date" and "end_date" in conditions:
-            date_range = conditions.copy()
-            date_range.pop("owner_id")
-            conditions.pop("start_date")
-            conditions.pop("end_date")
-        else:
-            date_range = self.handle_date_filter_args(args=conditions)
+        date_range = self.handle_date_filter_args(args=conditions)
         return self.repository.find_all(event_ctx, conditions=conditions, date_range=date_range)
 
     def get(self, id):
@@ -383,11 +378,18 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
 
     @staticmethod
     def handle_date_filter_args(args: dict) -> dict:
+        date_range = None
         if 'month' and 'year' in args:
             month = int(args.get("month"))
             year = int(args.get("year"))
             args.pop('month')
             args.pop('year')
+        elif "start_date" and "end_date" in args:
+            date_range = args.copy()
+            if "owner_id" in date_range:
+                date_range.pop("owner_id")
+            args.pop("start_date")
+            args.pop("end_date")
         elif 'month' in args:
             month = int(args.get("month"))
             year = get_current_year()
@@ -395,7 +397,7 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         else:
             month = get_current_month()
             year = get_current_year()
-        return get_date_range_of_month(year, month)
+        return date_range if date_range else get_date_range_of_month(year, month)
 
 
 def create_dao() -> TimeEntriesDao:
