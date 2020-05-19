@@ -51,7 +51,7 @@ Remember to do it with Python 3.
 Bear in mind that the requirements for `time_tracker_events`, must be located on its local requirements.txt, by 
     [convention](https://docs.microsoft.com/en-us/azure/azure-functions/functions-reference-python#folder-structure).
 
-- Run `pre-commit install`. For more details, check out Development > Git hooks.
+- Run `pre-commit install -t pre-commit -t commit-msg`. For more details, see section Development > Git hooks.
 
 ### How to use it
 - Set the env var `FLASK_APP` to `time_tracker_api` and start the app:
@@ -153,11 +153,10 @@ func azure functionapp publish time-tracker-events  --build local
 We use [pre-commit](https://github.com/pre-commit/pre-commit) library to manage local git hooks, as developers we just need to run in our virtual environment:
 
 ```
-pre-commit install
+pre-commit install -t pre-commit -t commit-msg
 ```
 With this command the library will take configuration from `.pre-commit-config.yaml` and will set up the hooks by us. 
 
-Currently, we only have a hook to enforce semantic commit message.
 
 ### Test
 We are using [Pytest](https://docs.pytest.org/en/latest/index.html) for tests. The tests are located in the package 

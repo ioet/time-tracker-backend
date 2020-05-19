@@ -1,3 +1,5 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
 repos:
 - repo: local
   hooks:
@@ -6,3 +8,10 @@ repos:
     entry: python ./commons/git_hooks/enforce_semantic_commit_msg.py
     language: python
     stages : [commit-msg]
+- repo: https://github.com/psf/black
+  rev: stable
+  hooks:
+  - id: black
+    args: [--line-length=79, --skip-string-normalization]
+    name: Check formatted code
+    stages: [commit]
