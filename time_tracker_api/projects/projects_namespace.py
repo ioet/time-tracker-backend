@@ -48,7 +48,15 @@ project_input = ns.model('ProjectInput', {
     )
 })
 
-project_response_fields = {}
+project_response_fields = {
+    'customer_name': fields.String(
+        required=True,
+        title='Customer Name',
+        max_length=50,
+        description='Name of the customer of the project',
+        example=faker.company(),
+    ),
+}
 project_response_fields.update(common_fields)
 
 project = ns.inherit(

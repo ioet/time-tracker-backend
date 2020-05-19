@@ -5,6 +5,9 @@ from time_tracker_api.database import CRUDDao, APICosmosDBDao
 from time_tracker_api.customers.customers_model import create_dao as customers_create_dao
 from time_tracker_api.customers.customers_model import CustomerCosmosDBModel
 
+from time_tracker_api.projects.custom_modules.utils import (
+    add_customer_name_to_projects
+)
 
 class ProjectDao(CRUDDao):
     pass
@@ -73,11 +76,15 @@ class ProjectCosmosDBDao(APICosmosDBDao, ProjectDao):
         customers_id = [customer.id for customer in customers]
         conditions = conditions if conditions else {}
         custom_condition = "c.customer_id IN {}".format(str(tuple(customers_id)))
+        # TODO this must be refactored to be used from the utils module ↑
         if "custom_sql_conditions" in kwargs:
             kwargs["custom_sql_conditions"].append(custom_condition)
         else:
-            kwargs["custom_sql_conditions"] = [custom_condition]
-        return self.repository.find_all(event_ctx, conditions, **kwargs)
+            kwargs["custom_sql_conditions"] = [custom_condition]        
+        projects = self.repository.find_all(event_ctx, conditions, **kwargs)
+
+        add_customer_name_to_projects(projects, customers)
+        return projects
 
 
 def create_dao() -> ProjectDao:
