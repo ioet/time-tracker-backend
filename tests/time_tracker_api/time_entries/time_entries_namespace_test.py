@@ -10,12 +10,12 @@ from pytest_mock import MockFixture, pytest
 from commons.data_access_layer.cosmos_db import (
     current_datetime,
     current_datetime_str,
-    get_date_range_of_month,
     get_current_month,
     get_current_year,
 )
 
-from time_tracker_api.time_entries.custom_modules import worked_time
+from utils import worked_time
+
 from time_tracker_api.time_entries.time_entries_model import (
     TimeEntriesCosmosDBDao,
 )
