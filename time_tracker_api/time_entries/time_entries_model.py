@@ -312,7 +312,6 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         event_ctx = self.create_event_context("read")
 
         time_entry = self.repository.find(id, event_ctx)
-        self.repository.cosmos_helper.logger.info(f"{self.current_user_id()}")
         self.check_whether_current_user_owns_item(time_entry)
 
         project_dao = projects_model.create_dao()
