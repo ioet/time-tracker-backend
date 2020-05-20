@@ -275,27 +275,24 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
     def __init__(self, repository):
         CosmosDBDao.__init__(self, repository)
 
-    @classmethod
-    def check_whether_current_user_owns_item(cls, data):
+    def check_whether_current_user_owns_item(self, data):
         if (
             data.owner_id is not None
-            and data.owner_id != cls.current_user_id()
+            and data.owner_id != self.current_user_id()
         ):
             raise CustomError(
                 HTTPStatus.FORBIDDEN,
                 "The current user is not the owner of this time entry",
             )
 
-    @classmethod
-    def check_time_entry_is_not_stopped(cls, data):
+    def check_time_entry_is_not_stopped(self, data):
         if data.end_date is not None:
             raise CustomError(
                 HTTPStatus.UNPROCESSABLE_ENTITY,
                 "The specified time entry is already stopped",
             )
 
-    @classmethod
-    def check_time_entry_is_not_started(cls, data):
+    def check_time_entry_is_not_started(self, data):
         if data.end_date is None:
             raise CustomError(
                 HTTPStatus.UNPROCESSABLE_ENTITY,
