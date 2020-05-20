@@ -276,10 +276,10 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         CosmosDBDao.__init__(self, repository)
 
     @classmethod
-    def check_whether_current_user_owns_item(cls, data: dict):
+    def check_whether_current_user_owns_item(cls, data):
         if (
-            data.get('owner_id') is not None
-            and data.get('owner_id') != cls.current_user_id()
+            data.owner_id is not None
+            and data.owner_id != cls.current_user_id()
         ):
             raise CustomError(
                 HTTPStatus.FORBIDDEN,
@@ -287,20 +287,16 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
             )
 
     @classmethod
-    def checks_owner_and_is_not_stopped(cls, data: dict):
-        cls.check_whether_current_user_owns_item(data)
-
-        if data.get('end_date') is not None:
+    def check_time_entry_is_not_stopped(cls, data):
+        if data.end_date is not None:
             raise CustomError(
                 HTTPStatus.UNPROCESSABLE_ENTITY,
                 "The specified time entry is already stopped",
             )
 
     @classmethod
-    def checks_owner_and_is_not_started(cls, data: dict):
-        cls.check_whether_current_user_owns_item(data)
-
-        if data.get('end_date') is None:
+    def check_time_entry_is_not_started(cls, data):
+        if data.end_date is None:
             raise CustomError(
                 HTTPStatus.UNPROCESSABLE_ENTITY,
                 "The specified time entry is already running",
@@ -317,9 +313,10 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
 
     def get(self, id):
         event_ctx = self.create_event_context("read")
-        time_entry = self.repository.find(
-            id, event_ctx, peeker=self.check_whether_current_user_owns_item
-        )
+
+        time_entry = self.repository.find(id, event_ctx)
+        self.repository.cosmos_helper.logger.info(f"{self.current_user_id()}")
+        self.check_whether_current_user_owns_item(time_entry)
 
         project_dao = projects_model.create_dao()
         project = project_dao.get(time_entry.project_id)
@@ -333,35 +330,40 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
 
     def update(self, id, data: dict, description=None):
         event_ctx = self.create_event_context("update", description)
-        return self.repository.partial_update(
-            id,
-            data,
-            event_ctx,
-            peeker=self.check_whether_current_user_owns_item,
-        )
+
+        time_entry = self.repository.find(id, event_ctx)
+        self.check_whether_current_user_owns_item(time_entry)
+
+        return self.repository.partial_update(id, data, event_ctx,)
 
     def stop(self, id):
         event_ctx = self.create_event_context("update", "Stop time entry")
+
+        time_entry = self.repository.find(id, event_ctx)
+        self.check_whether_current_user_owns_item(time_entry)
+        self.check_time_entry_is_not_stopped(time_entry)
+
         return self.repository.partial_update(
-            id,
-            {'end_date': current_datetime_str()},
-            event_ctx,
-            peeker=self.checks_owner_and_is_not_stopped,
+            id, {'end_date': current_datetime_str()}, event_ctx,
         )
 
     def restart(self, id):
         event_ctx = self.create_event_context("update", "Restart time entry")
+
+        time_entry = self.repository.find(id, event_ctx)
+        self.check_whether_current_user_owns_item(time_entry)
+        self.check_time_entry_is_not_started(time_entry)
+
         return self.repository.partial_update(
-            id,
-            {'end_date': None},
-            event_ctx,
-            peeker=self.checks_owner_and_is_not_started,
+            id, {'end_date': None}, event_ctx,
         )
 
     def delete(self, id):
         event_ctx = self.create_event_context("delete")
+        time_entry = self.repository.find(id, event_ctx)
+        self.check_whether_current_user_owns_item(time_entry)
         self.repository.delete(
-            id, event_ctx, peeker=self.check_whether_current_user_owns_item
+            id, event_ctx,
         )
 
     def find_running(self):
