@@ -140,7 +140,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         )
 
         if time_entries:
-            projects_id = [project.project_id for project in time_entries]
+            projects_id = [str(project.project_id) for project in time_entries]
             p_ids = (
                 str(tuple(projects_id)).replace(",", "")
                 if len(projects_id) == 1
