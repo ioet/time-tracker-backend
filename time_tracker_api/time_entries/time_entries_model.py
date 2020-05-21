@@ -17,11 +17,10 @@ from commons.data_access_layer.cosmos_db import (
 )
 from commons.data_access_layer.database import EventContext
 
-from time_tracker_api.time_entries.custom_modules import worked_time
-from time_tracker_api.time_entries.custom_modules.utils import (
-    add_project_name_to_time_entries,
-)
-from time_tracker_api.projects.projects_model import ProjectCosmosDBModel, create_dao as project_create_dao
+from utils.extend_model import add_project_name_to_time_entries
+from utils import worked_time
+
+from time_tracker_api.projects.projects_model import ProjectCosmosDBModel
 from time_tracker_api.projects import projects_model
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
 from time_tracker_api.security import current_user_id
@@ -142,11 +141,17 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
         if time_entries:
             projects_id = [project.project_id for project in time_entries]
-            p_ids = str(tuple(projects_id)).replace(",", "") if len(projects_id) == 1 else str(tuple(projects_id))
+            p_ids = (
+                str(tuple(projects_id)).replace(",", "")
+                if len(projects_id) == 1
+                else str(tuple(projects_id))
+            )
             custom_conditions = "c.id IN {}".format(p_ids)
             # TODO this must be refactored to be used from the utils module ↑
             project_dao = projects_model.create_dao()
-            projects = project_dao.get_all(custom_sql_conditions=[custom_conditions])
+            projects = project_dao.get_all(
+                custom_sql_conditions=[custom_conditions]
+            )
             add_project_name_to_time_entries(time_entries, projects)
         return time_entries
 
@@ -270,32 +275,25 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
     def __init__(self, repository):
         CosmosDBDao.__init__(self, repository)
 
-    @classmethod
-    def check_whether_current_user_owns_item(cls, data: dict):
+    def check_whether_current_user_owns_item(self, data):
         if (
-            data.get('owner_id') is not None
-            and data.get('owner_id') != cls.current_user_id()
+            data.owner_id is not None
+            and data.owner_id != self.current_user_id()
         ):
             raise CustomError(
                 HTTPStatus.FORBIDDEN,
                 "The current user is not the owner of this time entry",
             )
 
-    @classmethod
-    def checks_owner_and_is_not_stopped(cls, data: dict):
-        cls.check_whether_current_user_owns_item(data)
-
-        if data.get('end_date') is not None:
+    def check_time_entry_is_not_stopped(self, data):
+        if data.end_date is not None:
             raise CustomError(
                 HTTPStatus.UNPROCESSABLE_ENTITY,
                 "The specified time entry is already stopped",
             )
 
-    @classmethod
-    def checks_owner_and_is_not_started(cls, data: dict):
-        cls.check_whether_current_user_owns_item(data)
-
-        if data.get('end_date') is None:
+    def check_time_entry_is_not_started(self, data):
+        if data.end_date is None:
             raise CustomError(
                 HTTPStatus.UNPROCESSABLE_ENTITY,
                 "The specified time entry is already running",
@@ -306,13 +304,15 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         conditions.update({"owner_id": event_ctx.user_id})
 
         date_range = self.handle_date_filter_args(args=conditions)
-        return self.repository.find_all(event_ctx, conditions=conditions, date_range=date_range)
+        return self.repository.find_all(
+            event_ctx, conditions=conditions, date_range=date_range
+        )
 
     def get(self, id):
         event_ctx = self.create_event_context("read")
-        time_entry = self.repository.find(
-            id, event_ctx, peeker=self.check_whether_current_user_owns_item
-        )
+
+        time_entry = self.repository.find(id, event_ctx)
+        self.check_whether_current_user_owns_item(time_entry)
 
         project_dao = projects_model.create_dao()
         project = project_dao.get(time_entry.project_id)
@@ -326,35 +326,40 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
 
     def update(self, id, data: dict, description=None):
         event_ctx = self.create_event_context("update", description)
-        return self.repository.partial_update(
-            id,
-            data,
-            event_ctx,
-            peeker=self.check_whether_current_user_owns_item,
-        )
+
+        time_entry = self.repository.find(id, event_ctx)
+        self.check_whether_current_user_owns_item(time_entry)
+
+        return self.repository.partial_update(id, data, event_ctx,)
 
     def stop(self, id):
         event_ctx = self.create_event_context("update", "Stop time entry")
+
+        time_entry = self.repository.find(id, event_ctx)
+        self.check_whether_current_user_owns_item(time_entry)
+        self.check_time_entry_is_not_stopped(time_entry)
+
         return self.repository.partial_update(
-            id,
-            {'end_date': current_datetime_str()},
-            event_ctx,
-            peeker=self.checks_owner_and_is_not_stopped,
+            id, {'end_date': current_datetime_str()}, event_ctx,
         )
 
     def restart(self, id):
         event_ctx = self.create_event_context("update", "Restart time entry")
+
+        time_entry = self.repository.find(id, event_ctx)
+        self.check_whether_current_user_owns_item(time_entry)
+        self.check_time_entry_is_not_started(time_entry)
+
         return self.repository.partial_update(
-            id,
-            {'end_date': None},
-            event_ctx,
-            peeker=self.checks_owner_and_is_not_started,
+            id, {'end_date': None}, event_ctx,
         )
 
     def delete(self, id):
         event_ctx = self.create_event_context("delete")
+        time_entry = self.repository.find(id, event_ctx)
+        self.check_whether_current_user_owns_item(time_entry)
         self.repository.delete(
-            id, event_ctx, peeker=self.check_whether_current_user_owns_item
+            id, event_ctx,
         )
 
     def find_running(self):
@@ -397,7 +402,9 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         else:
             month = get_current_month()
             year = get_current_year()
-        return date_range if date_range else get_date_range_of_month(year, month)
+        return (
+            date_range if date_range else get_date_range_of_month(year, month)
+        )
 
 
 def create_dao() -> TimeEntriesDao:

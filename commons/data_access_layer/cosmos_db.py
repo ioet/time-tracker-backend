@@ -210,20 +210,25 @@ class CosmosDBRepository:
         self,
         id: str,
         event_context: EventContext,
-        peeker: Callable = None,
         visible_only=True,
         mapper: Callable = None,
     ):
         partition_key_value = self.find_partition_key_value(event_context)
         found_item = self.container.read_item(id, partition_key_value)
-        if peeker:
-            peeker(found_item)
-
         function_mapper = self.get_mapper_or_dict(mapper)
         return function_mapper(self.check_visibility(found_item, visible_only))
 
-    def find_all(self, event_context: EventContext, conditions: dict = {}, custom_sql_conditions: List[str] = [],
-                 custom_params: dict = {}, max_count=None, offset=0, visible_only=True, mapper: Callable = None):
+    def find_all(
+        self,
+        event_context: EventContext,
+        conditions: dict = {},
+        custom_sql_conditions: List[str] = [],
+        custom_params: dict = {},
+        max_count=None,
+        offset=0,
+        visible_only=True,
+        mapper: Callable = None,
+    ):
         partition_key_value = self.find_partition_key_value(event_context)
         max_count = self.get_page_size_or(max_count)
         params = [
@@ -242,16 +247,16 @@ class CosmosDBRepository:
             {order_clause}
             OFFSET @offset LIMIT @max_count
             """.format(
-                partition_key_attribute=self.partition_key_attribute,
-                visibility_condition=self.create_sql_condition_for_visibility(
-                    visible_only
-                ),
-                conditions_clause=self.create_sql_where_conditions(conditions),
-                custom_sql_conditions_clause=self.create_custom_sql_conditions(
-                    custom_sql_conditions
-                ),
-                order_clause=self.create_sql_order_clause(),
-            )
+            partition_key_attribute=self.partition_key_attribute,
+            visibility_condition=self.create_sql_condition_for_visibility(
+                visible_only
+            ),
+            conditions_clause=self.create_sql_where_conditions(conditions),
+            custom_sql_conditions_clause=self.create_custom_sql_conditions(
+                custom_sql_conditions
+            ),
+            order_clause=self.create_sql_order_clause(),
+        )
 
         result = self.container.query_items(
             query=query_str,
@@ -268,16 +273,11 @@ class CosmosDBRepository:
         id: str,
         changes: dict,
         event_context: EventContext,
-        peeker: Callable = None,
         visible_only=True,
         mapper: Callable = None,
     ):
         item_data = self.find(
-            id,
-            event_context,
-            peeker=peeker,
-            visible_only=visible_only,
-            mapper=dict,
+            id, event_context, visible_only=visible_only, mapper=dict,
         )
         item_data.update(changes)
         return self.update(id, item_data, event_context, mapper=mapper)
@@ -295,17 +295,12 @@ class CosmosDBRepository:
         return function_mapper(self.container.replace_item(id, body=item_data))
 
     def delete(
-        self,
-        id: str,
-        event_context: EventContext,
-        peeker: Callable = None,
-        mapper: Callable = None,
+        self, id: str, event_context: EventContext, mapper: Callable = None,
     ):
         return self.partial_update(
             id,
             {'deleted': generate_uuid4()},
             event_context,
-            peeker=peeker,
             visible_only=True,
             mapper=mapper,
         )

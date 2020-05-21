@@ -10,15 +10,13 @@ from pytest_mock import MockFixture, pytest
 from commons.data_access_layer.cosmos_db import (
     current_datetime,
     current_datetime_str,
-    get_date_range_of_month,
     get_current_month,
     get_current_year,
 )
 
-from time_tracker_api.time_entries.custom_modules import worked_time
-from time_tracker_api.time_entries.time_entries_model import (
-    TimeEntriesCosmosDBDao,
-)
+from utils import worked_time
+
+from werkzeug.exceptions import NotFound, UnprocessableEntity, HTTPException
 
 fake = Faker()
 
@@ -39,7 +37,7 @@ fake_time_entry = {
 fake_time_entry.update(valid_time_entry_input)
 
 
-def test_create_time_entry_with_invalid_date_range_should_raise_bad_request_error(
+def test_create_time_entry_with_invalid_date_range_should_raise_bad_request(
     client: FlaskClient, mocker: MockFixture, valid_header: dict
 ):
     from time_tracker_api.time_entries.time_entries_namespace import (
@@ -65,7 +63,7 @@ def test_create_time_entry_with_invalid_date_range_should_raise_bad_request_erro
     repository_container_create_item_mock.assert_not_called()
 
 
-def test_create_time_entry_with_end_date_in_future_should_raise_bad_request_error(
+def test_create_time_entry_with_end_date_in_future_should_raise_bad_request(
     client: FlaskClient, mocker: MockFixture, valid_header: dict
 ):
     from time_tracker_api.time_entries.time_entries_namespace import (
@@ -182,58 +180,63 @@ def test_get_time_entry_should_succeed_with_valid_id(
     dao_get_mock.assert_called_once_with(str(valid_id))
 
 
-def test_get_time_entry_should_response_with_unprocessable_entity_for_invalid_id_format(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict
+@pytest.mark.parametrize(
+    'http_exception,http_status',
+    [
+        (NotFound, HTTPStatus.NOT_FOUND),
+        (UnprocessableEntity, HTTPStatus.UNPROCESSABLE_ENTITY),
+    ],
+)
+def test_get_time_entry_raise_http_exception(
+    client: FlaskClient,
+    mocker: MockFixture,
+    valid_header: dict,
+    valid_id: str,
+    http_exception: HTTPException,
+    http_status: tuple,
 ):
     from time_tracker_api.time_entries.time_entries_namespace import (
         time_entries_dao,
     )
-    from werkzeug.exceptions import UnprocessableEntity
 
-    invalid_id = fake.word()
-
-    repository_find_mock = mocker.patch.object(
-        time_entries_dao.repository, 'find', side_effect=UnprocessableEntity
-    )
+    time_entries_dao.repository.find = Mock(side_effect=http_exception)
 
     response = client.get(
-        "/time-entries/%s" % invalid_id,
+        f"/time-entries/{valid_id}",
         headers=valid_header,
         follow_redirects=True,
     )
 
-    assert HTTPStatus.UNPROCESSABLE_ENTITY == response.status_code
-    repository_find_mock.assert_called_once_with(
-        str(invalid_id), ANY, peeker=ANY
-    )
+    assert http_status == response.status_code
+    time_entries_dao.repository.find.assert_called_once_with(valid_id, ANY)
 
 
-def test_update_time_entry_should_succeed_with_valid_data(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict
+def test_update_time_entry_calls_partial_update_with_incoming_payload(
+    client: FlaskClient, mocker: MockFixture, valid_header: dict, valid_id: str
 ):
     from time_tracker_api.time_entries.time_entries_namespace import (
         time_entries_dao,
     )
 
-    repository_update_mock = mocker.patch.object(
-        time_entries_dao.repository,
-        'partial_update',
-        return_value=fake_time_entry,
-    )
+    time_entries_dao.repository.partial_update = Mock(return_value={})
 
-    valid_id = fake.random_int(1, 9999)
+    time_entries_dao.repository.find = Mock(return_value={})
+    time_entries_dao.check_whether_current_user_owns_item = Mock()
+
     response = client.put(
-        "/time-entries/%s" % valid_id,
+        f'/time-entries/{valid_id}',
         headers=valid_header,
         json=valid_time_entry_input,
         follow_redirects=True,
     )
 
     assert HTTPStatus.OK == response.status_code
-    fake_time_entry == json.loads(response.data)
-    repository_update_mock.assert_called_once_with(
-        str(valid_id), valid_time_entry_input, ANY, peeker=ANY
+    time_entries_dao.repository.partial_update.assert_called_once_with(
+        valid_id, valid_time_entry_input, ANY
     )
+
+    time_entries_dao.repository.find.assert_called_once()
+    time_entries_dao.check_whether_current_user_owns_item.assert_called_once()
 
 
 def test_update_time_entry_should_reject_bad_request(
@@ -245,7 +248,7 @@ def test_update_time_entry_should_reject_bad_request(
 
     invalid_time_entry_data = valid_time_entry_input.copy()
     invalid_time_entry_data.update(
-        {"project_id": fake.pyint(min_value=1, max_value=100),}
+        {"project_id": fake.pyint(min_value=1, max_value=100)}
     )
     repository_update_mock = mocker.patch.object(
         time_entries_dao.repository, 'update', return_value=fake_time_entry
@@ -263,218 +266,204 @@ def test_update_time_entry_should_reject_bad_request(
     repository_update_mock.assert_not_called()
 
 
-def test_update_time_entry_should_return_not_found_with_invalid_id(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict
+def test_update_time_entry_raise_not_found(
+    client: FlaskClient, mocker: MockFixture, valid_header: dict, valid_id: str
 ):
     from time_tracker_api.time_entries.time_entries_namespace import (
         time_entries_dao,
     )
     from werkzeug.exceptions import NotFound
 
-    repository_update_mock = mocker.patch.object(
-        time_entries_dao.repository, 'partial_update', side_effect=NotFound
-    )
-    invalid_id = fake.random_int(1, 9999)
+    time_entries_dao.repository.partial_update = Mock(side_effect=NotFound)
+
+    time_entries_dao.repository.find = Mock(return_value={})
+    time_entries_dao.check_whether_current_user_owns_item = Mock()
 
     response = client.put(
-        "/time-entries/%s" % invalid_id,
+        f'/time-entries/{valid_id}',
         headers=valid_header,
         json=valid_time_entry_input,
         follow_redirects=True,
     )
 
     assert HTTPStatus.NOT_FOUND == response.status_code
-    repository_update_mock.assert_called_once_with(
-        str(invalid_id), valid_time_entry_input, ANY, peeker=ANY
+    time_entries_dao.repository.partial_update.assert_called_once_with(
+        valid_id, valid_time_entry_input, ANY
     )
 
+    time_entries_dao.repository.find.assert_called_once()
+    time_entries_dao.check_whether_current_user_owns_item.assert_called_once()
 
-def test_delete_time_entry_should_succeed_with_valid_id(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict
+
+def test_delete_time_entry_calls_delete(
+    client: FlaskClient, mocker: MockFixture, valid_header: dict, valid_id: str
 ):
     from time_tracker_api.time_entries.time_entries_namespace import (
         time_entries_dao,
     )
 
-    repository_remove_mock = mocker.patch.object(
-        time_entries_dao.repository, 'delete', return_value=None
-    )
-    valid_id = fake.random_int(1, 9999)
-
+    time_entries_dao.repository.delete = Mock(return_value=None)
+    time_entries_dao.repository.find = Mock()
+    time_entries_dao.check_whether_current_user_owns_item = Mock()
     response = client.delete(
-        "/time-entries/%s" % valid_id,
+        f'/time-entries/{valid_id}',
         headers=valid_header,
         follow_redirects=True,
     )
 
     assert HTTPStatus.NO_CONTENT == response.status_code
     assert b'' == response.data
-    repository_remove_mock.assert_called_once_with(
-        str(valid_id), ANY, peeker=ANY
-    )
+    time_entries_dao.repository.delete.assert_called_once_with(valid_id, ANY)
+    time_entries_dao.repository.find.assert_called_once()
+    time_entries_dao.check_whether_current_user_owns_item.assert_called_once()
 
 
-def test_delete_time_entry_should_return_not_found_with_invalid_id(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict
+@pytest.mark.parametrize(
+    'http_exception,http_status',
+    [
+        (NotFound, HTTPStatus.NOT_FOUND),
+        (UnprocessableEntity, HTTPStatus.UNPROCESSABLE_ENTITY),
+    ],
+)
+def test_delete_time_entry_raise_http_exception(
+    client: FlaskClient,
+    mocker: MockFixture,
+    valid_header: dict,
+    valid_id: str,
+    http_exception: HTTPException,
+    http_status: tuple,
 ):
     from time_tracker_api.time_entries.time_entries_namespace import (
         time_entries_dao,
     )
-    from werkzeug.exceptions import NotFound
 
-    repository_remove_mock = mocker.patch.object(
-        time_entries_dao.repository, 'delete', side_effect=NotFound
-    )
-    invalid_id = fake.random_int(1, 9999)
+    time_entries_dao.repository.delete = Mock(side_effect=http_exception)
+    time_entries_dao.repository.find = Mock()
+    time_entries_dao.check_whether_current_user_owns_item = Mock()
 
     response = client.delete(
-        "/time-entries/%s" % invalid_id,
+        f"/time-entries/{valid_id}",
         headers=valid_header,
         follow_redirects=True,
     )
 
-    assert HTTPStatus.NOT_FOUND == response.status_code
-    repository_remove_mock.assert_called_once_with(
-        str(invalid_id), ANY, peeker=ANY
-    )
+    assert http_status == response.status_code
+    time_entries_dao.repository.delete.assert_called_once_with(valid_id, ANY)
+    time_entries_dao.repository.find.assert_called_once()
+    time_entries_dao.check_whether_current_user_owns_item.assert_called_once()
 
 
-def test_delete_time_entry_should_return_unprocessable_entity_for_invalid_id_format(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict
-):
-    from time_tracker_api.time_entries.time_entries_namespace import (
-        time_entries_dao,
-    )
-    from werkzeug.exceptions import UnprocessableEntity
-
-    repository_remove_mock = mocker.patch.object(
-        time_entries_dao.repository, 'delete', side_effect=UnprocessableEntity
-    )
-    invalid_id = fake.word()
-
-    response = client.delete(
-        "/time-entries/%s" % invalid_id,
-        headers=valid_header,
-        follow_redirects=True,
-    )
-
-    assert HTTPStatus.UNPROCESSABLE_ENTITY == response.status_code
-    repository_remove_mock.assert_called_once_with(
-        str(invalid_id), ANY, peeker=ANY
-    )
-
-
-def test_stop_time_entry_with_valid_id(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict
+def test_stop_time_entry_calls_partial_update(
+    client: FlaskClient, mocker: MockFixture, valid_header: dict, valid_id: str
 ):
     from time_tracker_api.time_entries.time_entries_namespace import (
         time_entries_dao,
     )
 
-    repository_update_mock = mocker.patch.object(
-        time_entries_dao.repository,
-        'partial_update',
-        return_value=fake_time_entry,
-    )
-    valid_id = fake.random_int(1, 9999)
+    time_entries_dao.repository.partial_update = Mock(return_value={})
+
+    time_entries_dao.repository.find = Mock(return_value={})
+    time_entries_dao.check_time_entry_is_not_stopped = Mock()
+    time_entries_dao.check_whether_current_user_owns_item = Mock()
 
     response = client.post(
-        "/time-entries/%s/stop" % valid_id,
+        f'/time-entries/{valid_id}/stop',
         headers=valid_header,
         follow_redirects=True,
     )
 
     assert HTTPStatus.OK == response.status_code
-    repository_update_mock.assert_called_once_with(
-        str(valid_id),
-        {"end_date": mocker.ANY},
-        ANY,
-        peeker=TimeEntriesCosmosDBDao.checks_owner_and_is_not_stopped,
+    time_entries_dao.repository.partial_update.assert_called_once_with(
+        valid_id, {"end_date": ANY}, ANY
     )
+    time_entries_dao.check_time_entry_is_not_stopped.assert_called_once()
+    time_entries_dao.check_whether_current_user_owns_item.assert_called_once()
 
 
-def test_stop_time_entry_with_id_with_invalid_format(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict
+def test_stop_time_entry_raise_unprocessable_entity(
+    client: FlaskClient, mocker: MockFixture, valid_header: dict, valid_id: str
 ):
     from time_tracker_api.time_entries.time_entries_namespace import (
         time_entries_dao,
     )
     from werkzeug.exceptions import UnprocessableEntity
 
-    repository_update_mock = mocker.patch.object(
-        time_entries_dao.repository,
-        'partial_update',
-        side_effect=UnprocessableEntity,
+    time_entries_dao.repository.partial_update = Mock(
+        side_effect=UnprocessableEntity
     )
-    invalid_id = fake.word()
 
+    time_entries_dao.repository.find = Mock(return_value={})
+    time_entries_dao.check_time_entry_is_not_stopped = Mock()
+    time_entries_dao.check_whether_current_user_owns_item = Mock()
     response = client.post(
-        "/time-entries/%s/stop" % invalid_id,
+        f'/time-entries/{valid_id}/stop',
         headers=valid_header,
         follow_redirects=True,
     )
 
     assert HTTPStatus.UNPROCESSABLE_ENTITY == response.status_code
-    repository_update_mock.assert_called_once_with(
-        invalid_id,
-        {"end_date": ANY},
-        ANY,
-        peeker=TimeEntriesCosmosDBDao.checks_owner_and_is_not_stopped,
+    time_entries_dao.repository.partial_update.assert_called_once_with(
+        valid_id, {"end_date": ANY}, ANY
     )
+    time_entries_dao.check_whether_current_user_owns_item.assert_called_once()
+    time_entries_dao.check_time_entry_is_not_stopped.assert_called_once()
 
 
-def test_restart_time_entry_with_valid_id(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict
+def test_restart_time_entry_calls_partial_update(
+    client: FlaskClient, mocker: MockFixture, valid_header: dict, valid_id: str
 ):
     from time_tracker_api.time_entries.time_entries_namespace import (
         time_entries_dao,
     )
 
-    repository_update_mock = mocker.patch.object(
-        time_entries_dao.repository,
-        'partial_update',
-        return_value=fake_time_entry,
-    )
-    valid_id = fake.random_int(1, 9999)
+    time_entries_dao.repository.partial_update = Mock(return_value={})
+
+    time_entries_dao.repository.find = Mock(return_value={})
+    time_entries_dao.check_time_entry_is_not_started = Mock()
+    time_entries_dao.check_whether_current_user_owns_item = Mock()
 
     response = client.post(
-        "/time-entries/%s/restart" % valid_id,
+        f'/time-entries/{valid_id}/restart',
         headers=valid_header,
         follow_redirects=True,
     )
 
     assert HTTPStatus.OK == response.status_code
-    repository_update_mock.assert_called_once_with(
-        str(valid_id), {"end_date": None}, ANY, peeker=ANY
+    time_entries_dao.repository.partial_update.assert_called_once_with(
+        valid_id, {"end_date": None}, ANY
     )
+    time_entries_dao.check_time_entry_is_not_started.assert_called_once()
+    time_entries_dao.check_whether_current_user_owns_item.assert_called_once()
 
 
-def test_restart_time_entry_with_id_with_invalid_format(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict
+def test_restart_time_entry_raise_unprocessable_entity(
+    client: FlaskClient, mocker: MockFixture, valid_header: dict, valid_id: str
 ):
     from time_tracker_api.time_entries.time_entries_namespace import (
         time_entries_dao,
     )
     from werkzeug.exceptions import UnprocessableEntity
 
-    repository_update_mock = mocker.patch.object(
-        time_entries_dao.repository,
-        'partial_update',
-        side_effect=UnprocessableEntity,
-        peeker=ANY,
+    time_entries_dao.repository.partial_update = Mock(
+        side_effect=UnprocessableEntity
     )
-    invalid_id = fake.word()
+
+    time_entries_dao.repository.find = Mock(return_value={})
+    time_entries_dao.check_time_entry_is_not_started = Mock()
+    time_entries_dao.check_whether_current_user_owns_item = Mock()
 
     response = client.post(
-        "/time-entries/%s/restart" % invalid_id,
+        f'/time-entries/{valid_id}/restart',
         headers=valid_header,
         follow_redirects=True,
     )
 
     assert HTTPStatus.UNPROCESSABLE_ENTITY == response.status_code
-    repository_update_mock.assert_called_once_with(
-        invalid_id, {"end_date": None}, ANY, peeker=ANY
+    time_entries_dao.repository.partial_update.assert_called_once_with(
+        valid_id, {"end_date": None}, ANY
     )
+    time_entries_dao.check_time_entry_is_not_started.assert_called_once()
+    time_entries_dao.check_whether_current_user_owns_item.assert_called_once()
 
 
 def test_get_running_should_call_find_running(
@@ -503,7 +492,7 @@ def test_get_running_should_call_find_running(
     repository_update_mock.assert_called_once_with(tenant_id, owner_id)
 
 
-def test_get_running_should_return_not_found_if_find_running_throws_StopIteration(
+def test_get_running_should_return_not_found_if_StopIteration(
     client: FlaskClient,
     mocker: MockFixture,
     valid_header: dict,

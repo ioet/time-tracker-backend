@@ -11,7 +11,9 @@ from commons.data_access_layer.database import EventContext
 from time_tracker_api import create_app
 from time_tracker_api.database import init_sql
 from time_tracker_api.security import get_or_generate_dev_secret_key
-from time_tracker_api.time_entries.time_entries_model import TimeEntryCosmosDBRepository
+from time_tracker_api.time_entries.time_entries_model import (
+    TimeEntryCosmosDBRepository,
+)
 
 fake = Faker()
 Faker.seed()
@@ -37,6 +39,7 @@ def sql_model_class(app: Flask):
         init_sql(app)
 
     from commons.data_access_layer.sql import db
+
     class PersonSQLModel(db.Model):
         __tablename__ = 'test'
         id = db.Column(db.Integer, primary_key=True)
@@ -59,27 +62,29 @@ def sql_repository(app: Flask, sql_model_class):
             init_app(app)
             from commons.data_access_layer.sql import db
 
-        db.metadata.create_all(bind=db.engine, tables=[sql_model_class.__table__])
+        db.metadata.create_all(
+            bind=db.engine, tables=[sql_model_class.__table__]
+        )
         app.logger.info("SQl test models created!")
 
         from commons.data_access_layer.sql import SQLRepository
+
         yield SQLRepository(sql_model_class)
 
-        db.metadata.drop_all(bind=db.engine, tables=[sql_model_class.__table__])
+        db.metadata.drop_all(
+            bind=db.engine, tables=[sql_model_class.__table__]
+        )
         app.logger.info("SQL test models removed!")
 
 
 @pytest.fixture(scope="module")
 def cosmos_db_model():
     from azure.cosmos import PartitionKey
+
     return {
         'id': 'test',
         'partition_key': PartitionKey(path='/tenant_id'),
-        'unique_key_policy': {
-            'uniqueKeys': [
-                {'paths': ['/email']},
-            ]
-        }
+        'unique_key_policy': {'uniqueKeys': [{'paths': ['/email']},]},
     }
 
 
@@ -104,9 +109,16 @@ def cosmos_db_repository(app: Flask, cosmos_db_model) -> CosmosDBRepository:
 
 
 @pytest.fixture(scope="module")
-def cosmos_db_dao(app: Flask, cosmos_db_repository: CosmosDBRepository) -> CosmosDBDao:
+def cosmos_db_dao(
+    app: Flask, cosmos_db_repository: CosmosDBRepository
+) -> CosmosDBDao:
     with app.app_context():
         return CosmosDBDao(cosmos_db_repository)
+
+
+@pytest.fixture
+def valid_id() -> str:
+    return fake.uuid4()
 
 
 @pytest.fixture(scope="session")
@@ -125,27 +137,35 @@ def owner_id() -> str:
 
 
 @pytest.fixture(scope="function")
-def sample_item(cosmos_db_repository: CosmosDBRepository,
-                tenant_id: str,
-                event_context: EventContext) -> dict:
-    sample_item_data = dict(id=fake.uuid4(),
-                            name=fake.name(),
-                            email=fake.safe_email(),
-                            age=fake.pyint(min_value=10, max_value=80),
-                            tenant_id=tenant_id)
+def sample_item(
+    cosmos_db_repository: CosmosDBRepository,
+    tenant_id: str,
+    event_context: EventContext,
+) -> dict:
+    sample_item_data = dict(
+        id=fake.uuid4(),
+        name=fake.name(),
+        email=fake.safe_email(),
+        age=fake.pyint(min_value=10, max_value=80),
+        tenant_id=tenant_id,
+    )
 
     return cosmos_db_repository.create(sample_item_data, event_context)
 
 
 @pytest.fixture(scope="function")
-def another_item(cosmos_db_repository: CosmosDBRepository,
-                 tenant_id: str,
-                 event_context: EventContext) -> dict:
-    sample_item_data = dict(id=fake.uuid4(),
-                            name=fake.name(),
-                            email=fake.safe_email(),
-                            age=fake.pyint(min_value=10, max_value=80),
-                            tenant_id=tenant_id)
+def another_item(
+    cosmos_db_repository: CosmosDBRepository,
+    tenant_id: str,
+    event_context: EventContext,
+) -> dict:
+    sample_item_data = dict(
+        id=fake.uuid4(),
+        name=fake.name(),
+        email=fake.safe_email(),
+        age=fake.pyint(min_value=10, max_value=80),
+        tenant_id=tenant_id,
+    )
 
     return cosmos_db_repository.create(sample_item_data, event_context)
 
@@ -162,31 +182,40 @@ def time_entry_repository(app: Flask) -> TimeEntryCosmosDBRepository:
 
 
 @pytest.yield_fixture(scope="module")
-def running_time_entry(time_entry_repository: TimeEntryCosmosDBRepository,
-                       owner_id: str,
-                       tenant_id: str,
-                       event_context: EventContext):
-    created_time_entry = time_entry_repository.create({
-        "project_id": fake.uuid4(),
-        "owner_id": owner_id,
-        "tenant_id": tenant_id
-    }, event_context)
+def running_time_entry(
+    time_entry_repository: TimeEntryCosmosDBRepository,
+    owner_id: str,
+    tenant_id: str,
+    event_context: EventContext,
+):
+    created_time_entry = time_entry_repository.create(
+        {
+            "project_id": fake.uuid4(),
+            "owner_id": owner_id,
+            "tenant_id": tenant_id,
+        },
+        event_context,
+    )
 
     yield created_time_entry
 
-    time_entry_repository.delete_permanently(id=created_time_entry.id,
-                                             event_context=event_context)
+    time_entry_repository.delete_permanently(
+        id=created_time_entry.id, event_context=event_context
+    )
 
 
 @pytest.fixture(scope="session")
 def valid_jwt(app: Flask, tenant_id: str, owner_id: str) -> str:
     with app.app_context():
         expiration_time = datetime.utcnow() + timedelta(seconds=3600)
-        return jwt.encode({
-            "iss": "https://ioetec.b2clogin.com/%s/v2.0/" % tenant_id,
-            "oid": owner_id,
-            'exp': expiration_time
-        }, key=get_or_generate_dev_secret_key()).decode("UTF-8")
+        return jwt.encode(
+            {
+                "iss": "https://ioetec.b2clogin.com/%s/v2.0/" % tenant_id,
+                "oid": owner_id,
+                'exp': expiration_time,
+            },
+            key=get_or_generate_dev_secret_key(),
+        ).decode("UTF-8")
 
 
 @pytest.fixture(scope="session")
@@ -196,13 +225,11 @@ def valid_header(valid_jwt: str) -> dict:
 
 @pytest.fixture(scope="session")
 def event_context(owner_id: str, tenant_id: str) -> EventContext:
-    return EventContext("test", "any",
-                        user_id=owner_id,
-                        tenant_id=tenant_id)
+    return EventContext("test", "any", user_id=owner_id, tenant_id=tenant_id)
 
 
 @pytest.fixture(scope="session")
 def another_event_context(another_tenant_id: str) -> EventContext:
-    return EventContext("test", "any",
-                        user_id=fake.uuid4(),
-                        tenant_id=another_tenant_id)
+    return EventContext(
+        "test", "any", user_id=fake.uuid4(), tenant_id=another_tenant_id
+    )
