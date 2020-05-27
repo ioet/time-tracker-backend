@@ -408,6 +408,10 @@ def get_current_month() -> int:
     return datetime.now().month
 
 
+def get_current_day() -> int:
+    return datetime.now().day
+
+
 def get_date_range_of_month(year: int, month: int) -> Dict[str, str]:
     first_day_of_month = 1
     start_date = datetime(
