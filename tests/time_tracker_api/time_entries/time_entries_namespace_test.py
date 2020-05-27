@@ -482,6 +482,7 @@ def test_get_running_should_call_find_running(
         'find_running',
         return_value=fake_time_entry,
     )
+    time_entries_dao.stop_time_entry_if_was_left_running = Mock()
 
     response = client.get(
         "/time-entries/running", headers=valid_header, follow_redirects=True
