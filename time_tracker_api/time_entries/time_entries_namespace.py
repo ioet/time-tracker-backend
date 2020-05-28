@@ -137,12 +137,21 @@ attributes_filter = create_attributes_filter(
 
 # custom attributes filter
 attributes_filter.add_argument(
+    'user_id',
+    required=False,
+    store_missing=False,
+    help="(Filter) User to filter by",
+    location='args',
+)
+
+attributes_filter.add_argument(
     'month',
     required=False,
     store_missing=False,
     help="(Filter) Month to filter by",
     location='args',
 )
+
 attributes_filter.add_argument(
     'year',
     required=False,
@@ -158,6 +167,7 @@ attributes_filter.add_argument(
     help="(Filter) Start to filter by",
     location='args',
 )
+
 attributes_filter.add_argument(
     'end_date',
     required=False,
