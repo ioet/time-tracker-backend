@@ -19,6 +19,7 @@ from commons.data_access_layer.database import EventContext
 
 from utils.extend_model import add_project_name_to_time_entries
 from utils import worked_time
+from utils.extend_model import create_in_condition
 
 from time_tracker_api.projects.projects_model import ProjectCosmosDBModel
 from time_tracker_api.projects import projects_model
@@ -140,14 +141,8 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         )
 
         if time_entries:
-            projects_id = [str(project.project_id) for project in time_entries]
-            p_ids = (
-                str(tuple(projects_id)).replace(",", "")
-                if len(projects_id) == 1
-                else str(tuple(projects_id))
-            )
-            custom_conditions = "c.id IN {}".format(p_ids)
-            # TODO this must be refactored to be used from the utils module ↑
+            custom_conditions = create_in_condition(time_entries, "project_id")
+
             project_dao = projects_model.create_dao()
             projects = project_dao.get_all(
                 custom_sql_conditions=[custom_conditions]
@@ -384,6 +379,8 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
     @staticmethod
     def handle_date_filter_args(args: dict) -> dict:
         date_range = None
+        year = None
+        month = None
         if 'month' and 'year' in args:
             month = int(args.get("month"))
             year = int(args.get("year"))

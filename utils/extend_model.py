@@ -1,3 +1,6 @@
+import re
+
+
 def add_customer_name_to_projects(projects, customers):
     """
     Add attribute customer_name in project model, based on customer_id of the
@@ -26,3 +29,14 @@ def add_project_name_to_time_entries(time_entries, projects):
         for project in projects:
             if time_entry.project_id == project.id:
                 setattr(time_entry, 'project_name', project.name)
+
+
+def create_in_condition(data_object, attr_to_filter, first_attr="c.id"):
+    attr_filter = re.sub('[^a-zA-Z_$0-9]', '', attr_to_filter)
+    object_id = [str(eval(f"object.{attr_filter}")) for object in data_object]
+    ids = (
+        str(tuple(object_id)).replace(",", "")
+        if len(object_id) == 1
+        else str(tuple(object_id))
+    )
+    return "{} IN {}".format(first_attr, ids)
