@@ -408,6 +408,11 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         time_entry = self.repository.find_running(
             event_ctx.tenant_id, event_ctx.user_id
         )
+        # TODO: we need to make this work using the users time zone
+        # This is disabled as part of https://github.com/ioet/time-tracker-backend/issues/160
+        # Remove all these comments after implementing
+        # https://github.com/ioet/time-tracker-backend/issues/159
+        # https://github.com/ioet/time-tracker-backend/issues/162
         # self.stop_time_entry_if_was_left_running(time_entry)
         return time_entry
 
