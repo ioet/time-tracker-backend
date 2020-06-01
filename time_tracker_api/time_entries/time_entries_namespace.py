@@ -122,6 +122,13 @@ time_entry_response_fields = {
         description='Name of the project where time-entry was registered',
         example=faker.word(['mobile app', 'web app']),
     ),
+    'activity_name': fields.String(
+        required=False,
+        title='Activity Name',
+        max_length=50,
+        description='Name of the activity associated with the time-entry',
+        example=faker.word(['development', 'QA']),
+    ),
 }
 time_entry_response_fields.update(common_fields)
 
