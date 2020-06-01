@@ -129,6 +129,13 @@ time_entry_response_fields = {
         description='Name of the activity associated with the time-entry',
         example=faker.word(['development', 'QA']),
     ),
+    'owner_email': fields.String(
+        required=True,
+        title="Owner's Email",
+        max_length=50,
+        description='Email of the user that owns the time-entry',
+        example=faker.email(),
+    ),
 }
 time_entry_response_fields.update(common_fields)
 

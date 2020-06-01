@@ -14,6 +14,13 @@ class MSALConfig:
     """
 
 
+class AzureUser:
+    def __init__(self, id, display_name, email):
+        self.id = id
+        self.display_name = display_name
+        self.email = email
+
+
 class AzureUsers:
     def __init__(self, config=MSALConfig):
         self.client = msal.ConfidentialClientApplication(
@@ -41,7 +48,7 @@ class AzureUsers:
 
     def get_user_info_by_id(self, id):
         endpoint = f"{self.config.MSAL_ENDPOINT}/users/{id}?api-version=1.6&$select=displayName,otherMails"
-        print(endpoint)
+        # print(endpoint)
         http_headers = {
             'Authorization': f'Bearer {self.access_token}',
             'Accept': 'application/json',
@@ -51,3 +58,37 @@ class AzureUsers:
             endpoint, headers=http_headers, stream=False
         ).json()
         return data
+
+    def get_users_info(self):
+        endpoint = f"{self.config.MSAL_ENDPOINT}/users?api-version=1.6&$select=displayName,otherMails,objectId"
+        http_headers = {
+            'Authorization': f'Bearer {self.access_token}',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        }
+        data = requests.get(
+            endpoint, headers=http_headers, stream=False
+        ).json()
+        return data
+
+    def users(self):
+        endpoint = f"{self.config.MSAL_ENDPOINT}/users?api-version=1.6&$select=displayName,otherMails,objectId"
+        http_headers = {
+            'Authorization': f'Bearer {self.access_token}',
+            #'Accept': 'application/json',
+            #'Content-Type': 'application/json',
+        }
+        data = requests.get(
+            endpoint, headers=http_headers, stream=False
+        ).json()
+        # print(data)
+
+        users = []
+        for value in data['value']:
+            user = AzureUser(
+                id=value['objectId'],
+                display_name=value['displayName'],
+                email=value['otherMails'][0],
+            )
+            users.append(user)
+        return users
