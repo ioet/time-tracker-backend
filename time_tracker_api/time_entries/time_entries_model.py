@@ -20,8 +20,9 @@ from commons.data_access_layer.cosmos_db import (
     get_current_day,
 )
 from commons.data_access_layer.database import EventContext
+from time_tracker_api.activities import activities_model
 
-from utils.extend_model import add_project_name_to_time_entries
+from utils.extend_model import add_project_name_to_time_entries, add_activity_name_to_time_entries
 from utils import worked_time
 from utils.worked_time import str_to_datetime
 
@@ -174,6 +175,10 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
                 custom_sql_conditions=[custom_conditions]
             )
             add_project_name_to_time_entries(time_entries, projects)
+
+            activity_dao = activities_model.create_dao()
+            activities = activity_dao.get_all()
+            add_activity_name_to_time_entries(time_entries, activities)
         return time_entries
 
     def on_create(self, new_item_data: dict, event_context: EventContext):
