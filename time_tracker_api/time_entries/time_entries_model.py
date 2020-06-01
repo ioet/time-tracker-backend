@@ -24,13 +24,14 @@ from time_tracker_api.activities import activities_model
 from utils.extend_model import (
     add_project_name_to_time_entries,
     add_activity_name_to_time_entries,
+    create_in_condition,
+    create_custom_query_from_str,
+    add_user_email_to_time_entries,
 )
 from utils import worked_time
 from utils.worked_time import str_to_datetime
-from utils.extend_model import (
-    create_in_condition,
-    create_custom_query_from_str,
-)
+
+from utils.azure_users import AzureUsers
 from time_tracker_api.projects.projects_model import ProjectCosmosDBModel
 from time_tracker_api.projects import projects_model
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
@@ -177,6 +178,8 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             activity_dao = activities_model.create_dao()
             activities = activity_dao.get_all()
             add_activity_name_to_time_entries(time_entries, activities)
+
+            add_user_email_to_time_entries(time_entries, AzureUsers().users())
         return time_entries
 
     def on_create(self, new_item_data: dict, event_context: EventContext):

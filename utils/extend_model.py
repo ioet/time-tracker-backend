@@ -38,6 +38,13 @@ def add_activity_name_to_time_entries(time_entries, activities):
                 setattr(time_entry, 'activity_name', activity.name)
 
 
+def add_user_email_to_time_entries(time_entries, users):
+    for time_entry in time_entries:
+        for user in users:
+            if time_entry.owner_id == user.id:
+                setattr(time_entry, 'owner_email', user.email)
+
+
 def create_in_condition(
     data_object: list, attr_to_filter: str = "", first_attr: str = "c.id"
 ):
