@@ -2,6 +2,7 @@ import abc
 from dataclasses import dataclass, field
 from typing import List, Callable
 from azure.cosmos import PartitionKey
+from azure.cosmos.exceptions import CosmosResourceNotFoundError
 from flask_restplus import abort
 from flask_restplus._http import HTTPStatus
 
@@ -11,19 +12,25 @@ from commons.data_access_layer.cosmos_db import (
     CustomError,
     CosmosDBModel,
     current_datetime_str,
+    datetime_str,
     get_date_range_of_month,
     get_current_year,
     get_current_month,
+    get_current_day,
 )
 from commons.data_access_layer.database import EventContext
+from time_tracker_api.activities import activities_model
 
-from utils.extend_model import add_project_name_to_time_entries
+from utils.extend_model import (
+    add_project_name_to_time_entries,
+    add_activity_name_to_time_entries,
+)
 from utils import worked_time
+from utils.worked_time import str_to_datetime
 from utils.extend_model import (
     create_in_condition,
     create_custom_query_from_str,
 )
-
 from time_tracker_api.projects.projects_model import ProjectCosmosDBModel
 from time_tracker_api.projects import projects_model
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
@@ -77,6 +84,22 @@ class TimeEntryCosmosDBModel(CosmosDBModel):
     @property
     def running(self):
         return self.end_date is None
+
+    @property
+    def was_left_running(self) -> bool:
+        start_date = str_to_datetime(self.start_date)
+        return (
+            get_current_day() > start_date.day
+            or get_current_month() > start_date.month
+            or get_current_year() > start_date.year
+        )
+
+    @property
+    def start_date_at_midnight(self) -> str:
+        start_date = str_to_datetime(self.start_date)
+        return datetime_str(
+            start_date.replace(hour=23, minute=59, second=59, microsecond=0)
+        )
 
     def __add__(self, other):
         if type(other) is ProjectCosmosDBModel:
@@ -150,6 +173,10 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
                 custom_sql_conditions=[custom_conditions]
             )
             add_project_name_to_time_entries(time_entries, projects)
+
+            activity_dao = activities_model.create_dao()
+            activities = activity_dao.get_all()
+            add_activity_name_to_time_entries(time_entries, activities)
         return time_entries
 
     def on_create(self, new_item_data: dict, event_context: EventContext):
@@ -296,6 +323,21 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
                 "The specified time entry is already running",
             )
 
+    def stop_time_entry_if_was_left_running(
+        self, time_entry: TimeEntryCosmosDBModel
+    ):
+
+        if time_entry.was_left_running:
+            end_date = time_entry.start_date_at_midnight
+            event_ctx = self.create_event_context(
+                "update", "Stop time-entry that was left running"
+            )
+
+            self.repository.partial_update(
+                time_entry.id, {'end_date': end_date}, event_ctx
+            )
+            raise CosmosResourceNotFoundError()
+
     def get_all(self, conditions: dict = None, **kwargs) -> list:
         event_ctx = self.create_event_context("read-many")
         conditions.update({"owner_id": event_ctx.user_id})
@@ -381,9 +423,16 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
 
     def find_running(self):
         event_ctx = self.create_event_context("find_running")
-        return self.repository.find_running(
+        time_entry = self.repository.find_running(
             event_ctx.tenant_id, event_ctx.user_id
         )
+        # TODO: we need to make this work using the users time zone
+        # This is disabled as part of https://github.com/ioet/time-tracker-backend/issues/160
+        # Remove all these comments after implementing
+        # https://github.com/ioet/time-tracker-backend/issues/159
+        # https://github.com/ioet/time-tracker-backend/issues/162
+        # self.stop_time_entry_if_was_left_running(time_entry)
+        return time_entry
 
     def get_worked_time(self, conditions: dict = {}):
         event_ctx = self.create_event_context(

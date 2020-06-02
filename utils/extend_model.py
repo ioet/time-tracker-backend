@@ -31,6 +31,13 @@ def add_project_name_to_time_entries(time_entries, projects):
                 setattr(time_entry, 'project_name', project.name)
 
 
+def add_activity_name_to_time_entries(time_entries, activities):
+    for time_entry in time_entries:
+        for activity in activities:
+            if time_entry.activity_id == activity.id:
+                setattr(time_entry, 'activity_name', activity.name)
+
+
 def create_in_condition(
     data_object: list, attr_to_filter: str = "", first_attr: str = "c.id"
 ):
