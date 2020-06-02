@@ -31,12 +31,27 @@ def add_project_name_to_time_entries(time_entries, projects):
                 setattr(time_entry, 'project_name', project.name)
 
 
-def create_in_condition(data_object, attr_to_filter, first_attr="c.id"):
+def create_in_condition(data_object, attr_to_filter="", first_attr="c.id"):
     attr_filter = re.sub('[^a-zA-Z_$0-9]', '', attr_to_filter)
-    object_id = [str(eval(f"object.{attr_filter}")) for object in data_object]
+    object_id = (
+        [str(i) for i in data_object]
+        if type(data_object[0]) == str
+        else [str(eval(f"object.{attr_filter}")) for object in data_object]
+    )
     ids = (
         str(tuple(object_id)).replace(",", "")
         if len(object_id) == 1
         else str(tuple(object_id))
     )
     return "{} IN {}".format(first_attr, ids)
+
+
+def create_custom_query_from_str(
+    data: str, first_attr, delimiter: str = ","
+) -> str:
+    data = data.split(delimiter)
+    if len(data) > 1:
+        query_str = create_in_condition(data, first_attr=first_attr)
+    else:
+        query_str = "{} = '{}'".format(first_attr, data[0])
+    return query_str
