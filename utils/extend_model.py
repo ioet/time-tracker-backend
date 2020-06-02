@@ -31,7 +31,16 @@ def add_project_name_to_time_entries(time_entries, projects):
                 setattr(time_entry, 'project_name', project.name)
 
 
-def create_in_condition(data_object, attr_to_filter="", first_attr="c.id"):
+def create_in_condition(
+    data_object: list, attr_to_filter: str = "", first_attr: str = "c.id"
+):
+    """
+    Function to create a custom query string from a list of objects or a list of strings.
+    :param data_object: List of objects or a list of strings
+    :param attr_to_filter: Attribute to retrieve the value of the objects (Only in case it is a list of objects)
+    :param first_attr: First attribute to build the condition
+    :return: Custom condition string
+    """
     attr_filter = re.sub('[^a-zA-Z_$0-9]', '', attr_to_filter)
     object_id = (
         [str(i) for i in data_object]
@@ -49,6 +58,13 @@ def create_in_condition(data_object, attr_to_filter="", first_attr="c.id"):
 def create_custom_query_from_str(
     data: str, first_attr, delimiter: str = ","
 ) -> str:
+    """
+    Function to create a string condition for url parameters (Example: data?values=value1,value2 or data?values=*)
+    :param data: String to build the query
+    :param first_attr: First attribute to build the condition
+    :param delimiter: String delimiter
+    :return: Custom condition string
+    """
     data = data.split(delimiter)
     if len(data) > 1:
         query_str = create_in_condition(data, first_attr=first_attr)
