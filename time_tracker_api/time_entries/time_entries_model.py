@@ -1,10 +1,9 @@
 import abc
 from dataclasses import dataclass, field
 from typing import List, Callable
-
 from azure.cosmos import PartitionKey
 from azure.cosmos.exceptions import CosmosResourceNotFoundError
-
+from flask_restplus import abort
 from flask_restplus._http import HTTPStatus
 
 from commons.data_access_layer.cosmos_db import (
@@ -22,10 +21,16 @@ from commons.data_access_layer.cosmos_db import (
 from commons.data_access_layer.database import EventContext
 from time_tracker_api.activities import activities_model
 
-from utils.extend_model import add_project_name_to_time_entries, add_activity_name_to_time_entries
+from utils.extend_model import (
+    add_project_name_to_time_entries,
+    add_activity_name_to_time_entries,
+)
 from utils import worked_time
 from utils.worked_time import str_to_datetime
-
+from utils.extend_model import (
+    create_in_condition,
+    create_custom_query_from_str,
+)
 from time_tracker_api.projects.projects_model import ProjectCosmosDBModel
 from time_tracker_api.projects import projects_model
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
@@ -144,13 +149,12 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         self,
         event_context: EventContext,
         conditions: dict = {},
+        custom_sql_conditions: List[str] = [],
         date_range: dict = {},
     ):
-        custom_sql_conditions = [self.create_sql_date_range_filter(date_range)]
-
-        if event_context.is_admin:
-            conditions.pop("owner_id")
-            # TODO should be removed when implementing a role-based permission module ↑
+        custom_sql_conditions.append(
+            self.create_sql_date_range_filter(date_range)
+        )
 
         custom_params = self.generate_params(date_range)
         time_entries = CosmosDBRepository.find_all(
@@ -162,14 +166,8 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         )
 
         if time_entries:
-            projects_id = [str(project.project_id) for project in time_entries]
-            p_ids = (
-                str(tuple(projects_id)).replace(",", "")
-                if len(projects_id) == 1
-                else str(tuple(projects_id))
-            )
-            custom_conditions = "c.id IN {}".format(p_ids)
-            # TODO this must be refactored to be used from the utils module ↑
+            custom_conditions = create_in_condition(time_entries, "project_id")
+
             project_dao = projects_model.create_dao()
             projects = project_dao.get_all(
                 custom_sql_conditions=[custom_conditions]
@@ -343,10 +341,30 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
     def get_all(self, conditions: dict = None, **kwargs) -> list:
         event_ctx = self.create_event_context("read-many")
         conditions.update({"owner_id": event_ctx.user_id})
-
+        custom_query = []
+        if "user_id" in conditions:
+            if event_ctx.is_admin:
+                conditions.pop("owner_id")
+                custom_query = (
+                    []
+                    if conditions.get("user_id") == "*"
+                    else [
+                        create_custom_query_from_str(
+                            conditions.get("user_id"), "c.owner_id"
+                        )
+                    ]
+                )
+                conditions.pop("user_id")
+            else:
+                abort(
+                    HTTPStatus.FORBIDDEN, "You don't have enough permissions."
+                )
         date_range = self.handle_date_filter_args(args=conditions)
         return self.repository.find_all(
-            event_ctx, conditions=conditions, date_range=date_range
+            event_ctx,
+            conditions=conditions,
+            custom_sql_conditions=custom_query,
+            date_range=date_range,
         )
 
     def get(self, id):
@@ -432,6 +450,8 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
     @staticmethod
     def handle_date_filter_args(args: dict) -> dict:
         date_range = None
+        year = None
+        month = None
         if 'month' and 'year' in args:
             month = int(args.get("month"))
             year = int(args.get("year"))
