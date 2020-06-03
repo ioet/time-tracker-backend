@@ -31,7 +31,7 @@ from utils.extend_model import (
 from utils import worked_time
 from utils.worked_time import str_to_datetime
 
-from utils.azure_users import AzureUsers
+from utils.azure_users import AzureConnection
 from time_tracker_api.projects.projects_model import ProjectCosmosDBModel
 from time_tracker_api.projects import projects_model
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
@@ -179,7 +179,8 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             activities = activity_dao.get_all()
             add_activity_name_to_time_entries(time_entries, activities)
 
-            add_user_email_to_time_entries(time_entries, AzureUsers().users())
+            users = AzureConnection().users()
+            add_user_email_to_time_entries(time_entries, users)
         return time_entries
 
     def on_create(self, new_item_data: dict, event_context: EventContext):
