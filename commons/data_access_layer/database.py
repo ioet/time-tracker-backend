@@ -7,7 +7,7 @@ To know more about protocols and subtyping check out PEP-0544
 """
 import abc
 
-COMMENTS_MAX_LENGTH = 500
+COMMENTS_MAX_LENGTH = 1500
 ID_MAX_LENGTH = 64
 
 
