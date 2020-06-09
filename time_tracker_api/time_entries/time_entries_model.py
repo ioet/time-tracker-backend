@@ -11,13 +11,8 @@ from commons.data_access_layer.cosmos_db import (
     CosmosDBRepository,
     CustomError,
     CosmosDBModel,
-    current_datetime_str,
-    datetime_str,
-    get_date_range_of_month,
-    get_current_year,
-    get_current_month,
-    get_current_day,
 )
+
 from commons.data_access_layer.database import EventContext
 from time_tracker_api.activities import activities_model
 
@@ -28,10 +23,18 @@ from utils.extend_model import (
     create_custom_query_from_str,
     add_user_email_to_time_entries,
 )
+from utils.time import (
+    datetime_str,
+    get_current_year,
+    get_current_month,
+    get_current_day,
+    get_date_range_of_month,
+    current_datetime_str,
+)
 from utils import worked_time
 from utils.worked_time import str_to_datetime
-
 from utils.azure_users import AzureConnection
+
 from time_tracker_api.projects.projects_model import ProjectCosmosDBModel
 from time_tracker_api.projects import projects_model
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
@@ -440,18 +443,20 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         # self.stop_time_entry_if_was_left_running(time_entry)
         return time_entry
 
-    def get_worked_time(self, conditions: dict = {}):
+    def get_worked_time(self, args: dict = {}):
         event_ctx = self.create_event_context(
             "read", "Summary of worked time in the current month"
         )
-        conditions.update({"owner_id": event_ctx.user_id})
 
+        conditions = {"owner_id": event_ctx.user_id}
         time_entries = self.repository.find_all(
             event_ctx,
             conditions=conditions,
             date_range=worked_time.date_range(),
         )
-        return worked_time.summary(time_entries)
+        return worked_time.summary(
+            time_entries, time_offset=args.get('time_offset')
+        )
 
     @staticmethod
     def handle_date_filter_args(args: dict) -> dict:

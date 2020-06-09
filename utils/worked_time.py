@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta, timezone
-from commons.data_access_layer.cosmos_db import (
-    current_datetime,
-    current_datetime_str,
+from utils.time import (
     datetime_str,
     get_current_month,
     get_current_year,
+    current_datetime,
+    current_datetime_str,
 )
 
 
@@ -127,7 +127,8 @@ def worked_time_in_month(time_entries):
     return WorkedTime(month_time_entries).summary()
 
 
-def summary(time_entries):
+def summary(time_entries, time_offset):
+    print(time_offset)
     stop_running_time_entry(time_entries)
     return {
         'day': worked_time_in_day(time_entries),

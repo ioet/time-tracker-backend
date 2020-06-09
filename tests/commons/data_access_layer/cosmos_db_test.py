@@ -1,24 +1,23 @@
 from dataclasses import dataclass
 from datetime import timedelta
 from typing import Callable
+from faker import Faker
 
 import pytest
+from pytest import fail
+
 from azure.cosmos.exceptions import (
     CosmosResourceExistsError,
     CosmosResourceNotFoundError,
 )
-from faker import Faker
-from flask_restplus._http import HTTPStatus
-from pytest import fail
 
+from commons.data_access_layer.database import EventContext
 from commons.data_access_layer.cosmos_db import (
     CosmosDBRepository,
     CosmosDBModel,
-    CustomError,
-    current_datetime,
-    datetime_str,
 )
-from commons.data_access_layer.database import EventContext
+
+from utils.time import datetime_str, current_datetime
 
 fake = Faker()
 Faker.seed()
