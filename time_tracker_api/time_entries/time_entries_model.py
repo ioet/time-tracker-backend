@@ -6,6 +6,8 @@ from azure.cosmos.exceptions import CosmosResourceNotFoundError
 from flask_restplus import abort
 from flask_restplus._http import HTTPStatus
 
+from datetime import datetime, timedelta
+
 from commons.data_access_layer.cosmos_db import (
     CosmosDBDao,
     CosmosDBRepository,
@@ -25,6 +27,7 @@ from utils.extend_model import (
 )
 from utils.time import (
     datetime_str,
+    str_to_datetime,
     get_current_year,
     get_current_month,
     get_current_day,
@@ -32,7 +35,6 @@ from utils.time import (
     current_datetime_str,
 )
 from utils import worked_time
-from utils.worked_time import str_to_datetime
 from utils.azure_users import AzureConnection
 
 from time_tracker_api.projects.projects_model import ProjectCosmosDBModel
@@ -105,6 +107,18 @@ class TimeEntryCosmosDBModel(CosmosDBModel):
             start_date.replace(hour=23, minute=59, second=59, microsecond=0)
         )
 
+    @property
+    def elapsed_time(self) -> timedelta:
+        start_datetime = str_to_datetime(self.start_date)
+        end_datetime = str_to_datetime(self.end_date)
+        return end_datetime - start_datetime
+
+    def in_range(self, start_date: datetime, end_date: datetime) -> bool:
+        return (
+            start_date <= str_to_datetime(self.start_date) <= end_date
+            and start_date <= str_to_datetime(self.end_date) <= end_date
+        )
+
     def __add__(self, other):
         if type(other) is ProjectCosmosDBModel:
             time_entry = self.__class__
@@ -114,7 +128,7 @@ class TimeEntryCosmosDBModel(CosmosDBModel):
             raise NotImplementedError
 
     def __repr__(self):
-        return '<Time Entry %r>' % self.start_date  # pragma: no cover
+        return f'<Time Entry {self.start_date} - {self.end_date}>'  # pragma: no cover
 
     def __str___(self):
         return (
@@ -171,17 +185,21 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
         if time_entries:
             custom_conditions = create_in_condition(time_entries, "project_id")
-            custom_conditions_activity = create_in_condition(time_entries, "activity_id")
+            custom_conditions_activity = create_in_condition(
+                time_entries, "activity_id"
+            )
 
             project_dao = projects_model.create_dao()
             projects = project_dao.get_all(
-                custom_sql_conditions=[custom_conditions],
-                visible_only=False
+                custom_sql_conditions=[custom_conditions], visible_only=False
             )
             add_project_name_to_time_entries(time_entries, projects)
 
             activity_dao = activities_model.create_dao()
-            activities = activity_dao.get_all(custom_sql_conditions=[custom_conditions_activity], visible_only=False)
+            activities = activity_dao.get_all(
+                custom_sql_conditions=[custom_conditions_activity],
+                visible_only=False,
+            )
             add_activity_name_to_time_entries(time_entries, activities)
 
             users = AzureConnection().users()

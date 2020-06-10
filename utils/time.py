@@ -1,5 +1,6 @@
+import pytz
 from typing import Dict
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 
 def current_datetime_str() -> str:
@@ -9,7 +10,7 @@ def current_datetime_str() -> str:
 
 
 def current_datetime() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(pytz.UTC)
 
 
 def get_current_year() -> int:
@@ -58,3 +59,37 @@ def get_date_range_of_month(year: int, month: int) -> Dict[str, str]:
         'start_date': datetime_str(start_date),
         'end_date': datetime_str(end_date),
     }
+
+
+def start_datetime_of_current_month() -> datetime:
+    return datetime(
+        year=get_current_year(),
+        month=get_current_month(),
+        day=1,
+        tzinfo=timezone.utc,
+    )
+
+
+def start_datetime_of_current_week() -> datetime:
+    today = current_datetime()
+    monday = today - timedelta(days=today.weekday())
+    monday = monday.replace(hour=0, minute=0, second=0, microsecond=000000)
+    return monday
+
+
+def start_datetime_of_current_day() -> datetime:
+    today = current_datetime()
+    today = today.replace(hour=0, minute=0, second=0, microsecond=000000)
+    return today
+
+
+def start_datetime_of_current_month_str() -> str:
+    return datetime_str(start_datetime_of_current_month())
+
+
+def str_to_datetime(value: str) -> datetime:
+    from dateutil.parser import isoparse
+    from dateutil.tz import tzutc
+
+    assert type(isoparse(value).tzinfo) == tzutc
+    return isoparse(value)

@@ -33,13 +33,6 @@ time_entry_input = ns.model(
             description='The id of the selected project',
             example=faker.uuid4(),
         ),
-        'start_date': fields.DateTime(
-            dt_format='iso8601',
-            title='Start date',
-            required=False,
-            description='When the user started doing this activity',
-            example=datetime_str(current_datetime() - timedelta(days=1)),
-        ),
         'activity_id': UUID(
             title='Activity',
             required=False,
@@ -53,8 +46,13 @@ time_entry_input = ns.model(
             example=faker.paragraph(nb_sentences=2),
             max_length=COMMENTS_MAX_LENGTH,
         ),
-        'end_date': fields.DateTime(
-            dt_format='iso8601',
+        'start_date': fields.String(
+            title='Start date',
+            required=False,
+            description='When the user started doing this activity',
+            example=datetime_str(current_datetime() - timedelta(days=1)),
+        ),
+        'end_date': fields.String(
             title='End date',
             required=False,
             description='When the user ended doing this activity',
