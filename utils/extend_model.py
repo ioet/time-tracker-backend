@@ -35,7 +35,8 @@ def add_activity_name_to_time_entries(time_entries, activities):
     for time_entry in time_entries:
         for activity in activities:
             if time_entry.activity_id == activity.id:
-                setattr(time_entry, 'activity_name', activity.name)
+                name = activity.name + " (archived)" if activity.is_deleted() else activity.name
+                setattr(time_entry, 'activity_name', name)
 
 
 def add_user_email_to_time_entries(time_entries, users):
