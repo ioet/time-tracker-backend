@@ -78,6 +78,11 @@ class CosmosDBModel:
             if k in names:
                 setattr(self, k, v)
 
+    def is_deleted(self):
+        if "deleted" in self.__dict__.keys():
+            return True if self.deleted else False
+        return False
+
 
 def partition_key_attribute(pk: PartitionKey) -> str:
     return pk.path.strip('/')
