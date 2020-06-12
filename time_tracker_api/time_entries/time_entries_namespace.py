@@ -294,6 +294,7 @@ summary_attribs_parser = ns.parser()
 summary_attribs_parser.add_argument(
     'time_offset',
     required=False,
+    type=int,
     store_missing=False,
     help="(Filter) Time zone difference, in minutes, from current locale (host system settings) to UTC.",
     location='args',

@@ -1,39 +1,62 @@
-from datetime import datetime, timedelta
-from utils.time import (
-    current_datetime,
-    current_datetime_str,
-    start_datetime_of_current_month,
-    start_datetime_of_current_week,
-    start_datetime_of_current_day,
-    start_datetime_of_current_month_str,
-)
+import pytz
+from datetime import datetime, timedelta, timezone
+from utils.time import datetime_str
+
+
+class DateRange:
+    def __init__(self, _timezone):
+        self.tz = _timezone
+
+    def start(self):
+        raise NotImplementedError
+
+    def end(self):
+        return datetime.now(self.tz)
+
+
+class MonthDateRange(DateRange):
+    def start(self):
+        return (
+            datetime.now(self.tz)
+            .replace(hour=0, minute=0, second=0, microsecond=0)
+            .replace(day=1)
+        )
+
+
+class WeekDateRange(DateRange):
+    def start(self):
+        result = datetime.now(self.tz).replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
+        result = result - timedelta(days=result.weekday())
+        return result
+
+
+class DayDateRange(DateRange):
+    def start(self):
+        return datetime.now(self.tz).replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
 
 
 def date_range():
+    dr = MonthDateRange(pytz.UTC)
     return {
-        "start_date": start_datetime_of_current_month_str(),
-        "end_date": current_datetime_str(),
+        "start_date": datetime_str(dr.start()),
+        "end_date": datetime_str(dr.end()),
     }
 
 
-def stop_running_time_entry(time_entries):
+def stop_running_time_entry(time_entries, tz):
+    end = datetime.now(tz)
     for t in time_entries:
         if t.end_date is None:
-            t.end_date = current_datetime_str()
+            t.end_date = datetime_str(end)
 
 
 class WorkedTime:
     def __init__(self, time_entries):
         self.time_entries = time_entries
-
-    @classmethod
-    def from_time_entries_in_range(
-        cls, time_entries, start_date: datetime, end_date: datetime
-    ):
-        time_entries_in_range = [
-            t for t in time_entries if t.in_range(start_date, end_date)
-        ]
-        return cls(time_entries_in_range)
 
     def total_time_in_seconds(self):
         times = [t.elapsed_time for t in self.time_entries]
@@ -57,36 +80,38 @@ class WorkedTime:
         }
 
 
-def worked_time_in_day(time_entries):
-    return WorkedTime.from_time_entries_in_range(
-        time_entries,
-        start_date=start_datetime_of_current_day(),
-        end_date=current_datetime(),
-    ).summary()
+def filter_time_entries(time_entries, dr: DateRange):
+    return [
+        t
+        for t in time_entries
+        if t.in_range(start_date=dr.start(), end_date=dr.end())
+    ]
 
 
-def worked_time_in_week(time_entries):
-    return WorkedTime.from_time_entries_in_range(
-        time_entries,
-        start_date=start_datetime_of_current_week(),
-        end_date=current_datetime(),
-    ).summary()
+def worked_time_in_day(time_entries, tz):
+    dr = DayDateRange(tz)
+    day_time_entries = filter_time_entries(time_entries, dr)
+    return WorkedTime(day_time_entries).summary()
 
 
-def worked_time_in_month(time_entries):
-    return WorkedTime.from_time_entries_in_range(
-        time_entries,
-        start_date=start_datetime_of_current_month(),
-        end_date=current_datetime(),
-    ).summary()
+def worked_time_in_week(time_entries, tz):
+    dr = WeekDateRange(tz)
+    week_time_entries = filter_time_entries(time_entries, dr)
+    return WorkedTime(week_time_entries).summary()
+
+
+def worked_time_in_month(time_entries, tz):
+    dr = MonthDateRange(tz)
+    month_time_entries = filter_time_entries(time_entries, dr)
+    return WorkedTime(month_time_entries).summary()
 
 
 def summary(time_entries, time_offset):
     offset_in_minutes = time_offset if time_offset else 300
-    print(offset_in_minutes)
-    stop_running_time_entry(time_entries)
+    tz = timezone(timedelta(minutes=-offset_in_minutes))
+    stop_running_time_entry(time_entries, tz)
     return {
-        'day': worked_time_in_day(time_entries),
-        'week': worked_time_in_week(time_entries),
-        'month': worked_time_in_month(time_entries),
+        'day': worked_time_in_day(time_entries, tz),
+        'week': worked_time_in_week(time_entries, tz),
+        'month': worked_time_in_month(time_entries, tz),
     }
