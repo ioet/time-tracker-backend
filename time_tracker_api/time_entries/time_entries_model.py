@@ -113,12 +113,6 @@ class TimeEntryCosmosDBModel(CosmosDBModel):
         end_datetime = str_to_datetime(self.end_date)
         return end_datetime - start_datetime
 
-    def in_range(self, start_date: datetime, end_date: datetime) -> bool:
-        return (
-            start_date <= str_to_datetime(self.start_date) <= end_date
-            and start_date <= str_to_datetime(self.end_date) <= end_date
-        )
-
     def __add__(self, other):
         if type(other) is ProjectCosmosDBModel:
             time_entry = self.__class__

@@ -76,11 +76,17 @@ class WorkedTime:
 
 
 def filter_time_entries(time_entries, dr: DateRange):
-    return [
-        t
-        for t in time_entries
-        if t.in_range(start_date=dr.start(), end_date=dr.end())
-    ]
+    start, end = dr.start(), dr.end()
+    result = []
+    for t in time_entries:
+        te_start, te_end = (
+            str_to_datetime(t.start_date),
+            str_to_datetime(t.end_date),
+        )
+        in_range = start <= te_start <= end or start <= te_end <= end
+        if in_range:
+            result.append(t)
+    return result
 
 
 def worked_time_in_day(time_entries, tz):
