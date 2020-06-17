@@ -1,6 +1,6 @@
 import pytz
 from datetime import datetime, timedelta, timezone
-from utils.time import datetime_str
+from utils.time import datetime_str, str_to_datetime
 
 
 class DateRange:
@@ -47,13 +47,6 @@ def date_range(time_offset: int):
         "start_date": datetime_str(dr.start()),
         "end_date": datetime_str(dr.end()),
     }
-
-
-def stop_running_time_entry(time_entries, tz):
-    end = datetime.now(tz)
-    for t in time_entries:
-        if t.end_date is None:
-            t.end_date = datetime_str(end)
 
 
 class WorkedTime:
@@ -108,10 +101,27 @@ def worked_time_in_month(time_entries, tz):
     return WorkedTime(month_time_entries).summary()
 
 
+def stop_running_time_entry(time_entries, tz):
+    end = datetime.now(tz)
+    for t in time_entries:
+        if t.end_date is None:
+            t.end_date = datetime_str(end)
+
+
+def change_timezones(time_entries, tz):
+    for t in time_entries:
+        start_date = str_to_datetime(t.start_date)
+        end_date = str_to_datetime(t.end_date)
+
+        t.start_date = datetime_str(start_date.astimezone(tz))
+        t.end_date = datetime_str(end_date.astimezone(tz))
+
+
 def summary(time_entries, time_offset):
     offset_in_minutes = time_offset if time_offset else 300
     tz = timezone(timedelta(minutes=-offset_in_minutes))
     stop_running_time_entry(time_entries, tz)
+    change_timezones(time_entries, tz)
     return {
         'day': worked_time_in_day(time_entries, tz),
         'week': worked_time_in_week(time_entries, tz),
