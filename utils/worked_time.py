@@ -39,10 +39,8 @@ class DayDateRange(DateRange):
         )
 
 
-def date_range(time_offset: int):
-    offset_in_minutes = time_offset if time_offset else 300
-    tz = timezone(timedelta(minutes=-offset_in_minutes))
-    dr = MonthDateRange(tz)
+def date_range():
+    dr = MonthDateRange(pytz.UTC)
     return {
         "start_date": datetime_str(dr.start()),
         "end_date": datetime_str(dr.end()),

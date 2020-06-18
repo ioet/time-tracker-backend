@@ -461,9 +461,10 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         )
 
         conditions = {"owner_id": event_ctx.user_id}
-        date_range = worked_time.date_range(args.get('time_offset'))
         time_entries = self.repository.find_all(
-            event_ctx, conditions=conditions, date_range=date_range,
+            event_ctx,
+            conditions=conditions,
+            date_range=worked_time.date_range(),
         )
         return worked_time.summary(
             time_entries, time_offset=args.get('time_offset')
