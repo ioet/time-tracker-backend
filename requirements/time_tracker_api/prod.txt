@@ -37,3 +37,7 @@ PyJWT==1.7.1
 
 #Azure
 msal==1.3.0
+
+# Time utils
+pytz==2019.3
+python-dateutil==2.8.1

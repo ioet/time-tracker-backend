@@ -7,13 +7,12 @@ from flask.testing import FlaskClient
 from flask_restplus._http import HTTPStatus
 from pytest_mock import MockFixture, pytest
 
-from commons.data_access_layer.cosmos_db import (
+from utils.time import (
+    get_current_year,
+    get_current_month,
     current_datetime,
     current_datetime_str,
-    get_current_month,
-    get_current_year,
 )
-
 from utils import worked_time
 
 from werkzeug.exceptions import NotFound, UnprocessableEntity, HTTPException

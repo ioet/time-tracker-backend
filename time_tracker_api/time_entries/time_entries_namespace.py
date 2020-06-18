@@ -4,11 +4,8 @@ from faker import Faker
 from flask_restplus import fields, Resource
 from flask_restplus._http import HTTPStatus
 
-from commons.data_access_layer.cosmos_db import (
-    current_datetime,
-    datetime_str,
-    current_datetime_str,
-)
+from utils.time import datetime_str, current_datetime, current_datetime_str
+
 from commons.data_access_layer.database import COMMENTS_MAX_LENGTH
 from time_tracker_api.api import (
     common_fields,
@@ -36,13 +33,6 @@ time_entry_input = ns.model(
             description='The id of the selected project',
             example=faker.uuid4(),
         ),
-        'start_date': fields.DateTime(
-            dt_format='iso8601',
-            title='Start date',
-            required=False,
-            description='When the user started doing this activity',
-            example=datetime_str(current_datetime() - timedelta(days=1)),
-        ),
         'activity_id': UUID(
             title='Activity',
             required=False,
@@ -56,8 +46,13 @@ time_entry_input = ns.model(
             example=faker.paragraph(nb_sentences=2),
             max_length=COMMENTS_MAX_LENGTH,
         ),
-        'end_date': fields.DateTime(
-            dt_format='iso8601',
+        'start_date': fields.String(
+            title='Start date',
+            required=False,
+            description='When the user started doing this activity',
+            example=datetime_str(current_datetime() - timedelta(days=1)),
+        ),
+        'end_date': fields.String(
             title='End date',
             required=False,
             description='When the user ended doing this activity',
@@ -295,13 +290,26 @@ class ActiveTimeEntry(Resource):
         return time_entries_dao.find_running()
 
 
+summary_attribs_parser = ns.parser()
+summary_attribs_parser.add_argument(
+    'time_offset',
+    required=False,
+    type=int,
+    store_missing=False,
+    help="(Filter) Time zone difference, in minutes, from current locale (host system settings) to UTC.",
+    location='args',
+)
+
+
 @ns.route('/summary')
 @ns.response(HTTPStatus.OK, 'Summary of worked time in the current month')
 @ns.response(
     HTTPStatus.NOT_FOUND, 'There is no time entry in the current month'
 )
 class WorkedTimeSummary(Resource):
+    @ns.expect(summary_attribs_parser)
     @ns.doc('summary_of_worked_time')
     def get(self):
         """Find the summary of worked time"""
-        return time_entries_dao.get_worked_time()
+        conditions = summary_attribs_parser.parse_args()
+        return time_entries_dao.get_worked_time(conditions)
