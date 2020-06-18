@@ -89,21 +89,37 @@ def filter_time_entries(time_entries, dr: DateRange):
     return result
 
 
+def cut_time_entries_out_of_range(time_entries, dr):
+    start, end = dr.start(), dr.end()
+    for t in time_entries:
+        te_start, te_end = (
+            str_to_datetime(t.start_date),
+            str_to_datetime(t.end_date),
+        )
+        if te_start < start:
+            t.start = datetime_str(start)
+        if end < te_end:
+            t.end = datetime_str(end)
+
+
 def worked_time_in_day(time_entries, tz):
     dr = DayDateRange(tz)
     day_time_entries = filter_time_entries(time_entries, dr)
+    cut_time_entries_out_of_range(time_entries, dr)
     return WorkedTime(day_time_entries).summary()
 
 
 def worked_time_in_week(time_entries, tz):
     dr = WeekDateRange(tz)
     week_time_entries = filter_time_entries(time_entries, dr)
+    cut_time_entries_out_of_range(time_entries, dr)
     return WorkedTime(week_time_entries).summary()
 
 
 def worked_time_in_month(time_entries, tz):
     dr = MonthDateRange(tz)
     month_time_entries = filter_time_entries(time_entries, dr)
+    cut_time_entries_out_of_range(time_entries, dr)
     return WorkedTime(month_time_entries).summary()
 
 
