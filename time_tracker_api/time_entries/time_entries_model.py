@@ -163,6 +163,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         conditions: dict = {},
         custom_sql_conditions: List[str] = [],
         date_range: dict = {},
+        **kwargs,
     ):
         custom_sql_conditions.append(
             self.create_sql_date_range_filter(date_range)
@@ -175,6 +176,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             conditions=conditions,
             custom_sql_conditions=custom_sql_conditions,
             custom_params=custom_params,
+            max_count=kwargs.get("max_count", None),
         )
 
         if time_entries:
@@ -381,11 +383,14 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
                     HTTPStatus.FORBIDDEN, "You don't have enough permissions."
                 )
         date_range = self.handle_date_filter_args(args=conditions)
+        limit = conditions.get("limit", None)
+        conditions.pop("limit", None)
         return self.repository.find_all(
             event_ctx,
             conditions=conditions,
             custom_sql_conditions=custom_query,
             date_range=date_range,
+            max_count=limit,
         )
 
     def get(self, id):
