@@ -145,6 +145,16 @@ attributes_filter = create_attributes_filter(
 )
 
 # custom attributes filter
+
+attributes_filter.add_argument(
+    'limit',
+    required=False,
+    type=int,
+    store_missing=False,
+    help="(Filter) Amount of data to return",
+    location='args',
+)
+
 attributes_filter.add_argument(
     'user_id',
     required=False,
@@ -191,6 +201,7 @@ class TimeEntries(Resource):
     @ns.doc('list_time_entries')
     @ns.expect(attributes_filter)
     @ns.marshal_list_with(time_entry)
+    @ns.response(HTTPStatus.NOT_FOUND, 'Time entry not found')
     def get(self):
         """List all time entries"""
         conditions = attributes_filter.parse_args()
