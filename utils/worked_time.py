@@ -42,8 +42,9 @@ class DayDateRange(DateRange):
 
 def date_range():
     dr = MonthDateRange(pytz.UTC)
+    start = dr.start() - timedelta(days=6)
     return {
-        "start_date": datetime_str(dr.start()),
+        "start_date": datetime_str(start),
         "end_date": datetime_str(dr.end()),
     }
 
