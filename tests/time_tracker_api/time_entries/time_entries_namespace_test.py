@@ -624,7 +624,7 @@ def test_summary_is_called_with_date_range_from_worked_time_module(
 
     worked_time.date_range = Mock(return_value=worked_time.date_range())
     repository_find_all_mock = mocker.patch.object(
-        time_entries_dao.repository, 'find_all', return_value=[]
+        time_entries_dao.repository, 'find_all_entries', return_value=[]
     )
 
     response = client.get(

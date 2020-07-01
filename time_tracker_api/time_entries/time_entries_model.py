@@ -157,6 +157,27 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         else:
             return ''
 
+    def find_all_entries(
+        self,
+        event_context: EventContext,
+        conditions: dict = {},
+        custom_sql_conditions: List[str] = [],
+        date_range: dict = {},
+    ):
+        custom_sql_conditions.append(
+            self.create_sql_date_range_filter(date_range)
+        )
+
+        custom_params = self.generate_params(date_range)
+        time_entries = CosmosDBRepository.find_all(
+            self,
+            event_context=event_context,
+            conditions=conditions,
+            custom_sql_conditions=custom_sql_conditions,
+            custom_params=custom_params,
+        )
+        return time_entries
+
     def find_all(
         self,
         event_context: EventContext,
@@ -468,7 +489,7 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         )
 
         conditions = {"owner_id": event_ctx.user_id}
-        time_entries = self.repository.find_all(
+        time_entries = self.repository.find_all_entries(
             event_ctx,
             conditions=conditions,
             date_range=worked_time.date_range(),
