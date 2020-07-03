@@ -161,9 +161,12 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         self,
         event_context: EventContext,
         conditions: dict = {},
-        custom_sql_conditions: List[str] = [],
+        custom_sql_conditions: List[str] = None,
         date_range: dict = {},
     ):
+        if custom_sql_conditions is None:
+            custom_sql_conditions = []
+
         custom_sql_conditions.append(
             self.create_sql_date_range_filter(date_range)
         )
