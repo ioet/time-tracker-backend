@@ -313,10 +313,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         )
 
         function_mapper = self.get_mapper_or_dict(mapper)
-        try:
-            return function_mapper(next(result))
-        except StopIteration as no_result:
-            raise CustomError(HTTPStatus.NO_CONTENT)
+        return function_mapper(next(result))
 
     def validate_data(self, data, event_context: EventContext):
         start_date = data.get('start_date')
