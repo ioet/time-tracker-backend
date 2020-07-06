@@ -160,12 +160,15 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
     def find_all_entries(
         self,
         event_context: EventContext,
-        conditions: dict = {},
+        conditions: dict = None,
         custom_sql_conditions: List[str] = None,
-        date_range: dict = {},
+        date_range: dict = None,
     ):
-        if custom_sql_conditions is None:
-            custom_sql_conditions = []
+        conditions = conditions if conditions else {}
+        custom_sql_conditions = (
+            custom_sql_conditions if custom_sql_conditions else []
+        )
+        date_range = date_range if date_range else {}
 
         custom_sql_conditions.append(
             self.create_sql_date_range_filter(date_range)
@@ -184,11 +187,17 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
     def find_all(
         self,
         event_context: EventContext,
-        conditions: dict = {},
-        custom_sql_conditions: List[str] = [],
-        date_range: dict = {},
+        conditions: dict = None,
+        custom_sql_conditions: List[str] = None,
+        date_range: dict = None,
         **kwargs,
     ):
+        conditions = conditions if conditions else {}
+        custom_sql_conditions = (
+            custom_sql_conditions if custom_sql_conditions else []
+        )
+        date_range = date_range if date_range else {}
+
         custom_sql_conditions.append(
             self.create_sql_date_range_filter(date_range)
         )
@@ -486,7 +495,7 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         # self.stop_time_entry_if_was_left_running(time_entry)
         return time_entry
 
-    def get_worked_time(self, args: dict = {}):
+    def get_worked_time(self, args: dict):
         event_ctx = self.create_event_context(
             "read", "Summary of worked time in the current month"
         )

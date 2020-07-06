@@ -92,7 +92,7 @@ class CosmosDBRepository:
         container_id: str,
         partition_key_attribute: str,
         mapper: Callable = None,
-        order_fields: list = [],
+        order_fields: list = None,
         custom_cosmos_helper: CosmosDBFacade = None,
     ):
         global cosmos_helper
@@ -100,7 +100,7 @@ class CosmosDBRepository:
         if self.cosmos_helper is None:  # pragma: no cover
             raise ValueError("The cosmos_db module has not been initialized!")
         self.mapper = mapper
-        self.order_fields = order_fields
+        self.order_fields = order_fields if order_fields else []
         self.container: ContainerProxy = self.cosmos_helper.db.get_container_client(
             container_id
         )
@@ -224,14 +224,20 @@ class CosmosDBRepository:
     def find_all(
         self,
         event_context: EventContext,
-        conditions: dict = {},
-        custom_sql_conditions: List[str] = [],
-        custom_params: dict = {},
+        conditions: dict = None,
+        custom_sql_conditions: List[str] = None,
+        custom_params: dict = None,
         max_count=None,
         offset=0,
         visible_only=True,
         mapper: Callable = None,
     ):
+        conditions = conditions if conditions else {}
+        custom_sql_conditions = (
+            custom_sql_conditions if custom_sql_conditions else []
+        )
+        custom_params = custom_params if custom_params else {}
+
         partition_key_value = self.find_partition_key_value(event_context)
         max_count = self.get_page_size_or(max_count)
         params = [
