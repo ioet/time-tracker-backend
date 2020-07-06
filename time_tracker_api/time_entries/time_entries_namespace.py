@@ -292,7 +292,7 @@ class RestartTimeEntry(Resource):
 
 @ns.route('/running')
 @ns.response(HTTPStatus.OK, 'The time entry that is active: currently running')
-@ns.response(HTTPStatus.NO_CONTENT, 'There is no time entry running right now')
+@ns.response(HTTPStatus.NOT_FOUND, 'There is no time entry running right now')
 class ActiveTimeEntry(Resource):
     @ns.doc('running_time_entry')
     @ns.marshal_with(time_entry)
