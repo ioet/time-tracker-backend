@@ -83,6 +83,7 @@ class TimeEntryCosmosDBModel(CosmosDBModel):
     technologies: List[str] = field(default_factory=list)
     end_date: str = field(default=None)
     deleted: str = field(default=None)
+    timezone_offset: str = field(default=None)
 
     def __init__(self, data):  # pragma: no cover
         super(TimeEntryCosmosDBModel, self).__init__(data)

@@ -1,4 +1,5 @@
 from datetime import timedelta
+from random import choice
 
 from faker import Faker
 from flask_restplus import fields, Resource
@@ -92,6 +93,12 @@ time_entry_input = ns.model(
                 ],
                 unique=True,
             ),
+        ),
+        'timezone_offset': fields.Integer(
+            title='Timezone Offset',
+            description='Time zone difference, in minutes, from current locale (host system settings) to UTC.',
+            required=False,
+            example=choice([300, -120]),
         ),
     },
 )
