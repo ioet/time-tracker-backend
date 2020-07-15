@@ -462,7 +462,7 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         start = conditions.get("start", None)
         conditions.pop("start", None)
 
-        return self.repository.find_all(
+        time_entries = self.repository.find_all(
             event_ctx,
             conditions=conditions,
             custom_sql_conditions=custom_query,
@@ -470,6 +470,12 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
             max_count=length,
             offset=start,
         )
+
+        return {
+            'records_total': 0,
+            'records_filtered': 0,
+            'data': time_entries,
+        }
 
     def get(self, id):
         event_ctx = self.create_event_context("read")

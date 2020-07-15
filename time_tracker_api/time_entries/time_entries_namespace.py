@@ -347,6 +347,20 @@ class WorkedTimeSummary(Resource):
         return time_entries_dao.get_worked_time(conditions)
 
 
+time_entry_paginated = ns.model(
+    'TimeEntryPaginated',
+    {
+        'records_total': fields.Integer(
+            title='Records total', description='Total number of entries.',
+        ),
+        'records_filtered': fields.Integer(
+            title='Records filtered',
+            description='Number of entries returned by the endpoint.',
+        ),
+        'data': fields.List(fields.Nested(time_entry)),
+    },
+)
+
 paginated_attribs_parser = ns.parser()
 paginated_attribs_parser.add_argument(
     'length',
@@ -371,7 +385,7 @@ paginated_attribs_parser.add_argument(
 class PaginatedTimeEntry(Resource):
     @ns.expect(paginated_attribs_parser)
     @ns.doc('list_time_entries_paginated')
-    @ns.marshal_list_with(time_entry)
+    @ns.marshal_list_with(time_entry_paginated)
     def get(self):
         """List all time entries paginated"""
         conditions = paginated_attribs_parser.parse_args()
