@@ -345,3 +345,34 @@ class WorkedTimeSummary(Resource):
         """Find the summary of worked time"""
         conditions = summary_attribs_parser.parse_args()
         return time_entries_dao.get_worked_time(conditions)
+
+
+paginated_attribs_parser = ns.parser()
+paginated_attribs_parser.add_argument(
+    'length',
+    required=True,
+    type=int,
+    help="(Filter) The number of rows the endpoint should return.",
+    location='args',
+)
+
+paginated_attribs_parser.add_argument(
+    'start',
+    required=True,
+    type=int,
+    help="(Filter) The number of rows to be removed from the query. (aka offset)",
+    location='args',
+)
+
+
+@ns.route('/paginated')
+@ns.response(HTTPStatus.OK, 'Time Entries paginated')
+@ns.response(HTTPStatus.NOT_FOUND, 'Time entry not found')
+class PaginatedTimeEntry(Resource):
+    @ns.expect(paginated_attribs_parser)
+    @ns.doc('list_time_entries_paginated')
+    @ns.marshal_list_with(time_entry)
+    def get(self):
+        """List all time entries paginated"""
+        conditions = paginated_attribs_parser.parse_args()
+        return time_entries_dao.get_all_paginated(conditions)

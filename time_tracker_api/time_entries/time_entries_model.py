@@ -211,6 +211,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             custom_sql_conditions=custom_sql_conditions,
             custom_params=custom_params,
             max_count=kwargs.get("max_count", None),
+            offset=kwargs.get("offset", 0),
         )
 
         if time_entries:
@@ -428,6 +429,46 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
             custom_sql_conditions=custom_query,
             date_range=date_range,
             max_count=limit,
+        )
+
+    def get_all_paginated(self, conditions: dict = None, **kwargs) -> list:
+        event_ctx = self.create_event_context("read-many")
+        conditions.update({"owner_id": event_ctx.user_id})
+
+        # TODO: abstract this method with a function or a class method
+        custom_query = []
+        if "user_id" in conditions:
+            if event_ctx.is_admin:
+                conditions.pop("owner_id")
+                custom_query = (
+                    []
+                    if conditions.get("user_id") == "*"
+                    else [
+                        create_custom_query_from_str(
+                            conditions.get("user_id"), "c.owner_id"
+                        )
+                    ]
+                )
+                conditions.pop("user_id")
+            else:
+                abort(
+                    HTTPStatus.FORBIDDEN, "You don't have enough permissions."
+                )
+        date_range = self.handle_date_filter_args(args=conditions)
+
+        length = conditions.get("length", None)
+        conditions.pop("length", None)
+
+        start = conditions.get("start", None)
+        conditions.pop("start", None)
+
+        return self.repository.find_all(
+            event_ctx,
+            conditions=conditions,
+            custom_sql_conditions=custom_query,
+            date_range=date_range,
+            max_count=length,
+            offset=start,
         )
 
     def get(self, id):
