@@ -473,7 +473,7 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
 
         return {
             'records_total': 0,
-            'records_filtered': 0,
+            'records_filtered': len(time_entries),
             'data': time_entries,
         }
 
