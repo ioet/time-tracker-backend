@@ -402,12 +402,10 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
             )
             raise CosmosResourceNotFoundError()
 
-    def get_all(self, conditions: dict = None, **kwargs) -> list:
-        event_ctx = self.create_event_context("read-many")
-        conditions.update({"owner_id": event_ctx.user_id})
+    def build_custom_query(self, is_admin: bool, conditions: dict = None):
         custom_query = []
         if "user_id" in conditions:
-            if event_ctx.is_admin:
+            if is_admin:
                 conditions.pop("owner_id")
                 custom_query = (
                     []
@@ -423,6 +421,16 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
                 abort(
                     HTTPStatus.FORBIDDEN, "You don't have enough permissions."
                 )
+        return custom_query
+
+    def get_all(self, conditions: dict = None, **kwargs) -> list:
+        event_ctx = self.create_event_context("read-many")
+        conditions.update({"owner_id": event_ctx.user_id})
+
+        custom_query = self.build_custom_query(
+            is_admin=event_ctx.is_admin, conditions=conditions,
+        )
+
         date_range = self.handle_date_filter_args(args=conditions)
         limit = conditions.get("limit", None)
         conditions.pop("limit", None)
@@ -438,25 +446,10 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         event_ctx = self.create_event_context("read-many")
         conditions.update({"owner_id": event_ctx.user_id})
 
-        # TODO: abstract this method with a function or a class method
-        custom_query = []
-        if "user_id" in conditions:
-            if event_ctx.is_admin:
-                conditions.pop("owner_id")
-                custom_query = (
-                    []
-                    if conditions.get("user_id") == "*"
-                    else [
-                        create_custom_query_from_str(
-                            conditions.get("user_id"), "c.owner_id"
-                        )
-                    ]
-                )
-                conditions.pop("user_id")
-            else:
-                abort(
-                    HTTPStatus.FORBIDDEN, "You don't have enough permissions."
-                )
+        custom_query = self.build_custom_query(
+            is_admin=event_ctx.is_admin, conditions=conditions,
+        )
+
         date_range = self.handle_date_filter_args(args=conditions)
 
         length = conditions.get("length", None)
