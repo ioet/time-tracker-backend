@@ -222,7 +222,9 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
             project_dao = projects_model.create_dao()
             projects = project_dao.get_all(
-                custom_sql_conditions=[custom_conditions], visible_only=False
+                custom_sql_conditions=[custom_conditions],
+                visible_only=False,
+                max_count=kwargs.get("max_count", None),
             )
 
             add_project_info_to_time_entries(time_entries, projects)
@@ -231,6 +233,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             activities = activity_dao.get_all(
                 custom_sql_conditions=[custom_conditions_activity],
                 visible_only=False,
+                max_count=kwargs.get("max_count", None),
             )
             add_activity_name_to_time_entries(time_entries, activities)
 
@@ -472,8 +475,7 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         )
 
         return {
-            'records_total': 0,
-            'records_filtered': len(time_entries),
+            'records_total': len(time_entries),
             'data': time_entries,
         }
 

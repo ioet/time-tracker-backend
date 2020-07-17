@@ -353,10 +353,6 @@ time_entry_paginated = ns.model(
         'records_total': fields.Integer(
             title='Records total', description='Total number of entries.',
         ),
-        'records_filtered': fields.Integer(
-            title='Records filtered',
-            description='Number of entries returned by the endpoint.',
-        ),
         'data': fields.List(fields.Nested(time_entry)),
     },
 )
