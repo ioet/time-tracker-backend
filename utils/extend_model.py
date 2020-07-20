@@ -30,6 +30,8 @@ def add_project_name_to_time_entries(time_entries, projects):
             if time_entry.project_id == project.id:
                 name = project.name + " (archived)" if project.is_deleted() else project.name
                 setattr(time_entry, 'project_name', name)
+                setattr(time_entry, 'customer_id', project.customer_id)
+                setattr(time_entry, 'customer_name', project.customer_name)
 
 
 def add_activity_name_to_time_entries(time_entries, activities):

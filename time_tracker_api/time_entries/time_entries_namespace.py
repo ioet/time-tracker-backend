@@ -138,6 +138,20 @@ time_entry_response_fields = {
         description='Email of the user that owns the time-entry',
         example=faker.email(),
     ),
+    'customer_id': fields.String(
+        required=False,
+        title='Customer ID',
+        max_length=50,
+        description='Unique ID for the customer the entry belongs to',
+        example=faker.uuid4(),
+    ),
+    'customer_name': fields.String(
+        required=False,
+        title='Customer Name',
+        max_length=50,
+        description='Name of the customer the entry belongs to',
+        example=faker.word(['development', 'QA']),
+    ),
 }
 time_entry_response_fields.update(common_fields)
 
