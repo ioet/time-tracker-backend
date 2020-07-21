@@ -639,3 +639,45 @@ def test_summary_is_called_with_date_range_from_worked_time_module(
     repository_find_all_mock.assert_called_once_with(
         ANY, conditions=conditions, date_range=date_range
     )
+
+
+def test_paginated_fails_with_no_params(
+    client: FlaskClient, valid_header: dict,
+):
+    response = client.get('/time-entries/paginated', headers=valid_header)
+    assert HTTPStatus.BAD_REQUEST == response.status_code
+
+
+def test_paginated_succeeds_with_valid_params(
+    client: FlaskClient, valid_header: dict,
+):
+    response = client.get(
+        '/time-entries/paginated?start=10&length=10', headers=valid_header
+    )
+    assert HTTPStatus.OK == response.status_code
+
+
+def test_paginated_response_contains_expected_props(
+    client: FlaskClient, valid_header: dict,
+):
+    response = client.get(
+        '/time-entries/paginated?start=10&length=10', headers=valid_header
+    )
+    assert 'data' in json.loads(response.data)
+    assert 'records_total' in json.loads(response.data)
+
+
+def test_paginated_sends_max_count_and_offset_on_call_to_repository(
+    client: FlaskClient, valid_header: dict, time_entries_dao
+):
+    time_entries_dao.repository.find_all = Mock(return_value=[])
+
+    response = client.get(
+        '/time-entries/paginated?start=10&length=10', headers=valid_header
+    )
+
+    time_entries_dao.repository.find_all.assert_called_once()
+
+    args, kwargs = time_entries_dao.repository.find_all.call_args
+    assert 'max_count' in kwargs and kwargs['max_count'] is not None
+    assert 'offset' in kwargs and kwargs['offset'] is not None
