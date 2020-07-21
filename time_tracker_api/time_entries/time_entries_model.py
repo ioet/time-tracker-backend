@@ -211,6 +211,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             custom_sql_conditions=custom_sql_conditions,
             custom_params=custom_params,
             max_count=kwargs.get("max_count", None),
+            offset=kwargs.get("offset", 0),
         )
 
         if time_entries:
@@ -221,7 +222,9 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
             project_dao = projects_model.create_dao()
             projects = project_dao.get_all(
-                custom_sql_conditions=[custom_conditions], visible_only=False
+                custom_sql_conditions=[custom_conditions],
+                visible_only=False,
+                max_count=kwargs.get("max_count", None),
             )
 
             add_project_info_to_time_entries(time_entries, projects)
@@ -230,6 +233,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             activities = activity_dao.get_all(
                 custom_sql_conditions=[custom_conditions_activity],
                 visible_only=False,
+                max_count=kwargs.get("max_count", None),
             )
             add_activity_name_to_time_entries(time_entries, activities)
 
@@ -398,12 +402,10 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
             )
             raise CosmosResourceNotFoundError()
 
-    def get_all(self, conditions: dict = None, **kwargs) -> list:
-        event_ctx = self.create_event_context("read-many")
-        conditions.update({"owner_id": event_ctx.user_id})
+    def build_custom_query(self, is_admin: bool, conditions: dict = None):
         custom_query = []
         if "user_id" in conditions:
-            if event_ctx.is_admin:
+            if is_admin:
                 conditions.pop("owner_id")
                 custom_query = (
                     []
@@ -419,6 +421,16 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
                 abort(
                     HTTPStatus.FORBIDDEN, "You don't have enough permissions."
                 )
+        return custom_query
+
+    def get_all(self, conditions: dict = None, **kwargs) -> list:
+        event_ctx = self.create_event_context("read-many")
+        conditions.update({"owner_id": event_ctx.user_id})
+
+        custom_query = self.build_custom_query(
+            is_admin=event_ctx.is_admin, conditions=conditions,
+        )
+
         date_range = self.handle_date_filter_args(args=conditions)
         limit = conditions.get("limit", None)
         conditions.pop("limit", None)
@@ -429,6 +441,36 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
             date_range=date_range,
             max_count=limit,
         )
+
+    def get_all_paginated(self, conditions: dict = None, **kwargs) -> list:
+        event_ctx = self.create_event_context("read-many")
+        conditions.update({"owner_id": event_ctx.user_id})
+
+        custom_query = self.build_custom_query(
+            is_admin=event_ctx.is_admin, conditions=conditions,
+        )
+
+        date_range = self.handle_date_filter_args(args=conditions)
+
+        length = conditions.get("length", None)
+        conditions.pop("length", None)
+
+        start = conditions.get("start", None)
+        conditions.pop("start", None)
+
+        time_entries = self.repository.find_all(
+            event_ctx,
+            conditions=conditions,
+            custom_sql_conditions=custom_query,
+            date_range=date_range,
+            max_count=length,
+            offset=start,
+        )
+
+        return {
+            'records_total': len(time_entries),
+            'data': time_entries,
+        }
 
     def get(self, id):
         event_ctx = self.create_event_context("read")

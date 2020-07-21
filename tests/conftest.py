@@ -181,6 +181,15 @@ def time_entry_repository(app: Flask) -> TimeEntryCosmosDBRepository:
     return TimeEntryCosmosDBRepository()
 
 
+@pytest.fixture
+def time_entries_dao():
+    from time_tracker_api.time_entries.time_entries_namespace import (
+        time_entries_dao,
+    )
+
+    return time_entries_dao
+
+
 @pytest.yield_fixture(scope="module")
 def running_time_entry(
     time_entry_repository: TimeEntryCosmosDBRepository,
