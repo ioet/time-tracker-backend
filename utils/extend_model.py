@@ -16,9 +16,9 @@ def add_customer_name_to_projects(projects, customers):
                 setattr(project, 'customer_name', customer.name)
 
 
-def add_project_name_to_time_entries(time_entries, projects):
+def add_project_info_to_time_entries(time_entries, projects):
     """
-    Add attribute project_name in time-entry model, based on project_id of the
+    Add project info in time-entry model, based on project_id of the
     time_entry
     :param (list) time_entries: time_entries retrieved from time-entry repository
     :param (list) projects: projects retrieved from project repository

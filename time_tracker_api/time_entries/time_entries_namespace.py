@@ -150,7 +150,7 @@ time_entry_response_fields = {
         title='Customer Name',
         max_length=50,
         description='Name of the customer the entry belongs to',
-        example=faker.word(['development', 'QA']),
+        example=faker.company(),
     ),
 }
 time_entry_response_fields.update(common_fields)

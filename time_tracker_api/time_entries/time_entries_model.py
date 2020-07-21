@@ -17,14 +17,13 @@ from commons.data_access_layer.cosmos_db import (
 
 from commons.data_access_layer.database import EventContext
 from time_tracker_api.activities import activities_model
-from time_tracker_api.customers import customers_model
 
 from utils.extend_model import (
-    add_project_name_to_time_entries,
+    add_project_info_to_time_entries,
     add_activity_name_to_time_entries,
     create_in_condition,
     create_custom_query_from_str,
-    add_user_email_to_time_entries, add_customer_name_to_projects,
+    add_user_email_to_time_entries,
 )
 from utils.time import (
     datetime_str,
@@ -220,17 +219,12 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
                 time_entries, "activity_id"
             )
 
-            customer_dao = customers_model.create_dao()
-            customers = customer_dao.get_all(visible_only=False)
-
             project_dao = projects_model.create_dao()
             projects = project_dao.get_all(
                 custom_sql_conditions=[custom_conditions], visible_only=False
             )
 
-            add_customer_name_to_projects(projects, customers)
-
-            add_project_name_to_time_entries(time_entries, projects)
+            add_project_info_to_time_entries(time_entries, projects)
 
             activity_dao = activities_model.create_dao()
             activities = activity_dao.get_all(
