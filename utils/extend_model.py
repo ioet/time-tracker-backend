@@ -16,9 +16,9 @@ def add_customer_name_to_projects(projects, customers):
                 setattr(project, 'customer_name', customer.name)
 
 
-def add_project_name_to_time_entries(time_entries, projects):
+def add_project_info_to_time_entries(time_entries, projects):
     """
-    Add attribute project_name in time-entry model, based on project_id of the
+    Add project info in time-entry model, based on project_id of the
     time_entry
     :param (list) time_entries: time_entries retrieved from time-entry repository
     :param (list) projects: projects retrieved from project repository
@@ -30,6 +30,8 @@ def add_project_name_to_time_entries(time_entries, projects):
             if time_entry.project_id == project.id:
                 name = project.name + " (archived)" if project.is_deleted() else project.name
                 setattr(time_entry, 'project_name', name)
+                setattr(time_entry, 'customer_id', project.customer_id)
+                setattr(time_entry, 'customer_name', project.customer_name)
 
 
 def add_activity_name_to_time_entries(time_entries, activities):

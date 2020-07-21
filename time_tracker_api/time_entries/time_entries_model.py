@@ -19,7 +19,7 @@ from commons.data_access_layer.database import EventContext
 from time_tracker_api.activities import activities_model
 
 from utils.extend_model import (
-    add_project_name_to_time_entries,
+    add_project_info_to_time_entries,
     add_activity_name_to_time_entries,
     create_in_condition,
     create_custom_query_from_str,
@@ -223,7 +223,8 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             projects = project_dao.get_all(
                 custom_sql_conditions=[custom_conditions], visible_only=False
             )
-            add_project_name_to_time_entries(time_entries, projects)
+
+            add_project_info_to_time_entries(time_entries, projects)
 
             activity_dao = activities_model.create_dao()
             activities = activity_dao.get_all(
