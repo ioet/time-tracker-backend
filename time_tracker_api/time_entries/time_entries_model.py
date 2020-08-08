@@ -6,7 +6,7 @@ from azure.cosmos.exceptions import CosmosResourceNotFoundError
 from flask_restplus import abort
 from flask_restplus._http import HTTPStatus
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from commons.data_access_layer.cosmos_db import (
     CosmosDBDao,
@@ -556,30 +556,22 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
 
     @staticmethod
     def handle_date_filter_args(args: dict) -> dict:
-        date_range = None
-        year = None
-        month = None
-        if 'month' and 'year' in args:
-            month = int(args.get("month"))
-            year = int(args.get("year"))
-            args.pop('month')
-            args.pop('year')
-        elif "start_date" and "end_date" in args:
-            date_range = args.copy()
-            if "owner_id" in date_range:
-                date_range.pop("owner_id")
-            args.pop("start_date")
-            args.pop("end_date")
-        elif 'month' in args:
-            month = int(args.get("month"))
-            year = get_current_year()
-            args.pop('month')
+        if "start_date" and "end_date" in args:
+            start_date = str_to_datetime(args.pop('start_date'))
+            end_date = str_to_datetime(args.pop('end_date'))
         else:
-            month = get_current_month()
-            year = get_current_year()
-        return (
-            date_range if date_range else get_date_range_of_month(year, month)
-        )
+            month = int(args.pop("month", get_current_month()))
+            year = int(args.pop("year", get_current_year()))
+            start_date, end_date = get_date_range_of_month(year, month)
+
+        offset_in_minutes = int(args.pop('timezone_offset', 300))
+        start_date = start_date + timedelta(minutes=offset_in_minutes)
+        end_date = end_date + timedelta(minutes=offset_in_minutes)
+
+        return {
+            'start_date': datetime_str(start_date),
+            'end_date': datetime_str(end_date),
+        }
 
 
 def create_dao() -> TimeEntriesDao:

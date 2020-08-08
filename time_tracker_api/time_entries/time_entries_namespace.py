@@ -216,6 +216,14 @@ attributes_filter.add_argument(
     location='args',
 )
 
+attributes_filter.add_argument(
+    'timezone_offset',
+    required=False,
+    store_missing=False,
+    help="(Filter) Time zone difference, in minutes, from current locale (host system settings) to UTC.",
+    location='args',
+)
+
 
 @ns.route('')
 class TimeEntries(Resource):
