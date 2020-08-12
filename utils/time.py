@@ -30,22 +30,18 @@ def get_current_day() -> int:
     return datetime.now(pytz.UTC).day
 
 
-def get_date_range_of_month(year: int, month: int) -> Dict[str, str]:
+def get_date_range_of_month(year: int, month: int):
     def get_last_day_of_month(year: int, month: int) -> int:
         from calendar import monthrange
 
         return monthrange(year=year, month=month)[1]
 
-    first_day_of_month = 1
-    start_date = datetime(
-        year=year, month=month, day=first_day_of_month, tzinfo=timezone.utc
-    )
+    start_date = datetime(year=year, month=month, day=1, tzinfo=timezone.utc)
 
-    last_day_of_month = get_last_day_of_month(year=year, month=month)
     end_date = datetime(
         year=year,
         month=month,
-        day=last_day_of_month,
+        day=get_last_day_of_month(year, month),
         hour=23,
         minute=59,
         second=59,
@@ -53,10 +49,7 @@ def get_date_range_of_month(year: int, month: int) -> Dict[str, str]:
         tzinfo=timezone.utc,
     )
 
-    return {
-        'start_date': datetime_str(start_date),
-        'end_date': datetime_str(end_date),
-    }
+    return start_date, end_date
 
 
 def str_to_datetime(value: str) -> datetime:

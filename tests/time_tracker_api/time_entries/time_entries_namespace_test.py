@@ -12,6 +12,8 @@ from utils.time import (
     get_current_month,
     current_datetime,
     current_datetime_str,
+    get_date_range_of_month,
+    datetime_str,
 )
 from utils import worked_time
 
@@ -581,35 +583,121 @@ def test_create_with_valid_uuid_format_should_return_created(
 
 
 @pytest.mark.parametrize(
-    'url,month,year',
+    'url',
     [
-        ('/time-entries?month=4&year=2020', 4, 2020),
-        ('/time-entries?month=4', 4, get_current_year()),
-        ('/time-entries', get_current_month(), get_current_year()),
+        (
+            '/time-entries?start_date=2020-04-01T00:00:00&end_date=2020-04-30T23:00:00'
+        ),
+        ('/time-entries?month=4&year=2020'),
+        ('/time-entries?month=4'),
+        ('/time-entries?year=2020'),
+        ('/time-entries'),
     ],
 )
-def test_find_all_is_called_with_generated_dates(
-    client: FlaskClient,
-    mocker: MockFixture,
-    valid_header: dict,
-    owner_id: str,
-    url: str,
-    month: int,
-    year: int,
+def test_get_all_passes_date_range_built_from_params_to_find_all(
+    client: FlaskClient, valid_header: dict, url: str, time_entries_dao
 ):
-    from time_tracker_api.time_entries.time_entries_namespace import (
-        time_entries_dao,
-    )
+    time_entries_dao.repository.find_all = Mock(return_value=[])
 
-    dao_get_all_mock = mocker.patch.object(
-        time_entries_dao, 'get_all', return_value=[]
-    )
+    response = client.get(url, headers=valid_header)
 
-    response = client.get(url, headers=valid_header, follow_redirects=True)
+    time_entries_dao.repository.find_all.assert_called_once()
+    _, kwargs = time_entries_dao.repository.find_all.call_args
+    assert 'date_range' in kwargs
+    assert 'start_date' in kwargs['date_range']
+    assert 'end_date' in kwargs['date_range']
 
-    assert HTTPStatus.OK == response.status_code
-    assert json.loads(response.data) is not None
-    dao_get_all_mock.assert_called_once()
+
+@pytest.mark.parametrize(
+    'url,start_date,end_date',
+    [
+        (
+            '/time-entries?month=4&year=2020',
+            '2020-04-01T05:00:00+00:00',
+            '2020-05-01T04:59:59.999999+00:00',
+        ),
+        (
+            '/time-entries?start_date=2020-04-01T00:00:00&end_date=2020-04-30T23:00:00',
+            '2020-04-01T05:00:00+00:00',
+            '2020-05-01T04:00:00+00:00',
+        ),
+    ],
+)
+def test_get_all_passes_date_range_to_find_all_with_default_tz_offset(
+    client: FlaskClient,
+    valid_header: dict,
+    time_entries_dao,
+    url: str,
+    start_date: str,
+    end_date: str,
+):
+    time_entries_dao.repository.find_all = Mock(return_value=[])
+
+    response = client.get(url, headers=valid_header)
+
+    time_entries_dao.repository.find_all.assert_called_once()
+    _, kwargs = time_entries_dao.repository.find_all.call_args
+    assert 'date_range' in kwargs
+    assert 'start_date' in kwargs['date_range']
+    assert 'end_date' in kwargs['date_range']
+    assert kwargs['date_range']['start_date'] == start_date
+    assert kwargs['date_range']['end_date'] == end_date
+
+
+@pytest.mark.parametrize(
+    'url,start_date,end_date',
+    [
+        (
+            '/time-entries?month=4&year=2020&timezone_offset=300',
+            '2020-04-01T05:00:00+00:00',
+            '2020-05-01T04:59:59.999999+00:00',
+        ),
+        (
+            '/time-entries?start_date=2020-04-01T00:00:00&end_date=2020-04-30T23:00:00&timezone_offset=300',
+            '2020-04-01T05:00:00+00:00',
+            '2020-05-01T04:00:00+00:00',
+        ),
+        (
+            '/time-entries?month=4&year=2020&timezone_offset=-120',
+            '2020-03-31T22:00:00+00:00',
+            '2020-04-30T21:59:59.999999+00:00',
+        ),
+        (
+            '/time-entries?start_date=2020-04-01T00:00:00&end_date=2020-04-30T23:00:00&timezone_offset=-120',
+            '2020-03-31T22:00:00+00:00',
+            '2020-04-30T21:00:00+00:00',
+        ),
+        (
+            '/time-entries?month=4&year=2020&timezone_offset=420',
+            '2020-04-01T07:00:00+00:00',
+            '2020-05-01T06:59:59.999999+00:00',
+        ),
+        (
+            '/time-entries?start_date=2020-04-01T00:00:00&end_date=2020-04-30T23:00:00&timezone_offset=420',
+            '2020-04-01T07:00:00+00:00',
+            '2020-05-01T06:00:00+00:00',
+        ),
+    ],
+)
+def test_get_all_passes_date_range_to_find_all_with_given_tz_offset(
+    client: FlaskClient,
+    valid_header: dict,
+    time_entries_dao,
+    url: str,
+    start_date: str,
+    end_date: str,
+):
+    time_entries_dao.repository.find_all = Mock(return_value=[])
+
+    response = client.get(url, headers=valid_header)
+
+    time_entries_dao.repository.find_all.assert_called_once()
+    _, kwargs = time_entries_dao.repository.find_all.call_args
+    assert 'date_range' in kwargs
+    assert 'start_date' in kwargs['date_range']
+    assert 'end_date' in kwargs['date_range']
+    assert kwargs['date_range']['start_date'] == start_date
+    assert kwargs['date_range']['end_date'] == end_date
 
 
 def test_summary_is_called_with_date_range_from_worked_time_module(
@@ -678,6 +766,6 @@ def test_paginated_sends_max_count_and_offset_on_call_to_repository(
 
     time_entries_dao.repository.find_all.assert_called_once()
 
-    args, kwargs = time_entries_dao.repository.find_all.call_args
+    _, kwargs = time_entries_dao.repository.find_all.call_args
     assert 'max_count' in kwargs and kwargs['max_count'] is not None
     assert 'offset' in kwargs and kwargs['offset'] is not None
