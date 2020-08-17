@@ -1,4 +1,8 @@
-from azure.cosmos.exceptions import CosmosResourceExistsError, CosmosResourceNotFoundError, CosmosHttpResponseError
+from azure.cosmos.exceptions import (
+    CosmosResourceExistsError,
+    CosmosResourceNotFoundError,
+    CosmosHttpResponseError,
+)
 from faker import Faker
 from flask import current_app as app, Flask
 from flask_restplus import Api, fields, Model
@@ -30,17 +34,24 @@ def remove_required_constraint(model: Model):
     return result
 
 
-def create_attributes_filter(ns: namespace, model: Model, filter_attrib_names: list) -> RequestParser:
+def create_attributes_filter(
+    ns: namespace, model: Model, filter_attrib_names: list
+) -> RequestParser:
     attribs_parser = ns.parser()
     model_attributes = model.resolved
     for attrib in filter_attrib_names:
         if attrib not in model_attributes:
-            raise ValueError(f"{attrib} is not a valid filter attribute for {model.name}")
+            raise ValueError(
+                f"{attrib} is not a valid filter attribute for {model.name}"
+            )
 
-        attribs_parser.add_argument(attrib, required=False,
-                                    store_missing=False,
-                                    help="(Filter) %s " % model_attributes[attrib].description,
-                                    location='args')
+        attribs_parser.add_argument(
+            attrib,
+            required=False,
+            store_missing=False,
+            help="(Filter) %s " % model_attributes[attrib].description,
+            location='args',
+        )
 
     return attribs_parser
 
@@ -103,6 +114,10 @@ def init_app(app: Flask):
 
     api.add_namespace(customers_namespace.ns)
 
+    from time_tracker_api.technologies import technologies_namespace
+
+    api.add_namespace(technologies_namespace.ns)
+
 
 """
 Error handlers
@@ -122,12 +137,18 @@ def handle_not_found_errors(error):
 
 @api.errorhandler(CosmosHttpResponseError)
 def handle_cosmos_http_response_error(error):
-    return {'message': 'Invalid request. Please verify your data.'}, HTTPStatus.BAD_REQUEST
+    return (
+        {'message': 'Invalid request. Please verify your data.'},
+        HTTPStatus.BAD_REQUEST,
+    )
 
 
 @api.errorhandler(AttributeError)
 def handle_attribute_error(error):
-    return {'message': "There are missing attributes"}, HTTPStatus.UNPROCESSABLE_ENTITY
+    return (
+        {'message': "There are missing attributes"},
+        HTTPStatus.UNPROCESSABLE_ENTITY,
+    )
 
 
 @api.errorhandler(CustomError)
@@ -138,4 +159,7 @@ def handle_custom_error(error):
 @api.errorhandler
 def default_error_handler(error):
     app.logger.error(error)
-    return {'message': 'An unhandled exception occurred.'}, HTTPStatus.INTERNAL_SERVER_ERROR
+    return (
+        {'message': 'An unhandled exception occurred.'},
+        HTTPStatus.INTERNAL_SERVER_ERROR,
+    )
