@@ -382,6 +382,54 @@ paginated_attribs_parser.add_argument(
     location='args',
 )
 
+paginated_attribs_parser.add_argument(
+    'user_id',
+    required=False,
+    store_missing=False,
+    help="(Filter) User to filter by",
+    location='args',
+)
+
+paginated_attribs_parser.add_argument(
+    'month',
+    required=False,
+    store_missing=False,
+    help="(Filter) Month to filter by",
+    location='args',
+)
+
+paginated_attribs_parser.add_argument(
+    'year',
+    required=False,
+    store_missing=False,
+    help="(Filter) Year to filter by",
+    location='args',
+)
+
+paginated_attribs_parser.add_argument(
+    'start_date',
+    required=False,
+    store_missing=False,
+    help="(Filter) Start to filter by",
+    location='args',
+)
+
+paginated_attribs_parser.add_argument(
+    'end_date',
+    required=False,
+    store_missing=False,
+    help="(Filter) End time to filter by",
+    location='args',
+)
+
+paginated_attribs_parser.add_argument(
+    'timezone_offset',
+    required=False,
+    store_missing=False,
+    help="(Filter) Time zone difference, in minutes, from current locale (host system settings) to UTC.",
+    location='args',
+)
+
 
 @ns.route('/paginated')
 @ns.response(HTTPStatus.OK, 'Time Entries paginated')
