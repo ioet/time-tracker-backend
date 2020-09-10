@@ -4,6 +4,7 @@ from typing import Callable, List
 
 import azure.cosmos.cosmos_client as cosmos_client
 import azure.cosmos.exceptions as exceptions
+import flask
 from azure.cosmos import ContainerProxy, PartitionKey
 from flask import Flask
 from werkzeug.exceptions import HTTPException
@@ -101,8 +102,8 @@ class CosmosDBRepository:
             raise ValueError("The cosmos_db module has not been initialized!")
         self.mapper = mapper
         self.order_fields = order_fields if order_fields else []
-        self.container: ContainerProxy = self.cosmos_helper.db.get_container_client(
-            container_id
+        self.container: ContainerProxy = (
+            self.cosmos_helper.db.get_container_client(container_id)
         )
         self.partition_key_attribute = partition_key_attribute
 
@@ -266,7 +267,6 @@ class CosmosDBRepository:
             ),
             order_clause=self.create_sql_order_clause(),
         )
-
         result = self.container.query_items(
             query=query_str,
             parameters=params,
@@ -277,6 +277,50 @@ class CosmosDBRepository:
         function_mapper = self.get_mapper_or_dict(mapper)
         return list(map(function_mapper, result))
 
+    def count(
+        self,
+        event_context: EventContext,
+        conditions: dict = None,
+        custom_sql_conditions: List[str] = None,
+        custom_params: dict = None,
+        visible_only=True,
+    ):
+        conditions = conditions if conditions else {}
+        custom_sql_conditions = (
+            custom_sql_conditions if custom_sql_conditions else []
+        )
+        custom_params = custom_params if custom_params else {}
+        partition_key_value = self.find_partition_key_value(event_context)
+        params = [
+            {"name": "@partition_key_value", "value": partition_key_value},
+        ]
+        params.extend(self.generate_params(conditions))
+        params.extend(custom_params)
+        query_str = """
+            SELECT VALUE COUNT(1) FROM c
+            WHERE c.{partition_key_attribute}=@partition_key_value
+            {conditions_clause}
+            {visibility_condition}
+            {custom_sql_conditions_clause}
+            """.format(
+            partition_key_attribute=self.partition_key_attribute,
+            visibility_condition=self.create_sql_condition_for_visibility(
+                visible_only
+            ),
+            conditions_clause=self.create_sql_where_conditions(conditions),
+            custom_sql_conditions_clause=self.create_custom_sql_conditions(
+                custom_sql_conditions
+            ),
+        )
+
+        flask.current_app.logger.debug(query_str)
+        result = self.container.query_items(
+            query=query_str,
+            parameters=params,
+            partition_key=partition_key_value,
+        )
+        return result.next()
+
     def partial_update(
         self,
         id: str,
@@ -286,7 +330,10 @@ class CosmosDBRepository:
         mapper: Callable = None,
     ):
         item_data = self.find(
-            id, event_context, visible_only=visible_only, mapper=dict,
+            id,
+            event_context,
+            visible_only=visible_only,
+            mapper=dict,
         )
         item_data.update(changes)
         return self.update(id, item_data, event_context, mapper=mapper)
@@ -304,7 +351,10 @@ class CosmosDBRepository:
         return function_mapper(self.container.replace_item(id, body=item_data))
 
     def delete(
-        self, id: str, event_context: EventContext, mapper: Callable = None,
+        self,
+        id: str,
+        event_context: EventContext,
+        mapper: Callable = None,
     ):
         return self.partial_update(
             id,
@@ -327,7 +377,7 @@ class CosmosDBRepository:
     def get_page_size_or(self, custom_page_size: int) -> int:
         # TODO The default value should be taken from the Azure Feature Manager
         # or any other repository for the settings
-        return custom_page_size or 100
+        return custom_page_size or 9999
 
     def on_update(self, update_item_data: dict, event_context: EventContext):
         pass

@@ -730,26 +730,31 @@ def test_summary_is_called_with_date_range_from_worked_time_module(
 
 
 def test_paginated_fails_with_no_params(
-    client: FlaskClient, valid_header: dict,
+    client: FlaskClient,
+    valid_header: dict,
 ):
     response = client.get('/time-entries/paginated', headers=valid_header)
     assert HTTPStatus.BAD_REQUEST == response.status_code
 
 
 def test_paginated_succeeds_with_valid_params(
-    client: FlaskClient, valid_header: dict,
+    client: FlaskClient,
+    valid_header: dict,
 ):
     response = client.get(
-        '/time-entries/paginated?start=10&length=10', headers=valid_header
+        '/time-entries/paginated?start_date=2020-09-10T00:00:00-05:00&end_date=2020-09-10T23:59:59-05:00&timezone_offset=300&start=0&length=5',
+        headers=valid_header,
     )
     assert HTTPStatus.OK == response.status_code
 
 
 def test_paginated_response_contains_expected_props(
-    client: FlaskClient, valid_header: dict,
+    client: FlaskClient,
+    valid_header: dict,
 ):
     response = client.get(
-        '/time-entries/paginated?start=10&length=10', headers=valid_header
+        '/time-entries/paginated?start_date=2020-09-10T00:00:00-05:00&end_date=2020-09-10T23:59:59-05:00&timezone_offset=300&start=0&length=5',
+        headers=valid_header,
     )
     assert 'data' in json.loads(response.data)
     assert 'records_total' in json.loads(response.data)
@@ -761,7 +766,8 @@ def test_paginated_sends_max_count_and_offset_on_call_to_repository(
     time_entries_dao.repository.find_all = Mock(return_value=[])
 
     response = client.get(
-        '/time-entries/paginated?start=10&length=10', headers=valid_header
+        '/time-entries/paginated?start_date=2020-09-10T00:00:00-05:00&end_date=2020-09-10T23:59:59-05:00&timezone_offset=300&start=0&length=5',
+        headers=valid_header,
     )
 
     time_entries_dao.repository.find_all.assert_called_once()
