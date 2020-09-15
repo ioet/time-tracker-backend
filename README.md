@@ -33,6 +33,15 @@ automatically [pip](https://pip.pypa.io/en/stable/) as well.
     virtualenv .venv
     source .venv/bin/activate
     ```
+
+Note:
+If you're a linux user you will need to install an additional dependency to have it working.
+
+Type in the terminal the following command to install the required dependency to have pyodbc working locally:
+
+```sh
+sudo apt-get install unixodbc-dev
+```
     
 - Install the requirements:
     ```
