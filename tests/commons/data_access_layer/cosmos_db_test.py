@@ -82,7 +82,10 @@ def test_create_with_diff_unique_data_but_same_tenant_should_succeed(
 ):
     new_data = sample_item.copy()
     new_data.update(
-        {'id': fake.uuid4(), 'email': fake.safe_email(),}
+        {
+            'id': fake.uuid4(),
+            'email': fake.safe_email(),
+        }
     )
 
     result = cosmos_db_repository.create(new_data, event_context)
@@ -97,7 +100,9 @@ def test_create_with_same_id_should_fail(
     try:
         new_data = sample_item.copy()
         new_data.update(
-            {'email': fake.safe_email(),}
+            {
+                'email': fake.safe_email(),
+            }
         )
 
         cosmos_db_repository.create(new_data, event_context)
@@ -134,7 +139,9 @@ def test_create_with_same_id_but_diff_partition_key_attrib_should_succeed(
     new_data = sample_item.copy()
 
     new_data.update(
-        {'tenant_id': another_tenant_id,}
+        {
+            'tenant_id': another_tenant_id,
+        }
     )
 
     result = cosmos_db_repository.create(new_data, another_event_context)
@@ -310,6 +317,15 @@ def test_find_all_with_offset(
     assert result_after_the_second_item == result_all_items[2:]
 
 
+def test_count(
+    cosmos_db_repository: CosmosDBRepository, event_context: EventContext
+):
+    counter = cosmos_db_repository.count(event_context)
+    print('test counter: ', counter)
+
+    assert counter == 10
+
+
 @pytest.mark.parametrize(
     'mapper,expected_type', [(None, dict), (dict, dict), (Person, Person)]
 )
@@ -405,7 +421,10 @@ def test_update_with_mapper(
 ):
     changed_item = sample_item.copy()
     changed_item.update(
-        {'name': fake.name(), 'email': fake.safe_email(),}
+        {
+            'name': fake.name(),
+            'email': fake.safe_email(),
+        }
     )
 
     updated_item = cosmos_db_repository.update(

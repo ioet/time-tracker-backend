@@ -39,7 +39,7 @@ automatically [pip](https://pip.pypa.io/en/stable/) as well.
     python3 -m pip install -r requirements/<app>/<stage>.txt
     ```
     
-    Where <app> is one of the executable app namespace, e.g. `time_tracker_api` or `time_tracker_events`.
+    Where `<app>` is one of the executable app namespace, e.g. `time_tracker_api` or `time_tracker_events`.
     The `stage` can be 
     
     * `dev`: Used for working locally

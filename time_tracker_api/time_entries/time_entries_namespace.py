@@ -156,7 +156,9 @@ time_entry_response_fields = {
 time_entry_response_fields.update(common_fields)
 
 time_entry = ns.inherit(
-    'TimeEntry', time_entry_input, time_entry_response_fields,
+    'TimeEntry',
+    time_entry_input,
+    time_entry_response_fields,
 )
 
 time_entries_dao = create_dao()
@@ -359,7 +361,8 @@ time_entry_paginated = ns.model(
     'TimeEntryPaginated',
     {
         'records_total': fields.Integer(
-            title='Records total', description='Total number of entries.',
+            title='Records total',
+            description='Total number of entries.',
         ),
         'data': fields.List(fields.Nested(time_entry)),
     },
@@ -408,7 +411,7 @@ paginated_attribs_parser.add_argument(
 
 paginated_attribs_parser.add_argument(
     'start_date',
-    required=False,
+    required=True,
     store_missing=False,
     help="(Filter) Start to filter by",
     location='args',
@@ -416,7 +419,7 @@ paginated_attribs_parser.add_argument(
 
 paginated_attribs_parser.add_argument(
     'end_date',
-    required=False,
+    required=True,
     store_missing=False,
     help="(Filter) End time to filter by",
     location='args',

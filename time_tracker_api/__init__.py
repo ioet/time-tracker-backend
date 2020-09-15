@@ -6,8 +6,9 @@ from flask import Flask
 flask_app: Flask = None
 
 
-def create_app(config_path='time_tracker_api.config.DefaultConfig',
-               config_data=None):
+def create_app(
+    config_path='time_tracker_api.config.DefaultConfig', config_data=None
+):
     global flask_app
     flask_app = Flask(__name__)
 
@@ -36,13 +37,15 @@ def init_app_config(app: Flask, config_path: str, config_data: dict = None):
 
 def init_app(app: Flask):
     from time_tracker_api.database import init_app as init_database
+
     init_database(app)
 
     from time_tracker_api.api import init_app
+
     init_app(app)
 
     if app.config.get('DEBUG'):
-        app.logger.setLevel(logging.INFO)
+        app.logger.setLevel(logging.DEBUG)
         add_debug_toolbar(app)
 
     add_werkzeug_proxy_fix(app)
@@ -62,16 +65,18 @@ def add_debug_toolbar(app: Flask):
         'flask_debugtoolbar.panels.template.TemplateDebugPanel',
         'flask_debugtoolbar.panels.logger.LoggingPanel',
         'flask_debugtoolbar.panels.route_list.RouteListDebugPanel',
-        'flask_debugtoolbar.panels.profiler.ProfilerDebugPanel'
+        'flask_debugtoolbar.panels.profiler.ProfilerDebugPanel',
     )
 
     from flask_debugtoolbar import DebugToolbarExtension
+
     toolbar = DebugToolbarExtension()
     toolbar.init_app(app)
 
 
 def enable_cors(app: Flask, cors_origins: str):
     from flask_cors import CORS
+
     cors_origins_list = cors_origins.split(",")
     CORS(app, resources={r"/*": {"origins": cors_origins_list}})
     app.logger.info("Set CORS access to [%s]" % cors_origins)
@@ -79,5 +84,6 @@ def enable_cors(app: Flask, cors_origins: str):
 
 def add_werkzeug_proxy_fix(app: Flask):
     from werkzeug.middleware.proxy_fix import ProxyFix
+
     app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
     app.logger.info("Add ProxyFix to serve swagger.json over https.")

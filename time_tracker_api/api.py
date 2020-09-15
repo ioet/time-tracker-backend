@@ -126,17 +126,20 @@ Error handlers
 
 @api.errorhandler(CosmosResourceExistsError)
 def handle_cosmos_resource_exists_error(error):
+    app.logger.error(error)
     return {'message': 'It already exists'}, HTTPStatus.CONFLICT
 
 
 @api.errorhandler(CosmosResourceNotFoundError)
 @api.errorhandler(StopIteration)
 def handle_not_found_errors(error):
+    app.logger.error(error)
     return {'message': 'It was not found'}, HTTPStatus.NOT_FOUND
 
 
 @api.errorhandler(CosmosHttpResponseError)
 def handle_cosmos_http_response_error(error):
+    app.logger.error(error)
     return (
         {'message': 'Invalid request. Please verify your data.'},
         HTTPStatus.BAD_REQUEST,
@@ -145,6 +148,7 @@ def handle_cosmos_http_response_error(error):
 
 @api.errorhandler(AttributeError)
 def handle_attribute_error(error):
+    app.logger.error(error)
     return (
         {'message': "There are missing attributes"},
         HTTPStatus.UNPROCESSABLE_ENTITY,
@@ -153,6 +157,7 @@ def handle_attribute_error(error):
 
 @api.errorhandler(CustomError)
 def handle_custom_error(error):
+    app.logger.error(error)
     return {'message': error.description}, error.code
 
 
