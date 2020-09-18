@@ -392,9 +392,8 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
 
     def check_whether_current_user_owns_item(self, data):
         if (
-                1 > 2
-                # data.owner_id is not None
-                # and data.owner_id != self.current_user_id()
+            data.owner_id is not None
+            and data.owner_id != self.current_user_id()
         ):
             raise CustomError(
                 HTTPStatus.FORBIDDEN,
@@ -621,10 +620,6 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
             'start_date': datetime_str(start_date),
             'end_date': datetime_str(end_date),
         }
-
-    @staticmethod
-    def current_user_id():
-        return super().current_user_id()
 
 
 def create_dao() -> TimeEntriesDao:
