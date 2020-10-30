@@ -158,6 +158,26 @@ def test_list_all_time_entries(
     dao_get_all_mock.assert_called_once()
 
 
+def test_list_last_time_entries(
+    client: FlaskClient, mocker: MockFixture, valid_header: dict
+):
+    from time_tracker_api.time_entries.time_entries_namespace import (
+        time_entries_dao,
+    )
+
+    dao_get_all_mock = mocker.patch.object(
+        time_entries_dao, 'get_last_projects_worked', return_value=[]
+    )
+
+    response = client.get(
+        "/time-entries/latest", headers=valid_header, follow_redirects=True
+    )
+
+    assert HTTPStatus.OK == response.status_code
+    assert [] == json.loads(response.data)
+    dao_get_all_mock.assert_called_once()
+
+
 def test_get_time_entry_should_succeed_with_valid_id(
     client: FlaskClient, mocker: MockFixture, valid_header: dict
 ):
