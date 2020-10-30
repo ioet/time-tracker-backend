@@ -164,6 +164,8 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             conditions=conditions,
             custom_sql_conditions=custom_sql_conditions,
             custom_params=custom_params,
+            max_count=kwargs.get("max_count", None),
+            offset=kwargs.get("offset", 0),
         )
         return time_entries
 
@@ -173,6 +175,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         conditions: dict = None,
         custom_sql_conditions: List[str] = None,
         date_range: dict = None,
+        **kwargs,
     ):
         conditions = conditions if conditions else {}
         custom_sql_conditions = (
@@ -424,7 +427,8 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         conditions.update({"owner_id": event_ctx.user_id})
 
         custom_query = self.build_custom_query(
-            is_admin=event_ctx.is_admin, conditions=conditions,
+            is_admin=event_ctx.is_admin,
+            conditions=conditions,
         )
         date_range = self.handle_date_filter_args(args=conditions)
         limit = conditions.get("limit", None)
@@ -437,6 +441,47 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
             max_count=limit,
         )
 
+    def get_last_projects_worked(
+        self, conditions: dict = None, **kwargs
+    ) -> list:
+        event_ctx = self.create_event_context("read-many")
+        conditions.update({"owner_id": event_ctx.user_id})
+        custom_query = self.build_custom_query(
+            is_admin=event_ctx.is_admin,
+            conditions=conditions,
+        )
+        date_range = self.handle_date_filter_args(args=conditions)
+
+        project_dao = projects_model.create_dao()
+        projects = project_dao.get_all()
+        projects_ids = [project.id for project in projects]
+
+        activity_dao = activities_model.create_dao()
+        activities = activity_dao.get_all(
+            visible_only=False,
+        )
+
+        result = []
+        for id_project in projects_ids:
+            conditions.update({"project_id": id_project})
+
+            limit = 2
+            latest = self.repository.find_all_entries(
+                event_ctx,
+                conditions=conditions,
+                custom_sql_conditions=custom_query,
+                date_range=date_range,
+                max_count=limit,
+            )
+
+            if len(latest) >= 1:
+                result.append(latest[0])
+
+        add_activity_name_to_time_entries(result, activities)
+        add_project_info_to_time_entries(result, projects)
+
+        return result
+
     def get_all_paginated(self, conditions: dict = None, **kwargs) -> list:
         get_all_conditions = dict(conditions)
         get_all_conditions.pop("length")
@@ -444,7 +489,8 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         event_ctx = self.create_event_context("read-many")
         get_all_conditions.update({"owner_id": event_ctx.user_id})
         custom_query = self.build_custom_query(
-            is_admin=event_ctx.is_admin, conditions=get_all_conditions,
+            is_admin=event_ctx.is_admin,
+            conditions=get_all_conditions,
         )
         date_range = self.handle_date_filter_args(args=get_all_conditions)
         records_total = self.repository.count(
@@ -455,7 +501,8 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         )
         conditions.update({"owner_id": event_ctx.user_id})
         custom_query = self.build_custom_query(
-            is_admin=event_ctx.is_admin, conditions=conditions,
+            is_admin=event_ctx.is_admin,
+            conditions=conditions,
         )
         date_range = self.handle_date_filter_args(args=conditions)
         length = conditions.get("length", None)
@@ -499,7 +546,11 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         time_entry = self.repository.find(id, event_ctx)
         self.check_whether_current_user_owns_item(time_entry)
 
-        return self.repository.partial_update(id, data, event_ctx,)
+        return self.repository.partial_update(
+            id,
+            data,
+            event_ctx,
+        )
 
     def stop(self, id):
         event_ctx = self.create_event_context("update", "Stop time entry")
@@ -509,7 +560,9 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         self.check_time_entry_is_not_stopped(time_entry)
 
         return self.repository.partial_update(
-            id, {'end_date': current_datetime_str()}, event_ctx,
+            id,
+            {'end_date': current_datetime_str()},
+            event_ctx,
         )
 
     def restart(self, id):
@@ -520,7 +573,9 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         self.check_time_entry_is_not_started(time_entry)
 
         return self.repository.partial_update(
-            id, {'end_date': None}, event_ctx,
+            id,
+            {'end_date': None},
+            event_ctx,
         )
 
     def delete(self, id):
@@ -528,7 +583,8 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         time_entry = self.repository.find(id, event_ctx)
         self.check_whether_current_user_owns_item(time_entry)
         self.repository.delete(
-            id, event_ctx,
+            id,
+            event_ctx,
         )
 
     def find_running(self):
