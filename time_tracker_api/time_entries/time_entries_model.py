@@ -146,6 +146,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         conditions: dict = None,
         custom_sql_conditions: List[str] = None,
         date_range: dict = None,
+        **kwargs,
     ):
         conditions = conditions if conditions else {}
         custom_sql_conditions = (
