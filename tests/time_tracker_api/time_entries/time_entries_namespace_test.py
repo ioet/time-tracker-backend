@@ -483,7 +483,6 @@ def test_get_running_should_call_find_running(
         'find_running',
         return_value=fake_time_entry,
     )
-    time_entries_dao.stop_time_entry_if_was_left_running = Mock()
 
     response = client.get(
         "/time-entries/running", headers=valid_header, follow_redirects=True
@@ -730,16 +729,14 @@ def test_summary_is_called_with_date_range_from_worked_time_module(
 
 
 def test_paginated_fails_with_no_params(
-    client: FlaskClient,
-    valid_header: dict,
+    client: FlaskClient, valid_header: dict,
 ):
     response = client.get('/time-entries/paginated', headers=valid_header)
     assert HTTPStatus.BAD_REQUEST == response.status_code
 
 
 def test_paginated_succeeds_with_valid_params(
-    client: FlaskClient,
-    valid_header: dict,
+    client: FlaskClient, valid_header: dict,
 ):
     response = client.get(
         '/time-entries/paginated?start_date=2020-09-10T00:00:00-05:00&end_date=2020-09-10T23:59:59-05:00&timezone_offset=300&start=0&length=5',
@@ -749,8 +746,7 @@ def test_paginated_succeeds_with_valid_params(
 
 
 def test_paginated_response_contains_expected_props(
-    client: FlaskClient,
-    valid_header: dict,
+    client: FlaskClient, valid_header: dict,
 ):
     response = client.get(
         '/time-entries/paginated?start_date=2020-09-10T00:00:00-05:00&end_date=2020-09-10T23:59:59-05:00&timezone_offset=300&start=0&length=5',

@@ -2,7 +2,6 @@ import abc
 from dataclasses import dataclass, field
 from typing import List, Callable
 from azure.cosmos import PartitionKey
-from azure.cosmos.exceptions import CosmosResourceNotFoundError
 from flask_restplus import abort
 from flask_restplus._http import HTTPStatus
 
@@ -30,7 +29,6 @@ from utils.time import (
     str_to_datetime,
     get_current_year,
     get_current_month,
-    get_current_day,
     get_date_range_of_month,
     current_datetime_str,
 )
@@ -91,22 +89,6 @@ class TimeEntryCosmosDBModel(CosmosDBModel):
     @property
     def running(self):
         return self.end_date is None
-
-    @property
-    def was_left_running(self) -> bool:
-        start_date = str_to_datetime(self.start_date)
-        return (
-            get_current_day() > start_date.day
-            or get_current_month() > start_date.month
-            or get_current_year() > start_date.year
-        )
-
-    @property
-    def start_date_at_midnight(self) -> str:
-        start_date = str_to_datetime(self.start_date)
-        return datetime_str(
-            start_date.replace(hour=23, minute=59, second=59, microsecond=0)
-        )
 
     @property
     def elapsed_time(self) -> timedelta:
@@ -416,21 +398,6 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
                 "The specified time entry is already running",
             )
 
-    def stop_time_entry_if_was_left_running(
-        self, time_entry: TimeEntryCosmosDBModel
-    ):
-
-        if time_entry.was_left_running:
-            end_date = time_entry.start_date_at_midnight
-            event_ctx = self.create_event_context(
-                "update", "Stop time-entry that was left running"
-            )
-
-            self.repository.partial_update(
-                time_entry.id, {'end_date': end_date}, event_ctx
-            )
-            raise CosmosResourceNotFoundError()
-
     def build_custom_query(self, is_admin: bool, conditions: dict = None):
         custom_query = []
         if "user_id" in conditions:
@@ -569,12 +536,6 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         time_entry = self.repository.find_running(
             event_ctx.tenant_id, event_ctx.user_id
         )
-        # TODO: we need to make this work using the users time zone
-        # This is disabled as part of https://github.com/ioet/time-tracker-backend/issues/160
-        # Remove all these comments after implementing
-        # https://github.com/ioet/time-tracker-backend/issues/159
-        # https://github.com/ioet/time-tracker-backend/issues/162
-        # self.stop_time_entry_if_was_left_running(time_entry)
         return time_entry
 
     def get_worked_time(self, args: dict):
