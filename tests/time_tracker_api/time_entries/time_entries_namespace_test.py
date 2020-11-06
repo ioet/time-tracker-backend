@@ -39,12 +39,11 @@ fake_time_entry.update(valid_time_entry_input)
 
 
 def test_create_time_entry_with_invalid_date_range_should_raise_bad_request(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict
+    client: FlaskClient,
+    mocker: MockFixture,
+    valid_header: dict,
+    time_entries_dao,
 ):
-    from time_tracker_api.time_entries.time_entries_namespace import (
-        time_entries_dao,
-    )
-
     repository_container_create_item_mock = mocker.patch.object(
         time_entries_dao.repository.container,
         'create_item',
@@ -65,12 +64,11 @@ def test_create_time_entry_with_invalid_date_range_should_raise_bad_request(
 
 
 def test_create_time_entry_with_end_date_in_future_should_raise_bad_request(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict
+    client: FlaskClient,
+    mocker: MockFixture,
+    valid_header: dict,
+    time_entries_dao,
 ):
-    from time_tracker_api.time_entries.time_entries_namespace import (
-        time_entries_dao,
-    )
-
     repository_container_create_item_mock = mocker.patch.object(
         time_entries_dao.repository.container,
         'create_item',
@@ -92,12 +90,11 @@ def test_create_time_entry_with_end_date_in_future_should_raise_bad_request(
 
 
 def test_create_time_entry_should_succeed_with_valid_request(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict
+    client: FlaskClient,
+    mocker: MockFixture,
+    valid_header: dict,
+    time_entries_dao,
 ):
-    from time_tracker_api.time_entries.time_entries_namespace import (
-        time_entries_dao,
-    )
-
     repository_create_mock = mocker.patch.object(
         time_entries_dao.repository, 'create', return_value=fake_time_entry
     )
@@ -114,12 +111,11 @@ def test_create_time_entry_should_succeed_with_valid_request(
 
 
 def test_create_time_entry_with_missing_req_field_should_return_bad_request(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict
+    client: FlaskClient,
+    mocker: MockFixture,
+    valid_header: dict,
+    time_entries_dao,
 ):
-    from time_tracker_api.time_entries.time_entries_namespace import (
-        time_entries_dao,
-    )
-
     repository_create_mock = mocker.patch.object(
         time_entries_dao.repository, 'create', return_value=fake_time_entry
     )
@@ -139,12 +135,11 @@ def test_create_time_entry_with_missing_req_field_should_return_bad_request(
 
 
 def test_list_all_time_entries(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict
+    client: FlaskClient,
+    mocker: MockFixture,
+    valid_header: dict,
+    time_entries_dao,
 ):
-    from time_tracker_api.time_entries.time_entries_namespace import (
-        time_entries_dao,
-    )
-
     dao_get_all_mock = mocker.patch.object(
         time_entries_dao, 'get_all', return_value=[]
     )
@@ -159,14 +154,13 @@ def test_list_all_time_entries(
 
 
 def test_list_last_time_entries(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict
+    client: FlaskClient,
+    mocker: MockFixture,
+    valid_header: dict,
+    time_entries_dao,
 ):
-    from time_tracker_api.time_entries.time_entries_namespace import (
-        time_entries_dao,
-    )
-
     dao_get_all_mock = mocker.patch.object(
-        time_entries_dao, 'get_last_projects_worked', return_value=[]
+        time_entries_dao, 'get_lastest_entries_by_project', return_value=[]
     )
 
     response = client.get(
@@ -179,12 +173,11 @@ def test_list_last_time_entries(
 
 
 def test_get_time_entry_should_succeed_with_valid_id(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict
+    client: FlaskClient,
+    mocker: MockFixture,
+    valid_header: dict,
+    time_entries_dao,
 ):
-    from time_tracker_api.time_entries.time_entries_namespace import (
-        time_entries_dao,
-    )
-
     dao_get_mock = mocker.patch.object(
         time_entries_dao, 'get', return_value={}
     )
@@ -215,11 +208,8 @@ def test_get_time_entry_raise_http_exception(
     valid_id: str,
     http_exception: HTTPException,
     http_status: tuple,
+    time_entries_dao,
 ):
-    from time_tracker_api.time_entries.time_entries_namespace import (
-        time_entries_dao,
-    )
-
     time_entries_dao.repository.find = Mock(side_effect=http_exception)
 
     response = client.get(
@@ -233,12 +223,12 @@ def test_get_time_entry_raise_http_exception(
 
 
 def test_update_time_entry_calls_partial_update_with_incoming_payload(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict, valid_id: str
+    client: FlaskClient,
+    mocker: MockFixture,
+    valid_header: dict,
+    valid_id: str,
+    time_entries_dao,
 ):
-    from time_tracker_api.time_entries.time_entries_namespace import (
-        time_entries_dao,
-    )
-
     time_entries_dao.repository.partial_update = Mock(return_value={})
 
     time_entries_dao.repository.find = Mock(return_value={})
@@ -261,12 +251,11 @@ def test_update_time_entry_calls_partial_update_with_incoming_payload(
 
 
 def test_update_time_entry_should_reject_bad_request(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict
+    client: FlaskClient,
+    mocker: MockFixture,
+    valid_header: dict,
+    time_entries_dao,
 ):
-    from time_tracker_api.time_entries.time_entries_namespace import (
-        time_entries_dao,
-    )
-
     invalid_time_entry_data = valid_time_entry_input.copy()
     invalid_time_entry_data.update(
         {"project_id": fake.pyint(min_value=1, max_value=100)}
@@ -288,11 +277,12 @@ def test_update_time_entry_should_reject_bad_request(
 
 
 def test_update_time_entry_raise_not_found(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict, valid_id: str
+    client: FlaskClient,
+    mocker: MockFixture,
+    valid_header: dict,
+    valid_id: str,
+    time_entries_dao,
 ):
-    from time_tracker_api.time_entries.time_entries_namespace import (
-        time_entries_dao,
-    )
     from werkzeug.exceptions import NotFound
 
     time_entries_dao.repository.partial_update = Mock(side_effect=NotFound)
@@ -317,12 +307,12 @@ def test_update_time_entry_raise_not_found(
 
 
 def test_delete_time_entry_calls_delete(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict, valid_id: str
+    client: FlaskClient,
+    mocker: MockFixture,
+    valid_header: dict,
+    valid_id: str,
+    time_entries_dao,
 ):
-    from time_tracker_api.time_entries.time_entries_namespace import (
-        time_entries_dao,
-    )
-
     time_entries_dao.repository.delete = Mock(return_value=None)
     time_entries_dao.repository.find = Mock()
     time_entries_dao.check_whether_current_user_owns_item = Mock()
@@ -353,11 +343,8 @@ def test_delete_time_entry_raise_http_exception(
     valid_id: str,
     http_exception: HTTPException,
     http_status: tuple,
+    time_entries_dao,
 ):
-    from time_tracker_api.time_entries.time_entries_namespace import (
-        time_entries_dao,
-    )
-
     time_entries_dao.repository.delete = Mock(side_effect=http_exception)
     time_entries_dao.repository.find = Mock()
     time_entries_dao.check_whether_current_user_owns_item = Mock()
@@ -375,12 +362,12 @@ def test_delete_time_entry_raise_http_exception(
 
 
 def test_stop_time_entry_calls_partial_update(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict, valid_id: str
+    client: FlaskClient,
+    mocker: MockFixture,
+    valid_header: dict,
+    valid_id: str,
+    time_entries_dao,
 ):
-    from time_tracker_api.time_entries.time_entries_namespace import (
-        time_entries_dao,
-    )
-
     time_entries_dao.repository.partial_update = Mock(return_value={})
 
     time_entries_dao.repository.find = Mock(return_value={})
@@ -402,11 +389,12 @@ def test_stop_time_entry_calls_partial_update(
 
 
 def test_stop_time_entry_raise_unprocessable_entity(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict, valid_id: str
+    client: FlaskClient,
+    mocker: MockFixture,
+    valid_header: dict,
+    valid_id: str,
+    time_entries_dao,
 ):
-    from time_tracker_api.time_entries.time_entries_namespace import (
-        time_entries_dao,
-    )
     from werkzeug.exceptions import UnprocessableEntity
 
     time_entries_dao.repository.partial_update = Mock(
@@ -431,12 +419,12 @@ def test_stop_time_entry_raise_unprocessable_entity(
 
 
 def test_restart_time_entry_calls_partial_update(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict, valid_id: str
+    client: FlaskClient,
+    mocker: MockFixture,
+    valid_header: dict,
+    valid_id: str,
+    time_entries_dao,
 ):
-    from time_tracker_api.time_entries.time_entries_namespace import (
-        time_entries_dao,
-    )
-
     time_entries_dao.repository.partial_update = Mock(return_value={})
 
     time_entries_dao.repository.find = Mock(return_value={})
@@ -458,11 +446,12 @@ def test_restart_time_entry_calls_partial_update(
 
 
 def test_restart_time_entry_raise_unprocessable_entity(
-    client: FlaskClient, mocker: MockFixture, valid_header: dict, valid_id: str
+    client: FlaskClient,
+    mocker: MockFixture,
+    valid_header: dict,
+    valid_id: str,
+    time_entries_dao,
 ):
-    from time_tracker_api.time_entries.time_entries_namespace import (
-        time_entries_dao,
-    )
     from werkzeug.exceptions import UnprocessableEntity
 
     time_entries_dao.repository.partial_update = Mock(
@@ -493,11 +482,8 @@ def test_get_running_should_call_find_running(
     valid_header: dict,
     tenant_id: str,
     owner_id: str,
+    time_entries_dao,
 ):
-    from time_tracker_api.time_entries.time_entries_namespace import (
-        time_entries_dao,
-    )
-
     repository_update_mock = mocker.patch.object(
         time_entries_dao.repository,
         'find_running',
@@ -519,11 +505,8 @@ def test_get_running_should_return_not_found_if_StopIteration(
     valid_header: dict,
     tenant_id: str,
     owner_id: str,
+    time_entries_dao,
 ):
-    from time_tracker_api.time_entries.time_entries_namespace import (
-        time_entries_dao,
-    )
-
     repository_update_mock = mocker.patch.object(
         time_entries_dao.repository, 'find_running', side_effect=StopIteration
     )
@@ -545,11 +528,8 @@ def test_create_with_invalid_uuid_format_should_return_bad_request(
     mocker: MockFixture,
     valid_header: dict,
     invalid_uuid: str,
+    time_entries_dao,
 ):
-    from time_tracker_api.time_entries.time_entries_namespace import (
-        time_entries_dao,
-    )
-
     repository_container_create_item_mock = mocker.patch.object(
         time_entries_dao.repository.container,
         'create_item',
@@ -576,11 +556,8 @@ def test_create_with_valid_uuid_format_should_return_created(
     mocker: MockFixture,
     valid_header: dict,
     valid_uuid: str,
+    time_entries_dao,
 ):
-    from time_tracker_api.time_entries.time_entries_namespace import (
-        time_entries_dao,
-    )
-
     repository_container_create_item_mock = mocker.patch.object(
         time_entries_dao.repository.container,
         'create_item',
@@ -614,7 +591,10 @@ def test_create_with_valid_uuid_format_should_return_created(
     ],
 )
 def test_get_all_passes_date_range_built_from_params_to_find_all(
-    client: FlaskClient, valid_header: dict, url: str, time_entries_dao
+    client: FlaskClient,
+    valid_header: dict,
+    url: str,
+    time_entries_dao,
 ):
     time_entries_dao.repository.find_all = Mock(return_value=[])
 
@@ -724,11 +704,8 @@ def test_summary_is_called_with_date_range_from_worked_time_module(
     mocker: MockFixture,
     valid_header: dict,
     owner_id: str,
+    time_entries_dao,
 ):
-    from time_tracker_api.time_entries.time_entries_namespace import (
-        time_entries_dao,
-    )
-
     worked_time.date_range = Mock(return_value=worked_time.date_range())
     repository_find_all_mock = mocker.patch.object(
         time_entries_dao.repository, 'find_all_entries', return_value=[]
@@ -749,14 +726,16 @@ def test_summary_is_called_with_date_range_from_worked_time_module(
 
 
 def test_paginated_fails_with_no_params(
-    client: FlaskClient, valid_header: dict,
+    client: FlaskClient,
+    valid_header: dict,
 ):
     response = client.get('/time-entries/paginated', headers=valid_header)
     assert HTTPStatus.BAD_REQUEST == response.status_code
 
 
 def test_paginated_succeeds_with_valid_params(
-    client: FlaskClient, valid_header: dict,
+    client: FlaskClient,
+    valid_header: dict,
 ):
     response = client.get(
         '/time-entries/paginated?start_date=2020-09-10T00:00:00-05:00&end_date=2020-09-10T23:59:59-05:00&timezone_offset=300&start=0&length=5',
@@ -766,7 +745,8 @@ def test_paginated_succeeds_with_valid_params(
 
 
 def test_paginated_response_contains_expected_props(
-    client: FlaskClient, valid_header: dict,
+    client: FlaskClient,
+    valid_header: dict,
 ):
     response = client.get(
         '/time-entries/paginated?start_date=2020-09-10T00:00:00-05:00&end_date=2020-09-10T23:59:59-05:00&timezone_offset=300&start=0&length=5',

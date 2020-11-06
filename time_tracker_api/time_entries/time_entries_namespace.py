@@ -16,7 +16,7 @@ from time_tracker_api.api import (
     NullableString,
     remove_required_constraint,
 )
-from time_tracker_api.time_entries.time_entries_model import create_dao
+from time_tracker_api.time_entries.time_entries_dao import create_dao
 
 faker = Faker()
 
@@ -256,8 +256,13 @@ class TimeEntries(Resource):
         return time_entries_dao.create(ns.payload), HTTPStatus.CREATED
 
 
+# TODO: Once this endpoint is working as expected in prod, review and
+# remove unnecessary filter args. As we are using same attributes_filter
+# as the get_all endpoint and some of the args are unnecessary for this endpoint.
+
+
 @ns.route('/latest')
-class TimeEntries(Resource):
+class LatestTimeEntries(Resource):
     @ns.doc('list_latest_time_entries')
     @ns.expect(attributes_filter)
     @ns.marshal_list_with(time_entry)
@@ -265,7 +270,9 @@ class TimeEntries(Resource):
     def get(self):
         """List the latest time entries"""
         conditions = attributes_filter.parse_args()
-        return time_entries_dao.get_last_projects_worked(conditions=conditions)
+        return time_entries_dao.get_lastest_entries_by_project(
+            conditions=conditions
+        )
 
 
 @ns.route('/<string:id>')
