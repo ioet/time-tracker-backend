@@ -1,5 +1,4 @@
 import abc
-from azure.cosmos import PartitionKey
 from flask_restplus import abort
 from flask_restplus._http import HTTPStatus
 

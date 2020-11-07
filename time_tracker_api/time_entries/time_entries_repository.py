@@ -1,4 +1,3 @@
-import abc
 from typing import List, Callable
 from azure.cosmos import PartitionKey
 from flask_restplus import abort
@@ -16,35 +15,13 @@ from utils.extend_model import (
     add_project_info_to_time_entries,
     add_activity_name_to_time_entries,
     create_in_condition,
-    create_custom_query_from_str,
     add_user_email_to_time_entries,
 )
 from utils.time import (
     current_datetime_str,
 )
 from utils.azure_users import AzureConnection
-
 from time_tracker_api.projects import projects_model
-from time_tracker_api.database import CRUDDao
-from time_tracker_api.security import current_user_id
-
-
-class TimeEntriesDao(CRUDDao):
-    @staticmethod
-    def current_user_id():
-        return current_user_id()
-
-    @abc.abstractmethod
-    def find_running(self):
-        pass
-
-    @abc.abstractmethod
-    def stop(self, id: str):
-        pass
-
-    @abc.abstractmethod
-    def restart(self, id: str):
-        pass
 
 
 container_definition = {
