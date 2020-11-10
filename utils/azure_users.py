@@ -76,4 +76,12 @@ class AzureConnection:
 
         assert 200 == response.status_code
         assert 'value' in response.json()
+
+        _id = ""
+        _endpoint = f"{self.config.ENDPOINT}/users/{_id}/appRoleAssignments?api-version=1.6"
+        _response = requests.get(_endpoint, auth=BearerAuth(self.access_token))
+        from pprint import pprint
+
+        pprint(_response.json())
+
         return [to_azure_user(item) for item in response.json()['value']]
