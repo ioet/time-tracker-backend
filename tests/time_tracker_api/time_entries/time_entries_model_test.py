@@ -3,10 +3,9 @@ from faker import Faker
 
 from commons.data_access_layer.database import EventContext
 from time_tracker_api.time_entries.time_entries_model import (
-    TimeEntryCosmosDBRepository,
     TimeEntryCosmosDBModel,
 )
-
+from time_tracker_api.time_entries.time_entries_repository import TimeEntryCosmosDBRepository
 
 def create_time_entry(
     start_date: str,
