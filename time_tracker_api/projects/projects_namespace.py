@@ -4,7 +4,7 @@ from flask_restplus._http import HTTPStatus
 
 from time_tracker_api.api import common_fields, create_attributes_filter, UUID, api, remove_required_constraint, \
     NullableString
-from time_tracker_api.projects.projects_dao import create_dao
+from time_tracker_api.projects.projects_model import create_dao
 
 faker = Faker()
 
