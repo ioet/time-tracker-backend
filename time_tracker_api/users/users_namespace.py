@@ -2,13 +2,7 @@ from faker import Faker
 from flask_restplus import fields, Resource
 from flask_restplus._http import HTTPStatus
 
-from time_tracker_api.activities.activities_model import create_dao
-from time_tracker_api.api import (
-    common_fields,
-    api,
-    remove_required_constraint,
-    NullableString,
-)
+from time_tracker_api.api import common_fields, api
 
 faker = Faker()
 
@@ -31,23 +25,16 @@ user_response_fields = ns.model(
             description='Email of the user that belongs to the tenant',
             example=faker.email(),
         ),
+        'role': fields.String(
+            title="User's Role",
+            max_length=50,
+            description='Role assigned to the user by the tenant',
+            example=faker.word(['admin']),
+        ),
     },
 )
 
 user_response_fields.update(common_fields)
-
-"""
-activity_response_fields = {}
-activity_response_fields.update(common_fields)
-
-activity = ns.inherit(
-    'Activity',
-    #activity_input,
-    activity_response_fields
-)
-
-activity_dao = create_dao()
-"""
 
 
 @ns.route('')
@@ -59,10 +46,7 @@ class Users(Resource):
         from utils.azure_users import AzureConnection
 
         azure_connection = AzureConnection()
-        for u in azure_connection.users():
-            print(u.name, '|', u.email)
         return azure_connection.users()
-        # return activity_dao.get_all()
 
 
 @ns.route('/<string:id>')
@@ -75,4 +59,3 @@ class User(Resource):
     def get(self, id):
         """Get an user"""
         return {}
-        # return activity_dao.get(id)
