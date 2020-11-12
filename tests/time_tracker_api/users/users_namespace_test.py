@@ -1,11 +1,7 @@
-from unittest.mock import ANY, Mock
-
-from faker import Faker
+from unittest.mock import Mock
 from flask import json
 from flask.testing import FlaskClient
 from flask_restplus._http import HTTPStatus
-from pytest_mock import MockFixture
-
 from utils.azure_users import AzureConnection
 
 
