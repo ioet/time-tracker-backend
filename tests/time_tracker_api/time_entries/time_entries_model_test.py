@@ -3,8 +3,10 @@ from faker import Faker
 
 from commons.data_access_layer.database import EventContext
 from time_tracker_api.time_entries.time_entries_model import (
-    TimeEntryCosmosDBRepository,
     TimeEntryCosmosDBModel,
+)
+from time_tracker_api.time_entries.time_entries_repository import (
+    TimeEntryCosmosDBRepository,
 )
 
 
@@ -174,16 +176,20 @@ def test_find_interception_should_ignore_id_of_existing_item(
     )
 
     try:
-        colliding_result = time_entry_repository.find_interception_with_date_range(
-            start_date, end_date, owner_id, tenant_id
+        colliding_result = (
+            time_entry_repository.find_interception_with_date_range(
+                start_date, end_date, owner_id, tenant_id
+            )
         )
 
-        non_colliding_result = time_entry_repository.find_interception_with_date_range(
-            start_date,
-            end_date,
-            owner_id,
-            tenant_id,
-            ignore_id=existing_item.id,
+        non_colliding_result = (
+            time_entry_repository.find_interception_with_date_range(
+                start_date,
+                end_date,
+                owner_id,
+                tenant_id,
+                ignore_id=existing_item.id,
+            )
         )
 
         assert colliding_result is not None
