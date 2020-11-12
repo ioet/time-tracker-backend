@@ -37,10 +37,11 @@ class BearerAuth(requests.auth.AuthBase):
 
 
 class AzureUser:
-    def __init__(self, id, name, email):
+    def __init__(self, id, name, email, role):
         self.id = id
         self.name = name
         self.email = email
+        self.role = role
 
 
 class AzureConnection:
@@ -66,12 +67,24 @@ class AzureConnection:
     def users(self) -> List[AzureUser]:
         def to_azure_user(item) -> AzureUser:
             there_is_email = len(item['otherMails']) > 0
+            there_is_role = (
+                'extension_1d76efa96f604499acc0c0ee116a1453_role' in item
+            )
+
             id = item['objectId']
             name = item['displayName']
             email = item['otherMails'][0] if there_is_email else ''
-            return AzureUser(id, name, email)
+            role = (
+                item['extension_1d76efa96f604499acc0c0ee116a1453_role']
+                if there_is_role
+                else None
+            )
+            return AzureUser(id, name, email, role)
 
-        endpoint = f"{self.config.ENDPOINT}/users?api-version=1.6&$select=displayName,otherMails,objectId"
+        endpoint = "{endpoint}/users?api-version=1.6&$select=displayName,otherMails,objectId,{role_field}".format(
+            endpoint=self.config.ENDPOINT,
+            role_field='extension_1d76efa96f604499acc0c0ee116a1453_role',
+        )
         response = requests.get(endpoint, auth=BearerAuth(self.access_token))
 
         assert 200 == response.status_code

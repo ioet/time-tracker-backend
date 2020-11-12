@@ -118,6 +118,10 @@ def init_app(app: Flask):
 
     api.add_namespace(technologies_namespace.ns)
 
+    from time_tracker_api.users import users_namespace
+
+    api.add_namespace(users_namespace.ns)
+
 
 """
 Error handlers
