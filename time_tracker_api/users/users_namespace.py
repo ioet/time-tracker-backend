@@ -36,6 +36,19 @@ user_response_fields = ns.model(
 
 user_response_fields.update(common_fields)
 
+user_input_fields = ns.model(
+    'UserInput',
+    {
+        'role': fields.String(
+            title="User's Role",
+            required=True,
+            max_length=50,
+            description='Role assigned to the user by the tenant',
+            example=faker.word(['admin']),
+        ),
+    },
+)
+
 
 @ns.route('')
 class Users(Resource):
@@ -59,3 +72,16 @@ class User(Resource):
     def get(self, id):
         """Get an user"""
         return {}
+
+    @ns.doc('update_user')
+    @ns.expect(user_input_fields)
+    @ns.response(
+        HTTPStatus.BAD_REQUEST, 'Invalid format or structure of the user'
+    )
+    @ns.marshal_with(user_response_fields)
+    def put(self, id):
+        """Update an user"""
+        from utils.azure_users import AzureConnection
+
+        azure_connection = AzureConnection()
+        return azure_connection.update_user_role(id, ns.payload['role'])
