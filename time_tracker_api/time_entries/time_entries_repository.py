@@ -1,8 +1,6 @@
 from commons.data_access_layer.cosmos_db import (
-    # CosmosDBDao,
     CosmosDBRepository,
     CustomError,
-    # CosmosDBModel,
 )
 
 from time_tracker_api.time_entries.time_entries_model import (
@@ -11,11 +9,6 @@ from time_tracker_api.time_entries.time_entries_model import (
 )
 
 from utils.time import (
-    # datetime_str,
-    # str_to_datetime,
-    # get_current_year,
-    # get_current_month,
-    # get_date_range_of_month,
     current_datetime_str,
 )
 
@@ -23,7 +16,6 @@ from utils.extend_model import (
     add_project_info_to_time_entries,
     add_activity_name_to_time_entries,
     create_in_condition,
-    # create_custom_query_from_str,
     add_user_email_to_time_entries,
 )
 

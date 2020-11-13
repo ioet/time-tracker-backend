@@ -1,14 +1,11 @@
 import abc
 from commons.data_access_layer.cosmos_db import (
     CosmosDBDao,
-    # CosmosDBRepository,
     CustomError,
-    # CosmosDBModel,
 )
 from utils.extend_model import (
     add_project_info_to_time_entries,
     add_activity_name_to_time_entries,
-    # create_in_condition,
     create_custom_query_from_str,
     add_user_email_to_time_entries,
 )
