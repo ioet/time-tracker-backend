@@ -23,4 +23,4 @@ List the parameters that the task must meet to be approved.
 - ...
 
 **Note**
-Information adicional,  por example links of documentation to work in xz task.
+Information adicional,  for example links of documentation to work in xz task.

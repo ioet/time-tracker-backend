@@ -14,7 +14,7 @@ A clear and concise description of this new task or feature
 A clear and concise description of what you want to happen.
 
 **Optional diagrams**
-Optional designs of diagrams. 
+Optional designs of diagrams.
 
 **Criteria of acceptance**
 List the parameters that the task must meet to be approved.
@@ -26,4 +26,4 @@ List the parameters that the task must meet to be approved.
 Defined scope of this task, for example business logic, the recommendation is to create a meeting with more than one person to define this scope.
 
 **Note**
-Information adicional,  por example links of documentation to work in xz task.
+Information adicional,  for example links of documentation to work in xz task.
