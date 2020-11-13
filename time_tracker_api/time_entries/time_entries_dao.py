@@ -28,6 +28,7 @@ from time_tracker_api.time_entries.time_entries_repository import (
     TimeEntryCosmosDBRepository,
 )
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
+from time_tracker_api.security import current_user_id
 
 
 class TimeEntriesDao(CRUDDao):

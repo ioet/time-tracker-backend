@@ -256,28 +256,20 @@ class TimeEntries(Resource):
         return time_entries_dao.create(ns.payload), HTTPStatus.CREATED
 
 
-# TODO: Once this endpoint is working as expected in prod, review and
-# remove unnecessary filter args. As we are using same attributes_filter
-# as the get_all endpoint and some of the args are unnecessary for this endpoint.
-
-
 @ns.route('/latest')
 class LatestTimeEntries(Resource):
     @ns.doc('list_latest_time_entries')
-    @ns.expect(attributes_filter)
     @ns.marshal_list_with(time_entry)
     @ns.response(HTTPStatus.NOT_FOUND, 'Time entry not found')
     def get(self):
         """List the latest time entries"""
-        conditions = attributes_filter.parse_args()
 
-        return time_entries_dao.get_lastest_entries_by_project(
-            conditions=conditions
-        )
+        return time_entries_dao.get_lastest_entries_by_project(conditions={})
 
 
 @ns.route('/<string:id>')
 @ns.response(HTTPStatus.NOT_FOUND, 'This time entry does not exist')
+@ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'The id has an invalid format')
 @ns.param('id', 'The unique identifier of the time entry')
 class TimeEntry(Resource):
     @ns.doc('get_time_entry')
