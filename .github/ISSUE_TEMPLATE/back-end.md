@@ -2,7 +2,7 @@
 name: Back end
 about: new tasks of Back-end
 title: BACK-END
-labels: ''
+labels: mvp, nice-to-have, tech-debt, enhancement
 assignees: ''
 
 ---

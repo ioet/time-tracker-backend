@@ -2,7 +2,7 @@
 name: UI task
 about: new tasks of UI
 title: UI TASK
-labels: ''
+labels: mvp, nice-to-have, tech-debt, enhancement
 assignees: ''
 
 ---
