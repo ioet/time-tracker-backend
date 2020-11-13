@@ -2,7 +2,7 @@ from faker import Faker
 from flask_restplus import fields, Resource
 from flask_restplus._http import HTTPStatus
 
-from time_tracker_api.api import common_fields, api
+from time_tracker_api.api import common_fields, api, NullableString
 
 faker = Faker()
 
@@ -25,11 +25,11 @@ user_response_fields = ns.model(
             description='Email of the user that belongs to the tenant',
             example=faker.email(),
         ),
-        'role': fields.String(
+        'role': NullableString(
             title="User's Role",
             max_length=50,
             description='Role assigned to the user by the tenant',
-            example=faker.word(['admin']),
+            example=faker.word(['time-tracker-admin']),
         ),
     },
 )
@@ -39,12 +39,12 @@ user_response_fields.update(common_fields)
 user_input_fields = ns.model(
     'UserInput',
     {
-        'role': fields.String(
+        'role': NullableString(
             title="User's Role",
             required=True,
             max_length=50,
             description='Role assigned to the user by the tenant',
-            example=faker.word(['admin']),
+            example=faker.word(['time-tracker-admin']),
         ),
     },
 )

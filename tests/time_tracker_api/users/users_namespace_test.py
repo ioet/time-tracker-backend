@@ -3,9 +3,6 @@ from flask import json
 from flask.testing import FlaskClient
 from flask_restplus._http import HTTPStatus
 from utils.azure_users import AzureConnection
-from faker import Faker
-
-fake = Faker()
 
 
 def test_users_response_contains_expected_props(
@@ -31,7 +28,7 @@ def test_users_response_contains_expected_props(
 def test_update_user_role_response_contains_expected_props(
     client: FlaskClient,
     valid_header: dict,
-    user_id: dict,
+    user_id: str,
 ):
     valid_user_role_data = {'role': 'admin'}
     AzureConnection.update_user_role = Mock(
@@ -53,7 +50,7 @@ def test_update_user_role_is_being_called_with_valid_arguments(
     update_user_role_mock,
     client: FlaskClient,
     valid_header: dict,
-    user_id: dict,
+    user_id: str,
 ):
 
     valid_user_role_data = {'role': 'admin'}
@@ -62,7 +59,6 @@ def test_update_user_role_is_being_called_with_valid_arguments(
     )
 
     assert HTTPStatus.OK == response.status_code
-    assert valid_user_role_data['role'] == 'admin'
     update_user_role_mock.assert_called_once_with(
         user_id, valid_user_role_data['role']
     )
