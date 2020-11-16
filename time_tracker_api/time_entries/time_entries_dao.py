@@ -31,10 +31,6 @@ from time_tracker_api.security import current_user_id
 
 
 class TimeEntriesDao(CRUDDao):
-    @staticmethod
-    def current_user_id():
-        return current_user_id()
-
     @abc.abstractmethod
     def find_running(self):
         pass
@@ -53,10 +49,7 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         CosmosDBDao.__init__(self, repository)
 
     def check_whether_current_user_owns_item(self, data):
-        if (
-            data.owner_id is not None
-            and data.owner_id != self.current_user_id()
-        ):
+        if data.owner_id is not None and data.owner_id != current_user_id():
             raise CustomError(
                 HTTPStatus.FORBIDDEN,
                 "The current user is not the owner of this time entry",
