@@ -62,25 +62,19 @@ class Users(Resource):
         return azure_connection.users()
 
 
-@ns.route('/<string:id>')
+@ns.route('/<string:id>/roles')
 @ns.response(HTTPStatus.NOT_FOUND, 'User not found')
 @ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'The id has an invalid format')
 @ns.param('id', 'The user identifier')
-class User(Resource):
-    @ns.doc('get_user')
-    @ns.marshal_with(user_response_fields)
-    def get(self, id):
-        """Get an user"""
-        return {}
-
-    @ns.doc('update_user')
+class UserRole(Resource):
+    @ns.doc('update_user_role')
     @ns.expect(user_input_fields)
     @ns.response(
         HTTPStatus.BAD_REQUEST, 'Invalid format or structure of the user'
     )
     @ns.marshal_with(user_response_fields)
     def put(self, id):
-        """Update an user"""
+        """Update user's role"""
         from utils.azure_users import AzureConnection
 
         azure_connection = AzureConnection()

@@ -6,18 +6,14 @@ from utils.azure_users import AzureConnection
 
 
 def test_users_response_contains_expected_props(
-    client: FlaskClient,
-    valid_header: dict,
+    client: FlaskClient, valid_header: dict,
 ):
 
     AzureConnection.users = Mock(
         return_value=[{'name': 'dummy', 'email': 'dummy', 'role': 'dummy'}]
     )
 
-    response = client.get(
-        '/users',
-        headers=valid_header,
-    )
+    response = client.get('/users', headers=valid_header,)
 
     assert HTTPStatus.OK == response.status_code
     assert 'name' in json.loads(response.data)[0]
@@ -26,9 +22,7 @@ def test_users_response_contains_expected_props(
 
 
 def test_update_user_role_response_contains_expected_props(
-    client: FlaskClient,
-    valid_header: dict,
-    user_id: str,
+    client: FlaskClient, valid_header: dict, user_id: str,
 ):
     valid_user_role_data = {'role': 'admin'}
     AzureConnection.update_user_role = Mock(
@@ -36,7 +30,9 @@ def test_update_user_role_response_contains_expected_props(
     )
 
     response = client.put(
-        f'/users/{user_id}', headers=valid_header, json=valid_user_role_data
+        f'/users/{user_id}/roles',
+        headers=valid_header,
+        json=valid_user_role_data,
     )
 
     assert HTTPStatus.OK == response.status_code
@@ -55,7 +51,9 @@ def test_update_user_role_is_being_called_with_valid_arguments(
 
     valid_user_role_data = {'role': 'admin'}
     response = client.put(
-        f'/users/{user_id}', headers=valid_header, json=valid_user_role_data
+        f'/users/{user_id}/roles',
+        headers=valid_header,
+        json=valid_user_role_data,
     )
 
     assert HTTPStatus.OK == response.status_code
