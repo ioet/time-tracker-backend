@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.24.5 (2020-11-16)
+### Fix
+* Remove static method from TimeEntriesDao #227 ([`b0a3bd5`](https://github.com/ioet/time-tracker-backend/commit/b0a3bd530c3449713ee2eb1793e5fbb238ef0c68))
+
 ## v0.24.4 (2020-11-14)
 ### Fix
 * Delete ui-task template ([`0be1370`](https://github.com/ioet/time-tracker-backend/commit/0be1370d81f4dcec739ed2bf8f3eff25640af36b))
