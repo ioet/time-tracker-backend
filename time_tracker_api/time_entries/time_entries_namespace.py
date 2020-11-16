@@ -260,7 +260,7 @@ class TimeEntries(Resource):
 class LatestTimeEntries(Resource):
     @ns.doc('list_latest_time_entries')
     @ns.marshal_list_with(time_entry)
-    @ns.response(HTTPStatus.NOT_FOUND, 'Time entry not found')
+    @ns.response(HTTPStatus.NOT_FOUND, 'No time entries found')
     def get(self):
         """List the latest time entries"""
 

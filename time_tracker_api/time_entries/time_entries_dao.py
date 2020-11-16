@@ -7,7 +7,6 @@ from utils.extend_model import (
     add_project_info_to_time_entries,
     add_activity_name_to_time_entries,
     create_custom_query_from_str,
-    add_user_email_to_time_entries,
 )
 from utils.time import (
     datetime_str,
