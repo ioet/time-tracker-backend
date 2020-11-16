@@ -38,7 +38,6 @@ from utils.azure_users import AzureConnection
 from time_tracker_api.projects.projects_model import ProjectCosmosDBModel
 from time_tracker_api.projects import projects_model
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
-from time_tracker_api.security import current_user_id
 
 container_definition = {
     'id': 'time_entry',
