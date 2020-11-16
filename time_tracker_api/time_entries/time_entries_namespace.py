@@ -16,7 +16,7 @@ from time_tracker_api.api import (
     NullableString,
     remove_required_constraint,
 )
-from time_tracker_api.time_entries.time_entries_model import create_dao
+from time_tracker_api.time_entries.time_entries_dao import create_dao
 
 faker = Faker()
 
@@ -254,6 +254,17 @@ class TimeEntries(Resource):
     def post(self):
         """Create a time entry"""
         return time_entries_dao.create(ns.payload), HTTPStatus.CREATED
+
+
+@ns.route('/latest')
+class LatestTimeEntries(Resource):
+    @ns.doc('list_latest_time_entries')
+    @ns.marshal_list_with(time_entry)
+    @ns.response(HTTPStatus.NOT_FOUND, 'No time entries found')
+    def get(self):
+        """List the latest time entries"""
+
+        return time_entries_dao.get_lastest_entries_by_project(conditions={})
 
 
 @ns.route('/<string:id>')

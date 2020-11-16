@@ -11,7 +11,7 @@ from commons.data_access_layer.database import EventContext
 from time_tracker_api import create_app
 from time_tracker_api.database import init_sql
 from time_tracker_api.security import get_or_generate_dev_secret_key
-from time_tracker_api.time_entries.time_entries_model import (
+from time_tracker_api.time_entries.time_entries_repository import (
     TimeEntryCosmosDBRepository,
 )
 
@@ -84,7 +84,11 @@ def cosmos_db_model():
     return {
         'id': 'test',
         'partition_key': PartitionKey(path='/tenant_id'),
-        'unique_key_policy': {'uniqueKeys': [{'paths': ['/email']},]},
+        'unique_key_policy': {
+            'uniqueKeys': [
+                {'paths': ['/email']},
+            ]
+        },
     }
 
 
