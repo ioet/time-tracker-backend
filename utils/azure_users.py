@@ -55,6 +55,8 @@ class AzureConnection:
         self.config = config
         self.access_token = self.get_token()
 
+        self.role_field = 'extension_1d76efa96f604499acc0c0ee116a1453_role'
+
     def get_token(self):
         response = self.client.acquire_token_for_client(
             scopes=self.config.SCOPE
@@ -67,8 +69,7 @@ class AzureConnection:
 
     def users(self) -> List[AzureUser]:
         endpoint = "{endpoint}/users?api-version=1.6&$select=displayName,otherMails,objectId,{role_field}".format(
-            endpoint=self.config.ENDPOINT,
-            role_field='extension_1d76efa96f604499acc0c0ee116a1453_role',
+            endpoint=self.config.ENDPOINT, role_field=self.role_field,
         )
         response = requests.get(endpoint, auth=BearerAuth(self.access_token))
 
@@ -84,7 +85,7 @@ class AzureConnection:
         endpoint = "{endpoint}/users/{user_id}?api-version=1.6".format(
             endpoint=self.config.ENDPOINT, user_id=id
         )
-        data = {'extension_1d76efa96f604499acc0c0ee116a1453_role': role}
+        data = {self.role_field: role}
         response = requests.patch(
             endpoint,
             auth=BearerAuth(self.access_token),
@@ -100,16 +101,10 @@ class AzureConnection:
 
     def to_azure_user(self, item) -> AzureUser:
         there_is_email = len(item['otherMails']) > 0
-        there_is_role = (
-            'extension_1d76efa96f604499acc0c0ee116a1453_role' in item
-        )
+        there_is_role = self.role_field in item
 
         id = item['objectId']
         name = item['displayName']
         email = item['otherMails'][0] if there_is_email else ''
-        role = (
-            item['extension_1d76efa96f604499acc0c0ee116a1453_role']
-            if there_is_role
-            else None
-        )
+        role = item[self.role_field] if there_is_role else None
         return AzureUser(id, name, email, role)
