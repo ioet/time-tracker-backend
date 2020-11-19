@@ -29,7 +29,7 @@ def test_update_user_role_response_contains_expected_props(
         return_value={'name': 'dummy', 'email': 'dummy', 'role': 'dummy'}
     )
 
-    response = client.put(
+    response = client.post(
         f'/users/{user_id}/roles',
         headers=valid_header,
         json=valid_user_role_data,
@@ -42,7 +42,7 @@ def test_update_user_role_response_contains_expected_props(
 
 
 @patch('utils.azure_users.AzureConnection.update_user_role', new_callable=Mock)
-def test_update_user_role_is_being_called_with_valid_arguments(
+def test_on_post_update_user_role_is_being_called_with_valid_arguments(
     update_user_role_mock,
     client: FlaskClient,
     valid_header: dict,
@@ -50,7 +50,7 @@ def test_update_user_role_is_being_called_with_valid_arguments(
 ):
 
     valid_user_role_data = {'role': 'admin'}
-    response = client.put(
+    response = client.post(
         f'/users/{user_id}/roles',
         headers=valid_header,
         json=valid_user_role_data,
@@ -60,3 +60,19 @@ def test_update_user_role_is_being_called_with_valid_arguments(
     update_user_role_mock.assert_called_once_with(
         user_id, valid_user_role_data['role']
     )
+
+
+@patch('utils.azure_users.AzureConnection.update_user_role', new_callable=Mock)
+def test_on_delete_update_user_role_is_being_called_with_valid_arguments(
+    update_user_role_mock,
+    client: FlaskClient,
+    valid_header: dict,
+    user_id: str,
+):
+
+    response = client.delete(
+        f'/users/{user_id}/roles/time-tracker-admin', headers=valid_header,
+    )
+
+    assert HTTPStatus.OK == response.status_code
+    update_user_role_mock.assert_called_once_with(user_id, role=None)
