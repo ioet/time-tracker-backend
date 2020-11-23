@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.25.2 (2020-11-23)
+### Fix
+* #000 fix sentence ([`b79e0c9`](https://github.com/ioet/time-tracker-backend/commit/b79e0c9c8f8467841963c4d90cfd8354f05c63d3))
+* #000 how run a single test ([`11c3fde`](https://github.com/ioet/time-tracker-backend/commit/11c3fdebf1ce06057961fa3585a7a321ff009f80))
+* #000 commit rebuild ([`d1dd7f4`](https://github.com/ioet/time-tracker-backend/commit/d1dd7f452b8e9af540e264e44661ce8a2e396ba2))
+
 ## v0.25.1 (2020-11-23)
 
 
