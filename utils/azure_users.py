@@ -1,7 +1,6 @@
 import msal
 import os
 import requests
-import json
 from typing import List
 
 
@@ -55,8 +54,6 @@ class AzureConnection:
         self.config = config
         self.access_token = self.get_token()
 
-        self.role_field = 'extension_1d76efa96f604499acc0c0ee116a1453_role'
-
     def get_token(self):
         response = self.client.acquire_token_for_client(
             scopes=self.config.SCOPE
@@ -68,43 +65,28 @@ class AzureConnection:
             raise ValueError(error_info)
 
     def users(self) -> List[AzureUser]:
+        def to_azure_user(item) -> AzureUser:
+            there_is_email = len(item['otherMails']) > 0
+            there_is_role = (
+                'extension_1d76efa96f604499acc0c0ee116a1453_role' in item
+            )
+
+            id = item['objectId']
+            name = item['displayName']
+            email = item['otherMails'][0] if there_is_email else ''
+            role = (
+                item['extension_1d76efa96f604499acc0c0ee116a1453_role']
+                if there_is_role
+                else None
+            )
+            return AzureUser(id, name, email, role)
+
         endpoint = "{endpoint}/users?api-version=1.6&$select=displayName,otherMails,objectId,{role_field}".format(
-            endpoint=self.config.ENDPOINT, role_field=self.role_field,
+            endpoint=self.config.ENDPOINT,
+            role_field='extension_1d76efa96f604499acc0c0ee116a1453_role',
         )
         response = requests.get(endpoint, auth=BearerAuth(self.access_token))
 
         assert 200 == response.status_code
         assert 'value' in response.json()
-        return [self.to_azure_user(item) for item in response.json()['value']]
-
-    def update_user_role(self, id, role):
-        headers = {
-            'Content-type': 'application/json',
-            'Accept': 'application/json',
-        }
-        endpoint = "{endpoint}/users/{user_id}?api-version=1.6".format(
-            endpoint=self.config.ENDPOINT, user_id=id
-        )
-        data = {self.role_field: role}
-        response = requests.patch(
-            endpoint,
-            auth=BearerAuth(self.access_token),
-            data=json.dumps(data),
-            headers=headers,
-        )
-        assert 204 == response.status_code
-
-        response = requests.get(endpoint, auth=BearerAuth(self.access_token))
-        assert 200 == response.status_code
-
-        return self.to_azure_user(response.json())
-
-    def to_azure_user(self, item) -> AzureUser:
-        there_is_email = len(item['otherMails']) > 0
-        there_is_role = self.role_field in item
-
-        id = item['objectId']
-        name = item['displayName']
-        email = item['otherMails'][0] if there_is_email else ''
-        role = item[self.role_field] if there_is_role else None
-        return AzureUser(id, name, email, role)
+        return [to_azure_user(item) for item in response.json()['value']]
