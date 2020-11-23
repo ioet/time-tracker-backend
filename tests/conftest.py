@@ -140,11 +140,6 @@ def owner_id() -> str:
     return fake.uuid4()
 
 
-@pytest.fixture(scope="session")
-def user_id() -> str:
-    return fake.uuid4()
-
-
 @pytest.fixture(scope="function")
 def sample_item(
     cosmos_db_repository: CosmosDBRepository,
