@@ -2,6 +2,9 @@
 
 <!--next-version-placeholder-->
 
+## v0.25.1 (2020-11-23)
+
+
 ## v0.25.0 (2020-11-23)
 ### Feature
 * Change PUT for POST and DELETE #229 ([`67ce20b`](https://github.com/ioet/time-tracker-backend/commit/67ce20bff82e235fc3f9e18278d99231267ab5b8))
