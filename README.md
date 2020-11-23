@@ -179,6 +179,10 @@ are working well together. These are the default tests we should run:
 python3 -m pytest -v --ignore=tests/commons/data_access_layer/azure/sql_repository_test.py
 ```
 
+```run a one test
+pytest -v -k name-test
+```
+
 As you may have noticed we are ignoring the tests related with the repository.
 
 
