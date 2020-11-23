@@ -179,7 +179,7 @@ are working well together. These are the default tests we should run:
 python3 -m pytest -v --ignore=tests/commons/data_access_layer/azure/sql_repository_test.py
 ```
 
-```run a one test
+```how run a sigle test
 pytest -v -k name-test
 ```
 
