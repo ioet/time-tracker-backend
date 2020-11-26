@@ -2,6 +2,9 @@
 
 <!--next-version-placeholder-->
 
+## v0.25.3 (2020-11-26)
+
+
 ## v0.25.2 (2020-11-23)
 ### Fix
 * #000 fix sentence ([`b79e0c9`](https://github.com/ioet/time-tracker-backend/commit/b79e0c9c8f8467841963c4d90cfd8354f05c63d3))
