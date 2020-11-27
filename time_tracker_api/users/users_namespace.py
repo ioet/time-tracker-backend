@@ -7,8 +7,6 @@ from time_tracker_api.api import common_fields, api, NullableString
 from utils.azure_users import AzureConnection
 
 
-azure_connection = AzureConnection()
-
 ns = api.namespace('users', description='Namespace of the API for users')
 
 # User Model
@@ -59,7 +57,7 @@ class Users(Resource):
     @ns.marshal_list_with(user_response_fields)
     def get(self):
         """List all users"""
-        return azure_connection.users()
+        return AzureConnection().users()
 
 
 @ns.route('/<string:id>/roles')
@@ -75,7 +73,7 @@ class UserRoles(Resource):
     @ns.marshal_with(user_response_fields)
     def post(self, id):
         """Create user's role"""
-        return azure_connection.update_user_role(id, ns.payload['role'])
+        return AzureConnection().update_user_role(id, ns.payload['role'])
 
 
 @ns.route('/<string:user_id>/roles/<string:role_id>')
@@ -88,4 +86,4 @@ class UserRole(Resource):
     @ns.marshal_with(user_response_fields)
     def delete(self, user_id, role_id):
         """Delete user's role"""
-        return azure_connection.update_user_role(user_id, role=None)
+        return AzureConnection().update_user_role(user_id, role=None)
