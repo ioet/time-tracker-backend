@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.25.4 (2020-11-27)
+### Fix
+* Instance on demand the azure connection proxy ([`ed781e5`](https://github.com/ioet/time-tracker-backend/commit/ed781e51106322174516a554b0b25935a1f8e944))
+
 ## v0.25.3 (2020-11-26)
 
 
