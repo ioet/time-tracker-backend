@@ -207,10 +207,8 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         result = self.container.query_items(
             query="""
             SELECT * FROM c
-            WHERE (((c.start_date BETWEEN @start_date AND @end_date)
+            WHERE ((c.start_date BETWEEN @start_date AND @end_date)
                   OR (c.end_date BETWEEN @start_date AND @end_date))
-                  OR ((@start_date BETWEEN c.start_date AND c.end_date)
-                  OR (@end_date BETWEEN c.start_date AND c.end_date)))
                   AND c.start_date!= @end_date
                   AND c.end_date!= @start_date
             {conditions_clause}
