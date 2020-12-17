@@ -181,7 +181,8 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
     def on_update(self, updated_item_data: dict, event_context: EventContext):
         CosmosDBRepository.on_update(self, updated_item_data, event_context)
-        self.validate_data(updated_item_data, event_context)
+        if not 'deleted' in updated_item_data:
+            self.validate_data(updated_item_data, event_context)
         self.replace_empty_value_per_none(updated_item_data)
 
     def find_interception_with_date_range(
