@@ -1,3 +1,4 @@
+from unittest.mock import Mock, patch
 import pytest
 from faker import Faker
 
@@ -231,3 +232,37 @@ def test_find_running_should_not_find_any_item(
         time_entry_repository.find_running(tenant_id, owner_id)
     except Exception as e:
         assert type(e) is StopIteration
+
+
+@patch(
+    'commons.data_access_layer.cosmos_db.CosmosDBRepository.on_update',
+    new_callable=Mock,
+)
+def test_updated_item_with_deleted_key_should_not_call_validate_data(
+    on_update_mock,
+    event_context: EventContext,
+    time_entry_repository: TimeEntryCosmosDBRepository,
+):
+
+    time_entry_repository.validate_data = Mock()
+    time_entry_repository.replace_empty_value_per_none = Mock()
+    time_entry_repository.on_update({'deleted': '01234'}, event_context)
+    on_update_mock.assert_called_once()
+    time_entry_repository.validate_data.assert_not_called()
+
+
+@patch(
+    'commons.data_access_layer.cosmos_db.CosmosDBRepository.on_update',
+    new_callable=Mock,
+)
+def test_updated_item_without_deleted_key_should_call_validate_data(
+    on_update_mock,
+    event_context: EventContext,
+    time_entry_repository: TimeEntryCosmosDBRepository,
+):
+
+    time_entry_repository.validate_data = Mock()
+    time_entry_repository.replace_empty_value_per_none = Mock()
+    time_entry_repository.on_update({}, event_context)
+    on_update_mock.assert_called_once()
+    time_entry_repository.validate_data.assert_called_once()
