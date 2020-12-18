@@ -181,7 +181,8 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
     def on_update(self, updated_item_data: dict, event_context: EventContext):
         CosmosDBRepository.on_update(self, updated_item_data, event_context)
-        if not 'deleted' in updated_item_data:
+        is_update_to_delete = 'deleted' in updated_item_data
+        if not is_update_to_delete:
             self.validate_data(updated_item_data, event_context)
         self.replace_empty_value_per_none(updated_item_data)
 
