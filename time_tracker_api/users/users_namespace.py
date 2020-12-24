@@ -87,3 +87,30 @@ class UserRole(Resource):
     def delete(self, user_id, role_id):
         """Delete user's role"""
         return AzureConnection().update_user_role(user_id, role=None)
+
+
+@ns.route('/<string:user_id>/roles/<string:role_id>/grant')
+@ns.param('user_id', 'The user identifier')
+@ns.param('role_id', 'The role name identifier')
+class GrantRole(Resource):
+    @ns.doc('grant_role')
+    def post(self, user_id, role_id):
+        """
+        Grant role to user
+        Available options for `role_id`:
+        ```
+            - test
+            - admin
+        ```
+        """
+        return [], HTTPStatus.OK
+
+
+@ns.route('/<string:user_id>/roles/<string:role_id>/revoke')
+@ns.param('user_id', 'The user identifier')
+@ns.param('role_id', 'The role name identifier')
+class RevokeRole(Resource):
+    @ns.doc('revoke_role')
+    def post(self, user_id, role_id):
+        """Revoke role to user"""
+        return [], HTTPStatus.OK
