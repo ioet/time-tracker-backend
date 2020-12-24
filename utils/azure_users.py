@@ -45,6 +45,12 @@ class AzureUser:
         self.role = role
 
 
+HTTP_PATCH_HEADERS = {
+    'Content-type': 'application/json',
+    'Accept': 'application/json',
+}
+
+
 class AzureConnection:
     def __init__(self, config=MSConfig):
         self.client = msal.ConfidentialClientApplication(
@@ -78,10 +84,6 @@ class AzureConnection:
         return [self.to_azure_user(item) for item in response.json()['value']]
 
     def update_user_role(self, id, role):
-        headers = {
-            'Content-type': 'application/json',
-            'Accept': 'application/json',
-        }
         endpoint = "{endpoint}/users/{user_id}?api-version=1.6".format(
             endpoint=self.config.ENDPOINT, user_id=id
         )
@@ -90,7 +92,7 @@ class AzureConnection:
             endpoint,
             auth=BearerAuth(self.access_token),
             data=json.dumps(data),
-            headers=headers,
+            headers=HTTP_PATCH_HEADERS,
         )
         assert 204 == response.status_code
 
