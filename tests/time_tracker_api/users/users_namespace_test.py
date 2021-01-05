@@ -3,6 +3,7 @@ from flask import json
 from flask.testing import FlaskClient
 from flask_restplus._http import HTTPStatus
 from utils.azure_users import AzureConnection
+from pytest import mark
 
 
 def test_users_response_contains_expected_props(
@@ -76,3 +77,32 @@ def test_on_delete_update_user_role_is_being_called_with_valid_arguments(
 
     assert HTTPStatus.OK == response.status_code
     update_user_role_mock.assert_called_once_with(user_id, role=None)
+
+
+@patch('utils.azure_users.AzureConnection.update_role', new_callable=Mock)
+@mark.parametrize(
+    'role_id,action,is_grant',
+    [
+        ('admin', 'grant', True),
+        ('admin', 'revoke', False),
+        ('test', 'grant', True),
+        ('test', 'revoke', False),
+    ],
+)
+def test_update_role_is_called_properly_on_each_action(
+    update_role_mock,
+    client: FlaskClient,
+    valid_header: dict,
+    user_id: str,
+    role_id,
+    action,
+    is_grant,
+):
+    response = client.post(
+        f'/users/{user_id}/roles/{role_id}/{action}', headers=valid_header,
+    )
+
+    assert HTTPStatus.OK == response.status_code
+    update_role_mock.assert_called_once_with(
+        user_id, role_id, is_grant=is_grant
+    )
