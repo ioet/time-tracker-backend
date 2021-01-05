@@ -139,6 +139,7 @@ class AzureConnection:
         return self.to_azure_user(response.json())
 
     def get_role_data(self, role_id, is_grant=True):
+        assert role_id in ROLE_FIELD_VALUES.keys()
         field_name, field_value = ROLE_FIELD_VALUES[role_id]
         if is_grant:
             return {field_name: field_value}
