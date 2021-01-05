@@ -91,7 +91,6 @@ class AzureConnection:
         assert 'value' in response.json()
         return [self.to_azure_user(item) for item in response.json()['value']]
 
-    # TODO : DEPRECATE
     def update_user_role(self, id, role):
         endpoint = "{endpoint}/users/{user_id}?api-version=1.6".format(
             endpoint=self.config.ENDPOINT, user_id=id
