@@ -50,6 +50,14 @@ HTTP_PATCH_HEADERS = {
     'Accept': 'application/json',
 }
 
+ROLE_FIELD_VALUES = {
+    'admin': (
+        'extension_1d76efa96f604499acc0c0ee116a1453_role',
+        'time_tracker_admin',
+    ),
+    'test': ('waitforrealvalue', 'waitforrealvalue'),
+}
+
 
 class AzureConnection:
     def __init__(self, config=MSConfig):
@@ -83,7 +91,7 @@ class AzureConnection:
         assert 'value' in response.json()
         return [self.to_azure_user(item) for item in response.json()['value']]
 
-    # TODO : DEPRECATE OR UPDATE
+    # TODO : DEPRECATE
     def update_user_role(self, id, role):
         endpoint = "{endpoint}/users/{user_id}?api-version=1.6".format(
             endpoint=self.config.ENDPOINT, user_id=id
@@ -132,14 +140,7 @@ class AzureConnection:
         return self.to_azure_user(response.json())
 
     def get_role_data(self, role_id, is_grant=True):
-        ROLE_VALUES = {
-            'admin': (
-                'extension_1d76efa96f604499acc0c0ee116a1453_role',
-                'time_tracker_admin',
-            ),
-            'test': ('waitforrealvalue', 'waitforrealvalue'),
-        }
-        field_name, field_value = ROLE_VALUES[role_id]
+        field_name, field_value = ROLE_FIELD_VALUES[role_id]
         if is_grant:
             return {field_name: field_value}
         else:
