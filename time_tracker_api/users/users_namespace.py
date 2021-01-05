@@ -60,6 +60,7 @@ class Users(Resource):
         return AzureConnection().users()
 
 
+# TODO : DEPRECATE
 @ns.route('/<string:id>/roles')
 @ns.response(HTTPStatus.NOT_FOUND, 'User not found')
 @ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'The id has an invalid format')
@@ -76,6 +77,7 @@ class UserRoles(Resource):
         return AzureConnection().update_user_role(id, ns.payload['role'])
 
 
+# TODO : DEPRECATE
 @ns.route('/<string:user_id>/roles/<string:role_id>')
 @ns.response(HTTPStatus.NOT_FOUND, 'User not found')
 @ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'The id has an invalid format')
@@ -94,6 +96,7 @@ class UserRole(Resource):
 @ns.param('role_id', 'The role name identifier')
 class GrantRole(Resource):
     @ns.doc('grant_role')
+    @ns.marshal_with(user_response_fields)
     def post(self, user_id, role_id):
         """
         Grant role to user
@@ -103,7 +106,7 @@ class GrantRole(Resource):
             - admin
         ```
         """
-        return [], HTTPStatus.OK
+        return AzureConnection().update_role(user_id, role_id, is_grant=True)
 
 
 @ns.route('/<string:user_id>/roles/<string:role_id>/revoke')
@@ -111,6 +114,7 @@ class GrantRole(Resource):
 @ns.param('role_id', 'The role name identifier')
 class RevokeRole(Resource):
     @ns.doc('revoke_role')
+    @ns.marshal_with(user_response_fields)
     def post(self, user_id, role_id):
         """Revoke role to user"""
-        return [], HTTPStatus.OK
+        return AzureConnection().update_role(user_id, role_id, is_grant=False)
