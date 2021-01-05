@@ -83,6 +83,7 @@ class AzureConnection:
         assert 'value' in response.json()
         return [self.to_azure_user(item) for item in response.json()['value']]
 
+    # TODO : DEPRECATE OR UPDATE
     def update_user_role(self, id, role):
         endpoint = "{endpoint}/users/{user_id}?api-version=1.6".format(
             endpoint=self.config.ENDPOINT, user_id=id
@@ -110,3 +111,36 @@ class AzureConnection:
         email = item['otherMails'][0] if there_is_email else ''
         role = item[self.role_field] if there_is_role else None
         return AzureUser(id, name, email, role)
+
+    def update_role(self, user_id, role_id, is_grant):
+        endpoint = "{endpoint}/users/{user_id}?api-version=1.6".format(
+            endpoint=self.config.ENDPOINT, user_id=user_id
+        )
+
+        data = self.get_role_data(role_id, is_grant)
+        response = requests.patch(
+            endpoint,
+            auth=BearerAuth(self.access_token),
+            data=json.dumps(data),
+            headers=HTTP_PATCH_HEADERS,
+        )
+        assert 204 == response.status_code
+
+        response = requests.get(endpoint, auth=BearerAuth(self.access_token))
+        assert 200 == response.status_code
+
+        return self.to_azure_user(response.json())
+
+    def get_role_data(self, role_id, is_grant=True):
+        ROLE_VALUES = {
+            'admin': (
+                'extension_1d76efa96f604499acc0c0ee116a1453_role',
+                'time_tracker_admin',
+            ),
+            'test': ('waitforrealvalue', 'waitforrealvalue'),
+        }
+        field_name, field_value = ROLE_VALUES[role_id]
+        if is_grant:
+            return {field_name: field_value}
+        else:
+            return {field_name: None}
