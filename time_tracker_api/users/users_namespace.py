@@ -60,7 +60,6 @@ class Users(Resource):
         return AzureConnection().users()
 
 
-# TODO : DEPRECATE
 @ns.route('/<string:id>/roles')
 @ns.response(HTTPStatus.NOT_FOUND, 'User not found')
 @ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'The id has an invalid format')
@@ -77,7 +76,6 @@ class UserRoles(Resource):
         return AzureConnection().update_user_role(id, ns.payload['role'])
 
 
-# TODO : DEPRECATE
 @ns.route('/<string:user_id>/roles/<string:role_id>')
 @ns.response(HTTPStatus.NOT_FOUND, 'User not found')
 @ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'The id has an invalid format')
