@@ -17,6 +17,7 @@ from time_tracker_api.api import (
     remove_required_constraint,
 )
 from time_tracker_api.time_entries.time_entries_dao import create_dao
+from commons.feature_flags.features_flags import FeatureFlags
 
 faker = Faker()
 
@@ -265,6 +266,24 @@ class LatestTimeEntries(Resource):
         """List the latest time entries"""
 
         return time_entries_dao.get_lastest_entries_by_project(conditions={})
+
+
+@ns.route('/featureFlags')
+class featuresFlags(Resource):
+    @ns.doc('flags')
+    @ns.marshal_list_with(time_entry)
+    @ns.response(HTTPStatus.NOT_FOUND, 'No time entries found')
+    def get(self):
+        """List the latest time entries"""
+        featureTest = FeatureFlags("ui-list-test-users")
+        test = featureTest.is_toggle_enabled_for_user()
+        if test:
+            return time_entries_dao.get_lastest_entries_by_project(
+                conditions={}
+            )
+        else:
+            conditions = attributes_filter.parse_args()
+            return time_entries_dao.get_all(conditions=conditions)
 
 
 @ns.route('/<string:id>')
