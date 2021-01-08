@@ -14,7 +14,7 @@ class FeatureToggleManager:
         self.label = label
         self.configuration = {}
 
-    def _get_configuration(self, key: str, label: str):
+    def get_configuration(self, key: str, label: str):
         connection_str = self.AZURE_CONNECTION_STRING
         client = AzureAppConfigurationClient.from_connection_string(
             connection_str
@@ -25,20 +25,20 @@ class FeatureToggleManager:
 
         return configuration
 
-    def _get_data_configuration(self):
-        self.configuration = self._get_configuration(self.key, self.label)
+    def get_data_configuration(self):
+        self.configuration = self.get_configuration(self.key, self.label)
         result = json.loads(self.configuration.value)
 
         return result
 
-    def _is_toggle_enabled(self):
-        data = self._get_data_configuration()
+    def is_toggle_enabled(self):
+        data = self.get_data_configuration()
         result = data["enabled"]
 
         return result
 
     def is_toggle_enabled_for_user(self):
-        data = self._get_data_configuration()
+        data = self.get_data_configuration()
         client_filters = data["conditions"]["client_filters"]
         first_client = client_filters[0]
         list_users = first_client["parameters"]["Audience"]["Users"]
@@ -46,6 +46,6 @@ class FeatureToggleManager:
 
         return (
             True
-            if current_user in list_users and self._is_toggle_enabled()
+            if current_user in list_users and self.is_toggle_enabled()
             else False
         )
