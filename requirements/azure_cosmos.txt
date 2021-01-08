@@ -3,7 +3,7 @@
 # For Cosmos DB
 
 # Azure Cosmos DB official library
-azure-core==1.1.1
+azure-core==1.9.0
 azure-cosmos==4.0.0b6
 certifi==2019.11.28
 chardet==3.0.4
