@@ -1,25 +1,42 @@
-from azure.appconfiguration import AzureAppConfigurationClient
-from time_tracker_api.security import current_user_email
-import json
 import os
+import json
+from time_tracker_api.security import current_user_email
+from azure.appconfiguration import AzureAppConfigurationClient
 
 
-class FeatureToggleManager:
-    AZURE_CONNECTION_STRING = os.environ.get(
+class MSConfig:
+    def check_variables_are_defined():
+        auth_variables = ['AZURE_APP_CONFIGURATION_CONNECTION_STRING']
+        for var in auth_variables:
+            if var not in os.environ:
+                raise EnvironmentError(
+                    "{} is not defined in the environment".format(var)
+                )
+
+    check_variables_are_defined()
+    AZURE_APP_CONFIGURATION_CONNECTION_STRING = os.environ.get(
         'AZURE_APP_CONFIGURATION_CONNECTION_STRING'
     )
 
-    def __init__(self, key: str, label: str = None):
+
+class FeatureToggleManager:
+    def __init__(self, key: str, label: str = None, config=MSConfig):
         self.key = key
         self.label = label
+        self.config = config
+        self.client = self.get_azure_app_configuration_client()
         self.configuration = {}
 
-    def get_configuration(self, key: str, label: str):
-        connection_str = self.AZURE_CONNECTION_STRING
+    def get_azure_app_configuration_client(self):
+        connection_str = self.config.AZURE_APP_CONFIGURATION_CONNECTION_STRING
         client = AzureAppConfigurationClient.from_connection_string(
             connection_str
         )
-        configuration = client.get_configuration_setting(
+
+        return client
+
+    def get_configuration(self, key: str, label: str):
+        configuration = self.client.get_configuration_setting(
             key=f".appconfig.featureflag/{self.key}", label=self.label
         )
 
@@ -37,15 +54,16 @@ class FeatureToggleManager:
 
         return result
 
-    def is_toggle_enabled_for_user(self):
+    def get_list_users(self):
         data = self.get_data_configuration()
         client_filters = data["conditions"]["client_filters"]
         first_client = client_filters[0]
         list_users = first_client["parameters"]["Audience"]["Users"]
+
+        return list_users
+
+    def is_toggle_enabled_for_user(self):
+        list_users = self.get_list_users()
         current_user = current_user_email()
 
-        return (
-            True
-            if current_user in list_users and self.is_toggle_enabled()
-            else False
-        )
+        return current_user in list_users and self.is_toggle_enabled()
