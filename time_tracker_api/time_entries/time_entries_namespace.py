@@ -268,24 +268,6 @@ class LatestTimeEntries(Resource):
         return time_entries_dao.get_lastest_entries_by_project(conditions={})
 
 
-@ns.route('/feature-toggles')
-class FeaturesToggles(Resource):
-    @ns.doc('feature_toggle_tests')
-    @ns.marshal_list_with(time_entry)
-    @ns.response(HTTPStatus.NOT_FOUND, 'No time entries found')
-    def get(self):
-        """Test Feature Toggles"""
-        featureTest = FeatureToggleManager("ui-list-test-users")
-        test = featureTest.is_toggle_enabled_for_user()
-        if test:
-            return time_entries_dao.get_lastest_entries_by_project(
-                conditions={}
-            )
-        else:
-            conditions = attributes_filter.parse_args()
-            return time_entries_dao.get_all(conditions=conditions)
-
-
 @ns.route('/<string:id>')
 @ns.response(HTTPStatus.NOT_FOUND, 'This time entry does not exist')
 @ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'The id has an invalid format')

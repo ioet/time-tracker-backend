@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 from pytest import mark
 
 
-def mock_payload(enabled, user):
+def mock_feature_toggle_config_response(enabled, user):
     return {
         "id": "test-feature-toggle",
         "description": "Feature Toggle test Backend",
@@ -54,8 +54,10 @@ def test_if_is_toggle_enabled_for_user(
 ):
     current_user_email_mock.return_value = currrent_user_email
     feature_toggle_manager = FeatureToggleManager("test-feature-toggle")
-    feature_toggle_manager.get_data_configuration.return_value = mock_payload(
-        is_toggle_enabled, user_email_enabled
+    feature_toggle_manager.get_data_configuration.return_value = (
+        mock_feature_toggle_config_response(
+            is_toggle_enabled, user_email_enabled
+        )
     )
 
     assert (

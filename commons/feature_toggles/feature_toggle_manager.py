@@ -4,14 +4,15 @@ from time_tracker_api.security import current_user_email
 from azure.appconfiguration import AzureAppConfigurationClient
 
 
-class MSConfig:
+class FeatureToggleConfig:
     def check_variables_are_defined():
-        auth_variables = ['AZURE_APP_CONFIGURATION_CONNECTION_STRING']
-        for var in auth_variables:
-            if var not in os.environ:
-                raise EnvironmentError(
-                    "{} is not defined in the environment".format(var)
+        azure_app_variable = 'AZURE_APP_CONFIGURATION_CONNECTION_STRING'
+        if azure_app_variable not in os.environ:
+            raise EnvironmentError(
+                "{} is not defined in the environment".format(
+                    azure_app_variable
                 )
+            )
 
     check_variables_are_defined()
     AZURE_APP_CONFIGURATION_CONNECTION_STRING = os.environ.get(
@@ -20,12 +21,13 @@ class MSConfig:
 
 
 class FeatureToggleManager:
-    def __init__(self, key: str, label: str = None, config=MSConfig):
+    def __init__(
+        self, key: str, label: str = None, config=FeatureToggleConfig
+    ):
         self.key = key
         self.label = label
         self.config = config
         self.client = self.get_azure_app_configuration_client()
-        self.configuration = {}
 
     def get_azure_app_configuration_client(self):
         connection_str = self.config.AZURE_APP_CONFIGURATION_CONNECTION_STRING
@@ -37,14 +39,16 @@ class FeatureToggleManager:
 
     def get_configuration(self, key: str, label: str):
         configuration = self.client.get_configuration_setting(
-            key=f".appconfig.featureflag/{self.key}", label=self.label
+            key=f".appconfig.featureflag/{key}", label=label
         )
 
         return configuration
 
     def get_data_configuration(self):
-        self.configuration = self.get_configuration(self.key, self.label)
-        result = json.loads(self.configuration.value)
+        feature_data_configuration = self.get_configuration(
+            self.key, self.label
+        )
+        result = json.loads(feature_data_configuration.value)
 
         return result
 
