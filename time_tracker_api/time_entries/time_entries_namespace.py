@@ -17,7 +17,6 @@ from time_tracker_api.api import (
     remove_required_constraint,
 )
 from time_tracker_api.time_entries.time_entries_dao import create_dao
-from commons.feature_toggles.feature_toggle_manager import FeatureToggleManager
 
 faker = Faker()
 
