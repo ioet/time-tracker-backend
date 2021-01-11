@@ -25,22 +25,41 @@ authorizations = {
 }
 
 # For matching UUIDs
-UUID_REGEX = '[0-9a-f]{8}\-[0-9a-f]{4}\-4[0-9a-f]{3}\-[89ab][0-9a-f]{3}\-[0-9a-f]{12}'
+UUID_REGEX = (
+    '[0-9a-f]{8}\-[0-9a-f]{4}\-4[0-9a-f]{3}\-[89ab][0-9a-f]{3}\-[0-9a-f]{12}'
+)
 
-iss_claim_pattern = re.compile(r"(.*).b2clogin.com/(?P<tenant_id>%s)" % UUID_REGEX)
+iss_claim_pattern = re.compile(
+    r"(.*).b2clogin.com/(?P<tenant_id>%s)" % UUID_REGEX
+)
 
 roles = {
     "admin": {"name": "time-tracker-admin"},
-    "client": {"name": "client-role"}
+    "client": {"name": "client-role"},
 }
 
 
 def current_user_id() -> str:
     oid_claim = get_token_json().get("oid")
     if oid_claim is None:
-        abort(message='The claim "oid" is missing in the JWT', code=HTTPStatus.UNAUTHORIZED)
+        abort(
+            message='The claim "oid" is missing in the JWT',
+            code=HTTPStatus.UNAUTHORIZED,
+        )
 
     return oid_claim
+
+
+def current_user_email() -> str:
+    email_list_claim = get_token_json().get("emails")
+    if email_list_claim is None:
+        abort(
+            message='The claim "emails" is missing in the JWT',
+            code=HTTPStatus.UNAUTHORIZED,
+        )
+
+    email_user = email_list_claim[0]
+    return email_user
 
 
 def current_role_user() -> str:
@@ -51,13 +70,18 @@ def current_role_user() -> str:
 def current_user_tenant_id() -> str:
     iss_claim = get_token_json().get("iss")
     if iss_claim is None:
-        abort(message='The claim "iss" is missing in the JWT', code=HTTPStatus.UNAUTHORIZED)
+        abort(
+            message='The claim "iss" is missing in the JWT',
+            code=HTTPStatus.UNAUTHORIZED,
+        )
 
     tenant_id = parse_tenant_id_from_iss_claim(iss_claim)
     if tenant_id is None:
-        abort(message='The format of the claim "iss" cannot be understood. '
-                      'Please contact the development team.',
-              code=HTTPStatus.UNAUTHORIZED)
+        abort(
+            message='The format of the claim "iss" cannot be understood. '
+            'Please contact the development team.',
+            code=HTTPStatus.UNAUTHORIZED,
+        )
 
     return tenant_id
 
@@ -66,11 +90,18 @@ def get_or_generate_dev_secret_key():
     global dev_secret_key
     if dev_secret_key is None:
         from time_tracker_api import flask_app as app
+
         """
         Generates a security key for development purposes
         :return: str
         """
-        dev_secret_key = fake.password(length=16, special_chars=True, digits=True, upper_case=True, lower_case=True)
+        dev_secret_key = fake.password(
+            length=16,
+            special_chars=True,
+            digits=True,
+            upper_case=True,
+            lower_case=True,
+        )
         if app.config.get("FLASK_DEBUG", False):  # pragma: no cover
             print('*********************************************************')
             print("The generated secret is \"%s\"" % dev_secret_key)
