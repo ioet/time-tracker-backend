@@ -32,6 +32,15 @@ user_response_fields = ns.model(
             description='Role assigned to the user by the tenant',
             example=Faker().word(['time-tracker-admin']),
         ),
+        'roles': fields.List(
+            fields.String(
+                title='Roles',
+                description='List of the roles assigned to the user by the tenant',
+            ),
+            example=Faker().words(
+                3, ['time-tracker-admin', 'test-user', 'guest',],
+            ),
+        ),
     },
 )
 
@@ -57,7 +66,7 @@ class Users(Resource):
     @ns.marshal_list_with(user_response_fields)
     def get(self):
         """List all users"""
-        return AzureConnection().users()
+        return AzureConnection().users_v2()
 
 
 @ns.route('/<string:id>/roles')
