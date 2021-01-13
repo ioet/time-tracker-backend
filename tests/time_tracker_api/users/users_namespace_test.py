@@ -42,6 +42,24 @@ def test_update_user_role_response_contains_expected_props(
     assert 'role' in json.loads(response.data)
 
 
+@mark.parametrize(
+    'role_id,action', [('test', 'grant'), ('admin', 'revoke')],
+)
+def test_update_role_response_contains_expected_props(
+    client: FlaskClient, valid_header: dict, user_id: str, role_id, action
+):
+    AzureConnection.update_role = Mock(
+        return_value={'name': 'dummy', 'email': 'dummy', 'roles': []}
+    )
+    response = client.post(
+        f'/users/{user_id}/roles/{role_id}/{action}', headers=valid_header,
+    )
+    assert HTTPStatus.OK == response.status_code
+    assert 'name' in json.loads(response.data)
+    assert 'email' in json.loads(response.data)
+    assert 'roles' in json.loads(response.data)
+
+
 @patch('utils.azure_users.AzureConnection.update_user_role', new_callable=Mock)
 def test_on_post_update_user_role_is_being_called_with_valid_arguments(
     update_user_role_mock,
