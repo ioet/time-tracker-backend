@@ -6,22 +6,6 @@ from utils.azure_users import AzureConnection
 from pytest import mark
 
 
-def test_users_response_contains_expected_props(
-    client: FlaskClient, valid_header: dict,
-):
-
-    AzureConnection.users = Mock(
-        return_value=[{'name': 'dummy', 'email': 'dummy', 'role': 'dummy'}]
-    )
-
-    response = client.get('/users', headers=valid_header,)
-
-    assert HTTPStatus.OK == response.status_code
-    assert 'name' in json.loads(response.data)[0]
-    assert 'email' in json.loads(response.data)[0]
-    assert 'role' in json.loads(response.data)[0]
-
-
 @patch(
     'commons.feature_toggles.feature_toggle_manager.FeatureToggleManager.get_azure_app_configuration_client'
 )
@@ -48,6 +32,8 @@ def test_feature_toggle_is_on_then_role_field_is_list(
     users_v2_mock.assert_called()
     users_mock.assert_not_called()
     assert HTTPStatus.OK == response.status_code
+    assert 'name' in json.loads(response.data)[0]
+    assert 'email' in json.loads(response.data)[0]
     assert 'roles' in json.loads(response.data)[0]
     assert ['dummy-role'] == json.loads(response.data)[0]['roles']
 
@@ -78,6 +64,8 @@ def test_feature_toggle_is_off_then_role_field_is_string(
     users_mock.assert_called()
     users_v2_mock.assert_not_called()
     assert HTTPStatus.OK == response.status_code
+    assert 'name' in json.loads(response.data)[0]
+    assert 'email' in json.loads(response.data)[0]
     assert 'role' in json.loads(response.data)[0]
     assert 'dummy-role' == json.loads(response.data)[0]['role']
 
@@ -102,15 +90,23 @@ def test_update_user_role_response_contains_expected_props(
     assert 'role' in json.loads(response.data)
 
 
+@patch('utils.azure_users.AzureConnection.update_role')
 @mark.parametrize(
     'role_id,action', [('test', 'grant'), ('admin', 'revoke')],
 )
 def test_update_role_response_contains_expected_props(
-    client: FlaskClient, valid_header: dict, user_id: str, role_id, action
+    update_role_mock,
+    client: FlaskClient,
+    valid_header: dict,
+    user_id: str,
+    role_id,
+    action,
 ):
-    AzureConnection.update_role = Mock(
-        return_value={'name': 'dummy', 'email': 'dummy', 'roles': []}
-    )
+    update_role_mock.return_value = {
+        'name': 'dummy',
+        'email': 'dummy',
+        'roles': [],
+    }
     response = client.post(
         f'/users/{user_id}/roles/{role_id}/{action}', headers=valid_header,
     )
@@ -127,7 +123,7 @@ def test_on_post_update_user_role_is_being_called_with_valid_arguments(
     valid_header: dict,
     user_id: str,
 ):
-
+    update_user_role_mock.return_value = {}
     valid_user_role_data = {'role': 'admin'}
     response = client.post(
         f'/users/{user_id}/roles',
@@ -148,7 +144,7 @@ def test_on_delete_update_user_role_is_being_called_with_valid_arguments(
     valid_header: dict,
     user_id: str,
 ):
-
+    update_user_role_mock.return_value = {}
     response = client.delete(
         f'/users/{user_id}/roles/time-tracker-admin', headers=valid_header,
     )
@@ -176,6 +172,7 @@ def test_update_role_is_called_properly_on_each_action(
     action,
     is_grant,
 ):
+    update_role_mock.return_value = {}
     response = client.post(
         f'/users/{user_id}/roles/{role_id}/{action}', headers=valid_header,
     )
