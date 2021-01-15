@@ -61,11 +61,11 @@ HTTP_PATCH_HEADERS = {
 ROLE_FIELD_VALUES = {
     'admin': (
         'extension_1d76efa96f604499acc0c0ee116a1453_role',
-        'time_tracker_admin',
+        'time-tracker-admin',
     ),
     'test': (
         'extension_1d76efa96f604499acc0c0ee116a1453_role_test',
-        'time_tracker_tester',
+        'time-tracker-tester',
     ),
 }
 
