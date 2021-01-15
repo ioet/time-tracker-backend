@@ -146,19 +146,17 @@ class AzureConnection:
         role = item[self.role_field] if there_is_role else None
         return AzureUser(id, name, email, role)
 
-    def to_azure_user_v2(self, item) -> AzureUser:
+    def to_azure_user_v2(self, item) -> AzureUser_v2:
         there_is_email = len(item['otherMails']) > 0
 
         id = item['objectId']
         name = item['displayName']
         email = item['otherMails'][0] if there_is_email else ''
-        roles = []
-        for role_id in ROLE_FIELD_VALUES.keys():
-            field_name, _ = ROLE_FIELD_VALUES[role_id]
-            if field_name in item:
-                field_value = item[field_name]
-                roles.append(field_value)
-
+        roles = [
+            item[field_name]
+            for (field_name, field_value) in ROLE_FIELD_VALUES.values()
+            if field_name in item
+        ]
         return AzureUser_v2(id, name, email, roles)
 
     def update_role(self, user_id, role_id, is_grant):

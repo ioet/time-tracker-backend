@@ -69,8 +69,7 @@ class Users(Resource):
         ftm = FeatureToggleManager('bk-user-role-field')
         if ftm.is_toggle_enabled_for_user():
             return AzureConnection().users_v2()
-        else:
-            return AzureConnection().users()
+        return AzureConnection().users()
 
 
 @ns.route('/<string:id>/roles')
