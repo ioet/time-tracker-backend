@@ -66,8 +66,8 @@ class Users(Resource):
     @ns.marshal_list_with(user_response_fields)
     def get(self):
         """List all users"""
-        ftm = FeatureToggleManager('bk-user-role-field')
-        if ftm.is_toggle_enabled_for_user():
+        user_role_field_toggle = FeatureToggleManager('bk-user-role-field')
+        if user_role_field_toggle.is_toggle_enabled_for_user():
             return AzureConnection().users_v2()
         return AzureConnection().users()
 
