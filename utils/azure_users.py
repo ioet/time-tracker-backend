@@ -45,6 +45,14 @@ class AzureUser:
         self.role = role
 
 
+class AzureUser_v2:
+    def __init__(self, id, name, email, roles):
+        self.id = id
+        self.name = name
+        self.email = email
+        self.roles = roles
+
+
 HTTP_PATCH_HEADERS = {
     'Content-type': 'application/json',
     'Accept': 'application/json',
@@ -53,9 +61,12 @@ HTTP_PATCH_HEADERS = {
 ROLE_FIELD_VALUES = {
     'admin': (
         'extension_1d76efa96f604499acc0c0ee116a1453_role',
-        'time_tracker_admin',
+        'time-tracker-admin',
     ),
-    'test': ('waitforrealvalue', 'waitforrealvalue'),
+    'test': (
+        'extension_1d76efa96f604499acc0c0ee116a1453_role_test',
+        'time-tracker-tester',
+    ),
 }
 
 
@@ -91,6 +102,22 @@ class AzureConnection:
         assert 'value' in response.json()
         return [self.to_azure_user(item) for item in response.json()['value']]
 
+    def users_v2(self) -> List[AzureUser]:
+        role_fields_params = ','.join(
+            [field_name for field_name, _ in ROLE_FIELD_VALUES.values()]
+        )
+        endpoint = "{endpoint}/users?api-version=1.6&$select=displayName,otherMails,objectId,{role_fields_params}".format(
+            endpoint=self.config.ENDPOINT,
+            role_fields_params=role_fields_params,
+        )
+        response = requests.get(endpoint, auth=BearerAuth(self.access_token))
+
+        assert 200 == response.status_code
+        assert 'value' in response.json()
+        return [
+            self.to_azure_user_v2(item) for item in response.json()['value']
+        ]
+
     def update_user_role(self, id, role):
         endpoint = "{endpoint}/users/{user_id}?api-version=1.6".format(
             endpoint=self.config.ENDPOINT, user_id=id
@@ -119,6 +146,19 @@ class AzureConnection:
         role = item[self.role_field] if there_is_role else None
         return AzureUser(id, name, email, role)
 
+    def to_azure_user_v2(self, item) -> AzureUser_v2:
+        there_is_email = len(item['otherMails']) > 0
+
+        id = item['objectId']
+        name = item['displayName']
+        email = item['otherMails'][0] if there_is_email else ''
+        roles = [
+            item[field_name]
+            for (field_name, field_value) in ROLE_FIELD_VALUES.values()
+            if field_name in item
+        ]
+        return AzureUser_v2(id, name, email, roles)
+
     def update_role(self, user_id, role_id, is_grant):
         endpoint = "{endpoint}/users/{user_id}?api-version=1.6".format(
             endpoint=self.config.ENDPOINT, user_id=user_id
@@ -136,7 +176,7 @@ class AzureConnection:
         response = requests.get(endpoint, auth=BearerAuth(self.access_token))
         assert 200 == response.status_code
 
-        return self.to_azure_user(response.json())
+        return self.to_azure_user_v2(response.json())
 
     def get_role_data(self, role_id, is_grant=True):
         assert role_id in ROLE_FIELD_VALUES.keys()

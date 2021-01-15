@@ -5,7 +5,7 @@ from flask_restplus._http import HTTPStatus
 from time_tracker_api.api import common_fields, api, NullableString
 
 from utils.azure_users import AzureConnection
-
+from commons.feature_toggles.feature_toggle_manager import FeatureToggleManager
 
 ns = api.namespace('users', description='Namespace of the API for users')
 
@@ -32,6 +32,15 @@ user_response_fields = ns.model(
             description='Role assigned to the user by the tenant',
             example=Faker().word(['time-tracker-admin']),
         ),
+        'roles': fields.List(
+            fields.String(
+                title='Roles',
+                description='List of the roles assigned to the user by the tenant',
+            ),
+            example=Faker().words(
+                3, ['time-tracker-admin', 'test-user', 'guest',],
+            ),
+        ),
     },
 )
 
@@ -57,6 +66,9 @@ class Users(Resource):
     @ns.marshal_list_with(user_response_fields)
     def get(self):
         """List all users"""
+        user_role_field_toggle = FeatureToggleManager('bk-user-role-field')
+        if user_role_field_toggle.is_toggle_enabled_for_user():
+            return AzureConnection().users_v2()
         return AzureConnection().users()
 
 
