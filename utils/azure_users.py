@@ -94,7 +94,8 @@ class AzureConnection:
 
     def users(self) -> List[AzureUser]:
         endpoint = "{endpoint}/users?api-version=1.6&$select=displayName,otherMails,objectId,{role_field}".format(
-            endpoint=self.config.ENDPOINT, role_field=self.role_field,
+            endpoint=self.config.ENDPOINT,
+            role_field=self.role_field,
         )
         response = requests.get(endpoint, auth=BearerAuth(self.access_token))
 
@@ -185,3 +186,32 @@ class AzureConnection:
             return {field_name: field_value}
         else:
             return {field_name: None}
+
+    def _get_user(self, user_id):
+        endpoint = "{endpoint}/users/{user_id}?api-version=1.6".format(
+            endpoint=self.config.ENDPOINT, user_id=user_id
+        )
+        response = requests.get(endpoint, auth=BearerAuth(self.access_token))
+        assert 200 == response.status_code
+        return response.json()
+
+    def is_test_user(self, user_id):
+        response = self._get_user(user_id)
+        field_name, field_value = ROLE_FIELD_VALUES['test']
+        return field_name in response and field_value == response[field_name]
+
+    def _get_test_user_ids(self):
+        field_name, field_value = ROLE_FIELD_VALUES['test']
+        endpoint = "{endpoint}/users?api-version=1.6&$select=objectId,{field_name}&$filter={field_name} eq '{field_value}'".format(
+            endpoint=self.config.ENDPOINT,
+            field_name=field_name,
+            field_value=field_value,
+        )
+        response = requests.get(endpoint, auth=BearerAuth(self.access_token))
+        assert 200 == response.status_code
+        assert 'value' in response.json()
+        return response.json()['value']
+
+    def get_test_user_ids(self):
+        response = self._get_test_user_ids()
+        return [item['objectId'] for item in response]
