@@ -3,6 +3,7 @@ from flask_restplus import fields, Resource
 from flask_restplus._http import HTTPStatus
 
 from time_tracker_api.api import common_fields, api, NullableString
+from time_tracker_api.security import current_user_id
 
 from utils.azure_users import AzureConnection
 from commons.feature_toggles.feature_toggle_manager import FeatureToggleManager
@@ -68,7 +69,14 @@ class Users(Resource):
         """List all users"""
         user_role_field_toggle = FeatureToggleManager('bk-user-role-field')
         if user_role_field_toggle.is_toggle_enabled_for_user():
-            return AzureConnection().users_v2()
+            azure_connection = AzureConnection()
+            current_user_is_tester = azure_connection.is_test_user(
+                current_user_id()
+            )
+            if current_user_is_tester:
+                return azure_connection.users_v2()
+            else:
+                return azure_connection.get_non_test_users()
         return AzureConnection().users()
 
 
