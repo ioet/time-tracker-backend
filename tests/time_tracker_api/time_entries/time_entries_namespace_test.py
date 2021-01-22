@@ -1,5 +1,5 @@
 from datetime import timedelta
-from unittest.mock import ANY, Mock
+from unittest.mock import ANY, Mock, patch
 
 from faker import Faker
 from flask import json
@@ -16,6 +16,9 @@ from utils.time import (
     datetime_str,
 )
 from utils import worked_time
+from time_tracker_api.time_entries.time_entries_model import (
+    TimeEntryCosmosDBModel,
+)
 
 from werkzeug.exceptions import NotFound, UnprocessableEntity, HTTPException
 
@@ -187,6 +190,81 @@ def test_get_time_entry_should_succeed_with_valid_id(
     assert HTTPStatus.OK == response.status_code
     assert [] == json.loads(response.data)
     dao_get_all_mock.assert_called_once()
+
+
+@patch(
+    'time_tracker_api.time_entries.time_entries_dao.TimeEntriesCosmosDBDao.create_event_context',
+    Mock(),
+)
+@patch(
+    'time_tracker_api.time_entries.time_entries_dao.TimeEntriesCosmosDBDao.build_custom_query',
+    Mock(),
+)
+@patch(
+    'time_tracker_api.time_entries.time_entries_dao.TimeEntriesCosmosDBDao.handle_date_filter_args',
+    Mock(),
+)
+@patch('msal.ConfidentialClientApplication', Mock())
+@patch('utils.azure_users.AzureConnection.get_token', Mock())
+@patch('utils.azure_users.AzureConnection.is_test_user')
+@patch('utils.azure_users.AzureConnection.get_test_user_ids')
+@pytest.mark.parametrize(
+    'current_user_is_tester, expected_user_ids',
+    [
+        (True, ['id1', 'id2']),
+        (False, ['id2']),
+    ],
+)
+def test_get_time_entries_by_type_of_user(
+    get_test_user_ids_mock,
+    is_test_user_mock,
+    client: FlaskClient,
+    valid_header: dict,
+    time_entries_dao,
+    current_user_is_tester,
+    expected_user_ids,
+):
+    test_user_id = "id1"
+    non_test_user_id = "id2"
+    te1 = TimeEntryCosmosDBModel(
+        {
+            "id": '1',
+            "project_id": "1",
+            "owner_id": test_user_id,
+            "tenant_id": '1',
+            "start_date": "",
+        }
+    )
+    te2 = TimeEntryCosmosDBModel(
+        {
+            "id": '2',
+            "project_id": "2",
+            "owner_id": non_test_user_id,
+            "tenant_id": '2',
+            "start_date": "",
+        }
+    )
+
+    find_all_mock = Mock()
+    find_all_mock.return_value = [te1, te2]
+
+    time_entries_dao.repository.find_all = find_all_mock
+
+    is_test_user_mock.return_value = current_user_is_tester
+    get_test_user_ids_mock.return_value = [test_user_id]
+
+    response = client.get(
+        "/time-entries?user_id=*", headers=valid_header, follow_redirects=True
+    )
+
+    is_test_user_mock.assert_called()
+    find_all_mock.assert_called()
+
+    expected_user_ids_in_time_entries = expected_user_ids
+    actual_user_ids_in_time_entries = [
+        time_entry["owner_id"] for time_entry in json.loads(response.data)
+    ]
+    assert expected_user_ids_in_time_entries == actual_user_ids_in_time_entries
 
 
 def test_get_time_entry_should_succeed_with_valid_id(
@@ -595,6 +673,11 @@ def test_create_with_valid_uuid_format_should_return_created(
     repository_container_create_item_mock.assert_called()
 
 
+@patch('msal.ConfidentialClientApplication', Mock())
+@patch('utils.azure_users.AzureConnection.get_token', Mock())
+@patch(
+    'utils.azure_users.AzureConnection.is_test_user', Mock(return_value=True)
+)
 @pytest.mark.parametrize(
     'url',
     [
@@ -624,6 +707,11 @@ def test_get_all_passes_date_range_built_from_params_to_find_all(
     assert 'end_date' in kwargs['date_range']
 
 
+@patch('msal.ConfidentialClientApplication', Mock())
+@patch('utils.azure_users.AzureConnection.get_token', Mock())
+@patch(
+    'utils.azure_users.AzureConnection.is_test_user', Mock(return_value=True)
+)
 @pytest.mark.parametrize(
     'url,start_date,end_date',
     [
@@ -660,6 +748,11 @@ def test_get_all_passes_date_range_to_find_all_with_default_tz_offset(
     assert kwargs['date_range']['end_date'] == end_date
 
 
+@patch('msal.ConfidentialClientApplication', Mock())
+@patch('utils.azure_users.AzureConnection.get_token', Mock())
+@patch(
+    'utils.azure_users.AzureConnection.is_test_user', Mock(return_value=True)
+)
 @pytest.mark.parametrize(
     'url,start_date,end_date',
     [

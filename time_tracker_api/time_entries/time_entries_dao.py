@@ -28,6 +28,7 @@ from time_tracker_api.time_entries.time_entries_repository import (
 )
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
 from time_tracker_api.security import current_user_id
+from utils.azure_users import AzureConnection
 
 
 class TimeEntriesDao(CRUDDao):
@@ -93,7 +94,7 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
     def get_all(self, conditions: dict = None, **kwargs) -> list:
         event_ctx = self.create_event_context("read-many")
         conditions.update({"owner_id": event_ctx.user_id})
-
+        is_complete_query = conditions.get("user_id") == '*'
         custom_query = self.build_custom_query(
             is_admin=event_ctx.is_admin,
             conditions=conditions,
@@ -101,13 +102,27 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         date_range = self.handle_date_filter_args(args=conditions)
         limit = conditions.get("limit", None)
         conditions.pop("limit", None)
-        return self.repository.find_all(
+        azure_connection = AzureConnection()
+        current_user_is_tester = azure_connection.is_test_user(
+            event_ctx.user_id
+        )
+        time_entries_list = self.repository.find_all(
             event_ctx,
             conditions=conditions,
             custom_sql_conditions=custom_query,
             date_range=date_range,
             max_count=limit,
         )
+        if not current_user_is_tester and is_complete_query:
+            test_user_ids = azure_connection.get_test_user_ids()
+            time_entries_list = [
+                time_entry
+                for time_entry in time_entries_list
+                if time_entry.owner_id not in test_user_ids
+            ]
+            return time_entries_list
+        else:
+            return time_entries_list
 
     def get_lastest_entries_by_project(
         self, conditions: dict = None, **kwargs
