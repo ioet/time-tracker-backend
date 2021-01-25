@@ -188,17 +188,17 @@ def test_update_role_is_called_properly_on_each_action(
     )
 
 
-@patch('msal.ConfidentialClientApplication')
-@patch('utils.azure_users.AzureConnection.get_token')
+@patch('msal.ConfidentialClientApplication', Mock())
+@patch('utils.azure_users.AzureConnection.get_token', Mock())
 @patch('utils.azure_users.AzureConnection.get_test_user_ids')
 @patch('utils.azure_users.AzureConnection.users_v2')
 def test_azure_connection_get_non_test_users(
-    users_v2_mock, get_test_user_ids_mock, get_token_mock, msal_client_mock,
+    users_v2_mock, get_test_user_ids_mock
 ):
-    az1 = AzureUser_v2('ID1', None, None, [])
-    az2 = AzureUser_v2('ID2', None, None, [])
-    users_v2_mock.return_value = [az1, az2]
+    test_user = AzureUser_v2('ID1', None, None, [])
+    non_test_user = AzureUser_v2('ID2', None, None, [])
+    users_v2_mock.return_value = [test_user, non_test_user]
     get_test_user_ids_mock.return_value = ['ID1']
-    non_test_users = [az2]
+    non_test_users = [non_test_user]
     az_conn = AzureConnection()
     assert az_conn.get_non_test_users() == non_test_users

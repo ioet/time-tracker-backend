@@ -70,13 +70,14 @@ class Users(Resource):
         user_role_field_toggle = FeatureToggleManager('bk-user-role-field')
         if user_role_field_toggle.is_toggle_enabled_for_user():
             azure_connection = AzureConnection()
-            current_user_is_tester = azure_connection.is_test_user(
+            is_current_user_a_tester = azure_connection.is_test_user(
                 current_user_id()
             )
-            if current_user_is_tester:
-                return azure_connection.users_v2()
-            else:
-                return azure_connection.get_non_test_users()
+            return (
+                azure_connection.users_v2()
+                if is_current_user_a_tester
+                else azure_connection.get_non_test_users()
+            )
         return AzureConnection().users()
 
 
