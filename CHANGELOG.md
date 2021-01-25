@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.26.0 (2021-01-25)
+### Feature
+* TT-123 exclude test users from report data ([#252](https://github.com/ioet/time-tracker-backend/issues/252)) ([`2833c00`](https://github.com/ioet/time-tracker-backend/commit/2833c00f90145b11d0a3af4a2e06ef91edbe422e))
+
 ## v0.25.4 (2020-11-27)
 ### Fix
 * Instance on demand the azure connection proxy ([`ed781e5`](https://github.com/ioet/time-tracker-backend/commit/ed781e51106322174516a554b0b25935a1f8e944))
