@@ -178,6 +178,12 @@ class AzureConnection:
 
         return self.to_azure_user_v2(response.json())
 
+    def get_non_test_users(self) -> List[AzureUser]:
+        test_user_ids = self.get_test_user_ids()
+        return [
+            user for user in self.users_v2() if user.id not in test_user_ids
+        ]
+
     def get_role_data(self, role_id, is_grant=True):
         assert role_id in ROLE_FIELD_VALUES.keys()
         field_name, field_value = ROLE_FIELD_VALUES[role_id]

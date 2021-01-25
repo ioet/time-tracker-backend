@@ -6,6 +6,11 @@ from utils.azure_users import AzureConnection
 from pytest import mark
 
 
+@patch('msal.ConfidentialClientApplication', Mock())
+@patch('utils.azure_users.AzureConnection.get_token', Mock())
+@patch(
+    'utils.azure_users.AzureConnection.is_test_user', Mock(return_value=True)
+)
 @patch(
     'commons.feature_toggles.feature_toggle_manager.FeatureToggleManager.get_azure_app_configuration_client'
 )
