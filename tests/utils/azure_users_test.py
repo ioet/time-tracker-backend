@@ -29,8 +29,7 @@ def test_azure_connection_is_test_user(
 @patch('msal.ConfidentialClientApplication', Mock())
 @patch('utils.azure_users.AzureConnection.get_token', Mock())
 @patch('requests.get')
-def test_azure_connection_get_test_user_ids(get_mock,):
-
+def test_azure_connection_get_test_user_ids(get_mock):
     response_mock = Mock()
     response_mock.status_code = 200
     response_mock.json = Mock(
