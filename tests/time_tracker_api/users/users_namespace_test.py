@@ -2,7 +2,7 @@ from unittest.mock import Mock, patch
 from flask import json
 from flask.testing import FlaskClient
 from flask_restplus._http import HTTPStatus
-from utils.azure_users import AzureConnection, ROLE_FIELD_VALUES, AzureUser_v2
+from utils.azure_users import AzureConnection
 from pytest import mark
 
 
@@ -186,19 +186,3 @@ def test_update_role_is_called_properly_on_each_action(
     update_role_mock.assert_called_once_with(
         user_id, role_id, is_grant=is_grant
     )
-
-
-@patch('msal.ConfidentialClientApplication', Mock())
-@patch('utils.azure_users.AzureConnection.get_token', Mock())
-@patch('utils.azure_users.AzureConnection.get_test_user_ids')
-@patch('utils.azure_users.AzureConnection.users_v2')
-def test_azure_connection_get_non_test_users(
-    users_v2_mock, get_test_user_ids_mock
-):
-    test_user = AzureUser_v2('ID1', None, None, [])
-    non_test_user = AzureUser_v2('ID2', None, None, [])
-    users_v2_mock.return_value = [test_user, non_test_user]
-    get_test_user_ids_mock.return_value = ['ID1']
-    non_test_users = [non_test_user]
-    az_conn = AzureConnection()
-    assert az_conn.get_non_test_users() == non_test_users

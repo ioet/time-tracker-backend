@@ -178,28 +178,6 @@ class AzureConnection:
 
         return self.to_azure_user_v2(response.json())
 
-    def is_test_user(self, user_id):
-        endpoint = "{endpoint}/users/{user_id}?api-version=1.6".format(
-            endpoint=self.config.ENDPOINT, user_id=user_id
-        )
-        response = requests.get(endpoint, auth=BearerAuth(self.access_token))
-        assert 200 == response.status_code
-        item = response.json()
-        field_name, field_value = ROLE_FIELD_VALUES['test']
-        return field_name in item and field_value == item[field_name]
-
-    def get_test_user_ids(self):
-        field_name, field_value = ROLE_FIELD_VALUES['test']
-        endpoint = "{endpoint}/users?api-version=1.6&$select=objectId,{field_name}&$filter={field_name} eq '{field_value}'".format(
-            endpoint=self.config.ENDPOINT,
-            field_name=field_name,
-            field_value=field_value,
-        )
-        response = requests.get(endpoint, auth=BearerAuth(self.access_token))
-        assert 200 == response.status_code
-        assert 'value' in response.json()
-        return [item['objectId'] for item in response.json()['value']]
-
     def get_non_test_users(self) -> List[AzureUser]:
         test_user_ids = self.get_test_user_ids()
         return [
