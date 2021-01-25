@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.27.0 (2021-01-25)
+### Feature
+* TT-122 show users by type of user ([#253](https://github.com/ioet/time-tracker-backend/issues/253)) ([`92573f2`](https://github.com/ioet/time-tracker-backend/commit/92573f2f19528eaabb57819cf06bd85626f2f95c))
+
 ## v0.26.0 (2021-01-25)
 ### Feature
 * TT-123 exclude test users from report data ([#252](https://github.com/ioet/time-tracker-backend/issues/252)) ([`2833c00`](https://github.com/ioet/time-tracker-backend/commit/2833c00f90145b11d0a3af4a2e06ef91edbe422e))
