@@ -77,35 +77,6 @@ class Users(Resource):
         )
 
 
-@ns.route('/<string:id>/roles')
-@ns.response(HTTPStatus.NOT_FOUND, 'User not found')
-@ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'The id has an invalid format')
-@ns.param('id', 'The user identifier')
-class UserRoles(Resource):
-    @ns.doc('create_user_role')
-    @ns.expect(user_role_input_fields)
-    @ns.response(
-        HTTPStatus.BAD_REQUEST, 'Invalid format or structure of the user'
-    )
-    @ns.marshal_with(user_response_fields)
-    def post(self, id):
-        """Create user's role"""
-        return AzureConnection().update_user_role(id, ns.payload['role'])
-
-
-@ns.route('/<string:user_id>/roles/<string:role_id>')
-@ns.response(HTTPStatus.NOT_FOUND, 'User not found')
-@ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'The id has an invalid format')
-@ns.param('user_id', 'The user identifier')
-@ns.param('role_id', 'The role name identifier')
-class UserRole(Resource):
-    @ns.doc('delete_user_role')
-    @ns.marshal_with(user_response_fields)
-    def delete(self, user_id, role_id):
-        """Delete user's role"""
-        return AzureConnection().update_user_role(user_id, role=None)
-
-
 @ns.route('/<string:user_id>/roles/<string:role_id>/grant')
 @ns.param('user_id', 'The user identifier')
 @ns.param('role_id', 'The role name identifier')

@@ -118,24 +118,6 @@ class AzureConnection:
             self.to_azure_user_v2(item) for item in response.json()['value']
         ]
 
-    def update_user_role(self, id, role):
-        endpoint = "{endpoint}/users/{user_id}?api-version=1.6".format(
-            endpoint=self.config.ENDPOINT, user_id=id
-        )
-        data = {self.role_field: role}
-        response = requests.patch(
-            endpoint,
-            auth=BearerAuth(self.access_token),
-            data=json.dumps(data),
-            headers=HTTP_PATCH_HEADERS,
-        )
-        assert 204 == response.status_code
-
-        response = requests.get(endpoint, auth=BearerAuth(self.access_token))
-        assert 200 == response.status_code
-
-        return self.to_azure_user(response.json())
-
     def to_azure_user(self, item) -> AzureUser:
         there_is_email = len(item['otherMails']) > 0
         there_is_role = self.role_field in item
