@@ -11,16 +11,16 @@ from pytest import mark
 @patch(
     'utils.azure_users.AzureConnection.is_test_user', Mock(return_value=True)
 )
-@patch('utils.azure_users.AzureConnection.users_v2')
+@patch('utils.azure_users.AzureConnection.users')
 def test_users_response_contains_expected_props(
-    users_v2_mock, client: FlaskClient, valid_header: dict,
+    users_mock, client: FlaskClient, valid_header: dict,
 ):
-    users_v2_mock.return_value = [
+    users_mock.return_value = [
         {'name': 'dummy', 'email': 'dummy', 'roles': ['dummy-role']}
     ]
     response = client.get('/users', headers=valid_header)
 
-    users_v2_mock.assert_called()
+    users_mock.assert_called()
     assert HTTPStatus.OK == response.status_code
     assert 'name' in json.loads(response.data)[0]
     assert 'email' in json.loads(response.data)[0]

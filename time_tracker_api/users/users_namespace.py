@@ -71,7 +71,7 @@ class Users(Resource):
             current_user_id()
         )
         return (
-            azure_connection.users_v2()
+            azure_connection.users()
             if is_current_user_a_tester
             else azure_connection.get_non_test_users()
         )

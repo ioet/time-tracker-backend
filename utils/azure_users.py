@@ -93,16 +93,6 @@ class AzureConnection:
             raise ValueError(error_info)
 
     def users(self) -> List[AzureUser]:
-        endpoint = "{endpoint}/users?api-version=1.6&$select=displayName,otherMails,objectId,{role_field}".format(
-            endpoint=self.config.ENDPOINT, role_field=self.role_field,
-        )
-        response = requests.get(endpoint, auth=BearerAuth(self.access_token))
-
-        assert 200 == response.status_code
-        assert 'value' in response.json()
-        return [self.to_azure_user(item) for item in response.json()['value']]
-
-    def users_v2(self) -> List[AzureUser]:
         role_fields_params = ','.join(
             [field_name for field_name, _ in ROLE_FIELD_VALUES.values()]
         )
@@ -162,9 +152,7 @@ class AzureConnection:
 
     def get_non_test_users(self) -> List[AzureUser]:
         test_user_ids = self.get_test_user_ids()
-        return [
-            user for user in self.users_v2() if user.id not in test_user_ids
-        ]
+        return [user for user in self.users() if user.id not in test_user_ids]
 
     def get_role_data(self, role_id, is_grant=True):
         assert role_id in ROLE_FIELD_VALUES.keys()
