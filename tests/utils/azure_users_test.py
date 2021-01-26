@@ -3,7 +3,7 @@ from utils.azure_users import AzureConnection, ROLE_FIELD_VALUES, AzureUser
 from pytest import mark
 
 
-@patch('msal.ConfidentialClientApplication', Mock())
+@patch('utils.azure_users.AzureConnection.get_msal_client', Mock())
 @patch('utils.azure_users.AzureConnection.get_token', Mock())
 @patch('requests.get')
 @mark.parametrize(
@@ -26,7 +26,7 @@ def test_azure_connection_is_test_user(
     assert az_conn.is_test_user(test_user_id) == is_test_user_expected_value
 
 
-@patch('msal.ConfidentialClientApplication', Mock())
+@patch('utils.azure_users.AzureConnection.get_msal_client', Mock())
 @patch('utils.azure_users.AzureConnection.get_token', Mock())
 @patch('requests.get')
 def test_azure_connection_get_test_user_ids(get_mock):
@@ -42,7 +42,7 @@ def test_azure_connection_get_test_user_ids(get_mock):
     assert az_conn.get_test_user_ids() == ids
 
 
-@patch('msal.ConfidentialClientApplication', Mock())
+@patch('utils.azure_users.AzureConnection.get_msal_client', Mock())
 @patch('utils.azure_users.AzureConnection.get_token', Mock())
 @patch('utils.azure_users.AzureConnection.get_test_user_ids')
 @patch('utils.azure_users.AzureConnection.users')

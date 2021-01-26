@@ -5,7 +5,7 @@ from flask_restplus._http import HTTPStatus
 from pytest import mark
 
 
-@patch('msal.ConfidentialClientApplication', Mock())
+@patch('utils.azure_users.AzureConnection.get_msal_client', Mock())
 @patch('utils.azure_users.AzureConnection.get_token', Mock())
 @patch(
     'utils.azure_users.AzureConnection.is_test_user', Mock(return_value=True)
@@ -27,6 +27,8 @@ def test_users_response_contains_expected_props(
     assert ['dummy-role'] == json.loads(response.data)[0]['roles']
 
 
+@patch('utils.azure_users.AzureConnection.get_msal_client', Mock())
+@patch('utils.azure_users.AzureConnection.get_token', Mock())
 @patch('utils.azure_users.AzureConnection.update_role')
 @mark.parametrize(
     'role_id,action', [('test', 'grant'), ('admin', 'revoke')],
@@ -53,6 +55,8 @@ def test_update_role_response_contains_expected_props(
     assert 'roles' in json.loads(response.data)
 
 
+@patch('utils.azure_users.AzureConnection.get_msal_client', Mock())
+@patch('utils.azure_users.AzureConnection.get_token', Mock())
 @patch('utils.azure_users.AzureConnection.update_role', new_callable=Mock)
 @mark.parametrize(
     'role_id,action,is_grant',

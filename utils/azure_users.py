@@ -64,13 +64,17 @@ ROLE_FIELD_VALUES = {
 
 class AzureConnection:
     def __init__(self, config=MSConfig):
-        self.client = msal.ConfidentialClientApplication(
-            config.CLIENT_ID,
-            authority=config.AUTHORITY,
-            client_credential=config.SECRET,
-        )
         self.config = config
+        self.client = self.get_msal_client()
         self.access_token = self.get_token()
+
+    def get_msal_client(self):
+        client = msal.ConfidentialClientApplication(
+            self.config.CLIENT_ID,
+            authority=self.config.AUTHORITY,
+            client_credential=self.config.SECRET,
+        )
+        return client
 
     def get_token(self):
         response = self.client.acquire_token_for_client(
