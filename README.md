@@ -167,6 +167,15 @@ pre-commit install -t pre-commit -t commit-msg
 With this command the library will take configuration from `.pre-commit-config.yaml` and will set up the hooks by us. 
 
 
+### Commit message style
+Use the following commit message style. e.g:
+```
+'feat: TT-123 Applying some changes'
+'fix: TT-321 Fixing something broken'
+'feat(config): TT-00 Fix something in config files'
+```
+The value `TT-###` refers to the Jira issue that is being solved. Use TT-00 if the commit does not refer to any issue.
+
 ### Test
 We are using [Pytest](https://docs.pytest.org/en/latest/index.html) for tests. The tests are located in the package 
 `tests` and use the [conventions for python test discovery](https://docs.pytest.org/en/latest/goodpractices.html#test-discovery).
