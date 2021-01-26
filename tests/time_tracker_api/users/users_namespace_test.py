@@ -2,7 +2,6 @@ from unittest.mock import Mock, patch
 from flask import json
 from flask.testing import FlaskClient
 from flask_restplus._http import HTTPStatus
-from utils.azure_users import AzureConnection
 from pytest import mark
 
 

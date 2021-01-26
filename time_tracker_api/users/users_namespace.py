@@ -1,8 +1,7 @@
 from faker import Faker
 from flask_restplus import fields, Resource
-from flask_restplus._http import HTTPStatus
 
-from time_tracker_api.api import common_fields, api, NullableString
+from time_tracker_api.api import common_fields, api
 from time_tracker_api.security import current_user_id
 
 from utils.azure_users import AzureConnection
@@ -26,12 +25,6 @@ user_response_fields = ns.model(
             description='Email of the user that belongs to the tenant',
             example=Faker().email(),
         ),
-        'role': NullableString(
-            title="User's Role",
-            max_length=50,
-            description='Role assigned to the user by the tenant',
-            example=Faker().word(['time-tracker-admin']),
-        ),
         'roles': fields.List(
             fields.String(
                 title='Roles',
@@ -45,19 +38,6 @@ user_response_fields = ns.model(
 )
 
 user_response_fields.update(common_fields)
-
-user_role_input_fields = ns.model(
-    'UserRoleInput',
-    {
-        'role': NullableString(
-            title="User's Role",
-            required=True,
-            max_length=50,
-            description='Role assigned to the user by the tenant',
-            example=Faker().word(['time-tracker-admin']),
-        ),
-    },
-)
 
 
 @ns.route('')

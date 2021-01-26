@@ -72,8 +72,6 @@ class AzureConnection:
         self.config = config
         self.access_token = self.get_token()
 
-        self.role_field = 'extension_1d76efa96f604499acc0c0ee116a1453_role'
-
     def get_token(self):
         response = self.client.acquire_token_for_client(
             scopes=self.config.SCOPE
