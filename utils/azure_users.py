@@ -38,14 +38,6 @@ class BearerAuth(requests.auth.AuthBase):
 
 
 class AzureUser:
-    def __init__(self, id, name, email, role):
-        self.id = id
-        self.name = name
-        self.email = email
-        self.role = role
-
-
-class AzureUser_v2:
     def __init__(self, id, name, email, roles):
         self.id = id
         self.name = name
@@ -104,21 +96,9 @@ class AzureConnection:
 
         assert 200 == response.status_code
         assert 'value' in response.json()
-        return [
-            self.to_azure_user_v2(item) for item in response.json()['value']
-        ]
+        return [self.to_azure_user(item) for item in response.json()['value']]
 
     def to_azure_user(self, item) -> AzureUser:
-        there_is_email = len(item['otherMails']) > 0
-        there_is_role = self.role_field in item
-
-        id = item['objectId']
-        name = item['displayName']
-        email = item['otherMails'][0] if there_is_email else ''
-        role = item[self.role_field] if there_is_role else None
-        return AzureUser(id, name, email, role)
-
-    def to_azure_user_v2(self, item) -> AzureUser_v2:
         there_is_email = len(item['otherMails']) > 0
 
         id = item['objectId']
@@ -129,7 +109,7 @@ class AzureConnection:
             for (field_name, field_value) in ROLE_FIELD_VALUES.values()
             if field_name in item
         ]
-        return AzureUser_v2(id, name, email, roles)
+        return AzureUser(id, name, email, roles)
 
     def update_role(self, user_id, role_id, is_grant):
         endpoint = "{endpoint}/users/{user_id}?api-version=1.6".format(
@@ -148,7 +128,7 @@ class AzureConnection:
         response = requests.get(endpoint, auth=BearerAuth(self.access_token))
         assert 200 == response.status_code
 
-        return self.to_azure_user_v2(response.json())
+        return self.to_azure_user(response.json())
 
     def get_non_test_users(self) -> List[AzureUser]:
         test_user_ids = self.get_test_user_ids()

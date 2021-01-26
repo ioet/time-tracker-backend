@@ -1,5 +1,5 @@
 from unittest.mock import Mock, patch
-from utils.azure_users import AzureConnection, ROLE_FIELD_VALUES, AzureUser_v2
+from utils.azure_users import AzureConnection, ROLE_FIELD_VALUES, AzureUser
 from pytest import mark
 
 
@@ -49,8 +49,8 @@ def test_azure_connection_get_test_user_ids(get_mock):
 def test_azure_connection_get_non_test_users(
     users_mock, get_test_user_ids_mock
 ):
-    test_user = AzureUser_v2('ID1', None, None, [])
-    non_test_user = AzureUser_v2('ID2', None, None, [])
+    test_user = AzureUser('ID1', None, None, [])
+    non_test_user = AzureUser('ID2', None, None, [])
     users_mock.return_value = [test_user, non_test_user]
     get_test_user_ids_mock.return_value = ['ID1']
     non_test_users = [non_test_user]
