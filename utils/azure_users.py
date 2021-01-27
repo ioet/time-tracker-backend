@@ -38,14 +38,6 @@ class BearerAuth(requests.auth.AuthBase):
 
 
 class AzureUser:
-    def __init__(self, id, name, email, role):
-        self.id = id
-        self.name = name
-        self.email = email
-        self.role = role
-
-
-class AzureUser_v2:
     def __init__(self, id, name, email, roles):
         self.id = id
         self.name = name
@@ -72,15 +64,17 @@ ROLE_FIELD_VALUES = {
 
 class AzureConnection:
     def __init__(self, config=MSConfig):
-        self.client = msal.ConfidentialClientApplication(
-            config.CLIENT_ID,
-            authority=config.AUTHORITY,
-            client_credential=config.SECRET,
-        )
         self.config = config
+        self.client = self.get_msal_client()
         self.access_token = self.get_token()
 
-        self.role_field = 'extension_1d76efa96f604499acc0c0ee116a1453_role'
+    def get_msal_client(self):
+        client = msal.ConfidentialClientApplication(
+            self.config.CLIENT_ID,
+            authority=self.config.AUTHORITY,
+            client_credential=self.config.SECRET,
+        )
+        return client
 
     def get_token(self):
         response = self.client.acquire_token_for_client(
@@ -93,16 +87,6 @@ class AzureConnection:
             raise ValueError(error_info)
 
     def users(self) -> List[AzureUser]:
-        endpoint = "{endpoint}/users?api-version=1.6&$select=displayName,otherMails,objectId,{role_field}".format(
-            endpoint=self.config.ENDPOINT, role_field=self.role_field,
-        )
-        response = requests.get(endpoint, auth=BearerAuth(self.access_token))
-
-        assert 200 == response.status_code
-        assert 'value' in response.json()
-        return [self.to_azure_user(item) for item in response.json()['value']]
-
-    def users_v2(self) -> List[AzureUser]:
         role_fields_params = ','.join(
             [field_name for field_name, _ in ROLE_FIELD_VALUES.values()]
         )
@@ -114,39 +98,9 @@ class AzureConnection:
 
         assert 200 == response.status_code
         assert 'value' in response.json()
-        return [
-            self.to_azure_user_v2(item) for item in response.json()['value']
-        ]
-
-    def update_user_role(self, id, role):
-        endpoint = "{endpoint}/users/{user_id}?api-version=1.6".format(
-            endpoint=self.config.ENDPOINT, user_id=id
-        )
-        data = {self.role_field: role}
-        response = requests.patch(
-            endpoint,
-            auth=BearerAuth(self.access_token),
-            data=json.dumps(data),
-            headers=HTTP_PATCH_HEADERS,
-        )
-        assert 204 == response.status_code
-
-        response = requests.get(endpoint, auth=BearerAuth(self.access_token))
-        assert 200 == response.status_code
-
-        return self.to_azure_user(response.json())
+        return [self.to_azure_user(item) for item in response.json()['value']]
 
     def to_azure_user(self, item) -> AzureUser:
-        there_is_email = len(item['otherMails']) > 0
-        there_is_role = self.role_field in item
-
-        id = item['objectId']
-        name = item['displayName']
-        email = item['otherMails'][0] if there_is_email else ''
-        role = item[self.role_field] if there_is_role else None
-        return AzureUser(id, name, email, role)
-
-    def to_azure_user_v2(self, item) -> AzureUser_v2:
         there_is_email = len(item['otherMails']) > 0
 
         id = item['objectId']
@@ -157,7 +111,7 @@ class AzureConnection:
             for (field_name, field_value) in ROLE_FIELD_VALUES.values()
             if field_name in item
         ]
-        return AzureUser_v2(id, name, email, roles)
+        return AzureUser(id, name, email, roles)
 
     def update_role(self, user_id, role_id, is_grant):
         endpoint = "{endpoint}/users/{user_id}?api-version=1.6".format(
@@ -176,13 +130,11 @@ class AzureConnection:
         response = requests.get(endpoint, auth=BearerAuth(self.access_token))
         assert 200 == response.status_code
 
-        return self.to_azure_user_v2(response.json())
+        return self.to_azure_user(response.json())
 
     def get_non_test_users(self) -> List[AzureUser]:
         test_user_ids = self.get_test_user_ids()
-        return [
-            user for user in self.users_v2() if user.id not in test_user_ids
-        ]
+        return [user for user in self.users() if user.id not in test_user_ids]
 
     def get_role_data(self, role_id, is_grant=True):
         assert role_id in ROLE_FIELD_VALUES.keys()
