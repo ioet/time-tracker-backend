@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.27.1 (2021-01-27)
+### Fix
+* TT-131 remove feature toggle for user role field ([#255](https://github.com/ioet/time-tracker-backend/issues/255)) ([`a3439c3`](https://github.com/ioet/time-tracker-backend/commit/a3439c3b0a2c3b6007f87b1157e38773968fc00d))
+
 ## v0.27.0 (2021-01-25)
 ### Feature
 * TT-122 show users by type of user ([#253](https://github.com/ioet/time-tracker-backend/issues/253)) ([`92573f2`](https://github.com/ioet/time-tracker-backend/commit/92573f2f19528eaabb57819cf06bd85626f2f95c))
