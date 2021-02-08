@@ -40,6 +40,16 @@ user_response_fields = ns.model(
 user_response_fields.update(common_fields)
 
 
+@ns.route('/<string:id>')
+@ns.param('id', 'The unique identifier of the user')
+class User(Resource):
+    @ns.doc('get_user')
+    @ns.marshal_list_with(user_response_fields)
+    def get(self, id):
+        """Get an user"""
+        return AzureConnection().get_user(id)
+
+
 @ns.route('')
 class Users(Resource):
     @ns.doc('list_users')
