@@ -1,8 +1,31 @@
 from unittest.mock import Mock, patch
 from flask import json
+from faker import Faker
 from flask.testing import FlaskClient
 from flask_restplus._http import HTTPStatus
 from pytest import mark
+
+
+@patch('utils.azure_users.AzureConnection.get_msal_client', Mock())
+@patch('utils.azure_users.AzureConnection.get_token', Mock())
+@patch('utils.azure_users.AzureConnection.get_user')
+def test_get_user_response_contains_expected_props(
+    get_user_mock, client: FlaskClient, valid_header: dict,
+):
+    get_user_mock.return_value = {
+        'name': 'dummy',
+        'email': 'dummy',
+        'roles': ['dummy-role'],
+    }
+    user_id = (Faker().uuid4(),)
+    response = client.get(f'/users/{user_id}', headers=valid_header)
+
+    get_user_mock.assert_called()
+    assert HTTPStatus.OK == response.status_code
+    assert 'name' in json.loads(response.data)
+    assert 'email' in json.loads(response.data)
+    assert 'roles' in json.loads(response.data)
+    assert ['dummy-role'] == json.loads(response.data)['roles']
 
 
 @patch('utils.azure_users.AzureConnection.get_msal_client', Mock())
