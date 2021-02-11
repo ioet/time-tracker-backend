@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.28.0 (2021-02-11)
+### Feature
+* TT-147 user endpoint ([#257](https://github.com/ioet/time-tracker-backend/issues/257)) ([`6abc3c2`](https://github.com/ioet/time-tracker-backend/commit/6abc3c24dfa1bfadd9c23558260dba14949fea22))
+
+### Documentation
+* TT-137: Create-Feature Toggles dictionary ([`5b0deaf`](https://github.com/ioet/time-tracker-backend/commit/5b0deaf4ebad89bdf9730ca3e5faf10761ae67e5))
+
 ## v0.27.1 (2021-01-27)
 ### Fix
 * TT-131 remove feature toggle for user role field ([#255](https://github.com/ioet/time-tracker-backend/issues/255)) ([`a3439c3`](https://github.com/ioet/time-tracker-backend/commit/a3439c3b0a2c3b6007f87b1157e38773968fc00d))
