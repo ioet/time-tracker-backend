@@ -86,6 +86,14 @@ class AzureConnection:
             error_info = f"{response['error']} {response['error_description']}"
             raise ValueError(error_info)
 
+    def get_user(self, user_id) -> AzureUser:
+        endpoint = "{endpoint}/users/{user_id}?api-version=1.6".format(
+            endpoint=self.config.ENDPOINT, user_id=user_id
+        )
+        response = requests.get(endpoint, auth=BearerAuth(self.access_token))
+        assert 200 == response.status_code
+        return self.to_azure_user(response.json())
+
     def users(self) -> List[AzureUser]:
         role_fields_params = ','.join(
             [field_name for field_name, _ in ROLE_FIELD_VALUES.values()]
