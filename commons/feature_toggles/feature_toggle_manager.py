@@ -2,19 +2,11 @@ import os
 import json
 from time_tracker_api.security import current_user_email
 from azure.appconfiguration import AzureAppConfigurationClient
+from utils.environment_variables import check_variables_are_defined
 
 
 class FeatureToggleConfig:
-    def check_variables_are_defined():
-        azure_app_variable = 'AZURE_APP_CONFIGURATION_CONNECTION_STRING'
-        if azure_app_variable not in os.environ:
-            raise EnvironmentError(
-                "{} is not defined in the environment".format(
-                    azure_app_variable
-                )
-            )
-
-    check_variables_are_defined()
+    check_variables_are_defined(['AZURE_APP_CONFIGURATION_CONNECTION_STRING'])
     AZURE_APP_CONFIGURATION_CONNECTION_STRING = os.environ.get(
         'AZURE_APP_CONFIGURATION_CONNECTION_STRING'
     )

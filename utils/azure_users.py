@@ -3,24 +3,20 @@ import os
 import requests
 import json
 from typing import List
+from utils.environment_variables import check_variables_are_defined
 
 
 class MSConfig:
-    def check_variables_are_defined():
-        auth_variables = [
-            'MS_CLIENT_ID',
-            'MS_AUTHORITY',
-            'MS_SECRET',
-            'MS_SCOPE',
-            'MS_ENDPOINT',
-        ]
-        for var in auth_variables:
-            if var not in os.environ:
-                raise EnvironmentError(
-                    "{} is not defined in the environment".format(var)
-                )
+    ms_variables = [
+        'MS_CLIENT_ID',
+        'MS_AUTHORITY',
+        'MS_SECRET',
+        'MS_SCOPE',
+        'MS_ENDPOINT',
+    ]
 
-    check_variables_are_defined()
+    check_variables_are_defined(ms_variables)
+
     CLIENT_ID = os.environ.get('MS_CLIENT_ID')
     AUTHORITY = os.environ.get('MS_AUTHORITY')
     SECRET = os.environ.get('MS_SECRET')
