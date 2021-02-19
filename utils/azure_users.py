@@ -169,3 +169,35 @@ class AzureConnection:
         assert 200 == response.status_code
         assert 'value' in response.json()
         return [item['objectId'] for item in response.json()['value']]
+
+    def get_group_id_by_group_name(self, group_name):
+        endpoint = "{endpoint}/groups?api-version=1.6&$select=objectId&$filter=displayName eq '{group_name}'".format(
+            endpoint=self.config.ENDPOINT, group_name=group_name
+        )
+
+        response = requests.get(endpoint, auth=BearerAuth(self.access_token))
+
+        assert 200 == response.status_code
+
+        return response.json()['value'][0]['objectId']
+
+    def is_user_in_group(self, user_id, group_name):
+        group_id = self.get_group_id_by_group_name(group_name=group_name)
+
+        endpoint = "{endpoint}/isMemberOf?api-version=1.6".format(
+            endpoint=self.config.ENDPOINT
+        )
+
+        data = {"groupId": group_id, "memberId": user_id}
+
+        response = requests.post(
+            endpoint,
+            auth=BearerAuth(self.access_token),
+            data=json.dumps(data),
+            headers=HTTP_PATCH_HEADERS,
+        )
+
+        assert 200 == response.status_code
+
+        item = response.json()['value']
+        return {'value': item}
