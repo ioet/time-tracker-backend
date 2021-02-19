@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.29.0 (2021-02-19)
+### Feature
+* TT-154 add is user member of a group endpoint ([#259](https://github.com/ioet/time-tracker-backend/issues/259)) ([`2381cf2`](https://github.com/ioet/time-tracker-backend/commit/2381cf2a76f6bdcc174ae8433a63d4121ac4acd5))
+
 ## v0.28.0 (2021-02-11)
 ### Feature
 * TT-147 user endpoint ([#257](https://github.com/ioet/time-tracker-backend/issues/257)) ([`6abc3c2`](https://github.com/ioet/time-tracker-backend/commit/6abc3c24dfa1bfadd9c23558260dba14949fea22))
