@@ -171,17 +171,15 @@ class AzureConnection:
         return [item['objectId'] for item in response.json()['value']]
 
     def get_group_id_by_group_name(self, group_name):
-        endpoint_get_groups = "{endpoint}/groups?api-version=1.6&$select=objectId&$filter=displayName eq '{group_name}'".format(
+        endpoint = "{endpoint}/groups?api-version=1.6&$select=objectId&$filter=displayName eq '{group_name}'".format(
             endpoint=self.config.ENDPOINT, group_name=group_name
         )
 
-        response_get_groups = requests.get(
-            endpoint_get_groups, auth=BearerAuth(self.access_token)
-        )
+        response = requests.get(endpoint, auth=BearerAuth(self.access_token))
 
-        assert 200 == response_get_groups.status_code
+        assert 200 == response.status_code
 
-        return response_get_groups.json()['value'][0]['objectId']
+        return response.json()['value'][0]['objectId']
 
     def is_user_in_group(self, user_id, group_name):
         group_id = self.get_group_id_by_group_name(group_name=group_name)
