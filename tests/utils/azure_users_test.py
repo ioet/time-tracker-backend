@@ -97,9 +97,10 @@ def test_is_user_in_group(
     post_mock.return_value = response_mock
 
     get_group_id_by_group_name_mock.return_value = 'group_id'
+    payload_mock = {'group_name': 'group_id'}
 
     azure_connection = AzureConnection()
     assert (
-        azure_connection.is_user_in_group('user_id', 'group_name')
+        azure_connection.is_user_in_group('user_id', payload_mock)
         == response_expected
     )

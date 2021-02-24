@@ -8,8 +8,22 @@ from utils.azure_users import AzureConnection
 
 ns = api.namespace('users', description='Namespace of the API for users')
 
-# User Model
+# Data to check if a user is in the group
+data_is_user_in_group = ns.model(
+    'Data',
+    {
+        'group_name': fields.String(
+            title='group_name',
+            max_length=50,
+            description='Name of the Group to verify',
+            example=Faker().word(
+                ['time-tracker-admin', 'time-tracker-tester']
+            ),
+        ),
+    },
+)
 
+# User Model
 user_response_fields = ns.model(
     'User',
     {
@@ -101,11 +115,11 @@ class RevokeRole(Resource):
         return AzureConnection().update_role(user_id, role_id, is_grant=False)
 
 
-@ns.route('/<string:user_id>/groups/<string:group_id>/is-member-of')
+@ns.route('/<string:user_id>/is-member-of')
 @ns.param('user_id', 'The user identifier')
-@ns.param('group_id', 'The group name identifier')
 class UserInGroup(Resource):
     @ns.doc('user_in_group')
-    def get(self, user_id, group_id):
+    @ns.expect(data_is_user_in_group)
+    def post(self, user_id):
         """Is User in the Group"""
-        return AzureConnection().is_user_in_group(user_id, group_id)
+        return AzureConnection().is_user_in_group(user_id, ns.payload)
