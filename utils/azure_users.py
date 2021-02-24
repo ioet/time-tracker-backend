@@ -34,11 +34,12 @@ class BearerAuth(requests.auth.AuthBase):
 
 
 class AzureUser:
-    def __init__(self, id, name, email, roles):
+    def __init__(self, id, name, email, roles, groups):
         self.id = id
         self.name = name
         self.email = email
         self.roles = roles
+        self.groups = groups if groups else []
 
 
 HTTP_PATCH_HEADERS = {
@@ -115,7 +116,14 @@ class AzureConnection:
             for (field_name, field_value) in ROLE_FIELD_VALUES.values()
             if field_name in item
         ]
-        return AzureUser(id, name, email, roles)
+
+        groups_and_users = self.get_groups_and_users()
+        groups = [
+            item['group_name']
+            for item in groups_and_users
+            if id in item['user_ids']
+        ]
+        return AzureUser(id, name, email, roles, groups)
 
     def update_role(self, user_id, role_id, is_grant):
         endpoint = "{endpoint}/users/{user_id}?api-version=1.6".format(
@@ -180,6 +188,23 @@ class AzureConnection:
         assert 200 == response.status_code
 
         return response.json()['value'][0]['objectId']
+
+    def get_groups_and_users(self):
+        endpoint = "{endpoint}/groups?api-version=1.6&$select=displayName,members&$expand=members".format(
+            endpoint=self.config.ENDPOINT
+        )
+        response = requests.get(endpoint, auth=BearerAuth(self.access_token))
+        assert 200 == response.status_code
+
+        result = []
+        for item in response.json()['value']:
+            new_item = {}
+            new_item['group_name'] = item['displayName']
+            user_ids = [member['objectId'] for member in item['members']]
+            new_item['user_ids'] = user_ids
+            result.append(new_item)
+
+        return result
 
     def is_user_in_group(self, user_id, data: dict):
         group_id = self.get_group_id_by_group_name(
