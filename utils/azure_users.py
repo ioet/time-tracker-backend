@@ -39,7 +39,7 @@ class AzureUser:
         self.name = name
         self.email = email
         self.roles = roles
-        self.groups = groups if groups else []
+        self.groups = groups
 
 
 HTTP_PATCH_HEADERS = {
@@ -64,6 +64,7 @@ class AzureConnection:
         self.config = config
         self.client = self.get_msal_client()
         self.access_token = self.get_token()
+        self.groups_and_users = None
 
     def get_msal_client(self):
         client = msal.ConfidentialClientApplication(
@@ -116,13 +117,7 @@ class AzureConnection:
             for (field_name, field_value) in ROLE_FIELD_VALUES.values()
             if field_name in item
         ]
-
-        groups_and_users = self.get_groups_and_users()
-        groups = [
-            item['group_name']
-            for item in groups_and_users
-            if id in item['user_ids']
-        ]
+        groups = self.get_groups_by_user_id(id)
         return AzureUser(id, name, email, roles, groups)
 
     def update_role(self, user_id, role_id, is_grant):
@@ -189,21 +184,26 @@ class AzureConnection:
 
         return response.json()['value'][0]['objectId']
 
+    def get_groups_by_user_id(self, user_id):
+        if self.groups_and_users is None:
+            self.groups_and_users = self.get_groups_and_users()
+        return [
+            group_name
+            for (group_name, user_ids) in self.groups_and_users
+            if user_id in user_ids
+        ]
+
     def get_groups_and_users(self):
         endpoint = "{endpoint}/groups?api-version=1.6&$select=displayName,members&$expand=members".format(
             endpoint=self.config.ENDPOINT
         )
         response = requests.get(endpoint, auth=BearerAuth(self.access_token))
         assert 200 == response.status_code
-
-        result = []
-        for item in response.json()['value']:
-            new_item = {}
-            new_item['group_name'] = item['displayName']
-            user_ids = [member['objectId'] for member in item['members']]
-            new_item['user_ids'] = user_ids
-            result.append(new_item)
-
+        parse_item = lambda item: (
+            item['displayName'],
+            [member['objectId'] for member in item['members']],
+        )
+        result = list(map(parse_item, response.json()['value']))
         return result
 
     def is_user_in_group(self, user_id, data: dict):
