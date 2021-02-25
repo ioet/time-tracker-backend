@@ -31,13 +31,28 @@ user_response_fields = ns.model(
                 description='List of the roles assigned to the user by the tenant',
             ),
             example=Faker().words(
-                3, ['time-tracker-admin', 'test-user', 'guest',],
+                3,
+                [
+                    'time-tracker-admin',
+                    'test-user',
+                    'guest',
+                ],
             ),
         ),
     },
 )
 
 user_response_fields.update(common_fields)
+
+
+@ns.route('/<string:id>')
+@ns.param('id', 'The unique identifier of the user')
+class User(Resource):
+    @ns.doc('get_user')
+    @ns.marshal_list_with(user_response_fields)
+    def get(self, id):
+        """Get an user"""
+        return AzureConnection().get_user(id)
 
 
 @ns.route('')
@@ -84,3 +99,13 @@ class RevokeRole(Resource):
     def post(self, user_id, role_id):
         """Revoke role to user"""
         return AzureConnection().update_role(user_id, role_id, is_grant=False)
+
+
+@ns.route('/<string:user_id>/groups/<string:group_id>/is-member-of')
+@ns.param('user_id', 'The user identifier')
+@ns.param('group_id', 'The group name identifier')
+class UserInGroup(Resource):
+    @ns.doc('user_in_group')
+    def get(self, user_id, group_id):
+        """Is User in the Group"""
+        return AzureConnection().is_user_in_group(user_id, group_id)
