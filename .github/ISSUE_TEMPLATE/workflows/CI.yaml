@@ -1,0 +1,15 @@
+name: 'Validate template (terraform)'
+
+on: push
+
+jobs:
+  terraform:
+    name: 'Terraform-validate'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Test
+      run: |
+        echo "Hello"
