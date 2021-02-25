@@ -57,12 +57,12 @@ user_in_group_input = ns.model(
 )
 
 user_in_group_response = ns.model(
-    'Response',
+    'UserInGroupResponse',
     {
         'value': fields.Boolean(
             readOnly=True,
             title='value',
-            description='Boolean to check if a user belong to a group',
+            description='Boolean to check if a user belongs to a group',
             example=Faker().boolean(),
         )
     },
