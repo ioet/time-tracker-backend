@@ -203,9 +203,6 @@ class AzureConnection:
             item['displayName'],
             [member['objectId'] for member in item['members']],
         )
-        # from pprint import pprint
-        # pprint(response.json()['value'])
-        print(1)
         result = list(map(parse_item, response.json()['value']))
         return result
 
