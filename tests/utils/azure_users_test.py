@@ -117,9 +117,10 @@ def test_get_groups_and_users(get_mock):
                 'displayName': 'test-group-2',
                 'members': [
                     {'objectId': 'user-id3'},
-                    {'objectId': 'user-id4'},
+                    {'objectId': 'user-id1'},
                 ],
             },
+            {'displayName': 'test-group-3', 'members': [],},
         ]
     }
     response_mock.json = Mock(return_value=return_value)
@@ -127,9 +128,26 @@ def test_get_groups_and_users(get_mock):
 
     expected_result = [
         ('test-group-1', ['user-id1', 'user-id2']),
-        ('test-group-2', ['user-id3', 'user-id4']),
+        ('test-group-2', ['user-id3', 'user-id1']),
+        ('test-group-3', []),
     ]
 
     azure_connection = AzureConnection()
 
     assert azure_connection.get_groups_and_users() == expected_result
+
+
+@patch('utils.azure_users.AzureConnection.get_msal_client', Mock())
+@patch('utils.azure_users.AzureConnection.get_token', Mock())
+@patch('utils.azure_users.AzureConnection.get_groups_and_users')
+def test_get_groups_by_user_id(get_groups_and_users_mock):
+    get_groups_and_users_mock.return_value = [
+        ('test-group-1', ['user-id1', 'user-id2']),
+        ('test-group-2', ['user-id3', 'user-id1']),
+    ]
+
+    azure_connection = AzureConnection()
+    user_id = 'user-id1'
+    expected_result = ['test-group-1', 'test-group-2']
+    groups = azure_connection.get_groups_by_user_id('user-id1')
+    assert groups == expected_result
