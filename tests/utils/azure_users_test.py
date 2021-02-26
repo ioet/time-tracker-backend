@@ -140,14 +140,23 @@ def test_get_groups_and_users(get_mock):
 @patch('utils.azure_users.AzureConnection.get_msal_client', Mock())
 @patch('utils.azure_users.AzureConnection.get_token', Mock())
 @patch('utils.azure_users.AzureConnection.get_groups_and_users')
-def test_get_groups_by_user_id(get_groups_and_users_mock):
+@mark.parametrize(
+    'user_id,groups_expected_value',
+    [
+        ('user-id1', ['test-group-1', 'test-group-2']),
+        ('user-id2', ['test-group-1']),
+        ('user-id3', ['test-group-2']),
+        ('user-id4', []),
+    ],
+)
+def test_get_groups_by_user_id(
+    get_groups_and_users_mock, user_id, groups_expected_value
+):
     get_groups_and_users_mock.return_value = [
         ('test-group-1', ['user-id1', 'user-id2']),
         ('test-group-2', ['user-id3', 'user-id1']),
     ]
 
     azure_connection = AzureConnection()
-    user_id = 'user-id1'
-    expected_result = ['test-group-1', 'test-group-2']
-    groups = azure_connection.get_groups_by_user_id('user-id1')
-    assert groups == expected_result
+    groups = azure_connection.get_groups_by_user_id(user_id)
+    assert groups == groups_expected_value
