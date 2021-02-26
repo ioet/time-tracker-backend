@@ -96,3 +96,40 @@ def test_is_user_in_group(
         azure_connection.is_user_in_group('user_id', payload_mock)
         == response_expected
     )
+
+
+@patch('utils.azure_users.AzureConnection.get_msal_client', Mock())
+@patch('utils.azure_users.AzureConnection.get_token', Mock())
+@patch('requests.get')
+def test_get_groups_and_users(get_mock):
+    response_mock = Mock()
+    response_mock.status_code = 200
+    return_value = {
+        'value': [
+            {
+                'displayName': 'test-group-1',
+                'members': [
+                    {'objectId': 'user-id1'},
+                    {'objectId': 'user-id2'},
+                ],
+            },
+            {
+                'displayName': 'test-group-2',
+                'members': [
+                    {'objectId': 'user-id3'},
+                    {'objectId': 'user-id4'},
+                ],
+            },
+        ]
+    }
+    response_mock.json = Mock(return_value=return_value)
+    get_mock.return_value = response_mock
+
+    expected_result = [
+        ('test-group-1', ['user-id1', 'user-id2']),
+        ('test-group-2', ['user-id3', 'user-id4']),
+    ]
+
+    azure_connection = AzureConnection()
+
+    assert azure_connection.get_groups_and_users() == expected_result
