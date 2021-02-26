@@ -181,8 +181,10 @@ class AzureConnection:
 
         return response.json()['value'][0]['objectId']
 
-    def is_user_in_group(self, user_id, group_name):
-        group_id = self.get_group_id_by_group_name(group_name=group_name)
+    def is_user_in_group(self, user_id, data: dict):
+        group_id = self.get_group_id_by_group_name(
+            group_name=data['group_name']
+        )
 
         endpoint = "{endpoint}/isMemberOf?api-version=1.6".format(
             endpoint=self.config.ENDPOINT

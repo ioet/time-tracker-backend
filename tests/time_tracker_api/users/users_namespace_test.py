@@ -132,9 +132,10 @@ def test_if_user_is_in_group(
     expected_value,
 ):
     is_user_in_group_mock.return_value = {'value': expected_value}
-    response = client.get(
-        f'/users/{user_id}/groups/{group_name}/is-member-of',
-        headers=valid_header,
+    valid_data = {'group_name': group_name}
+
+    response = client.post(
+        f'/users/{user_id}/is-member-of', headers=valid_header, json=valid_data
     )
     assert HTTPStatus.OK == response.status_code
     assert 'value' in json.loads(response.data)

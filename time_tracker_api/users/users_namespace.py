@@ -9,7 +9,6 @@ from utils.azure_users import AzureConnection
 ns = api.namespace('users', description='Namespace of the API for users')
 
 # User Model
-
 user_response_fields = ns.model(
     'User',
     {
@@ -39,6 +38,33 @@ user_response_fields = ns.model(
                 ],
             ),
         ),
+    },
+)
+
+# Data to check if a user is in the group
+user_in_group_input = ns.model(
+    'UserInGroupInput',
+    {
+        'group_name': fields.String(
+            title='group_name',
+            max_length=50,
+            description='Name of the Group to verify',
+            example=Faker().word(
+                ['time-tracker-admin', 'time-tracker-tester']
+            ),
+        ),
+    },
+)
+
+user_in_group_response = ns.model(
+    'UserInGroupResponse',
+    {
+        'value': fields.Boolean(
+            readOnly=True,
+            title='value',
+            description='Boolean to check if a user belongs to a group',
+            example=Faker().boolean(),
+        )
     },
 )
 
@@ -101,11 +127,12 @@ class RevokeRole(Resource):
         return AzureConnection().update_role(user_id, role_id, is_grant=False)
 
 
-@ns.route('/<string:user_id>/groups/<string:group_id>/is-member-of')
+@ns.route('/<string:user_id>/is-member-of')
 @ns.param('user_id', 'The user identifier')
-@ns.param('group_id', 'The group name identifier')
 class UserInGroup(Resource):
     @ns.doc('user_in_group')
-    def get(self, user_id, group_id):
-        """Is User in the Group"""
-        return AzureConnection().is_user_in_group(user_id, group_id)
+    @ns.expect(user_in_group_input)
+    @ns.marshal_with(user_in_group_response)
+    def post(self, user_id):
+        """Check if user belongs to group"""
+        return AzureConnection().is_user_in_group(user_id, ns.payload)
