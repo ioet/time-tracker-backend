@@ -160,3 +160,19 @@ def test_get_groups_by_user_id(
     azure_connection = AzureConnection()
     groups = azure_connection.get_groups_by_user_id(user_id)
     assert groups == groups_expected_value
+
+
+@patch('utils.azure_users.AzureConnection.get_msal_client', Mock())
+@patch('utils.azure_users.AzureConnection.get_token', Mock())
+@patch('utils.azure_users.AzureConnection.get_groups_and_users')
+def test_get_groups_and_users_called_once_by_instance(
+    get_groups_and_users_mock,
+):
+    get_groups_and_users_mock.return_value = []
+    user_id = 'user-id1'
+    azure_connection = AzureConnection()
+    azure_connection.get_groups_by_user_id(user_id)
+    azure_connection.get_groups_by_user_id(user_id)
+    azure_connection.get_groups_by_user_id(user_id)
+
+    get_groups_and_users_mock.assert_called_once()
