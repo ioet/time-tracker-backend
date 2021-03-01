@@ -10,14 +10,13 @@ from pytest import mark
 @patch('utils.azure_users.AzureConnection.get_token', Mock())
 @patch('utils.azure_users.AzureConnection.get_user')
 def test_get_user_response_contains_expected_props(
-    get_user_mock,
-    client: FlaskClient,
-    valid_header: dict,
+    get_user_mock, client: FlaskClient, valid_header: dict,
 ):
     get_user_mock.return_value = {
         'name': 'dummy',
         'email': 'dummy',
         'roles': ['dummy-role'],
+        'groups': ['dummy-group'],
     }
     user_id = (Faker().uuid4(),)
     response = client.get(f'/users/{user_id}', headers=valid_header)
@@ -27,7 +26,9 @@ def test_get_user_response_contains_expected_props(
     assert 'name' in json.loads(response.data)
     assert 'email' in json.loads(response.data)
     assert 'roles' in json.loads(response.data)
+    assert 'groups' in json.loads(response.data)
     assert ['dummy-role'] == json.loads(response.data)['roles']
+    assert ['dummy-group'] == json.loads(response.data)['groups']
 
 
 @patch('utils.azure_users.AzureConnection.get_msal_client', Mock())
@@ -37,12 +38,15 @@ def test_get_user_response_contains_expected_props(
 )
 @patch('utils.azure_users.AzureConnection.users')
 def test_users_response_contains_expected_props(
-    users_mock,
-    client: FlaskClient,
-    valid_header: dict,
+    users_mock, client: FlaskClient, valid_header: dict,
 ):
     users_mock.return_value = [
-        {'name': 'dummy', 'email': 'dummy', 'roles': ['dummy-role']}
+        {
+            'name': 'dummy',
+            'email': 'dummy',
+            'roles': ['dummy-role'],
+            'groups': ['dummy-group'],
+        }
     ]
     response = client.get('/users', headers=valid_header)
 
@@ -51,15 +55,16 @@ def test_users_response_contains_expected_props(
     assert 'name' in json.loads(response.data)[0]
     assert 'email' in json.loads(response.data)[0]
     assert 'roles' in json.loads(response.data)[0]
+    assert 'groups' in json.loads(response.data)[0]
     assert ['dummy-role'] == json.loads(response.data)[0]['roles']
+    assert ['dummy-group'] == json.loads(response.data)[0]['groups']
 
 
 @patch('utils.azure_users.AzureConnection.get_msal_client', Mock())
 @patch('utils.azure_users.AzureConnection.get_token', Mock())
 @patch('utils.azure_users.AzureConnection.update_role')
 @mark.parametrize(
-    'role_id,action',
-    [('test', 'grant'), ('admin', 'revoke')],
+    'role_id,action', [('test', 'grant'), ('admin', 'revoke')],
 )
 def test_update_role_response_contains_expected_props(
     update_role_mock,
@@ -73,15 +78,16 @@ def test_update_role_response_contains_expected_props(
         'name': 'dummy',
         'email': 'dummy',
         'roles': [],
+        'groups': [],
     }
     response = client.post(
-        f'/users/{user_id}/roles/{role_id}/{action}',
-        headers=valid_header,
+        f'/users/{user_id}/roles/{role_id}/{action}', headers=valid_header,
     )
     assert HTTPStatus.OK == response.status_code
     assert 'name' in json.loads(response.data)
     assert 'email' in json.loads(response.data)
     assert 'roles' in json.loads(response.data)
+    assert 'groups' in json.loads(response.data)
 
 
 @patch('utils.azure_users.AzureConnection.get_msal_client', Mock())
@@ -107,8 +113,7 @@ def test_update_role_is_called_properly_on_each_action(
 ):
     update_role_mock.return_value = {}
     response = client.post(
-        f'/users/{user_id}/roles/{role_id}/{action}',
-        headers=valid_header,
+        f'/users/{user_id}/roles/{role_id}/{action}', headers=valid_header,
     )
 
     assert HTTPStatus.OK == response.status_code

@@ -30,12 +30,22 @@ user_response_fields = ns.model(
                 description='List of the roles assigned to the user by the tenant',
             ),
             example=Faker().words(
+                3, ['time-tracker-admin', 'test-user', 'guest',], unique=True
+            ),
+        ),
+        'groups': fields.List(
+            fields.String(
+                title='Groups',
+                description='List of the groups the user belongs to, assigned by the tenant',
+            ),
+            example=Faker().words(
                 3,
                 [
                     'time-tracker-admin',
-                    'test-user',
-                    'guest',
+                    'time-tracker-tester',
+                    'time-tracker-guest',
                 ],
+                unique=True,
             ),
         ),
     },
