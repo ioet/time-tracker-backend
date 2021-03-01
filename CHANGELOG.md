@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.30.0 (2021-03-01)
+### Feature
+* TT-156 add groups field in User model ([#262](https://github.com/ioet/time-tracker-backend/issues/262)) ([`4c6f8ba`](https://github.com/ioet/time-tracker-backend/commit/4c6f8ba3d91097cec65d6b2946470a0c81e33f0c))
+
+### Fix
+* TT-162 change endpoint is user in group to a post ([#260](https://github.com/ioet/time-tracker-backend/issues/260)) ([`87894dd`](https://github.com/ioet/time-tracker-backend/commit/87894ddc4764d217d62edf688e36f53767459cbb))
+
 ## v0.29.0 (2021-02-19)
 ### Feature
 * TT-154 add is user member of a group endpoint ([#259](https://github.com/ioet/time-tracker-backend/issues/259)) ([`2381cf2`](https://github.com/ioet/time-tracker-backend/commit/2381cf2a76f6bdcc174ae8433a63d4121ac4acd5))
