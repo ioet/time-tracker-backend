@@ -51,19 +51,16 @@ user_response_fields = ns.model(
     },
 )
 
+group_name_field = fields.String(
+    title='group_name',
+    max_length=50,
+    description='Name of the Group',
+    example=Faker().word(['time-tracker-admin', 'time-tracker-tester']),
+)
+
 # Data to check if a user is in the group
 user_in_group_input = ns.model(
-    'UserInGroupInput',
-    {
-        'group_name': fields.String(
-            title='group_name',
-            max_length=50,
-            description='Name of the Group to verify',
-            example=Faker().word(
-                ['time-tracker-admin', 'time-tracker-tester']
-            ),
-        ),
-    },
+    'UserInGroupInput', {'group_name': group_name_field},
 )
 
 user_in_group_response = ns.model(
@@ -146,3 +143,44 @@ class UserInGroup(Resource):
     def post(self, user_id):
         """Check if user belongs to group"""
         return AzureConnection().is_user_in_group(user_id, ns.payload)
+
+
+add_user_to_group_input = ns.model(
+    'AddUserToGroupInput', {'group_name': group_name_field},
+)
+
+
+@ns.route('/<string:user_id>/groups/add')
+@ns.param('user_id', 'The user identifier')
+class AddToGroup(Resource):
+    @ns.doc('add_to_group')
+    @ns.expect(add_user_to_group_input)
+    @ns.marshal_with(user_response_fields)
+    def post(self, user_id):
+        """
+        Add user to an EXISTING group in the Azure Tenant directory.
+        Available options for `group_name`:
+        ```
+            - time-tracker-admin
+            - time-tracker-tester
+        ```
+        """
+        return []
+
+
+remove_user_from_group_input = ns.model(
+    'RemoveUserFromGroupInput', {'group_name': group_name_field},
+)
+
+
+@ns.route('/<string:user_id>/groups/remove')
+@ns.param('user_id', 'The user identifier')
+class RemoveFromGroup(Resource):
+    @ns.doc('remove_from_group')
+    @ns.expect(remove_user_from_group_input)
+    @ns.marshal_with(user_response_fields)
+    def post(self, user_id):
+        """
+        Remove user from an EXISTING group in the Azure Tenant directory.
+        """
+        return []
