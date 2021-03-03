@@ -153,13 +153,7 @@ class AzureConnection:
         )
         assert 204 == response.status_code
 
-        endpoint = "{endpoint}/users/{user_id}?api-version=1.6".format(
-            endpoint=self.config.ENDPOINT, user_id=user_id
-        )
-        response = requests.get(endpoint, auth=BearerAuth(self.access_token))
-        assert 200 == response.status_code
-
-        return self.to_azure_user(response.json())
+        return self.get_user(user_id)
 
     def remove_user_from_group(self, user_id, group_name):
         group_id = self.get_group_id_by_group_name(group_name)
@@ -173,13 +167,7 @@ class AzureConnection:
         )
         assert 204 == response.status_code
 
-        endpoint = "{endpoint}/users/{user_id}?api-version=1.6".format(
-            endpoint=self.config.ENDPOINT, user_id=user_id
-        )
-        response = requests.get(endpoint, auth=BearerAuth(self.access_token))
-        assert 200 == response.status_code
-
-        return self.to_azure_user(response.json())
+        return self.get_user(user_id)
 
     def get_non_test_users(self) -> List[AzureUser]:
         test_user_ids = self.get_test_user_ids()
