@@ -165,7 +165,9 @@ class AddToGroup(Resource):
             - time-tracker-tester
         ```
         """
-        return []
+        return AzureConnection().add_user_to_group(
+            user_id, ns.payload['group_name']
+        )
 
 
 remove_user_from_group_input = ns.model(
@@ -183,4 +185,6 @@ class RemoveFromGroup(Resource):
         """
         Remove user from an EXISTING group in the Azure Tenant directory.
         """
-        return []
+        return AzureConnection().remove_user_from_group(
+            user_id, ns.payload['group_name']
+        )
