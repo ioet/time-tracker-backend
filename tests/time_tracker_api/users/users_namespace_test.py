@@ -144,3 +144,45 @@ def test_if_user_is_in_group(
     )
     assert HTTPStatus.OK == response.status_code
     assert 'value' in json.loads(response.data)
+
+
+@patch('utils.azure_users.AzureConnection.get_msal_client', Mock())
+@patch('utils.azure_users.AzureConnection.get_token', Mock())
+@patch('utils.azure_users.AzureConnection.add_user_to_group')
+def test_add_to_group(
+    add_user_to_group_mock,
+    client: FlaskClient,
+    valid_header: dict,
+    user_id: str,
+):
+
+    add_user_to_group_mock.return_value = {}
+    valid_data = {'group_name': 'dummy_group'}
+
+    response = client.post(
+        f'/users/{user_id}/groups/add', headers=valid_header, json=valid_data
+    )
+    assert HTTPStatus.OK == response.status_code
+    add_user_to_group_mock.assert_called_once()
+
+
+@patch('utils.azure_users.AzureConnection.get_msal_client', Mock())
+@patch('utils.azure_users.AzureConnection.get_token', Mock())
+@patch('utils.azure_users.AzureConnection.remove_user_from_group')
+def test_remove_from_group(
+    remove_user_from_group_mock,
+    client: FlaskClient,
+    valid_header: dict,
+    user_id: str,
+):
+
+    remove_user_from_group_mock.return_value = {}
+    valid_data = {'group_name': 'dummy_group'}
+
+    response = client.post(
+        f'/users/{user_id}/groups/remove',
+        headers=valid_header,
+        json=valid_data,
+    )
+    assert HTTPStatus.OK == response.status_code
+    remove_user_from_group_mock.assert_called_once()

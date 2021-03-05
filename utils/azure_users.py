@@ -139,6 +139,36 @@ class AzureConnection:
 
         return self.to_azure_user(response.json())
 
+    def add_user_to_group(self, user_id, group_name):
+        group_id = self.get_group_id_by_group_name(group_name)
+        endpoint = "{endpoint}/groups/{group_id}/$links/members?api-version=1.6".format(
+            endpoint=self.config.ENDPOINT, group_id=group_id,
+        )
+        data = {'url': f'{self.config.ENDPOINT}/directoryObjects/{user_id}'}
+        response = requests.post(
+            endpoint,
+            auth=BearerAuth(self.access_token),
+            data=json.dumps(data),
+            headers=HTTP_PATCH_HEADERS,
+        )
+        assert 204 == response.status_code
+
+        return self.get_user(user_id)
+
+    def remove_user_from_group(self, user_id, group_name):
+        group_id = self.get_group_id_by_group_name(group_name)
+        endpoint = "{endpoint}/groups/{group_id}/$links/members/{user_id}?api-version=1.6".format(
+            endpoint=self.config.ENDPOINT, group_id=group_id, user_id=user_id
+        )
+        response = requests.delete(
+            endpoint,
+            auth=BearerAuth(self.access_token),
+            headers=HTTP_PATCH_HEADERS,
+        )
+        assert 204 == response.status_code
+
+        return self.get_user(user_id)
+
     def get_non_test_users(self) -> List[AzureUser]:
         test_user_ids = self.get_test_user_ids()
         return [user for user in self.users() if user.id not in test_user_ids]

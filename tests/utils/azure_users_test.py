@@ -176,3 +176,55 @@ def test_get_groups_and_users_called_once_by_instance(
     azure_connection.get_groups_by_user_id(user_id)
 
     get_groups_and_users_mock.assert_called_once()
+
+
+@patch('utils.azure_users.AzureConnection.get_msal_client', Mock())
+@patch('utils.azure_users.AzureConnection.get_token', Mock())
+@patch('utils.azure_users.AzureConnection.get_user')
+@patch('utils.azure_users.AzureConnection.get_group_id_by_group_name')
+@patch('requests.post')
+def test_add_user_to_group(
+    post_mock, get_group_id_by_group_name_mock, get_user_mock
+):
+    get_group_id_by_group_name_mock.return_value = 'dummy_group'
+    test_user = AzureUser('ID1', None, None, [], [])
+    get_user_mock.return_value = test_user
+
+    response_mock = Mock()
+    response_mock.status_code = 204
+    post_mock.return_value = response_mock
+
+    azure_connection = AzureConnection()
+    expected_value = azure_connection.add_user_to_group(
+        'dummy_user_id', 'dummy_group'
+    )
+
+    get_group_id_by_group_name_mock.assert_called_once()
+    get_user_mock.assert_called_once()
+    assert expected_value == test_user
+
+
+@patch('utils.azure_users.AzureConnection.get_msal_client', Mock())
+@patch('utils.azure_users.AzureConnection.get_token', Mock())
+@patch('utils.azure_users.AzureConnection.get_user')
+@patch('utils.azure_users.AzureConnection.get_group_id_by_group_name')
+@patch('requests.delete')
+def test_remove_user_from_group(
+    delete_mock, get_group_id_by_group_name_mock, get_user_mock
+):
+    get_group_id_by_group_name_mock.return_value = 'dummy_group'
+    test_user = AzureUser('ID1', None, None, [], [])
+    get_user_mock.return_value = test_user
+
+    response_mock = Mock()
+    response_mock.status_code = 204
+    delete_mock.return_value = response_mock
+
+    azure_connection = AzureConnection()
+    expected_value = azure_connection.remove_user_from_group(
+        'dummy_user_id', 'dummy_group'
+    )
+
+    get_group_id_by_group_name_mock.assert_called_once()
+    get_user_mock.assert_called_once()
+    assert expected_value == test_user
