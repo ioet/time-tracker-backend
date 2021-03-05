@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.31.0 (2021-03-05)
+### Feature
+* TT-169 add enpoints to add/remove users to/from groups ([#263](https://github.com/ioet/time-tracker-backend/issues/263)) ([`06a8988`](https://github.com/ioet/time-tracker-backend/commit/06a8988f8634e9e92183aea55e364eece157ea34))
+
 ## v0.30.0 (2021-03-01)
 ### Feature
 * TT-156 add groups field in User model ([#262](https://github.com/ioet/time-tracker-backend/issues/262)) ([`4c6f8ba`](https://github.com/ioet/time-tracker-backend/commit/4c6f8ba3d91097cec65d6b2946470a0c81e33f0c))
