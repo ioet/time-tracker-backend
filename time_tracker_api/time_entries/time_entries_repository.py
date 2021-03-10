@@ -18,7 +18,7 @@ from utils.extend_model import (
     create_in_condition,
     add_user_email_to_time_entries,
 )
-
+import flask
 from flask_restplus import abort
 from flask_restplus._http import HTTPStatus
 from utils.azure_users import AzureConnection
@@ -91,6 +91,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         conditions: dict = None,
         custom_sql_conditions: List[str] = None,
         date_range: dict = None,
+        visible_only=True,
         **kwargs,
     ):
         conditions = conditions if conditions else {}
@@ -104,14 +105,38 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         )
 
         custom_params = self.generate_params(date_range)
-        counter = CosmosDBRepository.count(
-            self,
-            event_context=event_context,
-            conditions=conditions,
-            custom_sql_conditions=custom_sql_conditions,
-            custom_params=custom_params,
+        partition_key_value = self.find_partition_key_value(event_context)
+        params = [
+            {"name": "@partition_key_value", "value": partition_key_value},
+        ]
+        params.extend(self.generate_params(conditions))
+        params.extend(custom_params)
+
+        query_str = """
+            SELECT VALUE COUNT(1) FROM c
+            WHERE c.{partition_key_attribute}=@partition_key_value
+            {conditions_clause}
+            {visibility_condition}
+            {custom_sql_conditions_clause}
+            """.format(
+            partition_key_attribute=self.partition_key_attribute,
+            visibility_condition=self.create_sql_condition_for_visibility(
+                visible_only
+            ),
+            conditions_clause=self.create_sql_where_conditions(conditions),
+            custom_sql_conditions_clause=self.create_custom_sql_conditions(
+                custom_sql_conditions
+            ),
         )
-        return counter
+
+        flask.current_app.logger.debug(query_str)
+        result = self.container.query_items(
+            query=query_str,
+            parameters=params,
+            partition_key=partition_key_value,
+        )
+
+        return result.next()
 
     def find_all(
         self,

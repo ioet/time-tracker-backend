@@ -36,3 +36,6 @@ migration_status.csv
 
 # Mac
 .DS_Store
+
+# windows env variables
+.env.bat
