@@ -317,15 +317,6 @@ def test_find_all_with_offset(
     assert result_after_the_second_item == result_all_items[2:]
 
 
-def test_count(
-    cosmos_db_repository: CosmosDBRepository, event_context: EventContext
-):
-    counter = cosmos_db_repository.count(event_context)
-    print('test counter: ', counter)
-
-    assert counter == 10
-
-
 @pytest.mark.parametrize(
     'mapper,expected_type', [(None, dict), (dict, dict), (Person, Person)]
 )

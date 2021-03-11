@@ -277,50 +277,6 @@ class CosmosDBRepository:
         function_mapper = self.get_mapper_or_dict(mapper)
         return list(map(function_mapper, result))
 
-    def count(
-        self,
-        event_context: EventContext,
-        conditions: dict = None,
-        custom_sql_conditions: List[str] = None,
-        custom_params: dict = None,
-        visible_only=True,
-    ):
-        conditions = conditions if conditions else {}
-        custom_sql_conditions = (
-            custom_sql_conditions if custom_sql_conditions else []
-        )
-        custom_params = custom_params if custom_params else {}
-        partition_key_value = self.find_partition_key_value(event_context)
-        params = [
-            {"name": "@partition_key_value", "value": partition_key_value},
-        ]
-        params.extend(self.generate_params(conditions))
-        params.extend(custom_params)
-        query_str = """
-            SELECT VALUE COUNT(1) FROM c
-            WHERE c.{partition_key_attribute}=@partition_key_value
-            {conditions_clause}
-            {visibility_condition}
-            {custom_sql_conditions_clause}
-            """.format(
-            partition_key_attribute=self.partition_key_attribute,
-            visibility_condition=self.create_sql_condition_for_visibility(
-                visible_only
-            ),
-            conditions_clause=self.create_sql_where_conditions(conditions),
-            custom_sql_conditions_clause=self.create_custom_sql_conditions(
-                custom_sql_conditions
-            ),
-        )
-
-        flask.current_app.logger.debug(query_str)
-        result = self.container.query_items(
-            query=query_str,
-            parameters=params,
-            partition_key=partition_key_value,
-        )
-        return result.next()
-
     def partial_update(
         self,
         id: str,
