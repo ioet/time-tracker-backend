@@ -67,6 +67,22 @@ def test_convert_list_to_tuple_string(
 
 
 @pytest.mark.parametrize(
+    "id_list,expected_result",
+    [
+        (["id1"], 'c.id IN ("id1")'),
+        (["id1", "id2"], "c.id IN ('id1', 'id2')"),
+        (["id1", "id2", "id3", "id4"], "c.id IN ('id1', 'id2', 'id3', 'id4')"),
+    ],
+)
+def test_create_sql_in_condition(
+    activity_repository: ActivityCosmosDBRepository, id_list, expected_result,
+):
+    result = activity_repository.create_sql_in_condition(id_list)
+    assert expected_result == result
+
+
+"""
+@pytest.mark.parametrize(
     "id_list , exception",
     [
         (123, AssertionError),
@@ -82,7 +98,7 @@ def test_create_sql_in_condition_with_invalid_list_should_fail(
         activity_repository.create_sql_in_condition(id_list)
     except Exception as e:
         assert type(e) is exception
-
+"""
 
 # valid_id = ["03741215-a9b0-4a22-93cc-9cd6571e0366",
 #             "d45c770a-b1a0-4bd8-a713-22c01a23e41b",
