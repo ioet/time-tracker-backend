@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 
 import jwt
-import base64
 import pytest
 from faker import Faker
 from flask import Flask
@@ -88,11 +87,7 @@ def cosmos_db_model():
     return {
         'id': 'test',
         'partition_key': PartitionKey(path='/tenant_id'),
-        'unique_key_policy': {
-            'uniqueKeys': [
-                {'paths': ['/email']},
-            ]
-        },
+        'unique_key_policy': {'uniqueKeys': [{'paths': ['/email']},]},
     }
 
 
@@ -239,9 +234,7 @@ def activity_repository(app: Flask) -> ActivityCosmosDBRepository:
 
 @pytest.fixture
 def activities_dao():
-    from time_tracker_api.activities.activities_model import (
-        create_dao,
-    )
+    from time_tracker_api.activities.activities_model import create_dao
 
     return create_dao()
 
