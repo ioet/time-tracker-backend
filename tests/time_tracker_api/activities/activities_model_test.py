@@ -10,7 +10,7 @@ from time_tracker_api.activities.activities_model import (
     ActivityCosmosDBModel,
 )
 
-
+"""
 def create_activity(
     valid_tenant_id: str,
     event_context: EventContext,
@@ -28,6 +28,19 @@ def create_activity(
         data, event_context, mapper=ActivityCosmosDBModel
     )
     return created_item
+"""
+
+
+@pytest.mark.parametrize(
+    "id_list", [123, (1, 2), "id_list", {"id_list": []},],
+)
+def test_validate_list(
+    id_list, activity_repository: ActivityCosmosDBRepository
+):
+    try:
+        activity_repository.validate_list(id_list)
+    except Exception as e:
+        assert type(e) is AssertionError
 
 
 @pytest.mark.parametrize(
