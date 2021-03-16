@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 import jwt
+import base64
 import pytest
 from faker import Faker
 from flask import Flask
@@ -13,6 +14,9 @@ from time_tracker_api.database import init_sql
 from time_tracker_api.security import get_or_generate_dev_secret_key
 from time_tracker_api.time_entries.time_entries_repository import (
     TimeEntryCosmosDBRepository,
+)
+from time_tracker_api.activities.activities_model import (
+    ActivityCosmosDBRepository,
 )
 
 fake = Faker()
@@ -220,6 +224,26 @@ def running_time_entry(
     time_entry_repository.delete_permanently(
         id=created_time_entry.id, event_context=event_context
     )
+
+
+@pytest.fixture(scope="module")
+def activity_repository(app: Flask) -> ActivityCosmosDBRepository:
+    with app.app_context():
+        from commons.data_access_layer.cosmos_db import init_app, cosmos_helper
+
+        if cosmos_helper is None:
+            init_app(app)
+
+    return ActivityCosmosDBRepository()
+
+
+@pytest.fixture
+def activities_dao():
+    from time_tracker_api.activities.activities_model import (
+        create_dao,
+    )
+
+    return create_dao()
 
 
 @pytest.fixture(scope="session")
