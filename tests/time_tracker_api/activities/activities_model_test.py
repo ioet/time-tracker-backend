@@ -1,7 +1,5 @@
 from unittest.mock import Mock, patch
 import pytest
-from faker import Faker
-from typing import List
 
 from commons.data_access_layer.database import EventContext
 from time_tracker_api.activities.activities_model import (
@@ -28,7 +26,7 @@ def test_validate_list(
 @pytest.mark.parametrize(
     "id_list,expected_result",
     [
-        (["id1"], '("id1")'),
+        (["id1"], "('id1')"),
         (["id1", "id2"], "('id1', 'id2')"),
         (["id1", "id2", "id3", "id4"], "('id1', 'id2', 'id3', 'id4')"),
     ],
@@ -48,7 +46,7 @@ def test_convert_list_to_tuple_string(
 @pytest.mark.parametrize(
     "id_list,expected_result",
     [
-        (["id1"], 'c.id IN ("id1")'),
+        (["id1"], "c.id IN ('id1')"),
         (["id1", "id2"], "c.id IN ('id1', 'id2')"),
         (["id1", "id2", "id3", "id4"], "c.id IN ('id1', 'id2', 'id3', 'id4')"),
     ],
