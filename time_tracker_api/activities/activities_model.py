@@ -19,11 +19,7 @@ class ActivityDao(CRUDDao):
 container_definition = {
     'id': 'activity',
     'partition_key': PartitionKey(path='/tenant_id'),
-    'unique_key_policy': {
-        'uniqueKeys': [
-            {'paths': ['/name', '/deleted']},
-        ]
-    },
+    'unique_key_policy': {'uniqueKeys': [{'paths': ['/name', '/deleted']},]},
 }
 
 
@@ -55,16 +51,15 @@ class ActivityCosmosDBRepository(CosmosDBRepository):
         )
 
     def create_sql_in_condition(self, id_list):
-        id_values = self.convert_list_to_tuple_or_string(id_list)
+        id_values = self.convert_list_to_tuple_string(id_list)
 
         return "c.id IN {value_condition}".format(value_condition=id_values)
 
-    def convert_list_to_tuple_or_string(self, id_list):
+    def convert_list_to_tuple_string(self, id_list):
         self.validate_list(id_list)
         id_value = (
-            '("%s")' % id_list[0] if len(id_list) == 1 else tuple(id_list)
+            f'("{id_list[0]}")' if len(id_list) == 1 else str(tuple(id_list))
         )
-
         return id_value
 
     def validate_list(self, id_list):
@@ -90,8 +85,7 @@ class ActivityCosmosDBRepository(CosmosDBRepository):
 
         tenant_id_value = self.find_partition_key_value(event_context)
         result = self.container.query_items(
-            query=query_str,
-            partition_key=tenant_id_value,
+            query=query_str, partition_key=tenant_id_value,
         )
 
         function_mapper = self.get_mapper_or_dict(mapper)
@@ -103,13 +97,11 @@ class ActivityCosmosDBDao(APICosmosDBDao, ActivityDao):
         CosmosDBDao.__init__(self, repository)
 
     def get_all_with_id_in_list(
-        self,
-        id_list,
+        self, id_list,
     ):
         event_ctx = self.create_event_context("read-many")
         activities_list = self.repository.find_all_with_id_in_list(
-            event_ctx,
-            id_list,
+            event_ctx, id_list,
         )
         return activities_list
 

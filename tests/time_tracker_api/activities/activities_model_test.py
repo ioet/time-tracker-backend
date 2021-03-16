@@ -43,6 +43,29 @@ def test_validate_list(
         assert type(e) is AssertionError
 
 
+@patch(
+    'time_tracker_api.activities.activities_model.ActivityCosmosDBRepository.validate_list'
+)
+@pytest.mark.parametrize(
+    "id_list,expected_result",
+    [
+        (["id1"], '("id1")'),
+        (["id1", "id2"], "('id1', 'id2')"),
+        (["id1", "id2", "id3", "id4"], "('id1', 'id2', 'id3', 'id4')"),
+    ],
+)
+def test_convert_list_to_tuple_string(
+    validate_list_mock,
+    activity_repository: ActivityCosmosDBRepository,
+    id_list,
+    expected_result,
+):
+    result = activity_repository.convert_list_to_tuple_string(id_list)
+
+    validate_list_mock.assert_called_once()
+    assert expected_result == result
+
+
 @pytest.mark.parametrize(
     "id_list , exception",
     [
