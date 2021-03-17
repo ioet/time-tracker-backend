@@ -87,7 +87,11 @@ def cosmos_db_model():
     return {
         'id': 'test',
         'partition_key': PartitionKey(path='/tenant_id'),
-        'unique_key_policy': {'uniqueKeys': [{'paths': ['/email']},]},
+        'unique_key_policy': {
+            'uniqueKeys': [
+                {'paths': ['/email']},
+            ]
+        },
     }
 
 
@@ -230,13 +234,6 @@ def activity_repository(app: Flask) -> ActivityCosmosDBRepository:
             init_app(app)
 
     return ActivityCosmosDBRepository()
-
-
-@pytest.fixture
-def activities_dao():
-    from time_tracker_api.activities.activities_model import create_dao
-
-    return create_dao()
 
 
 @pytest.fixture(scope="session")
