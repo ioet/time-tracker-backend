@@ -1,11 +1,13 @@
-def convert_list_to_tuple_string(id_list):
-    validate_list(id_list)
+def convert_list_to_tuple_string(ids_list):
+    validate_list(ids_list)
     id_value = (
-        f"('{id_list[0]}')" if len(id_list) == 1 else str(tuple(id_list))
+        str(tuple(ids_list)).replace(",", "")
+        if len(ids_list) == 1
+        else str(tuple(ids_list))
     )
     return id_value
 
 
-def validate_list(id_list):
-    assert isinstance(id_list, list)
-    assert len(id_list) > 0
+def validate_list(ids_list):
+    assert isinstance(ids_list, list)
+    assert len(ids_list) > 0

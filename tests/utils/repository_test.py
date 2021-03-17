@@ -4,24 +4,24 @@ import pytest
 
 
 @pytest.mark.parametrize(
-    "id_list",
+    "ids_list",
     [
         123,
         (1, 2),
-        "id_list",
-        {"id_list": []},
+        "ids_list",
+        {"ids_list": []},
     ],
 )
-def test_validate_list(id_list):
+def test_validate_list(ids_list):
     try:
-        validate_list(id_list)
+        validate_list(ids_list)
     except Exception as e:
         assert type(e) is AssertionError
 
 
 @patch('utils.repository.validate_list')
 @pytest.mark.parametrize(
-    "id_list,expected_result",
+    "ids_list,expected_result",
     [
         (["id1"], "('id1')"),
         (["id1", "id2"], "('id1', 'id2')"),
@@ -30,10 +30,10 @@ def test_validate_list(id_list):
 )
 def test_convert_list_to_tuple_string(
     validate_list_mock,
-    id_list,
+    ids_list,
     expected_result,
 ):
-    result = convert_list_to_tuple_string(id_list)
+    result = convert_list_to_tuple_string(ids_list)
 
     validate_list_mock.assert_called_once()
     assert expected_result == result

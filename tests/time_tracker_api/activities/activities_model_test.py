@@ -9,7 +9,7 @@ from time_tracker_api.activities.activities_model import (
 
 
 @pytest.mark.parametrize(
-    "id_list,expected_result",
+    "activities_ids_list,expected_result",
     [
         (["id1"], "c.id IN ('id1')"),
         (["id1", "id2"], "c.id IN ('id1', 'id2')"),
@@ -18,10 +18,10 @@ from time_tracker_api.activities.activities_model import (
 )
 def test_create_sql_in_condition(
     activity_repository: ActivityCosmosDBRepository,
-    id_list,
+    activities_ids_list,
     expected_result,
 ):
-    result = activity_repository.create_sql_in_condition(id_list)
+    result = activity_repository.create_sql_in_condition(activities_ids_list)
     assert expected_result == result
 
 
