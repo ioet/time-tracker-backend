@@ -66,7 +66,7 @@ class ProjectCosmosDBRepository(CosmosDBRepository):
             mapper=ProjectCosmosDBModel,
         )
 
-    def create_sql_in_condition(self, customer_ids_list):
+    def create_sql_customer_id_in_condition(self, customer_ids_list):
         id_values = convert_list_to_tuple_string(customer_ids_list)
 
         return "c.customer_id IN {value_condition}".format(value_condition=id_values)
@@ -84,7 +84,7 @@ class ProjectCosmosDBRepository(CosmosDBRepository):
             WHERE {condition}
             {visibility_condition}
             """.format(
-            condition=self.create_sql_in_condition(customer_ids_list),
+            condition=self.create_sql_customer_id_in_condition(customer_ids_list),
             visibility_condition=visibility,
         )
         
