@@ -1,5 +1,5 @@
 from unittest.mock import patch
-from utils.repository import convert_list_to_tuple_string, validate_list
+from utils.repository import convert_list_to_tuple_string
 import pytest
 
 
@@ -12,14 +12,13 @@ import pytest
         {"ids_list": []},
     ],
 )
-def test_validate_list(ids_list):
+def test_convert_list_to_tuple_string_should_fail(ids_list):
     try:
-        validate_list(ids_list)
+        convert_list_to_tuple_string(ids_list)
     except Exception as e:
         assert type(e) is AssertionError
 
 
-@patch('utils.repository.validate_list')
 @pytest.mark.parametrize(
     "ids_list,expected_result",
     [
@@ -28,12 +27,10 @@ def test_validate_list(ids_list):
         (["id1", "id2", "id3", "id4"], "('id1', 'id2', 'id3', 'id4')"),
     ],
 )
-def test_convert_list_to_tuple_string(
-    validate_list_mock,
+def test_convert_list_to_tuple_string_should_success(
     ids_list,
     expected_result,
 ):
     result = convert_list_to_tuple_string(ids_list)
 
-    validate_list_mock.assert_called_once()
     assert expected_result == result

@@ -55,15 +55,15 @@ class ActivityCosmosDBRepository(CosmosDBRepository):
             mapper=ActivityCosmosDBModel,
         )
 
-    def create_sql_in_condition(self, activities_ids_list):
-        id_values = convert_list_to_tuple_string(activities_ids_list)
+    def create_sql_in_condition(self, activity_ids):
+        id_values = convert_list_to_tuple_string(activity_ids)
 
         return "c.id IN {value_condition}".format(value_condition=id_values)
 
     def find_all_with_id_in_list(
         self,
         event_context: EventContext,
-        activities_ids_list: List[str],
+        activity_ids: List[str],
         visible_only=True,
         mapper: Callable = None,
     ):
@@ -73,7 +73,7 @@ class ActivityCosmosDBRepository(CosmosDBRepository):
             WHERE {condition}
             {visibility_condition}
             """.format(
-            condition=self.create_sql_in_condition(activities_ids_list),
+            condition=self.create_sql_in_condition(activity_ids),
             visibility_condition=visibility,
         )
 
@@ -93,14 +93,13 @@ class ActivityCosmosDBDao(APICosmosDBDao, ActivityDao):
 
     def get_all_with_id_in_list(
         self,
-        activities_ids_list,
+        activity_ids,
     ):
         event_ctx = self.create_event_context("read-many")
-        activities_list = self.repository.find_all_with_id_in_list(
+        return self.repository.find_all_with_id_in_list(
             event_ctx,
-            activities_ids_list,
+            activity_ids,
         )
-        return activities_list
 
 
 def create_dao() -> ActivityDao:
