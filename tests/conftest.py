@@ -14,6 +14,9 @@ from time_tracker_api.security import get_or_generate_dev_secret_key
 from time_tracker_api.time_entries.time_entries_repository import (
     TimeEntryCosmosDBRepository,
 )
+from time_tracker_api.activities.activities_model import (
+    ActivityCosmosDBRepository,
+)
 
 fake = Faker()
 Faker.seed()
@@ -220,6 +223,17 @@ def running_time_entry(
     time_entry_repository.delete_permanently(
         id=created_time_entry.id, event_context=event_context
     )
+
+
+@pytest.fixture(scope="module")
+def activity_repository(app: Flask) -> ActivityCosmosDBRepository:
+    with app.app_context():
+        from commons.data_access_layer.cosmos_db import init_app, cosmos_helper
+
+        if cosmos_helper is None:
+            init_app(app)
+
+    return ActivityCosmosDBRepository()
 
 
 @pytest.fixture(scope="session")
