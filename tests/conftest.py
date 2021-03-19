@@ -17,6 +17,9 @@ from time_tracker_api.time_entries.time_entries_repository import (
 from time_tracker_api.activities.activities_model import (
     ActivityCosmosDBRepository,
 )
+from time_tracker_api.projects.projects_model import (
+    ProjectCosmosDBRepository,
+)
 
 fake = Faker()
 Faker.seed()
@@ -191,6 +194,17 @@ def time_entry_repository(app: Flask) -> TimeEntryCosmosDBRepository:
             init_app(app)
 
     return TimeEntryCosmosDBRepository()
+
+
+@pytest.fixture(scope="module")
+def project_repository(app: Flask) -> ProjectCosmosDBRepository:
+    with app.app_context():
+        from commons.data_access_layer.cosmos_db import init_app, cosmos_helper
+
+        if cosmos_helper is None:
+            init_app(app)
+
+    return ProjectCosmosDBRepository()
 
 
 @pytest.fixture
