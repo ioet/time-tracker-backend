@@ -1,5 +1,5 @@
 from unittest.mock import patch
-from utils.repository import convert_list_to_tuple_string
+from utils.repository import convert_list_to_tuple_string, create_sql_in_condition
 import pytest
 
 
@@ -33,4 +33,24 @@ def test_convert_list_to_tuple_string_should_success(
 ):
     result = convert_list_to_tuple_string(ids_list)
 
+    assert expected_result == result
+
+
+@pytest.mark.parametrize(
+    "values,field,expected_result",
+    [
+        (["id1"],"customer_id", "c.customer_id IN ('id1')"),
+        (["id1", "id2"],"customer_id", "c.customer_id IN ('id1', 'id2')"),
+        (["id1", "id2", "id3", "id4"], "customer_id", "c.customer_id IN ('id1', 'id2', 'id3', 'id4')"),
+        (["id1"], "id", "c.id IN ('id1')"),
+        (["id1", "id4"], "id", "c.id IN ('id1', 'id4')"),
+        (["id1", "id2", "id3", "id4"], "id", "c.id IN ('id1', 'id2', 'id3', 'id4')"),
+    ],
+)
+def test_create_sql_in_condition(
+    values,
+    field,
+    expected_result,
+):
+    result = create_sql_in_condition(values, field)
     assert expected_result == result
