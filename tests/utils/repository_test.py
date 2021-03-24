@@ -37,20 +37,20 @@ def test_convert_list_to_tuple_string_should_success(
 
 
 @pytest.mark.parametrize(
-    "values,field,expected_result",
+    "field,values,expected_result",
     [
-        (["id1"],"customer_id", "c.customer_id IN ('id1')"),
-        (["id1", "id2"],"customer_id", "c.customer_id IN ('id1', 'id2')"),
-        (["id1", "id2", "id3", "id4"], "customer_id", "c.customer_id IN ('id1', 'id2', 'id3', 'id4')"),
-        (["id1"], "id", "c.id IN ('id1')"),
-        (["id1", "id4"], "id", "c.id IN ('id1', 'id4')"),
-        (["id1", "id2", "id3", "id4"], "id", "c.id IN ('id1', 'id2', 'id3', 'id4')"),
+        ("customer_id", ["id1"], "c.customer_id IN ('id1')"),
+        ("customer_id", ["id1", "id2"], "c.customer_id IN ('id1', 'id2')"),
+        ("customer_id", ["id1", "id2", "id3", "id4"], "c.customer_id IN ('id1', 'id2', 'id3', 'id4')"),
+        ("id", ["id1"], "c.id IN ('id1')"),
+        ("id", ["id1", "id4"], "c.id IN ('id1', 'id4')"),
+        ("id", ["id1", "id2", "id3", "id4"], "c.id IN ('id1', 'id2', 'id3', 'id4')"),
     ],
 )
 def test_create_sql_in_condition(
-    values,
     field,
+    values,
     expected_result,
 ):
-    result = create_sql_in_condition(values, field)
+    result = create_sql_in_condition(field, values)
     assert expected_result == result

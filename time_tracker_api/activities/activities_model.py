@@ -68,7 +68,7 @@ class ActivityCosmosDBRepository(CosmosDBRepository):
             WHERE {condition}
             {visibility_condition}
             """.format(
-            condition=create_sql_in_condition(activity_ids, "id"),
+            condition=create_sql_in_condition("id", activity_ids),
             visibility_condition=visibility,
         )
 

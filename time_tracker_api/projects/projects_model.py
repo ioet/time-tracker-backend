@@ -79,7 +79,7 @@ class ProjectCosmosDBRepository(CosmosDBRepository):
             WHERE {condition}
             {visibility_condition}
             """.format(
-            condition=create_sql_in_condition(customer_ids_list, "customer_id"),
+            condition=create_sql_in_condition("customer_id", customer_ids_list),
             visibility_condition=visibility,
         )
         

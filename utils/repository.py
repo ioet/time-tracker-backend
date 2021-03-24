@@ -8,7 +8,7 @@ def convert_list_to_tuple_string(ids_list):
     )
     return result
 
-def create_sql_in_condition(values, field):
+def create_sql_in_condition(field, values):
     tuple_string = convert_list_to_tuple_string(values)
 
     return "c.{field} IN {list}".format(field=field, list=tuple_string)
