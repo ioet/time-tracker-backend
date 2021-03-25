@@ -50,25 +50,25 @@ class CosmosDBQueryBuilder:
             self.offset = offset
         return self
 
-    def build_select(self):
+    def __build_select(self):
         if len(self.select_conditions) < 1:
             self.select_conditions.append("*")
         return ",".join(self.select_conditions)
 
-    def build_where(self):
+    def __build_where(self):
         if len(self.where_conditions) > 0:
             return "WHERE " + " AND ".join(self.where_conditions)
         else:
             return ""
 
-    def build_offset(self):
+    def __build_offset(self):
         if self.offset:
             self.parameters.append({'name': '@offset', 'value': self.offset})
             return "OFFSET @offset"
         else:
             return ""
 
-    def build_limit(self):
+    def __build_limit(self):
         if self.limit:
             self.parameters.append({'name': '@limit', 'value': self.limit})
             return "LIMIT @limit"
@@ -82,10 +82,10 @@ class CosmosDBQueryBuilder:
         {offset_condition}
         {limit_condition}
         """.format(
-            select_conditions=self.build_select(),
-            where_conditions=self.build_where(),
-            offset_condition=self.build_offset(),
-            limit_condition=self.build_limit(),
+            select_conditions=self.__build_select(),
+            where_conditions=self.__build_where(),
+            offset_condition=self.__build_offset(),
+            limit_condition=self.__build_limit(),
         )
         return self
 

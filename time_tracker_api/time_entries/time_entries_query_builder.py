@@ -3,7 +3,7 @@ from utils.query_builder import CosmosDBQueryBuilder
 
 class TimeEntryQueryBuilder(CosmosDBQueryBuilder):
     def __init__(self):
-        super().__init__()
+        super(TimeEntryQueryBuilder, self).__init__()
 
     def add_sql_date_range_condition(self, dates: tuple = None):
         if dates and len(dates) == 2:
