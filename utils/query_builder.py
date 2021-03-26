@@ -14,9 +14,9 @@ class CosmosDBQueryBuilder:
         self.limit = None
         self.offset = None
 
-    def add_select_conditions(self, column: List[str] = None):
-        column = column if column else ["*"]
-        self.select_conditions.extend(column)
+    def add_select_conditions(self, columns: List[str] = None):
+        columns = columns if columns else ["*"]
+        self.select_conditions.extend(columns)
         return self
 
     def add_sql_in_condition(
