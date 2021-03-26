@@ -110,8 +110,6 @@ def test_add_sql_visibility_condition(
         (1, 1),
         (10, 10),
         (None, None),
-        ("hola", None),
-        (["lista"], None),
     ],
 )
 def test_add_sql_limit_condition(limit_value, expected_limit):
@@ -126,8 +124,6 @@ def test_add_sql_limit_condition(limit_value, expected_limit):
         (1, 1),
         (10, 10),
         (None, None),
-        ("hola", None),
-        (["lista"], None),
     ],
 )
 def test_add_sql_offset_condition(

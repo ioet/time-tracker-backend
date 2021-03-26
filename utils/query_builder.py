@@ -41,12 +41,12 @@ class CosmosDBQueryBuilder:
         return self
 
     def add_sql_limit_condition(self, limit):
-        if limit and isinstance(limit, int):
+        if limit:
             self.limit = limit
         return self
 
     def add_sql_offset_condition(self, offset):
-        if offset and isinstance(offset, int):
+        if offset:
             self.offset = offset
         return self
 
