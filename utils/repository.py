@@ -18,5 +18,4 @@ def create_sql_in_condition(field, values):
 def remove_white_spaces(string: str):
     from re import sub
 
-    string = string.replace("\n", "")
-    return sub("[\s]+", ' ', string).rstrip().lstrip()
+    return sub('[\s]+', ' ', string).strip()
