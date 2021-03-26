@@ -202,6 +202,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
     def find_all_v2(
         self,
         event_context: EventContext,
+        time_entries_id: List[str],
         owner_id_list: List[str],
         date_range: tuple = None,
         fields: dict = None,
@@ -215,6 +216,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         query_builder = (
             TimeEntryQueryBuilder()
             .add_sql_date_range_condition(date_range)
+            .add_sql_in_condition(time_entries_id)
             .add_sql_in_condition(owner_id_list)
             .add_sql_where_equal_condition(fields)
             .add_sql_limit_condition(limit)
