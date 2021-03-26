@@ -8,9 +8,7 @@ from time_tracker_api.time_entries.time_entries_model import (
     TimeEntryCosmosDBModel,
 )
 
-from utils.time import (
-    current_datetime_str,
-)
+from utils.time import current_datetime_str
 
 from utils.extend_model import (
     add_project_info_to_time_entries,
@@ -26,6 +24,9 @@ from time_tracker_api.activities import activities_model
 from commons.data_access_layer.database import EventContext
 from typing import List, Callable
 from time_tracker_api.projects import projects_model
+from time_tracker_api.time_entries.time_entries_query_builder import (
+    TimeEntryQueryBuilder,
+)
 
 
 class TimeEntryCosmosDBRepository(CosmosDBRepository):
@@ -195,6 +196,42 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         elif not time_entries and len(conditions) > 1:
             abort(HTTPStatus.NOT_FOUND, "Time entry not found")
         return time_entries
+
+    def find_all_v2(
+        self,
+        event_context: EventContext,
+        time_entry_ids: List[str],
+        owner_ids: List[str],
+        date_range: tuple = None,
+        fields: dict = None,
+        limit: int = None,
+        offset: int = 0,
+        visible_only=True,
+        mapper: Callable = None,
+    ):
+        limit = self.get_page_size_or(limit)
+        partition_key_value = self.find_partition_key_value(event_context)
+        query_builder = (
+            TimeEntryQueryBuilder()
+            .add_sql_date_range_condition(date_range)
+            .add_sql_in_condition(time_entry_ids)
+            .add_sql_in_condition(owner_ids)
+            .add_sql_where_equal_condition(fields)
+            .add_sql_limit_condition(limit)
+            .add_sql_offset_condition(offset)
+            .build()
+        )
+
+        query_str = query_builder.get_query()
+        params = query_builder.get_parameters()
+
+        result = self.container.query_items(
+            query=query_str,
+            parameters=params,
+            partition_key=partition_key_value,
+        )
+        function_mapper = self.get_mapper_or_dict(mapper)
+        return list(map(function_mapper, result))
 
     def on_create(self, new_item_data: dict, event_context: EventContext):
         CosmosDBRepository.on_create(self, new_item_data, event_context)

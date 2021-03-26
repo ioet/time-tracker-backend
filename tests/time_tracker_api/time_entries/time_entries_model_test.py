@@ -8,6 +8,7 @@ from time_tracker_api.time_entries.time_entries_model import (
 )
 from time_tracker_api.time_entries.time_entries_repository import (
     TimeEntryCosmosDBRepository,
+    TimeEntryCosmosDBModel,
 )
 
 
@@ -266,3 +267,46 @@ def test_updated_item_without_deleted_key_should_call_validate_data(
     time_entry_repository.on_update({}, event_context)
     on_update_mock.assert_called_once()
     time_entry_repository.validate_data.assert_called_once()
+
+
+@patch(
+    'time_tracker_api.time_entries.time_entries_repository.TimeEntryCosmosDBRepository.find_partition_key_value'
+)
+@patch(
+    'time_tracker_api.time_entries.time_entries_repository.TimeEntryCosmosDBRepository.get_page_size_or'
+)
+def test_find_all_v2(
+    get_page_size_or_mock,
+    find_partition_key_value_mock,
+    event_context: EventContext,
+    time_entry_repository: TimeEntryCosmosDBRepository,
+):
+    expected_item = {
+        'id': 'id',
+        'start_date': '2021-03-22T10:00:00.000Z',
+        'end_date': "2021-03-22T11:00:00.000Z",
+        'description': 'do some testing',
+        'tenant_id': 'tenant_id',
+        'project_id': 'project_id',
+        'activity_id': 'activity_id',
+        'technologies': ['python'],
+    }
+    query_items_mock = Mock(return_value=[expected_item])
+    time_entry_repository.container = Mock()
+    time_entry_repository.container.query_items = query_items_mock
+
+    result = time_entry_repository.find_all_v2(
+        event_context,
+        ['owner_id'],
+        {
+            'start_date': "2021-03-22T10:00:00.000Z",
+            'end_date': "2021-03-22T11:00:00.000Z",
+        },
+    )
+
+    find_partition_key_value_mock.assert_called_once()
+    get_page_size_or_mock.assert_called_once()
+    assert len(result) == 1
+    time_entry = result[0]
+    assert isinstance(time_entry, TimeEntryCosmosDBModel)
+    assert time_entry.__dict__ == expected_item
