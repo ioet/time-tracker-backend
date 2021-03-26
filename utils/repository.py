@@ -7,3 +7,10 @@ def convert_list_to_tuple_string(ids_list):
         else str(tuple(ids_list))
     )
     return result
+
+
+def get_string_without_empty_spaces(string: str):
+    from re import sub
+
+    string = string.replace("\n", "")
+    return sub("[\s]+", ' ', string).rstrip().lstrip()

@@ -1,5 +1,8 @@
 from unittest.mock import patch
-from utils.repository import convert_list_to_tuple_string
+from utils.repository import (
+    convert_list_to_tuple_string,
+    get_string_without_empty_spaces,
+)
 import pytest
 
 
@@ -34,3 +37,16 @@ def test_convert_list_to_tuple_string_should_success(
     result = convert_list_to_tuple_string(ids_list)
 
     assert expected_result == result
+
+
+@pytest.mark.parametrize(
+    "string,expected_string",
+    [
+        ("   text with \t tab", "text with tab"),
+        (" text with \n new line", "text with new line"),
+        (""" SELECT * from c             """, "SELECT * from c"),
+    ],
+)
+def test_get_string_without_empty_spaces(string, expected_string):
+    string = get_string_without_empty_spaces(string)
+    assert string == expected_string

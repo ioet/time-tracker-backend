@@ -1,5 +1,6 @@
 from unittest.mock import patch
 from utils.query_builder import CosmosDBQueryBuilder
+from utils.repository import get_string_without_empty_spaces
 import pytest
 
 
@@ -178,3 +179,88 @@ def test__build_where_should_return_concatenate_conditions(
     result = query_builder._CosmosDBQueryBuilder__build_where()
 
     assert result == expected_condition
+
+
+@pytest.mark.parametrize(
+    "offset,expected_condition,expected_params",
+    [(1, "OFFSET @offset", [{'name': '@offset', 'value': 1}]), (None, "", [])],
+)
+def test__build_offset(
+    offset,
+    expected_condition,
+    expected_params,
+):
+    query_builder = CosmosDBQueryBuilder().add_sql_offset_condition(offset)
+
+    result = query_builder._CosmosDBQueryBuilder__build_offset()
+    assert result == expected_condition
+    assert len(query_builder.parameters) == len(expected_params)
+    assert query_builder.get_parameters() == expected_params
+
+
+@pytest.mark.parametrize(
+    "limit,expected_condition,expected_params",
+    [(1, "LIMIT @limit", [{'name': '@limit', 'value': 1}]), (None, "", [])],
+)
+def test__build_limit(
+    limit,
+    expected_condition,
+    expected_params,
+):
+    query_builder = CosmosDBQueryBuilder().add_sql_limit_condition(limit)
+
+    result = query_builder._CosmosDBQueryBuilder__build_limit()
+    assert result == expected_condition
+    assert len(query_builder.parameters) == len(expected_params)
+    assert query_builder.get_parameters() == expected_params
+
+
+def test_build_with_all_calls_return_query_with_all_conditions():
+    query_builder = (
+        CosmosDBQueryBuilder()
+        .add_select_conditions(["c.description"])
+        .add_sql_in_condition("id", ["id1", "id2"])
+        .add_sql_where_equal_condition({'name': 'test'})
+        .add_sql_offset_condition(2)
+        .add_sql_limit_condition(10)
+        .add_sql_visibility_condition(True)
+        .build()
+    )
+    query = query_builder.get_query()
+    expected_query = """
+                    SELECT c.description FROM c
+                    WHERE c.id IN ('id1', 'id2') AND c.name = @name AND NOT IS_DEFINED(c.deleted)
+                    OFFSET @offset
+                    LIMIT @limit
+                    """
+
+    assert get_string_without_empty_spaces(
+        query
+    ) == get_string_without_empty_spaces(expected_query)
+
+    assert len(query_builder.get_parameters()) > 0
+    assert len(query_builder.where_conditions) > 0
+    assert len(query_builder.select_conditions) > 0
+
+
+def test_build_with_empty_and_None_attributes_return_query_select_all():
+
+    query_builder = (
+        CosmosDBQueryBuilder()
+        .add_select_conditions()
+        .add_sql_in_condition()
+        .add_sql_where_equal_condition()
+        .add_sql_limit_condition(None)
+        .add_sql_offset_condition(None)
+        .build()
+    )
+
+    query = query_builder.get_query()
+
+    expected_query = """SELECT * FROM c"""
+    query = get_string_without_empty_spaces(query)
+    expected_query = get_string_without_empty_spaces(expected_query)
+
+    assert query == expected_query
+    assert len(query_builder.get_parameters()) == 0
+    assert len(query_builder.where_conditions) == 0
