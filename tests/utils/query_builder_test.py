@@ -36,12 +36,12 @@ def test_add_select_conditions_should_update_select_list(
         (None, ["id"], []),
         ("id", ["id"], ["c.id IN ('id')"]),
         ("id", ["id1", "id2"], ["c.id IN ('id1', 'id2')"]),
+        ("owner_id", ["id1", "id2"], ["c.owner_id IN ('id1', 'id2')"]),
+        ("customer_id", ["id1", "id2"], ["c.customer_id IN ('id1', 'id2')"]),
     ],
 )
 def test_add_sql_in_condition_should_update_where_list(
-    attribute,
-    ids_list,
-    expected_where_condition_list,
+    attribute, ids_list, expected_where_condition_list,
 ):
     query_builder = CosmosDBQueryBuilder().add_sql_in_condition(
         attribute, ids_list
@@ -66,9 +66,7 @@ def test_add_sql_in_condition_should_update_where_list(
     ],
 )
 def test_add_sql_where_equal_condition_should_update_where_params_list(
-    data,
-    expected_where_list,
-    expected_params,
+    data, expected_where_list, expected_params,
 ):
     query_builder = CosmosDBQueryBuilder().add_sql_where_equal_condition(data)
 
@@ -93,8 +91,7 @@ def test_add_sql_where_equal_condition_with_None_should_not_update_lists():
     [(True, ['NOT IS_DEFINED(c.deleted)']), (False, [])],
 )
 def test_add_sql_visibility_condition(
-    visibility_bool,
-    expected_where_list,
+    visibility_bool, expected_where_list,
 ):
     query_builder = CosmosDBQueryBuilder().add_sql_visibility_condition(
         visibility_bool
@@ -105,12 +102,7 @@ def test_add_sql_visibility_condition(
 
 
 @pytest.mark.parametrize(
-    "limit_value,expected_limit",
-    [
-        (1, 1),
-        (10, 10),
-        (None, None),
-    ],
+    "limit_value,expected_limit", [(1, 1), (10, 10), (None, None),],
 )
 def test_add_sql_limit_condition(limit_value, expected_limit):
     query_builder = CosmosDBQueryBuilder().add_sql_limit_condition(limit_value)
@@ -119,16 +111,10 @@ def test_add_sql_limit_condition(limit_value, expected_limit):
 
 
 @pytest.mark.parametrize(
-    "offset_value,expected_offset",
-    [
-        (1, 1),
-        (10, 10),
-        (None, None),
-    ],
+    "offset_value,expected_offset", [(1, 1), (10, 10), (None, None),],
 )
 def test_add_sql_offset_condition(
-    offset_value,
-    expected_offset,
+    offset_value, expected_offset,
 ):
     query_builder = CosmosDBQueryBuilder().add_sql_offset_condition(
         offset_value
@@ -139,15 +125,10 @@ def test_add_sql_offset_condition(
 
 @pytest.mark.parametrize(
     "select_conditions,expected_condition",
-    [
-        ([], "*"),
-        (["c.id"], "c.id"),
-        (["c.id", "c.name"], "c.id,c.name"),
-    ],
+    [([], "*"), (["c.id"], "c.id"), (["c.id", "c.name"], "c.id,c.name"),],
 )
 def test__build_select_return_fields_in_select_list(
-    select_conditions,
-    expected_condition,
+    select_conditions, expected_condition,
 ):
     query_builder = CosmosDBQueryBuilder().add_select_conditions(
         select_conditions
@@ -165,8 +146,7 @@ def test__build_select_return_fields_in_select_list(
     ],
 )
 def test__build_where_should_return_concatenate_conditions(
-    where_dict,
-    expected_condition,
+    where_dict, expected_condition,
 ):
     query_builder = CosmosDBQueryBuilder().add_sql_where_equal_condition(
         where_dict
@@ -182,9 +162,7 @@ def test__build_where_should_return_concatenate_conditions(
     [(1, "OFFSET @offset", [{'name': '@offset', 'value': 1}]), (None, "", [])],
 )
 def test__build_offset(
-    offset,
-    expected_condition,
-    expected_params,
+    offset, expected_condition, expected_params,
 ):
     query_builder = CosmosDBQueryBuilder().add_sql_offset_condition(offset)
 
@@ -199,9 +177,7 @@ def test__build_offset(
     [(1, "LIMIT @limit", [{'name': '@limit', 'value': 1}]), (None, "", [])],
 )
 def test__build_limit(
-    limit,
-    expected_condition,
-    expected_params,
+    limit, expected_condition, expected_params,
 ):
     query_builder = CosmosDBQueryBuilder().add_sql_limit_condition(limit)
 
