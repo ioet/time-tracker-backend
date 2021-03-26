@@ -5,9 +5,9 @@ class TimeEntryQueryBuilder(CosmosDBQueryBuilder):
     def __init__(self):
         super(TimeEntryQueryBuilder, self).__init__()
 
-    def add_sql_date_range_condition(self, dates: tuple = None):
-        if dates and len(dates) == 2:
-            start_date, end_date = dates
+    def add_sql_date_range_condition(self, date_range: tuple = None):
+        if date_range and len(date_range) == 2:
+            start_date, end_date = date_range
             condition = """
             ((c.start_date BETWEEN @start_date AND @end_date) OR
              (c.end_date BETWEEN @start_date AND @end_date))

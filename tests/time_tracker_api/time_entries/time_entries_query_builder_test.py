@@ -1,5 +1,4 @@
 import pytest
-from unittest.mock import patch
 from utils.query_builder import CosmosDBQueryBuilder
 from time_tracker_api.time_entries.time_entries_query_builder import (
     TimeEntryQueryBuilder,
@@ -11,7 +10,9 @@ def test_TimeEntryQueryBuilder_is_subclass_CosmosDBQueryBuilder():
     query_builder = CosmosDBQueryBuilder()
     time_entries_query_builder = TimeEntryQueryBuilder()
 
-    assert issubclass(TimeEntryQueryBuilder, CosmosDBQueryBuilder) == True
+    assert issubclass(
+        time_entries_query_builder.__class__, query_builder.__class__
+    )
 
 
 @pytest.mark.parametrize(
@@ -46,10 +47,8 @@ def test_TimeEntryQueryBuilder_is_subclass_CosmosDBQueryBuilder():
 def test_add_sql_date_range_condition_should_update_where_list(
     start_date, end_date, expected_params
 ):
-    time_entry_query_builder = (
-        TimeEntryQueryBuilder().add_sql_date_range_condition(
-            (start_date, end_date)
-        )
+    time_entry_query_builder = TimeEntryQueryBuilder().add_sql_date_range_condition(
+        (start_date, end_date)
     )
 
     assert len(time_entry_query_builder.where_conditions) == 1
