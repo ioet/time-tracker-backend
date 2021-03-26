@@ -235,7 +235,6 @@ def test_build_with_all_calls_return_query_with_all_conditions():
                     """
 
     assert remove_white_spaces(query) == remove_white_spaces(expected_query)
-
     assert len(query_builder.get_parameters()) > 0
     assert len(query_builder.where_conditions) > 0
     assert len(query_builder.select_conditions) > 0
@@ -254,8 +253,8 @@ def test_build_with_empty_and_None_attributes_return_query_select_all():
     )
 
     query = query_builder.get_query()
-
     expected_query = """SELECT * FROM c"""
+
     query = remove_white_spaces(query)
     expected_query = remove_white_spaces(expected_query)
 

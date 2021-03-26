@@ -74,6 +74,5 @@ def test_build_with_add_sql_date_range_condition():
     query = time_entry_query_builder.get_query()
 
     assert remove_white_spaces(query) == remove_white_spaces(expected_query)
-
     assert len(time_entry_query_builder.where_conditions) == 1
     assert len(time_entry_query_builder.get_parameters()) == 2
