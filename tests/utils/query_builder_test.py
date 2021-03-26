@@ -139,17 +139,19 @@ def test__build_select_return_fields_in_select_list(
 
 
 @pytest.mark.parametrize(
-    "where_dict,expected_condition",
+    "fields,expected_condition",
     [
+        (None, ""),
+        ({}, ""),
         ({"id": 1}, "WHERE c.id = @id"),
         ({"id": 1, "name": "test"}, "WHERE c.id = @id AND c.name = @name"),
     ],
 )
-def test__build_where_should_return_concatenate_conditions(
-    where_dict, expected_condition,
+def test__build_where_should_return_concatenated_conditions(
+    fields, expected_condition,
 ):
     query_builder = CosmosDBQueryBuilder().add_sql_where_equal_condition(
-        where_dict
+        fields
     )
 
     result = query_builder._CosmosDBQueryBuilder__build_where()
