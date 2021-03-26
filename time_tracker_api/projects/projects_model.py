@@ -8,7 +8,7 @@ from commons.data_access_layer.cosmos_db import (
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
 from typing import List, Callable
 from commons.data_access_layer.database import EventContext
-from utils.repository import convert_list_to_tuple_string
+from utils.repository import convert_list_to_tuple_string, create_sql_in_condition
 from time_tracker_api.customers.customers_model import (
     create_dao as customers_create_dao,
 )
@@ -65,18 +65,13 @@ class ProjectCosmosDBRepository(CosmosDBRepository):
             partition_key_attribute='tenant_id',
             mapper=ProjectCosmosDBModel,
         )
-
-    def create_sql_customer_id_in_condition(self, customer_ids_list):
-        id_values = convert_list_to_tuple_string(customer_ids_list)
-
-        return "c.customer_id IN {value_condition}".format(value_condition=id_values)
-    
+            
     def find_all_with_customer_id_in_list(
         self,
         event_context: EventContext,
         customer_ids_list: List[str],
         visible_only=True,
-        mapper: Callable = None,
+        mapper: Callable = None, 
     ):  
         visibility = self.create_sql_condition_for_visibility(visible_only)
         query_str = """
@@ -84,7 +79,7 @@ class ProjectCosmosDBRepository(CosmosDBRepository):
             WHERE {condition}
             {visibility_condition}
             """.format(
-            condition=self.create_sql_customer_id_in_condition(customer_ids_list),
+            condition=create_sql_in_condition("customer_id", customer_ids_list),
             visibility_condition=visibility,
         )
         
