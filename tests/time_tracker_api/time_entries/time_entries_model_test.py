@@ -269,26 +269,15 @@ def test_updated_item_without_deleted_key_should_call_validate_data(
     time_entry_repository.validate_data.assert_called_once()
 
 
-@pytest.mark.parametrize(
-    'owner_list,expected_result',
-    [
-        ([], ""),
-        (None, ""),
-        (["id"], "AND c.owner_id IN ('id')"),
-        (["id1", "id2"], "AND c.owner_id IN ('id1', 'id2')"),
-    ],
+@patch(
+    'time_tracker_api.time_entries.time_entries_repository.TimeEntryCosmosDBRepository.find_partition_key_value'
 )
-def test_create_owner_condition(
-    owner_list,
-    expected_result,
-    event_context: EventContext,
-    time_entry_repository: TimeEntryCosmosDBRepository,
-):
-    result = time_entry_repository.create_owner_condition(owner_list)
-    assert result == expected_result
-
-
+@patch(
+    'time_tracker_api.time_entries.time_entries_repository.TimeEntryCosmosDBRepository.get_page_size_or'
+)
 def test_find_all_v2(
+    get_page_size_or_mock,
+    find_partition_key_value_mock,
     event_context: EventContext,
     time_entry_repository: TimeEntryCosmosDBRepository,
 ):
@@ -315,9 +304,9 @@ def test_find_all_v2(
         },
     )
 
-    print(result)
+    find_partition_key_value_mock.assert_called_once()
+    get_page_size_or_mock.assert_called_once()
     assert len(result) == 1
     time_entry = result[0]
-    print(time_entry.__dict__)
     assert isinstance(time_entry, TimeEntryCosmosDBModel)
     assert time_entry.__dict__ == expected_item
