@@ -13,7 +13,7 @@ from time_tracker_api.customers.customers_model import (
     create_dao as customers_create_dao,
 )
 from time_tracker_api.customers.customers_model import CustomerCosmosDBModel
-
+from utils.query_builder import CosmosDBQueryBuilder
 from utils.extend_model import add_customer_name_to_projects
 
 
@@ -65,7 +65,32 @@ class ProjectCosmosDBRepository(CosmosDBRepository):
             partition_key_attribute='tenant_id',
             mapper=ProjectCosmosDBModel,
         )
-            
+
+    def find_all_with_id_in_list(
+        self,
+        event_context: EventContext,
+        ids_list: List[str] = None,
+        customers_ids_list: List[str] = None,
+        visible_only=True,
+        mapper: Callable = None, 
+    ):
+        query_builder = (CosmosDBQueryBuilder()
+            .add_sql_in_condition("id",ids_list)
+            .add_sql_in_condition("customer_id",customers_ids_list)
+            .add_sql_visibility_condition(visibility_only)
+            .build()
+        )
+        query_str = query_builder.get_query()
+        tenant_id_value = self.find_partition_key_value(event_context)
+
+        result = self.container.query_items(
+            query=query_str,
+            partition_key=tenant_id_value,
+        )
+        function_mapper = self.get_mapper_or_dict(mapper)
+        return list(map(function_mapper, result))
+
+
     def find_all_with_customer_id_in_list(
         self,
         event_context: EventContext,
@@ -123,6 +148,11 @@ class ProjectCosmosDBDao(APICosmosDBDao, ProjectDao):
 
         add_customer_name_to_projects(projects, customers)
         return projects
+
+    def get_all_with_id_in_list(self,id_list,):
+    	event_ctx = self.create_event_context("read-many")
+    	return self.repository.find_all_with_id_in_list(event_ctx, id_list)
+
 
 
 def create_dao() -> ProjectDao:
