@@ -8,9 +8,7 @@ from time_tracker_api.time_entries.time_entries_model import (
     TimeEntryCosmosDBModel,
 )
 
-from utils.time import (
-    current_datetime_str,
-)
+from utils.time import current_datetime_str
 
 from utils.extend_model import (
     add_project_info_to_time_entries,
@@ -202,8 +200,8 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
     def find_all_v2(
         self,
         event_context: EventContext,
-        time_entries_id: List[str],
-        owner_id_list: List[str],
+        time_entry_ids: List[str],
+        owner_ids: List[str],
         date_range: tuple = None,
         fields: dict = None,
         limit: int = None,
@@ -216,8 +214,8 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         query_builder = (
             TimeEntryQueryBuilder()
             .add_sql_date_range_condition(date_range)
-            .add_sql_in_condition(time_entries_id)
-            .add_sql_in_condition(owner_id_list)
+            .add_sql_in_condition(time_entry_ids)
+            .add_sql_in_condition(owner_ids)
             .add_sql_where_equal_condition(fields)
             .add_sql_limit_condition(limit)
             .add_sql_offset_condition(offset)
