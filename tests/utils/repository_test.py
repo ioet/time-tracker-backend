@@ -1,6 +1,9 @@
 from unittest.mock import patch
-from utils.repository import convert_list_to_tuple_string, create_sql_in_condition
-from utils.repository import get_string_without_empty_spaces
+from utils.repository import (
+    convert_list_to_tuple_string,
+    create_sql_in_condition,
+    remove_white_spaces,
+)
 import pytest
 
 
@@ -42,12 +45,18 @@ def test_convert_list_to_tuple_string_should_success(
     [
         ("customer_id", ["id1"], "c.customer_id IN ('id1')"),
         ("customer_id", ["id1", "id2"], "c.customer_id IN ('id1', 'id2')"),
-        ("customer_id", ["id1", "id2", "id3", "id4"],
-         "c.customer_id IN ('id1', 'id2', 'id3', 'id4')"),
+        (
+            "customer_id",
+            ["id1", "id2", "id3", "id4"],
+            "c.customer_id IN ('id1', 'id2', 'id3', 'id4')",
+        ),
         ("id", ["id1"], "c.id IN ('id1')"),
         ("id", ["id1", "id4"], "c.id IN ('id1', 'id4')"),
-        ("id", ["id1", "id2", "id3", "id4"],
-         "c.id IN ('id1', 'id2', 'id3', 'id4')"),
+        (
+            "id",
+            ["id1", "id2", "id3", "id4"],
+            "c.id IN ('id1', 'id2', 'id3', 'id4')",
+        ),
     ],
 )
 def test_create_sql_in_condition(
@@ -67,6 +76,6 @@ def test_create_sql_in_condition(
         (""" SELECT * from c             """, "SELECT * from c"),
     ],
 )
-def test_get_string_without_empty_spaces(string, expected_string):
-    string = get_string_without_empty_spaces(string)
+def test_remove_white_spaces(string, expected_string):
+    string = remove_white_spaces(string)
     assert string == expected_string

@@ -4,7 +4,7 @@ from utils.query_builder import CosmosDBQueryBuilder
 from time_tracker_api.time_entries.time_entries_query_builder import (
     TimeEntryQueryBuilder,
 )
-from utils.repository import get_string_without_empty_spaces
+from utils.repository import remove_white_spaces
 
 
 def test_TimeEntryQueryBuilder_is_subclass_CosmosDBQueryBuilder():
@@ -73,9 +73,7 @@ def test_build_with_add_sql_date_range_condition():
                     """
     query = time_entry_query_builder.get_query()
 
-    assert get_string_without_empty_spaces(
-        query
-    ) == get_string_without_empty_spaces(expected_query)
+    assert remove_white_spaces(query) == remove_white_spaces(expected_query)
 
     assert len(time_entry_query_builder.where_conditions) == 1
     assert len(time_entry_query_builder.get_parameters()) == 2

@@ -15,7 +15,7 @@ def create_sql_in_condition(field, values):
     return "c.{field} IN {list}".format(field=field, list=tuple_string)
 
 
-def get_string_without_empty_spaces(string: str):
+def remove_white_spaces(string: str):
     from re import sub
 
     string = string.replace("\n", "")

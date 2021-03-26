@@ -1,6 +1,6 @@
 from unittest.mock import patch
 from utils.query_builder import CosmosDBQueryBuilder
-from utils.repository import get_string_without_empty_spaces
+from utils.repository import remove_white_spaces
 import pytest
 
 
@@ -234,9 +234,7 @@ def test_build_with_all_calls_return_query_with_all_conditions():
                     LIMIT @limit
                     """
 
-    assert get_string_without_empty_spaces(
-        query
-    ) == get_string_without_empty_spaces(expected_query)
+    assert remove_white_spaces(query) == remove_white_spaces(expected_query)
 
     assert len(query_builder.get_parameters()) > 0
     assert len(query_builder.where_conditions) > 0
@@ -258,8 +256,8 @@ def test_build_with_empty_and_None_attributes_return_query_select_all():
     query = query_builder.get_query()
 
     expected_query = """SELECT * FROM c"""
-    query = get_string_without_empty_spaces(query)
-    expected_query = get_string_without_empty_spaces(expected_query)
+    query = remove_white_spaces(query)
+    expected_query = remove_white_spaces(expected_query)
 
     assert query == expected_query
     assert len(query_builder.get_parameters()) == 0
