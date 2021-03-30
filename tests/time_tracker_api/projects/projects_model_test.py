@@ -9,35 +9,31 @@ from time_tracker_api.projects.projects_model import (
 
 
 @patch(
-    'time_tracker_api.projects.projects_model.ProjectCosmosDBRepository.create_sql_condition_for_visibility'
-)
-@patch(
     'time_tracker_api.projects.projects_model.ProjectCosmosDBRepository.find_partition_key_value'
 )
-def test_find_all_with_customer_id_in_list(
+def test_find_all_v2(
     find_partition_key_value_mock,
-    create_sql_condition_for_visibility_mock,
     event_context: EventContext,
     project_repository: ProjectCosmosDBRepository,
 ):
     expected_item = {
         'customer_id': 'id1',
+        'id': 'id2',
         'name': 'testing',
         'description': 'do some testing',
         'project_type_id': "id2",
         'tenant_id': 'tenantid1',
     }
-
     query_items_mock = Mock(return_value=[expected_item])
     project_repository.container = Mock()
     project_repository.container.query_items = query_items_mock
 
-    result = project_repository.find_all_with_customer_id_in_list(event_context, [expected_item])
-
-    create_sql_condition_for_visibility_mock.assert_called_once()
+    result = project_repository.find_all_v2(
+        event_context,
+        ['id'],
+        ['customer_id']
+    )
     find_partition_key_value_mock.assert_called_once()
-    query_items_mock.assert_called_once()
-
     assert len(result) == 1
     project = result[0]
     assert isinstance(project, ProjectCosmosDBModel)
