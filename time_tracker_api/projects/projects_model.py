@@ -8,13 +8,13 @@ from commons.data_access_layer.cosmos_db import (
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
 from typing import List, Callable
 from commons.data_access_layer.database import EventContext
-from utils.repository import create_sql_in_condition
 from time_tracker_api.customers.customers_model import (
     create_dao as customers_create_dao,
 )
 from time_tracker_api.customers.customers_model import CustomerCosmosDBModel
 from utils.query_builder import CosmosDBQueryBuilder
 from utils.extend_model import add_customer_name_to_projects
+from utils.repository import create_sql_in_condition
 
 
 class ProjectDao(CRUDDao):
@@ -70,13 +70,13 @@ class ProjectCosmosDBRepository(CosmosDBRepository):
         self,
         event_context: EventContext,
         ids_list: List[str],
-        customers_ids_list: List[str] = None,
+        customers_ids: List[str] = None,
         visible_only=True,
         mapper: Callable = None, 
     ):
         query_builder = (CosmosDBQueryBuilder()
             .add_sql_in_condition("id",ids_list)
-            .add_sql_in_condition("customer_id",customers_ids_list)
+            .add_sql_in_condition("customer_id",customers_ids)
             .add_sql_visibility_condition(visible_only)
             .build()
         )
