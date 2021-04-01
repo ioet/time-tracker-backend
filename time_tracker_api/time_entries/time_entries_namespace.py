@@ -15,6 +15,7 @@ from time_tracker_api.api import (
     UUID,
     NullableString,
     remove_required_constraint,
+    update_last_entry_if_overlap,
 )
 from time_tracker_api.time_entries.time_entries_dao import create_dao
 
@@ -267,6 +268,11 @@ class LatestTimeEntries(Resource):
         return time_entries_dao.get_lastest_entries_by_project(conditions={})
 
 
+update_entry_input = update_last_entry_if_overlap(
+    remove_required_constraint(time_entry_input)
+)
+
+
 @ns.route('/<string:id>')
 @ns.response(HTTPStatus.NOT_FOUND, 'This time entry does not exist')
 @ns.response(HTTPStatus.UNPROCESSABLE_ENTITY, 'The id has an invalid format')
@@ -288,7 +294,7 @@ class TimeEntry(Resource):
         'A time entry already exists with this new data or there'
         ' is a bad reference for the project or activity',
     )
-    @ns.expect(remove_required_constraint(time_entry_input))
+    @ns.expect(update_entry_input)
     @ns.marshal_with(time_entry)
     def put(self, id):
         """Update a time entry"""

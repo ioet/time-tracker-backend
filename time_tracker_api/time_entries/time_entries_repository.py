@@ -27,6 +27,8 @@ from time_tracker_api.projects import projects_model
 from time_tracker_api.time_entries.time_entries_query_builder import (
     TimeEntryQueryBuilder,
 )
+from utils.query_builder import CosmosDBQueryBuilder, Order
+from utils.time import str_to_datetime
 
 
 class TimeEntryCosmosDBRepository(CosmosDBRepository):
@@ -232,6 +234,44 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         )
         function_mapper = self.get_mapper_or_dict(mapper)
         return list(map(function_mapper, result))
+
+    def get_last_entry(self, owner_id: str, event_context: EventContext):
+        query_builder = (
+            CosmosDBQueryBuilder()
+            .where_conditions({'owner_id': owner_id})
+            .add_sql_order_by_condition('end_date', Order.DESC)
+            .limit(1)
+            .offset(1)
+            .build()
+        )
+
+        query_str = query_builder.get_query()
+        params = query_builder.generate_params()
+        result = self.container.query_items(
+            query=query_str,
+            parameters=params,
+            partition_key=partition_key_value,
+        )
+
+        function_mapper = self.get_mapper_or_dict(mapper)
+        return list(map(function_mapper, result))
+
+    def update_last_entry(self, data: dict, event_context: EventContext):
+        owner_id = data.get('owner_id')
+        last_entry = self.get_last_entry(owner_id, event_context)
+        last_entry = last_entry.pop()
+
+        end_date = str_to_datetime(last_entry.end_date)
+        start_date = data.get('start_date')
+        start_date = str_to_datetime(start_date)
+
+        if start_date < end_date:
+            update_date = {'end_date': start_date}
+            return self.partial_update(
+                last_entry.id, update_date, event_context
+            )
+
+        return False
 
     def on_create(self, new_item_data: dict, event_context: EventContext):
         CosmosDBRepository.on_create(self, new_item_data, event_context)

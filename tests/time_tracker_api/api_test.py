@@ -58,8 +58,8 @@ def test_remove_required_constraint():
         ), "No attribute should be required"
 
 
-def test_add_update_last_entry_flag():
-    from time_tracker_api.api import add_update_last_entry_flag
+def test_add_update_last_entry_if_overlap():
+    from time_tracker_api.api import add_update_last_entry_if_overlap
     from flask_restplus import fields
     from flask_restplus import Namespace
 
@@ -76,9 +76,11 @@ def test_add_update_last_entry_flag():
         },
     )
 
-    new_model = add_update_last_entry_flag(sample_model)
+    new_model = add_update_last_entry_if_overlap(sample_model)
 
     assert new_model is not sample_model
 
-    update_last_entry_flag = new_model.get('update_last_entry')
-    assert update_last_entry_flag is not None
+    update_last_entry_if_overlap = new_model.get(
+        'update_last_entry_if_overlap'
+    )
+    assert update_last_entry_if_overlap is not None

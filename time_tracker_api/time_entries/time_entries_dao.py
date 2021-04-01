@@ -226,6 +226,9 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
     def update(self, id, data: dict, description=None):
         event_ctx = self.create_event_context("update", description)
 
+        if data.get('update_last_entry_if_overlap'):
+            self.repository.update_last_entry(data)
+
         time_entry = self.repository.find(id, event_ctx)
         self.check_whether_current_user_owns_item(time_entry)
 
