@@ -310,3 +310,34 @@ def test_find_all_v2(
     time_entry = result[0]
     assert isinstance(time_entry, TimeEntryCosmosDBModel)
     assert time_entry.__dict__ == expected_item
+
+
+@patch(
+    'time_tracker_api.time_entries.time_entries_repository.TimeEntryCosmosDBRepository.find_partition_key_value'
+)
+def test_get_last_entry(
+    find_partition_key_value_mock,
+    event_context: EventContext,
+    time_entry_repository: TimeEntryCosmosDBRepository,
+):
+    expected_item = {
+        'id': 'id',
+        'start_date': '2021-03-22T10:00:00.000Z',
+        'end_date': "2021-03-22T11:00:00.000Z",
+        'description': 'do some testing',
+        'tenant_id': 'tenant_id',
+        'project_id': 'project_id',
+        'activity_id': 'activity_id',
+        'technologies': ['python'],
+    }
+    query_items_mock = Mock(return_value=[expected_item])
+    time_entry_repository.container = Mock()
+    time_entry_repository.container.query_items = query_items_mock
+
+    result = time_entry_repository.get_last_entry('id1', event_context)
+    find_partition_key_value_mock.assert_called_once()
+
+    assert len(result) == 1
+    time_entry = result.pop()
+    assert isinstance(time_entry, TimeEntryCosmosDBModel)
+    assert time_entry.__dict__ == expected_item

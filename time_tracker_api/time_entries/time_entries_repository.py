@@ -247,6 +247,8 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
         query_str = query_builder.get_query()
         params = query_builder.generate_params()
+
+        partition_key_value = self.find_partition_key_value(event_context)
         result = self.container.query_items(
             query=query_str,
             parameters=params,
