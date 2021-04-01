@@ -30,16 +30,55 @@ def test_remove_required_constraint():
     from flask_restplus import Namespace
 
     ns = Namespace('todos', description='Namespace for testing')
-    sample_model = ns.model('Todo', {
-        'id': fields.Integer(readonly=True, description='The task unique identifier'),
-        'task': fields.String(required=True, description='The task details'),
-        'done': fields.Boolean(required=False, description='Has it being done or not')
-    })
+    sample_model = ns.model(
+        'Todo',
+        {
+            'id': fields.Integer(
+                readonly=True, description='The task unique identifier'
+            ),
+            'task': fields.String(
+                required=True, description='The task details'
+            ),
+            'done': fields.Boolean(
+                required=False, description='Has it being done or not'
+            ),
+        },
+    )
 
     new_model = remove_required_constraint(sample_model)
 
     assert new_model is not sample_model
 
     for attrib in sample_model:
-        assert new_model[attrib].required is False, "No attribute should be required"
-        assert new_model[attrib] is not sample_model[attrib], "No attribute should be required"
+        assert (
+            new_model[attrib].required is False
+        ), "No attribute should be required"
+        assert (
+            new_model[attrib] is not sample_model[attrib]
+        ), "No attribute should be required"
+
+
+def test_add_update_last_entry_flag():
+    from time_tracker_api.api import add_update_last_entry_flag
+    from flask_restplus import fields
+    from flask_restplus import Namespace
+
+    ns = Namespace('todos', description='Namespace for testing')
+    sample_model = ns.model(
+        'Todo',
+        {
+            'id': fields.Integer(
+                readonly=True, description='The task unique identifier'
+            ),
+            'task': fields.String(
+                required=True, description='The task details'
+            ),
+        },
+    )
+
+    new_model = add_update_last_entry_flag(sample_model)
+
+    assert new_model is not sample_model
+
+    update_last_entry_flag = new_model.get('update_last_entry')
+    assert update_last_entry_flag is not None
