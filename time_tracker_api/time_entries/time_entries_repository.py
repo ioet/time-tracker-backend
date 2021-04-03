@@ -235,18 +235,24 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         function_mapper = self.get_mapper_or_dict(mapper)
         return list(map(function_mapper, result))
 
-    def get_last_entry(self, owner_id: str, event_context: EventContext):
+    def get_last_entry(
+        self,
+        owner_id: str,
+        event_context: EventContext,
+        visible_only=True,
+        mapper: Callable = None,
+    ):
         query_builder = (
             CosmosDBQueryBuilder()
-            .where_conditions({'owner_id': owner_id})
+            .add_sql_where_equal_condition({'owner_id': owner_id})
             .add_sql_order_by_condition('end_date', Order.DESC)
-            .limit(1)
-            .offset(1)
+            .add_sql_limit_condition(1)
+            .add_sql_offset_condition(1)
             .build()
         )
 
         query_str = query_builder.get_query()
-        params = query_builder.generate_params()
+        params = query_builder.get_parameters()
 
         partition_key_value = self.find_partition_key_value(event_context)
         result = self.container.query_items(

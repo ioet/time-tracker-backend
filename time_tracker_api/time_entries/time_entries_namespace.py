@@ -15,7 +15,7 @@ from time_tracker_api.api import (
     UUID,
     NullableString,
     remove_required_constraint,
-    update_last_entry_if_overlap,
+    add_update_last_entry_if_overlap,
 )
 from time_tracker_api.time_entries.time_entries_dao import create_dao
 
@@ -268,7 +268,7 @@ class LatestTimeEntries(Resource):
         return time_entries_dao.get_lastest_entries_by_project(conditions={})
 
 
-update_entry_input = update_last_entry_if_overlap(
+update_entry_input = add_update_last_entry_if_overlap(
     remove_required_constraint(time_entry_input)
 )
 
