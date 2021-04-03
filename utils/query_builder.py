@@ -91,6 +91,8 @@ class CosmosDBQueryBuilder:
     def __build_order_By(self):
         if self.orderBy:
             return "ORDER BY c.@attribute @order"
+        else:
+            return ""
 
     def build(self):
         self.query = """
