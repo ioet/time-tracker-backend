@@ -274,7 +274,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         start_date = str_to_datetime(start_date)
 
         if start_date < end_date:
-            update_date = {'end_date': start_date}
+            update_date = {'end_date': data.get('start_date')}
             return self.partial_update(
                 last_entry.id, update_date, event_context
             )

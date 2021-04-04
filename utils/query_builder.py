@@ -19,7 +19,7 @@ class CosmosDBQueryBuilder:
         self.where_conditions = []
         self.limit = None
         self.offset = None
-        self.orderBy = False
+        self.order_by = tuple()
 
     def add_select_conditions(self, columns: List[str] = None):
         columns = columns if columns else ["*"]
@@ -58,7 +58,7 @@ class CosmosDBQueryBuilder:
         return self
 
     def add_sql_order_by_condition(self, attribute: str, order: Order):
-        self.orderBy = True
+        self.order_by = (attribute, order.name)
         self.parameters.append({'name': '@attribute', 'value': attribute})
         self.parameters.append({'name': '@order', 'value': order.name})
         return self
@@ -89,8 +89,9 @@ class CosmosDBQueryBuilder:
             return ""
 
     def __build_order_By(self):
-        if self.orderBy:
-            return "ORDER BY c.@attribute @order"
+        if self.order_by:
+            attribute, order = self.order_by
+            return f"ORDER BY c.{attribute} {order}"
         else:
             return ""
 
