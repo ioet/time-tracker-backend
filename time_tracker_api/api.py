@@ -34,6 +34,19 @@ def remove_required_constraint(model: Model):
     return result
 
 
+def add_update_last_entry_if_overlap(time_entry_model: Model):
+    time_entry_flag = {
+        'update_last_entry_if_overlap': fields.Boolean(
+            title='Update last entry if overlap',
+            required=False,
+            description='Flag that indicates if the last time entry is updated',
+            example=True,
+        )
+    }
+    new_model = time_entry_model.clone('TimeEntryInput', time_entry_flag)
+    return new_model
+
+
 def create_attributes_filter(
     ns: namespace, model: Model, filter_attrib_names: list
 ) -> RequestParser:
