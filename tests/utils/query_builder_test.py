@@ -268,8 +268,8 @@ def test_order_by_condition():
         'start_date', Order.DESC
     )
 
-    assert len(query_builder.get_parameters()) == 2
-    assert query_builder.orderBy == True
+    assert len(query_builder.order_by) == 2
+    assert query_builder.order_by == ('start_date', 'DESC')
 
 
 def test__build_orderBy():
@@ -278,13 +278,6 @@ def test__build_orderBy():
     )
 
     orderBy_condition = query_builder._CosmosDBQueryBuilder__build_order_By()
-    expected_order_string = "ORDER BY c.@attribute @order"
+    expected_order_string = "ORDER BY c.start_date DESC"
 
     assert expected_order_string == orderBy_condition
-
-    expected_params = [
-        {'name': '@attribute', 'value': 'start_date'},
-        {'name': '@order', 'value': 'DESC'},
-    ]
-
-    assert expected_params == query_builder.get_parameters()

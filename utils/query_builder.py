@@ -59,8 +59,6 @@ class CosmosDBQueryBuilder:
 
     def add_sql_order_by_condition(self, attribute: str, order: Order):
         self.order_by = (attribute, order.name)
-        self.parameters.append({'name': '@attribute', 'value': attribute})
-        self.parameters.append({'name': '@order', 'value': order.name})
         return self
 
     def __build_select(self):
