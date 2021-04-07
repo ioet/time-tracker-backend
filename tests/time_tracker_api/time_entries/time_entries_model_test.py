@@ -341,3 +341,68 @@ def test_get_last_entry(
     time_entry = result.pop()
     assert isinstance(time_entry, TimeEntryCosmosDBModel)
     assert time_entry.__dict__ == expected_item
+
+
+expected_item = {
+    'id': 'id',
+    'owner_id': '1',
+    'start_date': '2021-03-22T10:00:00.000Z',
+    'end_date': "2021-03-22T11:00:00.000Z",
+    'description': 'do some testing',
+    'tenant_id': 'tenant_id',
+    'project_id': 'project_id',
+    'activity_id': 'activity_id',
+    'technologies': ['python'],
+        
+}
+
+running_item = {
+    'id': 'id',
+    'owner_id': '1',
+    'update_last_entry_if_overlap': True,
+    'start_date': '2021-03-22T10:30:00.000Z',
+    'end_date': '2021-03-22T11:30:00.000Z',
+    'description': 'do some testing',
+    'tenant_id': 'tenant_id',
+    'project_id': 'project_id',
+    'activity_id': 'activity_id',
+    'technologies': ['python'],
+}
+
+last_item_update = {
+    'id': 'id',
+    'owner_id': '1',
+    'start_date': '2021-03-22T10:00:00.000Z',
+    'end_date': "2021-03-22T10:30:00.000Z",
+    'description': 'do some testing',
+    'tenant_id': 'tenant_id',
+    'project_id': 'project_id',
+    'activity_id': 'activity_id',
+    'technologies': ['python'],
+ }
+
+@pytest.mark.parametrize("expected_item, running_item, last_item_update", 
+                        [(expected_item, running_item, last_item_update)])
+def test_update_last_entry(
+    event_context: EventContext,
+    time_entry_repository: TimeEntryCosmosDBRepository,
+    expected_item,
+    running_item,
+    last_item_update
+):
+    query_items_mock = Mock(return_value=[expected_item])
+    time_entry_repository.container = Mock()
+    time_entry_repository.container.query_items = query_items_mock
+    
+    partial_update_mock = Mock(return_value=[last_item_update])
+    time_entry_repository.partial_update = partial_update_mock
+    
+    result = time_entry_repository.update_last_entry(running_item, event_context)
+
+    partial_update_mock.assert_called_once()
+    query_items_mock.assert_called_once()
+    assert result == [last_item_update]
+
+
+
+

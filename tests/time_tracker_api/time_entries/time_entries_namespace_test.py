@@ -881,3 +881,33 @@ def test_paginated_sends_max_count_and_offset_on_call_to_repository(
     _, kwargs = time_entries_dao.repository.find_all.call_args
     assert 'max_count' in kwargs and kwargs['max_count'] is not None
     assert 'offset' in kwargs and kwargs['offset'] is not None
+
+
+def test_update_time_entry_calls_update_last_entry(
+    client: FlaskClient,
+    mocker: MockFixture,
+    valid_header: dict,
+    valid_id: str,
+    time_entries_dao,
+):
+    time_entries_dao.repository.partial_update = Mock(return_value={})
+    time_entries_dao.repository.find = Mock(return_value={})
+    time_entries_dao.check_whether_current_user_owns_item = Mock()
+    time_entries_dao.repository.update_last_entry = Mock(return_value={})
+
+    update_time_entry = valid_time_entry_input.copy()
+    update_time_entry['update_last_entry_if_overlap'] = True
+
+    response = client.put(
+        f'/time-entries/{valid_id}',
+        headers=valid_header,
+        json=update_time_entry,
+        follow_redirects=True,
+    )
+
+    assert HTTPStatus.OK == response.status_code
+    time_entries_dao.repository.partial_update.assert_called_once()
+    time_entries_dao.repository.find.assert_called_once()
+    time_entries_dao.check_whether_current_user_owns_item.assert_called_once()
+    time_entries_dao.repository.update_last_entry.assert_called_once()
+
