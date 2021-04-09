@@ -142,13 +142,6 @@ def handle_not_found_errors(error):
     return {'message': 'It was not found'}, HTTPStatus.NOT_FOUND
 
 
-@api.errorhandler(CosmosClientTimeoutError)
-@api.errorhandler(StopIteration)
-def handle_not_found_errors(error):
-    app.logger.error(error)
-    return {'message': 'No Content'}, HTTPStatus.NO_CONTENT
-
-
 @api.errorhandler(CosmosHttpResponseError)
 def handle_cosmos_http_response_error(error):
     app.logger.error(error)
@@ -180,3 +173,10 @@ def default_error_handler(error):
         {'message': 'An unhandled exception occurred.'},
         HTTPStatus.INTERNAL_SERVER_ERROR,
     )
+
+
+@api.errorhandler(CosmosClientTimeoutError)
+@api.errorhandler(StopIteration)
+def handle_no_content(error):
+    app.logger.error(error)
+    return {'message': 'No Content'}, HTTPStatus.NO_CONTENT
