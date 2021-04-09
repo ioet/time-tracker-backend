@@ -261,7 +261,8 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             partition_key=partition_key_value,
         )
 
-        return result.pop()
+        function_mapper = self.get_mapper_or_dict(mapper)
+        return function_mapper(next(result))
 
     def update_last_entry(
         self, owner_id, start_date, event_context: EventContext
