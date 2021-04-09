@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.31.1 (2021-04-09)
+### Fix
+* TT-206 return 404 when a time entry is not running ([#274](https://github.com/ioet/time-tracker-backend/issues/274)) ([`e6784d3`](https://github.com/ioet/time-tracker-backend/commit/e6784d3620d02a4dd88cc8ddd6975f72adfec605))
+
+### Documentation
+* TT-196 update readme ([#272](https://github.com/ioet/time-tracker-backend/issues/272)) ([`0d8520e`](https://github.com/ioet/time-tracker-backend/commit/0d8520e4001fcaab084c9f6ab9224538e258e383))
+
 ## v0.31.0 (2021-03-05)
 ### Feature
 * TT-169 add enpoints to add/remove users to/from groups ([#263](https://github.com/ioet/time-tracker-backend/issues/263)) ([`06a8988`](https://github.com/ioet/time-tracker-backend/commit/06a8988f8634e9e92183aea55e364eece157ea34))
