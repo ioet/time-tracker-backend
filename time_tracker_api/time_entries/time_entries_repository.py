@@ -265,16 +265,15 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         return function_mapper(next(result))
 
     def update_last_entry(
-        self, owner_id, start_date, event_context: EventContext
+        self, owner_id: str, start_date: str, event_context: EventContext
     ):
         last_entry = self.get_last_entry(owner_id, event_context)
-        start_date_tmp = start_date
 
         end_date = str_to_datetime(last_entry.end_date)
-        start_date = str_to_datetime(start_date)
+        _start_date = str_to_datetime(start_date)
 
-        if start_date < end_date:
-            update_data = {'end_date': start_date_tmp}
+        if _start_date < end_date:
+            update_data = {'end_date': start_date}
             self.partial_update(last_entry.id, update_data, event_context)
 
     def on_create(self, new_item_data: dict, event_context: EventContext):
