@@ -172,3 +172,9 @@ def default_error_handler(error):
         {'message': 'An unhandled exception occurred.'},
         HTTPStatus.INTERNAL_SERVER_ERROR,
     )
+
+
+@api.errorhandler(StopIteration)
+def handle_no_content(error):
+    app.logger.error(error)
+    return {'message': 'No Content'}, HTTPStatus.NO_CONTENT
