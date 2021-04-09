@@ -594,7 +594,7 @@ def test_get_running_should_call_find_running(
     repository_update_mock.assert_called_once_with(tenant_id, owner_id)
 
 
-def test_get_running_should_return_not_found_if_StopIteration(
+def test_get_running_should_return_no_content_if_StopIteration(
     client: FlaskClient,
     mocker: MockFixture,
     valid_header: dict,
@@ -610,7 +610,7 @@ def test_get_running_should_return_not_found_if_StopIteration(
         "/time-entries/running", headers=valid_header, follow_redirects=True
     )
 
-    assert HTTPStatus.NOT_FOUND == response.status_code
+    assert HTTPStatus.NO_CONTENT == response.status_code
     repository_update_mock.assert_called_once_with(tenant_id, owner_id)
 
 

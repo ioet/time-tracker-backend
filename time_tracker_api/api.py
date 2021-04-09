@@ -2,6 +2,7 @@ from azure.cosmos.exceptions import (
     CosmosResourceExistsError,
     CosmosResourceNotFoundError,
     CosmosHttpResponseError,
+    CosmosClientTimeoutError,
 )
 from faker import Faker
 from flask import current_app as app, Flask
@@ -139,6 +140,13 @@ def handle_cosmos_resource_exists_error(error):
 def handle_not_found_errors(error):
     app.logger.error(error)
     return {'message': 'It was not found'}, HTTPStatus.NOT_FOUND
+
+
+@api.errorhandler(CosmosClientTimeoutError)
+@api.errorhandler(StopIteration)
+def handle_not_found_errors(error):
+    app.logger.error(error)
+    return {'message': 'No Content'}, HTTPStatus.NO_CONTENT
 
 
 @api.errorhandler(CosmosHttpResponseError)
