@@ -263,21 +263,42 @@ def test_build_with_empty_and_None_attributes_return_query_select_all():
     assert len(query_builder.where_conditions) == 0
 
 
-def test_order_by_condition():
+@pytest.mark.parametrize(
+    "attribute,order,expected_order_by",
+    [
+        ('start_date', Order.DESC, ('start_date', 'DESC')),
+        ('start_date', Order.ASC, ('start_date', 'ASC')),
+    ],
+)
+def test_add_sql_order_by_condition(
+    attribute,
+    order,
+    expected_order_by,
+):
     query_builder = CosmosDBQueryBuilder().add_sql_order_by_condition(
-        'start_date', Order.DESC
+        attribute, order
     )
 
     assert len(query_builder.order_by) == 2
-    assert query_builder.order_by == ('start_date', 'DESC')
+    assert query_builder.order_by == expected_order_by
 
 
-def test__build_orderBy():
+@pytest.mark.parametrize(
+    "attribute,order,expected_order_by_condition",
+    [
+        ('start_date', Order.DESC, "ORDER BY c.start_date DESC"),
+        ('start_date', Order.ASC, "ORDER BY c.start_date ASC"),
+    ],
+)
+def test__build_order_by(
+    attribute,
+    order,
+    expected_order_by_condition,
+):
     query_builder = CosmosDBQueryBuilder().add_sql_order_by_condition(
-        'start_date', Order.DESC
+        attribute, order
     )
 
-    orderBy_condition = query_builder._CosmosDBQueryBuilder__build_order_By()
-    expected_order_string = "ORDER BY c.start_date DESC"
+    orderBy_condition = query_builder._CosmosDBQueryBuilder__build_order_by()
 
-    assert expected_order_string == orderBy_condition
+    assert orderBy_condition == expected_order_by_condition

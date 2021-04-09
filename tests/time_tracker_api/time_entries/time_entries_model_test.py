@@ -337,7 +337,4 @@ def test_get_last_entry(
     result = time_entry_repository.get_last_entry('id1', event_context)
     find_partition_key_value_mock.assert_called_once()
 
-    assert len(result) == 1
-    time_entry = result.pop()
-    assert isinstance(time_entry, TimeEntryCosmosDBModel)
-    assert time_entry.__dict__ == expected_item
+    assert result == expected_item
