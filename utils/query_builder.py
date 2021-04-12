@@ -1,5 +1,11 @@
 from typing import List
 from utils.repository import convert_list_to_tuple_string
+from enum import Enum
+
+
+class Order(Enum):
+    DESC = 'DESC'
+    ASC = 'ASC'
 
 
 class CosmosDBQueryBuilder:
@@ -13,6 +19,7 @@ class CosmosDBQueryBuilder:
         self.where_conditions = []
         self.limit = None
         self.offset = None
+        self.order_by = None
 
     def add_select_conditions(self, columns: List[str] = None):
         columns = columns if columns else ["*"]
@@ -50,6 +57,10 @@ class CosmosDBQueryBuilder:
             self.offset = offset
         return self
 
+    def add_sql_order_by_condition(self, attribute: str, order: Order):
+        self.order_by = (attribute, order.name)
+        return self
+
     def __build_select(self):
         if len(self.select_conditions) < 1:
             self.select_conditions.append("*")
@@ -75,15 +86,24 @@ class CosmosDBQueryBuilder:
         else:
             return ""
 
+    def __build_order_by(self):
+        if self.order_by:
+            attribute, order = self.order_by
+            return f"ORDER BY c.{attribute} {order}"
+        else:
+            return ""
+
     def build(self):
         self.query = """
         SELECT {select_conditions} FROM c
         {where_conditions}
+        {order_by_condition}
         {offset_condition}
         {limit_condition}
         """.format(
             select_conditions=self.__build_select(),
             where_conditions=self.__build_where(),
+            order_by_condition=self.__build_order_by(),
             offset_condition=self.__build_offset(),
             limit_condition=self.__build_limit(),
         )

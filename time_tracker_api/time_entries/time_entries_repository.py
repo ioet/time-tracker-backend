@@ -27,6 +27,8 @@ from time_tracker_api.projects import projects_model
 from time_tracker_api.time_entries.time_entries_query_builder import (
     TimeEntryQueryBuilder,
 )
+from utils.query_builder import CosmosDBQueryBuilder, Order
+from utils.time import str_to_datetime
 
 
 class TimeEntryCosmosDBRepository(CosmosDBRepository):
@@ -232,6 +234,47 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         )
         function_mapper = self.get_mapper_or_dict(mapper)
         return list(map(function_mapper, result))
+
+    def get_last_entry(
+        self,
+        owner_id: str,
+        event_context: EventContext,
+        visible_only=True,
+        mapper: Callable = None,
+    ):
+        query_builder = (
+            CosmosDBQueryBuilder()
+            .add_sql_where_equal_condition({'owner_id': owner_id})
+            .add_sql_order_by_condition('end_date', Order.DESC)
+            .add_sql_limit_condition(1)
+            .add_sql_offset_condition(1)
+            .build()
+        )
+
+        query_str = query_builder.get_query()
+        params = query_builder.get_parameters()
+
+        partition_key_value = self.find_partition_key_value(event_context)
+        result = self.container.query_items(
+            query=query_str,
+            parameters=params,
+            partition_key=partition_key_value,
+        )
+
+        function_mapper = self.get_mapper_or_dict(mapper)
+        return function_mapper(next(result))
+
+    def update_last_entry(
+        self, owner_id: str, start_date: str, event_context: EventContext
+    ):
+        last_entry = self.get_last_entry(owner_id, event_context)
+
+        end_date = str_to_datetime(last_entry.end_date)
+        _start_date = str_to_datetime(start_date)
+
+        if _start_date < end_date:
+            update_data = {'end_date': start_date}
+            self.partial_update(last_entry.id, update_data, event_context)
 
     def on_create(self, new_item_data: dict, event_context: EventContext):
         CosmosDBRepository.on_create(self, new_item_data, event_context)
