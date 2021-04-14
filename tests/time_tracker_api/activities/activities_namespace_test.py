@@ -61,7 +61,7 @@ def test_list_all_activities(client: FlaskClient,
                                                    'find_all',
                                                    return_value=[])
 
-    response = client.get("/activities",
+    response = client.get("/activities?only_active=1",
                           headers=valid_header,
                           follow_redirects=True)
 
@@ -69,7 +69,7 @@ def test_list_all_activities(client: FlaskClient,
     json_data = json.loads(response.data)
     assert [] == json_data
 
-    repository_find_all_mock.assert_called_once_with(ANY, conditions={})
+    repository_find_all_mock.assert_called_once_with(ANY, ANY, conditions={})
 
 
 def test_get_activity_should_succeed_with_valid_id(client: FlaskClient,
@@ -195,7 +195,7 @@ def test_delete_activity_should_succeed_with_valid_id(client: FlaskClient,
     valid_id = fake.random_int(1, 9999)
 
     repository_remove_mock = mocker.patch.object(activity_dao.repository,
-                                                 'delete',
+                                                 'partial_update',
                                                  return_value=None)
 
     response = client.delete("/activities/%s" % valid_id,
@@ -204,7 +204,7 @@ def test_delete_activity_should_succeed_with_valid_id(client: FlaskClient,
 
     assert HTTPStatus.NO_CONTENT == response.status_code
     assert b'' == response.data
-    repository_remove_mock.assert_called_once_with(str(valid_id), ANY)
+    repository_remove_mock.assert_called_once_with(str(valid_id), {'status': 'inactive'}, ANY)
 
 
 def test_delete_activity_should_return_not_found_with_invalid_id(client: FlaskClient,
@@ -216,7 +216,7 @@ def test_delete_activity_should_return_not_found_with_invalid_id(client: FlaskCl
     invalid_id = fake.random_int(1, 9999)
 
     repository_remove_mock = mocker.patch.object(activity_dao.repository,
-                                                 'delete',
+                                                 'partial_update',
                                                  side_effect=NotFound)
 
     response = client.delete("/activities/%s" % invalid_id,
@@ -224,7 +224,7 @@ def test_delete_activity_should_return_not_found_with_invalid_id(client: FlaskCl
                              follow_redirects=True)
 
     assert HTTPStatus.NOT_FOUND == response.status_code
-    repository_remove_mock.assert_called_once_with(str(invalid_id), ANY)
+    repository_remove_mock.assert_called_once_with(str(invalid_id), {'status': 'inactive'}, ANY)
 
 
 def test_delete_activity_should_return_422_for_invalid_id_format(client: FlaskClient,
@@ -236,7 +236,7 @@ def test_delete_activity_should_return_422_for_invalid_id_format(client: FlaskCl
     invalid_id = fake.company()
 
     repository_remove_mock = mocker.patch.object(activity_dao.repository,
-                                                 'delete',
+                                                 'partial_update',
                                                  side_effect=UnprocessableEntity)
 
     response = client.delete("/activities/%s" % invalid_id,
@@ -244,4 +244,4 @@ def test_delete_activity_should_return_422_for_invalid_id_format(client: FlaskCl
                              follow_redirects=True)
 
     assert HTTPStatus.UNPROCESSABLE_ENTITY == response.status_code
-    repository_remove_mock.assert_called_once_with(str(invalid_id), ANY)
+    repository_remove_mock.assert_called_once_with(str(invalid_id), {'status': 'inactive'}, ANY)

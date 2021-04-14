@@ -134,6 +134,13 @@ class CosmosDBRepository:
         return ''
 
     @staticmethod
+    def create_sql_condition_for_active( only_active: bool,
+        container_name='c' ) -> str:
+        if only_active:
+            return 'AND NOT IS_DEFINED(%s.status) OR (IS_DEFINED(%s.status) AND %s.status = \'active\')' % (container_name, container_name, container_name)
+        return ''
+
+    @staticmethod
     def create_sql_where_conditions(
         conditions: dict, container_name='c'
     ) -> str:
@@ -225,6 +232,7 @@ class CosmosDBRepository:
     def find_all(
         self,
         event_context: EventContext,
+        only_active = True,
         conditions: dict = None,
         custom_sql_conditions: List[str] = None,
         custom_params: dict = None,
@@ -253,6 +261,7 @@ class CosmosDBRepository:
             WHERE c.{partition_key_attribute}=@partition_key_value
             {conditions_clause}
             {visibility_condition}
+            {only_active_condition}
             {custom_sql_conditions_clause}
             {order_clause}
             OFFSET @offset LIMIT @max_count
@@ -261,6 +270,7 @@ class CosmosDBRepository:
             visibility_condition=self.create_sql_condition_for_visibility(
                 visible_only
             ),
+            only_active_condition=self.create_sql_condition_for_active(only_active),
             conditions_clause=self.create_sql_where_conditions(conditions),
             custom_sql_conditions_clause=self.create_custom_sql_conditions(
                 custom_sql_conditions
@@ -348,11 +358,11 @@ class CosmosDBDao(CRUDDao):
     def __init__(self, repository: CosmosDBRepository):
         self.repository = repository
 
-    def get_all(self, conditions: dict = None, **kwargs) -> list:
+    def get_all(self, only_active = True, conditions: dict = None, **kwargs) -> list:
         conditions = conditions if conditions else {}
         event_ctx = self.create_event_context("read-many")
         return self.repository.find_all(
-            event_ctx, conditions=conditions, **kwargs
+            event_ctx, only_active, conditions=conditions, **kwargs
         )
 
     def get(self, id):

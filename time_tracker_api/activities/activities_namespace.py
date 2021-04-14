@@ -23,7 +23,15 @@ activity_input = ns.model('ActivityInput', {
         required=False,
         description='Comments about the activity',
         example=faker.paragraph(),
-    )
+    ),
+    'status': fields.String(
+        required=False,
+        title='Status',
+        description='Status active or inactive activities',
+        example=Faker().words(
+            2, ['active', 'inactive',], unique=True
+        ),
+    ),
 })
 
 activity_response_fields = {}
@@ -37,14 +45,28 @@ activity = ns.inherit(
 
 activity_dao = create_dao()
 
+list_activities_attribs_parser = ns.parser()
+list_activities_attribs_parser.add_argument(
+    'only_active',
+    required=False,
+    type=int,
+    store_missing=False,
+    help="(Filter) Permits to get a list of active or inactive activities.",
+    location='args',
+)
+
+ONLY_ACTIVE_TRUE_VALUE = 1
 
 @ns.route('')
 class Activities(Resource):
     @ns.doc('list_activities')
     @ns.marshal_list_with(activity)
+    @ns.expect(list_activities_attribs_parser)
     def get(self):
         """List all activities"""
-        return activity_dao.get_all()
+        conditions = list_activities_attribs_parser.parse_args()
+        only_active = conditions.get('only_active') == ONLY_ACTIVE_TRUE_VALUE
+        return activity_dao.get_all(only_active)
 
     @ns.doc('create_activity')
     @ns.response(HTTPStatus.CONFLICT, 'This activity already exists')
@@ -80,5 +102,5 @@ class Activity(Resource):
     @ns.response(HTTPStatus.NO_CONTENT, 'Activity deleted successfully')
     def delete(self, id):
         """Delete an activity"""
-        activity_dao.delete(id)
+        activity_dao.update(id, {'status': 'inactive'})
         return None, HTTPStatus.NO_CONTENT
