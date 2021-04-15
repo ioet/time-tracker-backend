@@ -134,10 +134,27 @@ class CosmosDBRepository:
         return ''
 
     @staticmethod
-    def create_sql_condition_for_active( only_active: bool,
-        container_name='c' ) -> str:
-        if only_active:
-            return 'AND NOT IS_DEFINED(%s.status) OR (IS_DEFINED(%s.status) AND %s.status = \'active\')' % (container_name, container_name, container_name)
+    def create_sql_active_condition(
+        status_value: str, container_name='c'
+    ) -> str:
+        if status_value != None:
+            not_defined_condition = ''
+            condition_operand = ' AND '
+            if status_value == 'active':
+                not_defined_condition = (
+                    'AND NOT IS_DEFINED({container_name}.status)'.format(
+                        container_name=container_name
+                    )
+                )
+                condition_operand = ' OR '
+
+            defined_condition = '(IS_DEFINED({container_name}.status) AND {container_name}.status = \'{status_value}\')'.format(
+                container_name=container_name, status_value=status_value
+            )
+            return (
+                not_defined_condition + condition_operand + defined_condition
+            )
+
         return ''
 
     @staticmethod
@@ -232,7 +249,6 @@ class CosmosDBRepository:
     def find_all(
         self,
         event_context: EventContext,
-        only_active = True,
         conditions: dict = None,
         custom_sql_conditions: List[str] = None,
         custom_params: dict = None,
@@ -254,6 +270,12 @@ class CosmosDBRepository:
             {"name": "@offset", "value": offset},
             {"name": "@max_count", "value": max_count},
         ]
+
+        status_value = None
+        if conditions.get('status') != None:
+            status_value = conditions.get('status')
+            conditions.pop('status')
+
         params.extend(self.generate_params(conditions))
         params.extend(custom_params)
         query_str = """
@@ -261,7 +283,7 @@ class CosmosDBRepository:
             WHERE c.{partition_key_attribute}=@partition_key_value
             {conditions_clause}
             {visibility_condition}
-            {only_active_condition}
+            {active_condition}
             {custom_sql_conditions_clause}
             {order_clause}
             OFFSET @offset LIMIT @max_count
@@ -270,7 +292,7 @@ class CosmosDBRepository:
             visibility_condition=self.create_sql_condition_for_visibility(
                 visible_only
             ),
-            only_active_condition=self.create_sql_condition_for_active(only_active),
+            active_condition=self.create_sql_active_condition(status_value),
             conditions_clause=self.create_sql_where_conditions(conditions),
             custom_sql_conditions_clause=self.create_custom_sql_conditions(
                 custom_sql_conditions
@@ -358,11 +380,11 @@ class CosmosDBDao(CRUDDao):
     def __init__(self, repository: CosmosDBRepository):
         self.repository = repository
 
-    def get_all(self, only_active = True, conditions: dict = None, **kwargs) -> list:
+    def get_all(self, conditions: dict = None, **kwargs) -> list:
         conditions = conditions if conditions else {}
         event_ctx = self.create_event_context("read-many")
         return self.repository.find_all(
-            event_ctx, only_active, conditions=conditions, **kwargs
+            event_ctx, conditions=conditions, **kwargs
         )
 
     def get(self, id):
