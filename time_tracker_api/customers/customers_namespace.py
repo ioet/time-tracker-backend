@@ -122,5 +122,5 @@ class Customer(Resource):
     @ns.response(HTTPStatus.NO_CONTENT, 'Customer successfully deleted')
     def delete(self, id):
         """Delete a customer"""
-        customer_dao.update(id, {'status': 'active'})
+        customer_dao.update(id, {'status': 'inactive'})
         return None, HTTPStatus.NO_CONTENT
