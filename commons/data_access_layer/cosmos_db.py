@@ -148,7 +148,8 @@ class CosmosDBRepository:
                 )
                 condition_operand = ' OR '
 
-            defined_condition = '(IS_DEFINED({container_name}.status) AND {container_name}.status = \'{status_value}\')'.format(
+            defined_condition = '(IS_DEFINED({container_name}.status) \
+                AND {container_name}.status = \'{status_value}\')'.format(
                 container_name=container_name, status_value=status_value
             )
             return (
