@@ -39,3 +39,5 @@ migration_status.csv
 
 # windows env variables
 .env.bat
+# mac / linux env variables
+.env
