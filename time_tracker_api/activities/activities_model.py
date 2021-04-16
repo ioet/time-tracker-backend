@@ -34,6 +34,7 @@ class ActivityCosmosDBModel(CosmosDBModel):
     name: str
     description: str
     deleted: str
+    status: str
     tenant_id: str
 
     def __init__(self, data):

@@ -134,6 +134,31 @@ class CosmosDBRepository:
         return ''
 
     @staticmethod
+    def create_sql_active_condition(
+        status_value: str, container_name='c'
+    ) -> str:
+        if status_value != None:
+            not_defined_condition = ''
+            condition_operand = ' AND '
+            if status_value == 'active':
+                not_defined_condition = (
+                    'AND NOT IS_DEFINED({container_name}.status)'.format(
+                        container_name=container_name
+                    )
+                )
+                condition_operand = ' OR '
+
+            defined_condition = '(IS_DEFINED({container_name}.status) \
+                AND {container_name}.status = \'{status_value}\')'.format(
+                container_name=container_name, status_value=status_value
+            )
+            return (
+                not_defined_condition + condition_operand + defined_condition
+            )
+
+        return ''
+
+    @staticmethod
     def create_sql_where_conditions(
         conditions: dict, container_name='c'
     ) -> str:
@@ -246,6 +271,12 @@ class CosmosDBRepository:
             {"name": "@offset", "value": offset},
             {"name": "@max_count", "value": max_count},
         ]
+
+        status_value = None
+        if conditions.get('status') != None:
+            status_value = conditions.get('status')
+            conditions.pop('status')
+
         params.extend(self.generate_params(conditions))
         params.extend(custom_params)
         query_str = """
@@ -253,6 +284,7 @@ class CosmosDBRepository:
             WHERE c.{partition_key_attribute}=@partition_key_value
             {conditions_clause}
             {visibility_condition}
+            {active_condition}
             {custom_sql_conditions_clause}
             {order_clause}
             OFFSET @offset LIMIT @max_count
@@ -261,6 +293,7 @@ class CosmosDBRepository:
             visibility_condition=self.create_sql_condition_for_visibility(
                 visible_only
             ),
+            active_condition=self.create_sql_active_condition(status_value),
             conditions_clause=self.create_sql_where_conditions(conditions),
             custom_sql_conditions_clause=self.create_custom_sql_conditions(
                 custom_sql_conditions
