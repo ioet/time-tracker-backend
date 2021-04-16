@@ -57,7 +57,7 @@ project_input = ns.model(
         'status': fields.String(
             required=False,
             title='Status',
-            description='Status active or inactive activities',
+            description='Status active or inactive projects',
             example=Faker().words(
                 2,
                 [
