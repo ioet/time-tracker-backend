@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.31.2 (2021-04-16)
+### Fix
+* TT-210 Don't allow activities deleting ([#275](https://github.com/ioet/time-tracker-backend/issues/275)) ([`2651857`](https://github.com/ioet/time-tracker-backend/commit/265185715b99619e94eda1f0eda9eede2f728eaf))
+
 ## v0.31.1 (2021-04-09)
 ### Fix
 * TT-206 return 404 when a time entry is not running ([#274](https://github.com/ioet/time-tracker-backend/issues/274)) ([`e6784d3`](https://github.com/ioet/time-tracker-backend/commit/e6784d3620d02a4dd88cc8ddd6975f72adfec605))
