@@ -10,7 +10,10 @@ from commons.data_access_layer.cosmos_db import (
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
 from typing import List, Callable
 from commons.data_access_layer.database import EventContext
-from utils.repository import convert_list_to_tuple_string, create_sql_in_condition
+from utils.repository import (
+    convert_list_to_tuple_string,
+    create_sql_in_condition,
+)
 
 
 class ActivityDao(CRUDDao):
@@ -62,7 +65,7 @@ class ActivityCosmosDBRepository(CosmosDBRepository):
         activity_ids: List[str],
         visible_only=True,
         mapper: Callable = None,
-    ):  
+    ):
         visibility = self.create_sql_condition_for_visibility(visible_only)
         query_str = """
             SELECT * FROM c
