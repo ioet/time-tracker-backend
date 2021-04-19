@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.31.3 (2021-04-19)
+### Fix
+* TT-84 not allow deleting customers ([#276](https://github.com/ioet/time-tracker-backend/issues/276)) ([`0251c48`](https://github.com/ioet/time-tracker-backend/commit/0251c4897e56430aa851c57dc9495edb1d346daf))
+
 ## v0.31.2 (2021-04-16)
 ### Fix
 * TT-210 Don't allow activities deleting ([#275](https://github.com/ioet/time-tracker-backend/issues/275)) ([`2651857`](https://github.com/ioet/time-tracker-backend/commit/265185715b99619e94eda1f0eda9eede2f728eaf))
