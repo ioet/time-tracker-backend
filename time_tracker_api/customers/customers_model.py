@@ -2,7 +2,11 @@ from dataclasses import dataclass
 
 from azure.cosmos import PartitionKey
 
-from commons.data_access_layer.cosmos_db import CosmosDBModel, CosmosDBRepository, CosmosDBDao
+from commons.data_access_layer.cosmos_db import (
+    CosmosDBModel,
+    CosmosDBRepository,
+    CosmosDBDao,
+)
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
 
 
@@ -17,7 +21,7 @@ container_definition = {
         'uniqueKeys': [
             {'paths': ['/name', '/deleted']},
         ]
-    }
+    },
 }
 
 
@@ -28,6 +32,7 @@ class CustomerCosmosDBModel(CosmosDBModel):
     description: str
     deleted: str
     tenant_id: str
+    status: str
 
     def __init__(self, data):
         super(CustomerCosmosDBModel, self).__init__(data)  # pragma: no cover
@@ -40,8 +45,9 @@ class CustomerCosmosDBModel(CosmosDBModel):
 
 
 def create_dao() -> CustomerDao:
-    repository = CosmosDBRepository.from_definition(container_definition,
-                                                    mapper=CustomerCosmosDBModel)
+    repository = CosmosDBRepository.from_definition(
+        container_definition, mapper=CustomerCosmosDBModel
+    )
 
     class CustomerCosmosDBDao(APICosmosDBDao, CustomerDao):
         def __init__(self):
