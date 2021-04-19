@@ -24,7 +24,9 @@ container_definition = {
     'id': 'project',
     'partition_key': PartitionKey(path='/tenant_id'),
     'unique_key_policy': {
-        'uniqueKeys': [{'paths': ['/name', '/customer_id', '/deleted']},]
+        'uniqueKeys': [
+            {'paths': ['/name', '/customer_id', '/deleted']},
+        ]
     },
 }
 
@@ -37,6 +39,7 @@ class ProjectCosmosDBModel(CosmosDBModel):
     project_type_id: int
     customer_id: str
     deleted: str
+    status: str
     tenant_id: str
     technologies: list
 
@@ -71,11 +74,12 @@ class ProjectCosmosDBRepository(CosmosDBRepository):
         project_ids: List[str],
         customer_ids: List[str] = None,
         visible_only=True,
-        mapper: Callable = None, 
+        mapper: Callable = None,
     ):
-        query_builder = (CosmosDBQueryBuilder()
-            .add_sql_in_condition("id",project_ids)
-            .add_sql_in_condition("customer_id",customer_ids)
+        query_builder = (
+            CosmosDBQueryBuilder()
+            .add_sql_in_condition("id", project_ids)
+            .add_sql_in_condition("customer_id", customer_ids)
             .add_sql_visibility_condition(visible_only)
             .build()
         )
@@ -121,10 +125,9 @@ class ProjectCosmosDBDao(APICosmosDBDao, ProjectDao):
         add_customer_name_to_projects(projects, customers)
         return projects
 
-    def get_all_with_id_in_list(self,id_list):
-    	event_ctx = self.create_event_context("read-many")
-    	return self.repository.find_all_v2(event_ctx, id_list)
-
+    def get_all_with_id_in_list(self, id_list):
+        event_ctx = self.create_event_context("read-many")
+        return self.repository.find_all_v2(event_ctx, id_list)
 
 
 def create_dao() -> ProjectDao:
