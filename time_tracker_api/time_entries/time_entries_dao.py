@@ -230,7 +230,7 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
 
         if data.get('update_last_entry_if_overlap', None):
             self.repository.update_last_entry(
-                data.get('owner_id'), data.get('start_date'), event_ctx
+                data.get('owner_id'), data.get('start_date'), data.get('id'), event_ctx
             )
 
         return self.repository.partial_update(

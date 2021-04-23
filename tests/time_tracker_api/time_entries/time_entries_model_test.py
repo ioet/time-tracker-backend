@@ -334,7 +334,7 @@ def test_get_last_entry(
     time_entry_repository.container = Mock()
     time_entry_repository.container.query_items = query_items_mock
 
-    time_entry = time_entry_repository.get_last_entry('id1', event_context)
+    time_entry = time_entry_repository.get_last_entry('id1', ['id1'], event_context)
 
     find_partition_key_value_mock.assert_called_once()
     assert isinstance(time_entry, TimeEntryCosmosDBModel)
@@ -356,6 +356,7 @@ expected_item = {
 running_item = {
     'id': 'id',
     'owner_id': '1',
+    'id_running_entry': '1',
     'update_last_entry_if_overlap': True,
     'start_date': '2021-03-22T10:30:00.000Z',
     'end_date': '2021-03-22T11:30:00.000Z',
@@ -400,6 +401,7 @@ def test_update_last_entry(
     time_entry_repository.update_last_entry(
         running_item.get('owner_id'),
         running_item.get('start_date'),
+        running_item.get('id_running_entry'),
         event_context,
     )
 

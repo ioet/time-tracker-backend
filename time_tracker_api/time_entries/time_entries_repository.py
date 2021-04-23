@@ -238,6 +238,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
     def get_last_entry(
         self,
         owner_id: str,
+        id_running_entry: str,
         event_context: EventContext,
         visible_only=True,
         mapper: Callable = None,
@@ -246,29 +247,26 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             CosmosDBQueryBuilder()
             .add_sql_where_equal_condition({'owner_id': owner_id})
             .add_sql_order_by_condition('end_date', Order.DESC)
-            .add_sql_limit_condition(1)
-            .add_sql_offset_condition(1)
-            .build()
+            .add_sql_not_in_condition('id', [id_running_entry])
+            .build_with_order_by()
         )
-
         query_str = query_builder.get_query()
         params = query_builder.get_parameters()
-
         partition_key_value = self.find_partition_key_value(event_context)
         result = self.container.query_items(
             query=query_str,
             parameters=params,
             partition_key=partition_key_value,
         )
-
         function_mapper = self.get_mapper_or_dict(mapper)
         return function_mapper(next(result))
 
-    def update_last_entry(
-        self, owner_id: str, start_date: str, event_context: EventContext
-    ):
-        last_entry = self.get_last_entry(owner_id, event_context)
 
+    def update_last_entry(
+        self, owner_id: str, start_date: str, id_running_entry: str, event_context: EventContext
+    ):
+        last_entry = self.get_last_entry(
+        owner_id, id_running_entry, event_context)
         end_date = str_to_datetime(last_entry.end_date)
         _start_date = str_to_datetime(start_date)
 
