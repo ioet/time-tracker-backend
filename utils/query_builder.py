@@ -20,7 +20,6 @@ class CosmosDBQueryBuilder:
         self.limit = None
         self.offset = None
         self.order_by = None
-        self.not_in = []
 
     def add_select_conditions(self, columns: List[str] = None):
         columns = columns if columns else ["*"]
@@ -114,18 +113,6 @@ class CosmosDBQueryBuilder:
             order_by_condition=self.__build_order_by(),
             offset_condition=self.__build_offset(),
             limit_condition=self.__build_limit(),
-        )
-        return self
-
-    def build_with_order_by(self):
-        self.query = """
-        SELECT {select_conditions} FROM c
-        {where_conditions}
-        {order_by_condition}
-        """.format(
-            select_conditions=self.__build_select(),
-            where_conditions=self.__build_where(),
-            order_by_condition=self.__build_order_by(),
         )
         return self
 

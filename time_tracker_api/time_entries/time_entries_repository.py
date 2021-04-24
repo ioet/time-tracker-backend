@@ -248,7 +248,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             .add_sql_where_equal_condition({'owner_id': owner_id})
             .add_sql_order_by_condition('end_date', Order.DESC)
             .add_sql_not_in_condition('id', [id_running_entry])
-            .build_with_order_by()
+            .build()
         )
         query_str = query_builder.get_query()
         params = query_builder.get_parameters()
