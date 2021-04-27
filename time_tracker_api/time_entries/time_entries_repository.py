@@ -141,7 +141,37 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
         return result.next()
 
-    def find_all(
+    def add_complementary_info(self, time_entries=None, max_count=None):
+        if time_entries:
+            custom_conditions = create_in_condition(time_entries, "project_id")
+            custom_conditions_activity = create_in_condition(
+                time_entries, "activity_id"
+            )
+
+            project_dao = projects_model.create_dao()
+            projects = project_dao.get_all(
+                custom_sql_conditions=[custom_conditions],
+                visible_only=False,
+                max_count=max_count,
+            )
+
+            add_project_info_to_time_entries(time_entries, projects)
+
+            activity_dao = activities_model.create_dao()
+            activities = activity_dao.get_all(
+                custom_sql_conditions=[custom_conditions_activity],
+                visible_only=False,
+                max_count=max_count,
+            )
+            add_activity_name_to_time_entries(time_entries, activities)
+
+            users = AzureConnection().users()
+            add_user_email_to_time_entries(time_entries, users)
+        elif not time_entries and len(conditions) > 1:
+            abort(HTTPStatus.NOT_FOUND, "Time entry not found")
+        return time_entries
+
+    def find_all_old(
         self,
         event_context: EventContext,
         conditions: dict = None,
@@ -199,41 +229,71 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             abort(HTTPStatus.NOT_FOUND, "Time entry not found")
         return time_entries
 
-    def find_all_v2(
+    def find_all(
         self,
+        conditions,
+        custom_sql_conditions,
         event_context: EventContext,
-        time_entry_ids: List[str],
-        owner_ids: List[str],
-        date_range: tuple = None,
-        fields: dict = None,
-        limit: int = None,
-        offset: int = 0,
+        date_range: dict = None,
+        test_user_ids=None,
+        offset=0,
+        max_count=None,
         visible_only=True,
+        custom_params: dict = None,
         mapper: Callable = None,
     ):
-        limit = self.get_page_size_or(limit)
         partition_key_value = self.find_partition_key_value(event_context)
-        query_builder = (
-            TimeEntryQueryBuilder()
-            .add_sql_date_range_condition(date_range)
-            .add_sql_in_condition(time_entry_ids)
-            .add_sql_in_condition(owner_ids)
-            .add_sql_where_equal_condition(fields)
-            .add_sql_limit_condition(limit)
-            .add_sql_offset_condition(offset)
-            .build()
-        )
+        max_count = self.get_page_size_or(max_count)
 
-        query_str = query_builder.get_query()
-        params = query_builder.get_parameters()
+        params = [
+            {"name": "@partition_key_value", "value": partition_key_value},
+            {"name": "@offset", "value": offset},
+            {"name": "@max_count", "value": max_count},
+        ]
+
+        params.extend(self.generate_params(conditions))
+        params.extend(custom_params)
+
+        query_str = """
+            SELECT * FROM c
+            WHERE c.{partition_key_attribute}=@partition_key_value
+            {conditions_clause}
+            {visibility_condition}
+            {test_users_exclusion_condition}
+            {custom_sql_conditions_clause}
+            OFFSET @offset LIMIT @max_count
+            """.format(
+            partition_key_attribute=self.partition_key_attribute,
+            visibility_condition=self.create_sql_condition_for_visibility(
+                visible_only
+            ),
+            conditions_clause=self.create_sql_where_conditions(conditions),
+            test_users_exclusion_condition=self.create_sql_test_users_exclusion_condition(
+                test_user_ids
+            ),
+            custom_sql_conditions_clause=self.create_custom_sql_conditions(
+                custom_sql_conditions
+            ),
+        )
 
         result = self.container.query_items(
             query=query_str,
             parameters=params,
             partition_key=partition_key_value,
+            max_item_count=max_count,
         )
+
         function_mapper = self.get_mapper_or_dict(mapper)
-        return list(map(function_mapper, result))
+        time_entries = list(map(function_mapper, result))
+
+        return self.add_complementary_info(time_entries, max_count)
+
+    def create_sql_test_users_exclusion_condition(self, test_user_ids):
+        if test_user_ids != None:
+            return (
+                " AND c.owner_id NOT IN ('" + "','".join(test_user_ids) + "') "
+            )
+        return ""
 
     def get_last_entry(
         self,

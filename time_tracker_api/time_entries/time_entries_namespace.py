@@ -19,6 +19,8 @@ from time_tracker_api.api import (
 )
 from time_tracker_api.time_entries.time_entries_dao import create_dao
 
+from commons.feature_toggles.feature_toggle_manager import FeatureToggleManager
+
 faker = Faker()
 
 ns = api.namespace(
@@ -237,7 +239,11 @@ class TimeEntries(Resource):
     def get(self):
         """List all time entries"""
         conditions = attributes_filter.parse_args()
-        return time_entries_dao.get_all(conditions=conditions)
+        find_all_version = FeatureToggleManager('find_all_version')
+        if find_all_version.is_toggle_enabled_for_user():
+            return time_entries_dao.get_all(conditions=conditions)
+        else:
+            return time_entries_dao.get_all_old(conditions=conditions)
 
     @ns.doc('create_time_entry')
     @ns.expect(time_entry_input)

@@ -2,6 +2,7 @@ import abc
 from commons.data_access_layer.cosmos_db import (
     CosmosDBDao,
     CustomError,
+    CosmosDBRepository,
 )
 from utils.extend_model import (
     add_project_info_to_time_entries,
@@ -91,7 +92,7 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
                 )
         return custom_query
 
-    def get_all(self, conditions: dict = None, **kwargs) -> list:
+    def get_all_old(self, conditions: dict = None, **kwargs) -> list:
         event_ctx = self.create_event_context("read-many")
         conditions.update({"owner_id": event_ctx.user_id})
         is_complete_query = conditions.get("user_id") == '*'
@@ -106,7 +107,7 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         current_user_is_tester = azure_connection.is_test_user(
             event_ctx.user_id
         )
-        time_entries_list = self.repository.find_all(
+        time_entries_list = self.repository.find_all_old(
             event_ctx,
             conditions=conditions,
             custom_sql_conditions=custom_query,
@@ -123,6 +124,47 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
             return time_entries_list
         else:
             return time_entries_list
+
+    def get_all(self, conditions: dict = None, **kwargs) -> list:
+        event_ctx = self.create_event_context("read-many")
+        conditions.update({"owner_id": event_ctx.user_id})
+        is_complete_query = conditions.get("user_id") == '*'
+        custom_query = self.build_custom_query(
+            is_admin=event_ctx.is_admin,
+            conditions=conditions,
+        )
+        date_range = self.handle_date_filter_args(args=conditions)
+        limit = conditions.get("limit", None)
+        conditions.pop("limit", None)
+        azure_connection = AzureConnection()
+        current_user_is_tester = azure_connection.is_test_user(
+            event_ctx.user_id
+        )
+
+        custom_query.append(
+            TimeEntryCosmosDBRepository.create_sql_date_range_filter(
+                date_range
+            )
+        )
+        custom_params = CosmosDBRepository.generate_params(date_range)
+
+        test_user_ids = (
+            azure_connection.get_test_user_ids()
+            if not current_user_is_tester and is_complete_query
+            else None
+        )
+
+        time_entries_list = self.repository.find_all(
+            conditions=conditions,
+            custom_sql_conditions=custom_query,
+            test_user_ids=test_user_ids,
+            date_range=date_range,
+            max_count=limit,
+            custom_params=custom_params,
+            event_context=event_ctx,
+        )
+
+        return time_entries_list
 
     def get_lastest_entries_by_project(
         self, conditions: dict = None, **kwargs
