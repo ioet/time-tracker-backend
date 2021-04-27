@@ -61,6 +61,13 @@ class CosmosDBQueryBuilder:
         self.order_by = (attribute, order.name)
         return self
 
+
+    def add_sql_not_in_condition(self, attribute: str = None, ids_list: List[str] = None):
+        if ids_list and attribute and len(ids_list) > 0:
+            ids_values = convert_list_to_tuple_string(ids_list)
+            self.where_conditions.append(f"c.{attribute} NOT IN {ids_values}")
+        return self
+
     def __build_select(self):
         if len(self.select_conditions) < 1:
             self.select_conditions.append("*")
