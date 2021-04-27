@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.31.5 (2021-04-27)
+### Fix
+* TT-225 Add build query with not in ([#281](https://github.com/ioet/time-tracker-backend/issues/281)) ([`0225544`](https://github.com/ioet/time-tracker-backend/commit/022554491c9c1cf9d09c192cfa9d62e3ed4da095))
+
 ## v0.31.4 (2021-04-19)
 ### Fix
 * TT-207 Dont allow projects deleting ([#280](https://github.com/ioet/time-tracker-backend/issues/280)) ([`d449aa6`](https://github.com/ioet/time-tracker-backend/commit/d449aa69bf056cc64f8587edbc6269b988900df5))
