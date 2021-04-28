@@ -324,7 +324,6 @@ def test_find_all_v2(
     time_entry_repository.container = Mock()
     time_entry_repository.container.query_items = query_items_mock
 
-    time_entry_repository.add_complementary_info = Mock()
     time_entry_repository.add_complementary_info = query_items_mock
 
     result = time_entry_repository.find_all(
@@ -371,7 +370,9 @@ def test_get_last_entry(
     time_entry_repository.container = Mock()
     time_entry_repository.container.query_items = query_items_mock
 
-    time_entry = time_entry_repository.get_last_entry('id1', ['id1'], event_context)
+    time_entry = time_entry_repository.get_last_entry(
+        'id1', ['id1'], event_context
+    )
 
     find_partition_key_value_mock.assert_called_once()
     assert isinstance(time_entry, TimeEntryCosmosDBModel)

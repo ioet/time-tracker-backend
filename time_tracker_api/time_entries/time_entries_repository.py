@@ -9,6 +9,7 @@ from time_tracker_api.time_entries.time_entries_model import (
 )
 
 from utils.time import current_datetime_str
+from utils.repository import convert_list_to_tuple_string
 
 from utils.extend_model import (
     add_project_info_to_time_entries,
@@ -290,9 +291,9 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
     def create_sql_test_users_exclusion_condition(self, test_user_ids):
         if test_user_ids != None:
-            return (
-                " AND c.owner_id NOT IN ('" + "','".join(test_user_ids) + "') "
-            )
+            tuple_string = convert_list_to_tuple_string(test_user_ids)
+            return "AND c.owner_id NOT IN {list}".format(list=tuple_string)
+
         return ""
 
     def get_last_entry(
@@ -321,12 +322,16 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         function_mapper = self.get_mapper_or_dict(mapper)
         return function_mapper(next(result))
 
-
     def update_last_entry(
-        self, owner_id: str, start_date: str, id_running_entry: str, event_context: EventContext
+        self,
+        owner_id: str,
+        start_date: str,
+        id_running_entry: str,
+        event_context: EventContext,
     ):
         last_entry = self.get_last_entry(
-        owner_id, id_running_entry, event_context)
+            owner_id, id_running_entry, event_context
+        )
         end_date = str_to_datetime(last_entry.end_date)
         _start_date = str_to_datetime(start_date)
 

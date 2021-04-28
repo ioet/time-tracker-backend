@@ -230,6 +230,95 @@ def test_get_time_entry_should_succeed_with_valid_id(
     'current_user_is_tester, expected_user_ids',
     [
         (True, ['id1', 'id1']),
+    ],
+)
+@patch(
+    'commons.feature_toggles.feature_toggle_manager.FeatureToggleManager.get_azure_app_configuration_client'
+)
+@patch(
+    'commons.feature_toggles.feature_toggle_manager.FeatureToggleManager.is_toggle_enabled_for_user'
+)
+def test_get_time_entries_by_type_of_user_when_is_user_tester(
+    is_toggle_enabled_for_user_mock,
+    get_azure_app_configuration_client_mock,
+    get_test_user_ids_mock,
+    is_test_user_mock,
+    client: FlaskClient,
+    valid_header: dict,
+    time_entries_dao,
+    current_user_is_tester,
+    expected_user_ids,
+):
+    is_toggle_enabled_for_user_mock.return_value = True
+    test_user_id = "id1"
+    non_test_user_id = "id2"
+    te1 = TimeEntryCosmosDBModel(
+        {
+            "id": '1',
+            "project_id": "1",
+            "owner_id": test_user_id,
+            "tenant_id": '1',
+            "start_date": "",
+        }
+    )
+    te2 = TimeEntryCosmosDBModel(
+        {
+            "id": '2',
+            "project_id": "2",
+            "owner_id": test_user_id,
+            "tenant_id": '2',
+            "start_date": "",
+        }
+    )
+
+    find_all_mock = Mock()
+    find_all_mock.return_value = [te1, te2]
+
+    time_entries_dao.repository.find_all = find_all_mock
+
+    is_test_user_mock.return_value = current_user_is_tester
+
+    response = client.get(
+        "/time-entries?user_id=*", headers=valid_header, follow_redirects=True
+    )
+
+    get_test_user_ids_mock.assert_not_called()
+    find_all_mock.assert_called()
+
+    expected_user_ids_in_time_entries = expected_user_ids
+    actual_user_ids_in_time_entries = [
+        time_entry["owner_id"] for time_entry in json.loads(response.data)
+    ]
+    assert expected_user_ids_in_time_entries == actual_user_ids_in_time_entries
+
+
+@patch(
+    'time_tracker_api.time_entries.time_entries_dao.TimeEntriesCosmosDBDao.create_event_context',
+    Mock(),
+)
+@patch(
+    'time_tracker_api.time_entries.time_entries_dao.TimeEntriesCosmosDBDao.build_custom_query',
+    Mock(),
+)
+@patch(
+    'time_tracker_api.time_entries.time_entries_dao.TimeEntriesCosmosDBDao.handle_date_filter_args',
+    Mock(),
+)
+@patch(
+    'time_tracker_api.time_entries.time_entries_repository.TimeEntryCosmosDBRepository.create_sql_date_range_filter',
+    Mock(),
+)
+@patch(
+    'commons.data_access_layer.cosmos_db.CosmosDBRepository.generate_params',
+    Mock(),
+)
+@patch('msal.ConfidentialClientApplication', Mock())
+@patch('utils.azure_users.AzureConnection.get_token', Mock())
+@patch('utils.azure_users.AzureConnection.is_test_user')
+@patch('utils.azure_users.AzureConnection.get_test_user_ids')
+@pytest.mark.parametrize(
+    'current_user_is_tester, expected_user_ids',
+    [
         (False, ['id1', 'id1']),
     ],
 )
@@ -239,7 +328,7 @@ def test_get_time_entry_should_succeed_with_valid_id(
 @patch(
     'commons.feature_toggles.feature_toggle_manager.FeatureToggleManager.is_toggle_enabled_for_user'
 )
-def test_get_time_entries_by_type_of_user(
+def test_get_time_entries_by_type_of_user_when_is_not_user_tester(
     is_toggle_enabled_for_user_mock,
     get_azure_app_configuration_client_mock,
     get_test_user_ids_mock,
@@ -284,7 +373,7 @@ def test_get_time_entries_by_type_of_user(
         "/time-entries?user_id=*", headers=valid_header, follow_redirects=True
     )
 
-    is_test_user_mock.assert_called()
+    get_test_user_ids_mock.assert_called()
     find_all_mock.assert_called()
 
     expected_user_ids_in_time_entries = expected_user_ids
