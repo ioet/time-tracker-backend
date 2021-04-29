@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.31.6 (2021-04-29)
+### Fix
+* TT-219 Refactoring find_all for time entries ([#282](https://github.com/ioet/time-tracker-backend/issues/282)) ([`63371fb`](https://github.com/ioet/time-tracker-backend/commit/63371fb730c8f94125ee0bae0bf893b8bac179bd))
+
 ## v0.31.5 (2021-04-27)
 ### Fix
 * TT-225 Add build query with not in ([#281](https://github.com/ioet/time-tracker-backend/issues/281)) ([`0225544`](https://github.com/ioet/time-tracker-backend/commit/022554491c9c1cf9d09c192cfa9d62e3ed4da095))
