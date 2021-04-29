@@ -18,7 +18,10 @@ def test_TimeEntryQueryBuilder_is_subclass_CosmosDBQueryBuilder():
 def test_add_sql_date_range_condition_should_update_where_list():
     time_entry_query_builder = (
         TimeEntryQueryBuilder().add_sql_date_range_condition(
-            ("2021-03-19T05:07:00.000Z", "2021-03-25T10:00:00.000Z")
+            {
+                "start_date": "2021-03-19T05:07:00.000Z",
+                "end_date": "2021-03-25T10:00:00.000Z",
+            }
         )
     )
     expected_params = [
@@ -34,7 +37,10 @@ def test_build_with_add_sql_date_range_condition():
     time_entry_query_builder = (
         TimeEntryQueryBuilder()
         .add_sql_date_range_condition(
-            ("2021-03-19T05:00:00.000Z", "2021-03-20T10:00:00.000Z")
+            {
+                "start_date": "2021-03-19T05:00:00.000Z",
+                "end_date": "2021-03-20T10:00:00.000Z",
+            }
         )
         .build()
     )
