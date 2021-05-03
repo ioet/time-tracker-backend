@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.32.0 (2021-05-03)
+### Feature
+* TT-228 When-the-client-is-archived-his-projects-must-be-hidden ([#283](https://github.com/ioet/time-tracker-backend/issues/283)) ([`cde7fdd`](https://github.com/ioet/time-tracker-backend/commit/cde7fdda9052af8a978d9a36c3b5fa425dcf5b62))
+
 ## v0.31.6 (2021-04-29)
 ### Fix
 * TT-219 Refactoring find_all for time entries ([#282](https://github.com/ioet/time-tracker-backend/issues/282)) ([`63371fb`](https://github.com/ioet/time-tracker-backend/commit/63371fb730c8f94125ee0bae0bf893b8bac179bd))
