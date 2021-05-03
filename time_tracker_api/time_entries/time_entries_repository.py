@@ -262,6 +262,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             {visibility_condition}
             {test_users_exclusion_condition}
             {custom_sql_conditions_clause}
+            {order_clause}
             OFFSET @offset LIMIT @max_count
             """.format(
             partition_key_attribute=self.partition_key_attribute,
@@ -275,6 +276,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             custom_sql_conditions_clause=self.create_custom_sql_conditions(
                 custom_sql_conditions
             ),
+            order_clause=self.create_sql_order_clause(),
         )
 
         result = self.container.query_items(
