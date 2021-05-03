@@ -110,7 +110,11 @@ class ProjectCosmosDBDao(APICosmosDBDao, ProjectDao):
             max_count=kwargs.get('max_count', None)
         )
 
-        customers_id = [customer.id for customer in customers]
+        customers_id = [
+            customer.id
+            for customer in customers
+            if customer.status == 'active'
+        ]
         conditions = conditions if conditions else {}
         custom_condition = "c.customer_id IN {}".format(
             str(tuple(customers_id))

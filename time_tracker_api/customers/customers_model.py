@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from azure.cosmos import PartitionKey
 
@@ -32,7 +32,7 @@ class CustomerCosmosDBModel(CosmosDBModel):
     description: str
     deleted: str
     tenant_id: str
-    status: str
+    status: str = field(default='active')
 
     def __init__(self, data):
         super(CustomerCosmosDBModel, self).__init__(data)  # pragma: no cover
