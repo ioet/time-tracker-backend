@@ -172,64 +172,6 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             abort(HTTPStatus.NOT_FOUND, "Time entry not found")
         return time_entries
 
-    def find_all_old(
-        self,
-        event_context: EventContext,
-        conditions: dict = None,
-        custom_sql_conditions: List[str] = None,
-        date_range: dict = None,
-        **kwargs,
-    ):
-        conditions = conditions if conditions else {}
-        custom_sql_conditions = (
-            custom_sql_conditions if custom_sql_conditions else []
-        )
-        date_range = date_range if date_range else {}
-
-        custom_sql_conditions.append(
-            self.create_sql_date_range_filter(date_range)
-        )
-
-        custom_params = self.generate_params(date_range)
-        time_entries = CosmosDBRepository.find_all(
-            self,
-            event_context=event_context,
-            conditions=conditions,
-            custom_sql_conditions=custom_sql_conditions,
-            custom_params=custom_params,
-            max_count=kwargs.get("max_count", None),
-            offset=kwargs.get("offset", 0),
-        )
-
-        if time_entries:
-            custom_conditions = create_in_condition(time_entries, "project_id")
-            custom_conditions_activity = create_in_condition(
-                time_entries, "activity_id"
-            )
-
-            project_dao = projects_model.create_dao()
-            projects = project_dao.get_all(
-                custom_sql_conditions=[custom_conditions],
-                visible_only=False,
-                max_count=kwargs.get("max_count", None),
-            )
-
-            add_project_info_to_time_entries(time_entries, projects)
-
-            activity_dao = activities_model.create_dao()
-            activities = activity_dao.get_all(
-                custom_sql_conditions=[custom_conditions_activity],
-                visible_only=False,
-                max_count=kwargs.get("max_count", None),
-            )
-            add_activity_name_to_time_entries(time_entries, activities)
-
-            users = AzureConnection().users()
-            add_user_email_to_time_entries(time_entries, users)
-        elif not time_entries and len(conditions) > 1:
-            abort(HTTPStatus.NOT_FOUND, "Time entry not found")
-        return time_entries
-
     def find_all(
         self,
         conditions,

@@ -290,15 +290,7 @@ def test_updated_item_without_deleted_key_should_call_validate_data(
 @patch(
     'time_tracker_api.time_entries.time_entries_repository.TimeEntryCosmosDBRepository.add_complementary_info'
 )
-@patch(
-    'commons.feature_toggles.feature_toggle_manager.FeatureToggleManager.get_azure_app_configuration_client'
-)
-@patch(
-    'commons.feature_toggles.feature_toggle_manager.FeatureToggleManager.is_toggle_enabled_for_user'
-)
 def test_find_all_v2(
-    is_toggle_enabled_for_user_mock,
-    get_azure_app_configuration_client_mock,
     add_complementary_info_mock,
     create_custom_sql_conditions_mock,
     create_sql_where_conditions_mock,
@@ -309,7 +301,6 @@ def test_find_all_v2(
     event_context: EventContext,
     time_entry_repository: TimeEntryCosmosDBRepository,
 ):
-    is_toggle_enabled_for_user_mock.return_value = True
     expected_item = {
         'id': 'id',
         'start_date': '2021-03-22T10:00:00.000Z',

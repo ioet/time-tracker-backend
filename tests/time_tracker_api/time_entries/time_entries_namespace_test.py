@@ -137,22 +137,12 @@ def test_create_time_entry_with_missing_req_field_should_return_bad_request(
     repository_create_mock.assert_not_called()
 
 
-@patch(
-    'commons.feature_toggles.feature_toggle_manager.FeatureToggleManager.get_azure_app_configuration_client'
-)
-@patch(
-    'commons.feature_toggles.feature_toggle_manager.FeatureToggleManager.is_toggle_enabled_for_user'
-)
 def test_list_all_time_entries(
-    is_toggle_enabled_for_user_mock,
-    get_azure_app_configuration_client_mock,
     client: FlaskClient,
     mocker: MockFixture,
     valid_header: dict,
     time_entries_dao,
 ):
-    is_toggle_enabled_for_user_mock.return_value = True
-
     dao_get_all_mock = mocker.patch.object(
         time_entries_dao, 'get_all', return_value=[]
     )
@@ -232,15 +222,7 @@ def test_get_time_entry_should_succeed_with_valid_id(
         (True, ['id1', 'id1']),
     ],
 )
-@patch(
-    'commons.feature_toggles.feature_toggle_manager.FeatureToggleManager.get_azure_app_configuration_client'
-)
-@patch(
-    'commons.feature_toggles.feature_toggle_manager.FeatureToggleManager.is_toggle_enabled_for_user'
-)
 def test_get_time_entries_by_type_of_user_when_is_user_tester(
-    is_toggle_enabled_for_user_mock,
-    get_azure_app_configuration_client_mock,
     get_test_user_ids_mock,
     is_test_user_mock,
     client: FlaskClient,
@@ -249,7 +231,6 @@ def test_get_time_entries_by_type_of_user_when_is_user_tester(
     current_user_is_tester,
     expected_user_ids,
 ):
-    is_toggle_enabled_for_user_mock.return_value = True
     test_user_id = "id1"
     non_test_user_id = "id2"
     te1 = TimeEntryCosmosDBModel(
@@ -322,15 +303,7 @@ def test_get_time_entries_by_type_of_user_when_is_user_tester(
         (False, ['id1', 'id1']),
     ],
 )
-@patch(
-    'commons.feature_toggles.feature_toggle_manager.FeatureToggleManager.get_azure_app_configuration_client'
-)
-@patch(
-    'commons.feature_toggles.feature_toggle_manager.FeatureToggleManager.is_toggle_enabled_for_user'
-)
 def test_get_time_entries_by_type_of_user_when_is_not_user_tester(
-    is_toggle_enabled_for_user_mock,
-    get_azure_app_configuration_client_mock,
     get_test_user_ids_mock,
     is_test_user_mock,
     client: FlaskClient,
@@ -339,7 +312,6 @@ def test_get_time_entries_by_type_of_user_when_is_not_user_tester(
     current_user_is_tester,
     expected_user_ids,
 ):
-    is_toggle_enabled_for_user_mock.return_value = True
     test_user_id = "id1"
     non_test_user_id = "id2"
     te1 = TimeEntryCosmosDBModel(
@@ -806,21 +778,12 @@ def test_create_with_valid_uuid_format_should_return_created(
         ('/time-entries'),
     ],
 )
-@patch(
-    'commons.feature_toggles.feature_toggle_manager.FeatureToggleManager.get_azure_app_configuration_client'
-)
-@patch(
-    'commons.feature_toggles.feature_toggle_manager.FeatureToggleManager.is_toggle_enabled_for_user'
-)
 def test_get_all_passes_date_range_built_from_params_to_find_all(
-    is_toggle_enabled_for_user_mock,
-    get_azure_app_configuration_client_mock,
     client: FlaskClient,
     valid_header: dict,
     url: str,
     time_entries_dao,
 ):
-    is_toggle_enabled_for_user_mock.return_value = True
     time_entries_dao.repository.find_all = Mock(return_value=[])
 
     response = client.get(url, headers=valid_header)
@@ -852,15 +815,7 @@ def test_get_all_passes_date_range_built_from_params_to_find_all(
         ),
     ],
 )
-@patch(
-    'commons.feature_toggles.feature_toggle_manager.FeatureToggleManager.get_azure_app_configuration_client'
-)
-@patch(
-    'commons.feature_toggles.feature_toggle_manager.FeatureToggleManager.is_toggle_enabled_for_user'
-)
 def test_get_all_passes_date_range_to_find_all_with_default_tz_offset(
-    is_toggle_enabled_for_user_mock,
-    get_azure_app_configuration_client_mock,
     client: FlaskClient,
     valid_header: dict,
     time_entries_dao,
@@ -868,8 +823,6 @@ def test_get_all_passes_date_range_to_find_all_with_default_tz_offset(
     start_date: str,
     end_date: str,
 ):
-    is_toggle_enabled_for_user_mock.return_value = True
-
     time_entries_dao.repository.find_all = Mock(return_value=[])
 
     response = client.get(url, headers=valid_header)
@@ -923,15 +876,7 @@ def test_get_all_passes_date_range_to_find_all_with_default_tz_offset(
         ),
     ],
 )
-@patch(
-    'commons.feature_toggles.feature_toggle_manager.FeatureToggleManager.get_azure_app_configuration_client'
-)
-@patch(
-    'commons.feature_toggles.feature_toggle_manager.FeatureToggleManager.is_toggle_enabled_for_user'
-)
 def test_get_all_passes_date_range_to_find_all_with_given_tz_offset(
-    is_toggle_enabled_for_user_mock,
-    get_azure_app_configuration_client_mock,
     client: FlaskClient,
     valid_header: dict,
     time_entries_dao,
@@ -939,7 +884,6 @@ def test_get_all_passes_date_range_to_find_all_with_given_tz_offset(
     start_date: str,
     end_date: str,
 ):
-    is_toggle_enabled_for_user_mock.return_value = True
     time_entries_dao.repository.find_all = Mock(return_value=[])
 
     response = client.get(url, headers=valid_header)
