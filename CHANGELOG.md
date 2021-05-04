@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.32.1 (2021-05-04)
+### Fix
+* TT-231 adjust time entries order items by start date ([#285](https://github.com/ioet/time-tracker-backend/issues/285)) ([`91e6bfa`](https://github.com/ioet/time-tracker-backend/commit/91e6bfab44d76a1b9d8e299f5bf0fd69e1b293b4))
+
 ## v0.32.0 (2021-05-03)
 ### Feature
 * TT-228 When-the-client-is-archived-his-projects-must-be-hidden ([#283](https://github.com/ioet/time-tracker-backend/issues/283)) ([`cde7fdd`](https://github.com/ioet/time-tracker-backend/commit/cde7fdda9052af8a978d9a36c3b5fa425dcf5b62))
