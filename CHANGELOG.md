@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.33.0 (2021-05-05)
+### Feature
+* TT-233 Update README.md in time tracker brackend ([#287](https://github.com/ioet/time-tracker-backend/issues/287)) ([`a678e4a`](https://github.com/ioet/time-tracker-backend/commit/a678e4abc65602eee3a6a55b5d4a77e570677bed))
+
+### Fix
+* TT-133 Remove old logic for find_all on time entries ([#286](https://github.com/ioet/time-tracker-backend/issues/286)) ([`9dfd66a`](https://github.com/ioet/time-tracker-backend/commit/9dfd66a59ac1867de1bd074a0244a7786322fa0e))
+
 ## v0.32.1 (2021-05-04)
 ### Fix
 * TT-231 adjust time entries order items by start date ([#285](https://github.com/ioet/time-tracker-backend/issues/285)) ([`91e6bfa`](https://github.com/ioet/time-tracker-backend/commit/91e6bfab44d76a1b9d8e299f5bf0fd69e1b293b4))
