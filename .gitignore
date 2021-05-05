@@ -41,3 +41,5 @@ migration_status.csv
 .env.bat
 # mac / linux env variables
 .env
+#PowerShell env variables
+.env.ps1
