@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.33.1 (2021-05-07)
+### Fix
+* TT-237 Fix test to Update Start time Entries ([`41c5c23`](https://github.com/ioet/time-tracker-backend/commit/41c5c233163a9a94b2c2752fa5119282906d13ae))
+
 ## v0.33.0 (2021-05-05)
 ### Feature
 * TT-233 Update README.md in time tracker brackend ([#287](https://github.com/ioet/time-tracker-backend/issues/287)) ([`a678e4a`](https://github.com/ioet/time-tracker-backend/commit/a678e4abc65602eee3a6a55b5d4a77e570677bed))
