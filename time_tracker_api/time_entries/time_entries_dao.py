@@ -234,6 +234,7 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
 
     def update(self, id, data: dict, description=None):
         event_ctx = self.create_event_context("update", description)
+        data['owner_id'] = event_ctx.user_id
         time_entry = self.repository.find(id, event_ctx)
         self.check_whether_current_user_owns_item(time_entry)
 
