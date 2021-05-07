@@ -410,8 +410,12 @@ def test_update_time_entry_calls_partial_update_with_incoming_payload(
     mocker: MockFixture,
     valid_header: dict,
     valid_id: str,
+    owner_id: str,
     time_entries_dao,
 ):
+    valid_time_entry_input_to_update = valid_time_entry_input.copy()
+    valid_time_entry_input_to_update["owner_id"] = owner_id
+
     time_entries_dao.repository.partial_update = Mock(return_value={})
 
     time_entries_dao.repository.find = Mock(return_value={})
@@ -420,13 +424,13 @@ def test_update_time_entry_calls_partial_update_with_incoming_payload(
     response = client.put(
         f'/time-entries/{valid_id}',
         headers=valid_header,
-        json=valid_time_entry_input,
+        json=valid_time_entry_input_to_update,
         follow_redirects=True,
     )
 
     assert HTTPStatus.OK == response.status_code
     time_entries_dao.repository.partial_update.assert_called_once_with(
-        valid_id, valid_time_entry_input, ANY
+        valid_id, valid_time_entry_input_to_update, ANY
     )
 
     time_entries_dao.repository.find.assert_called_once()
@@ -464,9 +468,13 @@ def test_update_time_entry_raise_not_found(
     mocker: MockFixture,
     valid_header: dict,
     valid_id: str,
+    owner_id: str,
     time_entries_dao,
 ):
     from werkzeug.exceptions import NotFound
+
+    valid_time_entry_input_to_update = valid_time_entry_input.copy()
+    valid_time_entry_input_to_update["owner_id"] = owner_id
 
     time_entries_dao.repository.partial_update = Mock(side_effect=NotFound)
 
@@ -476,13 +484,13 @@ def test_update_time_entry_raise_not_found(
     response = client.put(
         f'/time-entries/{valid_id}',
         headers=valid_header,
-        json=valid_time_entry_input,
+        json=valid_time_entry_input_to_update,
         follow_redirects=True,
     )
 
     assert HTTPStatus.NOT_FOUND == response.status_code
     time_entries_dao.repository.partial_update.assert_called_once_with(
-        valid_id, valid_time_entry_input, ANY
+        valid_id, valid_time_entry_input_to_update, ANY
     )
 
     time_entries_dao.repository.find.assert_called_once()
