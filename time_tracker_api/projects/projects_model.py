@@ -68,10 +68,10 @@ class ProjectCosmosDBRepository(CosmosDBRepository):
             mapper=ProjectCosmosDBModel,
         )
 
-    def find_all_v2(
+    def find_all(
         self,
         event_context: EventContext,
-        project_ids: List[str],
+        project_ids: List[str] = None,
         customer_ids: List[str] = None,
         visible_only=True,
         mapper: Callable = None,
@@ -97,7 +97,9 @@ class ProjectCosmosDBDao(APICosmosDBDao, ProjectDao):
     def __init__(self, repository):
         CosmosDBDao.__init__(self, repository)
 
-    def get_all(self, conditions: dict = None, **kwargs) -> list:
+    def get_all(
+        self, conditions: dict = None, project_ids: List = None, **kwargs
+    ) -> list:
         """
         Get all the projects an active client has
         :param (dict) conditions: Conditions for querying the database
@@ -110,28 +112,26 @@ class ProjectCosmosDBDao(APICosmosDBDao, ProjectDao):
             max_count=kwargs.get('max_count', None)
         )
 
+        # TODO: evaluate another approach in order that memory filtering will be make in Database instead
         customers_id = [
             customer.id
             for customer in customers
             if customer.status == 'active'
         ]
         conditions = conditions if conditions else {}
-        custom_condition = "c.customer_id IN {}".format(
-            str(tuple(customers_id))
+        customers_ids = [v for k, v in conditions.items()]
+        customers_ids = (
+            customers_ids + customers_id if project_ids else customers_ids
         )
-        # TODO this must be refactored to be used from the utils module ↑
-        if "custom_sql_conditions" in kwargs:
-            kwargs["custom_sql_conditions"].append(custom_condition)
-        else:
-            kwargs["custom_sql_conditions"] = [custom_condition]
-        projects = self.repository.find_all(event_ctx, conditions, **kwargs)
+
+        projects = self.repository.find_all(
+            event_context=event_ctx,
+            project_ids=project_ids,
+            customer_ids=customers_ids,
+        )
 
         add_customer_name_to_projects(projects, customers)
         return projects
-
-    def get_all_with_id_in_list(self, id_list):
-        event_ctx = self.create_event_context("read-many")
-        return self.repository.find_all_v2(event_ctx, id_list)
 
 
 def create_dao() -> ProjectDao:

@@ -146,14 +146,16 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         self, time_entries=None, max_count=None, exist_conditions=False
     ):
         if time_entries:
-            custom_conditions = create_in_condition(time_entries, "project_id")
+            project_ids_set = set([x.project_id for x in time_entries])
+            project_ids = list(project_ids_set)
+
             custom_conditions_activity = create_in_condition(
                 time_entries, "activity_id"
             )
 
             project_dao = projects_model.create_dao()
             projects = project_dao.get_all(
-                custom_sql_conditions=[custom_conditions],
+                project_ids=project_ids,
                 visible_only=False,
                 max_count=max_count,
             )
