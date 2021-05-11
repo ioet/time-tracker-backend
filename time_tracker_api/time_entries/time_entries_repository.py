@@ -142,7 +142,9 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
         return result.next()
 
-    def add_complementary_info(self, time_entries=None, max_count=None):
+    def add_complementary_info(
+        self, time_entries=None, max_count=None, exist_conditions=False
+    ):
         if time_entries:
             custom_conditions = create_in_condition(time_entries, "project_id")
             custom_conditions_activity = create_in_condition(
@@ -168,7 +170,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
             users = AzureConnection().users()
             add_user_email_to_time_entries(time_entries, users)
-        elif not time_entries and len(conditions) > 1:
+        elif not time_entries and exist_conditions:
             abort(HTTPStatus.NOT_FOUND, "Time entry not found")
         return time_entries
 
@@ -230,8 +232,11 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
         function_mapper = self.get_mapper_or_dict(mapper)
         time_entries = list(map(function_mapper, result))
+        exist_conditions = len(conditions) > 1
 
-        return self.add_complementary_info(time_entries, max_count)
+        return self.add_complementary_info(
+            time_entries, max_count, exist_conditions
+        )
 
     def create_sql_test_users_exclusion_condition(self, test_user_ids):
         if test_user_ids != None:
