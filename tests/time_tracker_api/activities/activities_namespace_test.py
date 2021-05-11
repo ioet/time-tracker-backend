@@ -71,7 +71,13 @@ def test_list_all_active(
     json_data = json.loads(response.data)
     assert [] == json_data
 
-    repository_find_all_mock.assert_called_once_with(ANY, conditions={})
+    repository_find_all_mock.assert_called_once_with(
+        event_context=ANY,
+        activities_id=ANY,
+        conditions={},
+        visible_only=ANY,
+        max_count=ANY,
+    )
 
 
 def test_list_all_active_activities(
@@ -94,7 +100,11 @@ def test_list_all_active_activities(
     assert [] == json_data
 
     repository_find_all_mock.assert_called_once_with(
-        ANY, conditions={'status': 'active'}
+        event_context=ANY,
+        conditions={'status': 'active'},
+        activities_id=ANY,
+        visible_only=ANY,
+        max_count=ANY,
     )
 
 

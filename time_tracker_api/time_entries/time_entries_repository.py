@@ -149,9 +149,8 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             project_ids_set = set([x.project_id for x in time_entries])
             project_ids = list(project_ids_set)
 
-            custom_conditions_activity = create_in_condition(
-                time_entries, "activity_id"
-            )
+            activity_ids_set = set([x.activity_id for x in time_entries])
+            activity_ids = list(activity_ids_set)
 
             project_dao = projects_model.create_dao()
             projects = project_dao.get_all(
@@ -164,10 +163,11 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
             activity_dao = activities_model.create_dao()
             activities = activity_dao.get_all(
-                custom_sql_conditions=[custom_conditions_activity],
+                activities_id=activity_ids,
                 visible_only=False,
                 max_count=max_count,
             )
+
             add_activity_name_to_time_entries(time_entries, activities)
 
             users = AzureConnection().users()
