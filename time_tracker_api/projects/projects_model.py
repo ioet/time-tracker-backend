@@ -118,16 +118,20 @@ class ProjectCosmosDBDao(APICosmosDBDao, ProjectDao):
             for customer in customers
             if customer.status == 'active'
         ]
+
         conditions = conditions if conditions else {}
-        customers_ids = [v for k, v in conditions.items()]
-        customers_ids = (
-            customers_ids + customers_id if project_ids else customers_ids
+        customers_ids_conditions = [v for k, v in conditions.items()]
+
+        customers_ids_conditions = (
+            customers_ids_conditions + customers_id
+            if customers_id
+            else customers_id
         )
 
         projects = self.repository.find_all(
             event_context=event_ctx,
             project_ids=project_ids,
-            customer_ids=customers_ids,
+            customer_ids=customers_ids_conditions,
         )
 
         add_customer_name_to_projects(projects, customers)
