@@ -20,6 +20,7 @@ class CosmosDBQueryBuilder:
         self.limit = None
         self.offset = None
         self.order_by = None
+        self.date_range = None
 
     def add_select_conditions(self, columns: List[str] = None):
         columns = columns if columns else ["*"]
@@ -69,6 +70,11 @@ class CosmosDBQueryBuilder:
             self.where_conditions.append(f"c.{attribute} NOT IN {ids_values}")
         return self
 
+    def add_date_range(self, date_range: dict = None):
+        if date_range:
+            self.date_range = date_range
+            return self
+
     def __build_select(self):
         if len(self.select_conditions) < 1:
             self.select_conditions.append("*")
@@ -101,16 +107,25 @@ class CosmosDBQueryBuilder:
         else:
             return ""
 
+    def __build_date_range(self):
+        if self.date_range:
+            and_keyword = "AND " if len(self.where_conditions) > 0 else ""
+            return f"{and_keyword}((c.start_date BETWEEN @start_date AND @end_date) OR (c.end_date BETWEEN @start_date AND @end_date))"
+        else:
+            return ""
+
     def build(self):
         self.query = """
         SELECT {select_conditions} FROM c
         {where_conditions}
+        {date_range_condition}
         {order_by_condition}
         {offset_condition}
         {limit_condition}
         """.format(
             select_conditions=self.__build_select(),
             where_conditions=self.__build_where(),
+            date_range_condition=self.__build_date_range(),
             order_by_condition=self.__build_order_by(),
             offset_condition=self.__build_offset(),
             limit_condition=self.__build_limit(),

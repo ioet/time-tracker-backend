@@ -174,17 +174,6 @@ class CosmosDBRepository:
             return ""
 
     @staticmethod
-    def create_custom_sql_conditions(custom_sql_conditions: List[str]) -> str:
-        if len(custom_sql_conditions) > 0:
-            return "AND {custom_sql_conditions_clause}".format(
-                custom_sql_conditions_clause=" AND ".join(
-                    custom_sql_conditions
-                )
-            )
-        else:
-            return ''
-
-    @staticmethod
     def generate_params(conditions: dict) -> list:
         result = []
         for k, v in conditions.items():
@@ -216,6 +205,16 @@ class CosmosDBRepository:
             "container_id": event_context.container_id,
             "session_id": event_context.session_id,
         }
+
+    @staticmethod
+    def create_sql_date_range_filter(date_range: dict) -> str:
+        if 'start_date' and 'end_date' in date_range:
+            return """
+                AND ((c.start_date BETWEEN @start_date AND @end_date) OR
+                 (c.end_date BETWEEN @start_date AND @end_date))
+                """
+        else:
+            return ''
 
     def create(
         self, data: dict, event_context: EventContext, mapper: Callable = None
@@ -251,19 +250,13 @@ class CosmosDBRepository:
         self,
         event_context: EventContext,
         conditions: dict = None,
-        custom_sql_conditions: List[str] = None,
-        custom_params: dict = None,
+        date_range: dict = None,
         max_count=None,
         offset=0,
         visible_only=True,
         mapper: Callable = None,
     ):
         conditions = conditions if conditions else {}
-        custom_sql_conditions = (
-            custom_sql_conditions if custom_sql_conditions else []
-        )
-        custom_params = custom_params if custom_params else {}
-
         partition_key_value = self.find_partition_key_value(event_context)
         max_count = self.get_page_size_or(max_count)
         params = [
@@ -277,15 +270,20 @@ class CosmosDBRepository:
             status_value = conditions.get('status')
             conditions.pop('status')
 
+        date_range = date_range if date_range else {}
+        date_range_params = (
+            self.generate_params(date_range) if date_range else []
+        )
         params.extend(self.generate_params(conditions))
-        params.extend(custom_params)
+        params.extend(date_range_params)
+
         query_str = """
             SELECT * FROM c
             WHERE c.{partition_key_attribute}=@partition_key_value
             {conditions_clause}
-            {visibility_condition}
             {active_condition}
-            {custom_sql_conditions_clause}
+            {date_range_sql_condition}
+            {visibility_condition}
             {order_clause}
             OFFSET @offset LIMIT @max_count
             """.format(
@@ -295,11 +293,12 @@ class CosmosDBRepository:
             ),
             active_condition=self.create_sql_active_condition(status_value),
             conditions_clause=self.create_sql_where_conditions(conditions),
-            custom_sql_conditions_clause=self.create_custom_sql_conditions(
-                custom_sql_conditions
+            date_range_sql_condition=self.create_sql_date_range_filter(
+                date_range
             ),
             order_clause=self.create_sql_order_clause(),
         )
+
         result = self.container.query_items(
             query=query_str,
             parameters=params,

@@ -11,7 +11,7 @@ from time_tracker_api.projects.projects_model import (
 @patch(
     'time_tracker_api.projects.projects_model.ProjectCosmosDBRepository.find_partition_key_value'
 )
-def test_find_all_new_version(
+def test_find_all_projects_new_version(
     find_partition_key_value_mock,
     event_context: EventContext,
     project_repository: ProjectCosmosDBRepository,
