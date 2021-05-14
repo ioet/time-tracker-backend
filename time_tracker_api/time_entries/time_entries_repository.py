@@ -173,7 +173,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             .add_sql_where_equal_condition(conditions)
             .add_sql_visibility_condition(visible_only)
             .add_date_range(date_range)
-            .add_sql_not_in_condition(test_user_ids)
+            .add_sql_not_in_condition('owner_id', test_user_ids)
             .add_sql_order_by_condition('start_date', Order.DESC)
             .add_sql_limit_condition(max_count)
             .add_sql_offset_condition(offset)
