@@ -71,13 +71,17 @@ class ProjectCosmosDBRepository(CosmosDBRepository):
     def find_all(
         self,
         event_context: EventContext,
+        conditions: dict = None,
         project_ids: List[str] = None,
         customer_ids: List[str] = None,
         visible_only=True,
         mapper: Callable = None,
     ):
+        params = self.generate_params(conditions) if conditions else []
+
         query_builder = (
             CosmosDBQueryBuilder()
+            .add_sql_where_equal_condition(conditions)
             .add_sql_in_condition("id", project_ids)
             .add_sql_in_condition("customer_id", customer_ids)
             .add_sql_visibility_condition(visible_only)
@@ -87,6 +91,7 @@ class ProjectCosmosDBRepository(CosmosDBRepository):
         tenant_id_value = self.find_partition_key_value(event_context)
         result = self.container.query_items(
             query=query_str,
+            parameters=params,
             partition_key=tenant_id_value,
         )
         function_mapper = self.get_mapper_or_dict(mapper)
@@ -120,18 +125,12 @@ class ProjectCosmosDBDao(APICosmosDBDao, ProjectDao):
         ]
 
         conditions = conditions if conditions else {}
-        customers_ids_conditions = [v for k, v in conditions.items()]
-
-        customers_ids_conditions = (
-            customers_ids_conditions + customers_id
-            if customers_id
-            else customers_ids_conditions
-        )
 
         projects = self.repository.find_all(
             event_context=event_ctx,
+            conditions=conditions,
             project_ids=project_ids,
-            customer_ids=customers_ids_conditions,
+            customer_ids=customers_id,
         )
 
         add_customer_name_to_projects(projects, customers)
