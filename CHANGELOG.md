@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.33.3 (2021-05-14)
+### Fix
+* TT-232 checkputApi ([#291](https://github.com/ioet/time-tracker-backend/issues/291)) ([`3dee5b7`](https://github.com/ioet/time-tracker-backend/commit/3dee5b794a7607a23cd6319594af857cb6a72028))
+
 ## v0.33.2 (2021-05-11)
 ### Fix
 * TT-238 adds condition to control when there are no time entries … ([#290](https://github.com/ioet/time-tracker-backend/issues/290)) ([`d4939c8`](https://github.com/ioet/time-tracker-backend/commit/d4939c8127fb8110f6c2d746fc79fbe2fc2e6155))
