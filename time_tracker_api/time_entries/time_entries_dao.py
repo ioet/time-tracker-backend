@@ -98,8 +98,7 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
             conditions=conditions,
         )
         date_range = self.handle_date_filter_args(args=conditions)
-        limit = conditions.get("limit", None)
-        conditions.pop("limit", None)
+        limit = conditions.pop("limit", None)
         azure_connection = AzureConnection()
         current_user_is_tester = azure_connection.is_test_user(
             event_ctx.user_id
@@ -143,12 +142,11 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         for id_project in projects_ids:
             conditions.update({"project_id": id_project})
 
-            limit = 1
             latest = self.repository.find_all_entries(
                 event_ctx,
                 conditions=conditions,
                 date_range=date_range,
-                max_count=limit,
+                max_count=1,
             )
 
             if len(latest) > 0:

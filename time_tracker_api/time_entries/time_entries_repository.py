@@ -196,13 +196,6 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             time_entries, max_count, exist_conditions
         )
 
-    def create_sql_test_users_exclusion_condition(self, test_user_ids):
-        if test_user_ids != None:
-            tuple_string = convert_list_to_tuple_string(test_user_ids)
-            return "AND c.owner_id NOT IN {list}".format(list=tuple_string)
-
-        return ""
-
     def get_last_entry(
         self,
         owner_id: str,

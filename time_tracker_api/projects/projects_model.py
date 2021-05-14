@@ -125,7 +125,7 @@ class ProjectCosmosDBDao(APICosmosDBDao, ProjectDao):
         customers_ids_conditions = (
             customers_ids_conditions + customers_id
             if customers_id
-            else customers_id
+            else customers_ids_conditions
         )
 
         projects = self.repository.find_all(
