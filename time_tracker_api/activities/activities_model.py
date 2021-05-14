@@ -101,7 +101,6 @@ class ActivityCosmosDBRepository(CosmosDBRepository):
             .add_sql_in_condition('id', activities_id)
             .add_sql_where_equal_condition(conditions)
             .add_sql_visibility_condition(visible_only)
-            .add_sql_order_by_condition('id', Order.ASC)
             .add_sql_limit_condition(max_count)
             .add_sql_offset_condition(offset)
             .build()
