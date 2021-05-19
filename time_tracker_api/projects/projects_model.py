@@ -71,7 +71,7 @@ class ProjectCosmosDBRepository(CosmosDBRepository):
     def find_all(
         self,
         event_context: EventContext,
-        conditions,
+        conditions: dict = None,
         project_ids: List[str] = None,
         customer_ids: List[str] = None,
         visible_only=True,
