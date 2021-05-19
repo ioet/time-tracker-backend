@@ -208,7 +208,7 @@ class CosmosDBRepository:
 
     @staticmethod
     def create_sql_date_range_filter(date_range: dict) -> str:
-        if 'start_date' and 'end_date' in date_range:
+        if 'start_date' in date_range and 'end_date' in date_range:
             return """
                 AND ((c.start_date BETWEEN @start_date AND @end_date) OR
                  (c.end_date BETWEEN @start_date AND @end_date))
@@ -251,9 +251,9 @@ class CosmosDBRepository:
         event_context: EventContext,
         conditions: dict = None,
         date_range: dict = None,
+        visible_only=True,
         max_count=None,
         offset=0,
-        visible_only=True,
         mapper: Callable = None,
     ):
         conditions = conditions if conditions else {}

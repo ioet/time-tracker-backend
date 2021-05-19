@@ -109,6 +109,12 @@ class CosmosDBQueryBuilder:
 
     def __build_date_range(self):
         if self.date_range:
+            self.parameters.append(
+                {'name': '@start_date', 'value': self.date_range['start_date']}
+            )
+            self.parameters.append(
+                {'name': '@end_date', 'value': self.date_range['end_date']}
+            )
             and_keyword = "AND " if len(self.where_conditions) > 0 else ""
             return f"{and_keyword}((c.start_date BETWEEN @start_date AND @end_date) OR (c.end_date BETWEEN @start_date AND @end_date))"
         else:

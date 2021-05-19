@@ -82,7 +82,6 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         date_range = date_range if date_range else {}
 
         date_range_params = self.generate_params(date_range)
-        partition_key_value = self.find_partition_key_value(event_context)
         params = self.generate_params(conditions)
         params.extend(date_range_params)
 
@@ -153,19 +152,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         mapper: Callable = None,
     ):
         max_count = self.get_page_size_or(max_count)
-
-        params = [
-            {"name": "@offset", "value": offset},
-            {"name": "@limit", "value": max_count},
-        ]
-
         date_range = date_range if date_range else {}
-        date_range_params = (
-            self.generate_params(date_range) if date_range else []
-        )
-
-        params.extend(self.generate_params(conditions) if conditions else [])
-        params.extend(date_range_params)
 
         query_builder = (
             CosmosDBQueryBuilder()
@@ -181,6 +168,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         )
 
         query_str = query_builder.get_query()
+        params = query_builder.get_parameters()
         tenant_id_value = self.find_partition_key_value(event_context)
         result = self.container.query_items(
             query=query_str,

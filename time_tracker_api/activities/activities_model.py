@@ -89,10 +89,10 @@ class ActivityCosmosDBRepository(CosmosDBRepository):
     def find_all(
         self,
         event_context: EventContext,
-        conditions: dict = None,
+        conditions,
         activities_id: List = None,
         visible_only=True,
-        max_count=0,
+        max_count=None,
         offset=0,
         mapper: Callable = None,
     ):

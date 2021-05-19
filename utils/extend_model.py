@@ -99,5 +99,5 @@ def create_custom_query_from_str(
     return query_str
 
 
-def create_list_from_str(data: str, delimiter: str = ",") -> str:
+def create_list_from_str(data: str, delimiter: str = ",") -> list:
     return [id for id in data.split(delimiter)] if data else []

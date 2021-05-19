@@ -29,7 +29,10 @@ def test_find_all_projects_new_version(
     project_repository.container.query_items = query_items_mock
 
     result = project_repository.find_all(
-        event_context, {"customer_id": "1"}, ['id'], ['customer_id']
+        event_context=event_context,
+        conditions={"customer_id": "1"},
+        project_ids=['id'],
+        customer_ids=['customer_id'],
     )
     find_partition_key_value_mock.assert_called_once()
     assert len(result) == 1

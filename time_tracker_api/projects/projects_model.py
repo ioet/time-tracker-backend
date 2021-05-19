@@ -71,14 +71,12 @@ class ProjectCosmosDBRepository(CosmosDBRepository):
     def find_all(
         self,
         event_context: EventContext,
-        conditions: dict = None,
+        conditions,
         project_ids: List[str] = None,
         customer_ids: List[str] = None,
         visible_only=True,
         mapper: Callable = None,
     ):
-        params = self.generate_params(conditions) if conditions else []
-
         query_builder = (
             CosmosDBQueryBuilder()
             .add_sql_where_equal_condition(conditions)
@@ -89,6 +87,7 @@ class ProjectCosmosDBRepository(CosmosDBRepository):
         )
         query_str = query_builder.get_query()
         tenant_id_value = self.find_partition_key_value(event_context)
+        params = query_builder.get_parameters()
         result = self.container.query_items(
             query=query_str,
             parameters=params,
@@ -117,7 +116,6 @@ class ProjectCosmosDBDao(APICosmosDBDao, ProjectDao):
             max_count=kwargs.get('max_count', None)
         )
 
-        # TODO: evaluate another approach in order that memory filtering will be make in Database instead
         customers_id = [
             customer.id
             for customer in customers
