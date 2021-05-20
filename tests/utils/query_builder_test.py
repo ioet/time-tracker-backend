@@ -331,27 +331,3 @@ def test_add_sql_not_in_condition(
     )
     assert len(query_builder.where_conditions) == len(expected_not_in_list)
     assert query_builder.where_conditions == expected_not_in_list
-
-
-@pytest.mark.parametrize(
-    "date_range,expected_value,expected_expression",
-    [
-        (
-            {
-                'start_date': '2021-05-09T00:00:00-05:00',
-                'end_date': '2021-05-15T23:59:59-05:00',
-            },
-            {
-                'start_date': '2021-05-09T00:00:00-05:00',
-                'end_date': '2021-05-15T23:59:59-05:00',
-            },
-            "((c.start_date BETWEEN @start_date AND @end_date) OR (c.end_date BETWEEN @start_date AND @end_date))",
-        )
-    ],
-)
-def test_add_date_range(date_range, expected_value, expected_expression):
-    query_builder = CosmosDBQueryBuilder().add_date_range(date_range)
-    result = query_builder._CosmosDBQueryBuilder__build_date_range()
-
-    assert query_builder.date_range == expected_value
-    assert result == expected_expression

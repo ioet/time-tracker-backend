@@ -78,24 +78,18 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         visible_only=True,
         **kwargs,
     ):
-        conditions = conditions if conditions else {}
-        date_range = date_range if date_range else {}
-
-        date_range_params = self.generate_params(date_range)
-        params = self.generate_params(conditions)
-        params.extend(date_range_params)
-
         query_builder = (
-            CosmosDBQueryBuilder()
+            TimeEntryQueryBuilder()
             .add_select_conditions(["VALUE COUNT(1)"])
             .add_sql_in_condition('owner_id', owner_ids)
             .add_sql_where_equal_condition(conditions)
             .add_sql_visibility_condition(visible_only)
-            .add_date_range(date_range)
+            .add_sql_date_range_condition(date_range)
             .build()
         )
 
         query_str = query_builder.get_query()
+        params = query_builder.get_parameters()
         tenant_id_value = self.find_partition_key_value(event_context)
         result = self.container.query_items(
             query=query_str,
@@ -109,11 +103,8 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         self, time_entries=None, max_count=None, exist_conditions=False
     ):
         if time_entries:
-            project_ids_set = set([x.project_id for x in time_entries])
-            project_ids = list(project_ids_set)
-
-            activity_ids_set = set([x.activity_id for x in time_entries])
-            activity_ids = list(activity_ids_set)
+            project_ids = list(set([x.project_id for x in time_entries]))
+            activity_ids = list(set([x.activity_id for x in time_entries]))
 
             project_dao = projects_model.create_dao()
             projects = project_dao.get_all(
@@ -155,11 +146,11 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         date_range = date_range if date_range else {}
 
         query_builder = (
-            CosmosDBQueryBuilder()
+            TimeEntryQueryBuilder()
             .add_sql_in_condition('owner_id', owner_ids)
             .add_sql_where_equal_condition(conditions)
             .add_sql_visibility_condition(visible_only)
-            .add_date_range(date_range)
+            .add_sql_date_range_condition(date_range)
             .add_sql_not_in_condition('owner_id', test_user_ids)
             .add_sql_order_by_condition('start_date', Order.DESC)
             .add_sql_limit_condition(max_count)
