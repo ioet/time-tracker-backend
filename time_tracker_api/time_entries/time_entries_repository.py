@@ -49,41 +49,21 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         else:
             return "AND c.id!=@ignore_id"
 
-    @staticmethod
-    def create_sql_date_range_filter(date_range: dict) -> str:
-        if 'start_date' and 'end_date' in date_range:
-            return """
-            ((c.start_date BETWEEN @start_date AND @end_date) OR
-             (c.end_date BETWEEN @start_date AND @end_date))
-            """
-        else:
-            return ''
-
     def find_all_entries(
         self,
         event_context: EventContext,
         conditions: dict = None,
-        custom_sql_conditions: List[str] = None,
         date_range: dict = None,
         **kwargs,
     ):
         conditions = conditions if conditions else {}
-        custom_sql_conditions = (
-            custom_sql_conditions if custom_sql_conditions else []
-        )
         date_range = date_range if date_range else {}
 
-        custom_sql_conditions.append(
-            self.create_sql_date_range_filter(date_range)
-        )
-
-        custom_params = self.generate_params(date_range)
         time_entries = CosmosDBRepository.find_all(
             self,
             event_context=event_context,
             conditions=conditions,
-            custom_sql_conditions=custom_sql_conditions,
-            custom_params=custom_params,
+            date_range=date_range,
             max_count=kwargs.get("max_count", None),
             offset=kwargs.get("offset", 0),
         )
@@ -93,51 +73,28 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         self,
         event_context: EventContext,
         conditions: dict = None,
-        custom_sql_conditions: List[str] = None,
+        owner_ids: list = None,
         date_range: dict = None,
         visible_only=True,
         **kwargs,
     ):
-        conditions = conditions if conditions else {}
-        custom_sql_conditions = (
-            custom_sql_conditions if custom_sql_conditions else []
-        )
-        date_range = date_range if date_range else {}
-
-        custom_sql_conditions.append(
-            self.create_sql_date_range_filter(date_range)
-        )
-
-        custom_params = self.generate_params(date_range)
-        partition_key_value = self.find_partition_key_value(event_context)
-        params = [
-            {"name": "@partition_key_value", "value": partition_key_value},
-        ]
-        params.extend(self.generate_params(conditions))
-        params.extend(custom_params)
-
-        query_str = """
-            SELECT VALUE COUNT(1) FROM c
-            WHERE c.{partition_key_attribute}=@partition_key_value
-            {conditions_clause}
-            {visibility_condition}
-            {custom_sql_conditions_clause}
-            """.format(
-            partition_key_attribute=self.partition_key_attribute,
-            visibility_condition=self.create_sql_condition_for_visibility(
-                visible_only
-            ),
-            conditions_clause=self.create_sql_where_conditions(conditions),
-            custom_sql_conditions_clause=self.create_custom_sql_conditions(
-                custom_sql_conditions
-            ),
+        query_builder = (
+            TimeEntryQueryBuilder()
+            .add_select_conditions(["VALUE COUNT(1)"])
+            .add_sql_in_condition('owner_id', owner_ids)
+            .add_sql_where_equal_condition(conditions)
+            .add_sql_visibility_condition(visible_only)
+            .add_sql_date_range_condition(date_range)
+            .build()
         )
 
-        flask.current_app.logger.debug(query_str)
+        query_str = query_builder.get_query()
+        params = query_builder.get_parameters()
+        tenant_id_value = self.find_partition_key_value(event_context)
         result = self.container.query_items(
             query=query_str,
             parameters=params,
-            partition_key=partition_key_value,
+            partition_key=tenant_id_value,
         )
 
         return result.next()
@@ -146,14 +103,12 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         self, time_entries=None, max_count=None, exist_conditions=False
     ):
         if time_entries:
-            custom_conditions = create_in_condition(time_entries, "project_id")
-            custom_conditions_activity = create_in_condition(
-                time_entries, "activity_id"
-            )
+            project_ids = list(set([x.project_id for x in time_entries]))
+            activity_ids = list(set([x.activity_id for x in time_entries]))
 
             project_dao = projects_model.create_dao()
             projects = project_dao.get_all(
-                custom_sql_conditions=[custom_conditions],
+                project_ids=project_ids,
                 visible_only=False,
                 max_count=max_count,
             )
@@ -162,10 +117,11 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
             activity_dao = activities_model.create_dao()
             activities = activity_dao.get_all(
-                custom_sql_conditions=[custom_conditions_activity],
+                activities_id=activity_ids,
                 visible_only=False,
                 max_count=max_count,
             )
+
             add_activity_name_to_time_entries(time_entries, activities)
 
             users = AzureConnection().users()
@@ -177,57 +133,38 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
     def find_all(
         self,
         conditions,
-        custom_sql_conditions,
         event_context: EventContext,
         date_range: dict = None,
+        owner_ids: list = None,
         test_user_ids=None,
         offset=0,
         max_count=None,
         visible_only=True,
-        custom_params: dict = None,
         mapper: Callable = None,
     ):
-        partition_key_value = self.find_partition_key_value(event_context)
         max_count = self.get_page_size_or(max_count)
+        date_range = date_range if date_range else {}
 
-        params = [
-            {"name": "@partition_key_value", "value": partition_key_value},
-            {"name": "@offset", "value": offset},
-            {"name": "@max_count", "value": max_count},
-        ]
-
-        params.extend(self.generate_params(conditions))
-        params.extend(custom_params)
-
-        query_str = """
-            SELECT * FROM c
-            WHERE c.{partition_key_attribute}=@partition_key_value
-            {conditions_clause}
-            {visibility_condition}
-            {test_users_exclusion_condition}
-            {custom_sql_conditions_clause}
-            {order_clause}
-            OFFSET @offset LIMIT @max_count
-            """.format(
-            partition_key_attribute=self.partition_key_attribute,
-            visibility_condition=self.create_sql_condition_for_visibility(
-                visible_only
-            ),
-            conditions_clause=self.create_sql_where_conditions(conditions),
-            test_users_exclusion_condition=self.create_sql_test_users_exclusion_condition(
-                test_user_ids
-            ),
-            custom_sql_conditions_clause=self.create_custom_sql_conditions(
-                custom_sql_conditions
-            ),
-            order_clause=self.create_sql_order_clause(),
+        query_builder = (
+            TimeEntryQueryBuilder()
+            .add_sql_in_condition('owner_id', owner_ids)
+            .add_sql_where_equal_condition(conditions)
+            .add_sql_visibility_condition(visible_only)
+            .add_sql_date_range_condition(date_range)
+            .add_sql_not_in_condition('owner_id', test_user_ids)
+            .add_sql_order_by_condition('start_date', Order.DESC)
+            .add_sql_limit_condition(max_count)
+            .add_sql_offset_condition(offset)
+            .build()
         )
 
+        query_str = query_builder.get_query()
+        params = query_builder.get_parameters()
+        tenant_id_value = self.find_partition_key_value(event_context)
         result = self.container.query_items(
             query=query_str,
             parameters=params,
-            partition_key=partition_key_value,
-            max_item_count=max_count,
+            partition_key=tenant_id_value,
         )
 
         function_mapper = self.get_mapper_or_dict(mapper)
@@ -237,13 +174,6 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         return self.add_complementary_info(
             time_entries, max_count, exist_conditions
         )
-
-    def create_sql_test_users_exclusion_condition(self, test_user_ids):
-        if test_user_ids != None:
-            tuple_string = convert_list_to_tuple_string(test_user_ids)
-            return "AND c.owner_id NOT IN {list}".format(list=tuple_string)
-
-        return ""
 
     def get_last_entry(
         self,

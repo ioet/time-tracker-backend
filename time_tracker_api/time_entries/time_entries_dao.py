@@ -8,6 +8,7 @@ from utils.extend_model import (
     add_project_info_to_time_entries,
     add_activity_name_to_time_entries,
     create_custom_query_from_str,
+    create_list_from_str,
 )
 from utils.time import (
     datetime_str,
@@ -71,7 +72,7 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
                 "The specified time entry is already running",
             )
 
-    def build_custom_query(self, is_admin: bool, conditions: dict = None):
+    def get_owner_ids(self, is_admin: bool, conditions: dict = None):
         custom_query = []
         if "user_id" in conditions:
             if is_admin:
@@ -79,11 +80,7 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
                 custom_query = (
                     []
                     if conditions.get("user_id") == "*"
-                    else [
-                        create_custom_query_from_str(
-                            conditions.get("user_id"), "c.owner_id"
-                        )
-                    ]
+                    else create_list_from_str(conditions.get("user_id"))
                 )
                 conditions.pop("user_id")
             else:
@@ -96,24 +93,16 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         event_ctx = self.create_event_context("read-many")
         conditions.update({"owner_id": event_ctx.user_id})
         is_complete_query = conditions.get("user_id") == '*'
-        custom_query = self.build_custom_query(
+        owner_ids = self.get_owner_ids(
             is_admin=event_ctx.is_admin,
             conditions=conditions,
         )
         date_range = self.handle_date_filter_args(args=conditions)
-        limit = conditions.get("limit", None)
-        conditions.pop("limit", None)
+        limit = conditions.pop("limit", None)
         azure_connection = AzureConnection()
         current_user_is_tester = azure_connection.is_test_user(
             event_ctx.user_id
         )
-
-        custom_query.append(
-            TimeEntryCosmosDBRepository.create_sql_date_range_filter(
-                date_range
-            )
-        )
-        custom_params = CosmosDBRepository.generate_params(date_range)
 
         test_user_ids = (
             azure_connection.get_test_user_ids()
@@ -123,11 +112,10 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
 
         time_entries_list = self.repository.find_all(
             conditions=conditions,
-            custom_sql_conditions=custom_query,
             test_user_ids=test_user_ids,
+            owner_ids=owner_ids,
             date_range=date_range,
             max_count=limit,
-            custom_params=custom_params,
             event_context=event_ctx,
         )
 
@@ -138,10 +126,7 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
     ) -> list:
         event_ctx = self.create_event_context("read-many")
         conditions.update({"owner_id": event_ctx.user_id})
-        custom_query = self.build_custom_query(
-            is_admin=event_ctx.is_admin,
-            conditions=conditions,
-        )
+
         date_range = self.handle_date_filter_args(args=conditions)
 
         project_dao = projects_model.create_dao()
@@ -157,17 +142,15 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         for id_project in projects_ids:
             conditions.update({"project_id": id_project})
 
-            limit = 1
             latest = self.repository.find_all_entries(
                 event_ctx,
                 conditions=conditions,
-                custom_sql_conditions=custom_query,
                 date_range=date_range,
-                max_count=limit,
+                max_count=1,
             )
 
             if len(latest) > 0:
-                result.append(latest[0])
+                self.append = result.append(latest[0])
 
         add_activity_name_to_time_entries(result, activities)
         add_project_info_to_time_entries(result, projects)
@@ -180,7 +163,7 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         get_all_conditions.pop("start")
         event_ctx = self.create_event_context("read-many")
         get_all_conditions.update({"owner_id": event_ctx.user_id})
-        custom_query = self.build_custom_query(
+        owner_ids = self.get_owner_ids(
             is_admin=event_ctx.is_admin,
             conditions=get_all_conditions,
         )
@@ -188,11 +171,11 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         records_total = self.repository.count(
             event_ctx,
             conditions=get_all_conditions,
-            custom_sql_conditions=custom_query,
+            owner_ids=owner_ids,
             date_range=date_range,
         )
         conditions.update({"owner_id": event_ctx.user_id})
-        custom_query = self.build_custom_query(
+        owner_ids = self.get_owner_ids(
             is_admin=event_ctx.is_admin,
             conditions=conditions,
         )
@@ -203,9 +186,9 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         conditions.pop("start", None)
 
         time_entries = self.repository.find_all(
-            event_ctx,
+            event_context=event_ctx,
             conditions=conditions,
-            custom_sql_conditions=custom_query,
+            owner_ids=owner_ids,
             date_range=date_range,
             max_count=length,
             offset=start,

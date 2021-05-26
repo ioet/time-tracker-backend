@@ -303,6 +303,7 @@ def test__build_order_by(
 
     assert orderBy_condition == expected_order_by_condition
 
+
 @pytest.mark.parametrize(
     "attribute,ids_list,expected_not_in_list",
     [
@@ -313,8 +314,11 @@ def test__build_order_by(
         ("id", ["id"], ["c.id NOT IN ('id')"]),
         ("id", ["id1", "id2"], ["c.id NOT IN ('id1', 'id2')"]),
         ("owner_id", ["id1", "id2"], ["c.owner_id NOT IN ('id1', 'id2')"]),
-        ("customer_id", ["id1", "id2"], [
-         "c.customer_id NOT IN ('id1', 'id2')"]),
+        (
+            "customer_id",
+            ["id1", "id2"],
+            ["c.customer_id NOT IN ('id1', 'id2')"],
+        ),
     ],
 )
 def test_add_sql_not_in_condition(
@@ -325,7 +329,5 @@ def test_add_sql_not_in_condition(
     query_builder = CosmosDBQueryBuilder().add_sql_not_in_condition(
         attribute, ids_list
     )
-    assert len(query_builder.where_conditions) == len(
-        expected_not_in_list
-    )
+    assert len(query_builder.where_conditions) == len(expected_not_in_list)
     assert query_builder.where_conditions == expected_not_in_list

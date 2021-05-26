@@ -197,7 +197,7 @@ def test_get_time_entry_should_succeed_with_valid_id(
     Mock(),
 )
 @patch(
-    'time_tracker_api.time_entries.time_entries_dao.TimeEntriesCosmosDBDao.build_custom_query',
+    'time_tracker_api.time_entries.time_entries_dao.TimeEntriesCosmosDBDao.get_owner_ids',
     Mock(),
 )
 @patch(
@@ -278,7 +278,7 @@ def test_get_time_entries_by_type_of_user_when_is_user_tester(
     Mock(),
 )
 @patch(
-    'time_tracker_api.time_entries.time_entries_dao.TimeEntriesCosmosDBDao.build_custom_query',
+    'time_tracker_api.time_entries.time_entries_dao.TimeEntriesCosmosDBDao.get_owner_ids',
     Mock(),
 )
 @patch(

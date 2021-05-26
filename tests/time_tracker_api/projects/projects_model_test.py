@@ -11,7 +11,7 @@ from time_tracker_api.projects.projects_model import (
 @patch(
     'time_tracker_api.projects.projects_model.ProjectCosmosDBRepository.find_partition_key_value'
 )
-def test_find_all_v2(
+def test_find_all_projects_new_version(
     find_partition_key_value_mock,
     event_context: EventContext,
     project_repository: ProjectCosmosDBRepository,
@@ -28,10 +28,11 @@ def test_find_all_v2(
     project_repository.container = Mock()
     project_repository.container.query_items = query_items_mock
 
-    result = project_repository.find_all_v2(
-        event_context,
-        ['id'],
-        ['customer_id']
+    result = project_repository.find_all(
+        event_context=event_context,
+        conditions={"customer_id": "1"},
+        project_ids=['id'],
+        customer_ids=['customer_id'],
     )
     find_partition_key_value_mock.assert_called_once()
     assert len(result) == 1

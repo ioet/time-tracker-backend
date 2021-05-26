@@ -28,7 +28,11 @@ def add_project_info_to_time_entries(time_entries, projects):
     for time_entry in time_entries:
         for project in projects:
             if time_entry.project_id == project.id:
-                name = project.name + " (archived)" if project.is_deleted() else project.name
+                name = (
+                    project.name + " (archived)"
+                    if project.is_deleted()
+                    else project.name
+                )
                 setattr(time_entry, 'project_name', name)
                 setattr(time_entry, 'customer_id', project.customer_id)
                 setattr(time_entry, 'customer_name', project.customer_name)
@@ -38,7 +42,11 @@ def add_activity_name_to_time_entries(time_entries, activities):
     for time_entry in time_entries:
         for activity in activities:
             if time_entry.activity_id == activity.id:
-                name = activity.name + " (archived)" if activity.is_deleted() else activity.name
+                name = (
+                    activity.name + " (archived)"
+                    if activity.is_deleted()
+                    else activity.name
+                )
                 setattr(time_entry, 'activity_name', name)
 
 
@@ -89,3 +97,7 @@ def create_custom_query_from_str(
     else:
         query_str = "{} = '{}'".format(first_attr, data[0])
     return query_str
+
+
+def create_list_from_str(data: str, delimiter: str = ",") -> list:
+    return [id for id in data.split(delimiter)] if data else []

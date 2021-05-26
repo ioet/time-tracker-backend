@@ -53,7 +53,7 @@ class CosmosDBQueryBuilder:
         return self
 
     def add_sql_offset_condition(self, offset):
-        if offset:
+        if offset != None:
             self.offset = offset
         return self
 
@@ -61,8 +61,9 @@ class CosmosDBQueryBuilder:
         self.order_by = (attribute, order.name)
         return self
 
-
-    def add_sql_not_in_condition(self, attribute: str = None, ids_list: List[str] = None):
+    def add_sql_not_in_condition(
+        self, attribute: str = None, ids_list: List[str] = None
+    ):
         if ids_list and attribute and len(ids_list) > 0:
             ids_values = convert_list_to_tuple_string(ids_list)
             self.where_conditions.append(f"c.{attribute} NOT IN {ids_values}")
@@ -80,14 +81,14 @@ class CosmosDBQueryBuilder:
             return ""
 
     def __build_offset(self):
-        if self.offset:
+        if self.offset != None:
             self.parameters.append({'name': '@offset', 'value': self.offset})
             return "OFFSET @offset"
         else:
             return ""
 
     def __build_limit(self):
-        if self.limit:
+        if self.limit != None:
             self.parameters.append({'name': '@limit', 'value': self.limit})
             return "LIMIT @limit"
         else:

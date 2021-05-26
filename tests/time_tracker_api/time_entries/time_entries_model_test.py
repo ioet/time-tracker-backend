@@ -279,22 +279,10 @@ def test_updated_item_without_deleted_key_should_call_validate_data(
     'commons.data_access_layer.cosmos_db.CosmosDBRepository.generate_params'
 )
 @patch(
-    'commons.data_access_layer.cosmos_db.CosmosDBRepository.create_sql_condition_for_visibility'
-)
-@patch(
-    'commons.data_access_layer.cosmos_db.CosmosDBRepository.create_sql_where_conditions'
-)
-@patch(
-    'commons.data_access_layer.cosmos_db.CosmosDBRepository.create_custom_sql_conditions'
-)
-@patch(
     'time_tracker_api.time_entries.time_entries_repository.TimeEntryCosmosDBRepository.add_complementary_info'
 )
-def test_find_all_v2(
+def test_find_all_time_entries_new_version(
     add_complementary_info_mock,
-    create_custom_sql_conditions_mock,
-    create_sql_where_conditions_mock,
-    create_sql_condition_for_visibility_mock,
     generate_params_mock,
     get_page_size_or_mock,
     find_partition_key_value_mock,
@@ -319,24 +307,19 @@ def test_find_all_v2(
 
     result = time_entry_repository.find_all(
         conditions={"user_id": "*"},
-        custom_sql_conditions=[],
         event_context=event_context,
         date_range={
             'start_date': "2021-03-22T10:00:00.000Z",
             'end_date': "2021-03-22T11:00:00.000Z",
         },
-        custom_params={},
     )
 
     find_partition_key_value_mock.assert_called_once()
     get_page_size_or_mock.assert_called_once()
+
     assert len(result) == 1
     time_entry = result[0]
     assert time_entry == expected_item
-
-    create_sql_condition_for_visibility_mock.assert_called_once()
-    create_sql_where_conditions_mock.assert_called_once()
-    create_custom_sql_conditions_mock.assert_called_once()
 
 
 @patch(
