@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.33.4 (2021-05-26)
+### Fix
+* TT-220 remove custom sql conditions from find all ([#292](https://github.com/ioet/time-tracker-backend/issues/292)) ([`91d6507`](https://github.com/ioet/time-tracker-backend/commit/91d6507041330363a03913398e5bd25d5e1ffa95))
+
 ## v0.33.3 (2021-05-14)
 ### Fix
 * TT-232 checkputApi ([#291](https://github.com/ioet/time-tracker-backend/issues/291)) ([`3dee5b7`](https://github.com/ioet/time-tracker-backend/commit/3dee5b794a7607a23cd6319594af857cb6a72028))
