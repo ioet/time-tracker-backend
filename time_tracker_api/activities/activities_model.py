@@ -67,15 +67,13 @@ class ActivityCosmosDBRepository(CosmosDBRepository):
         visible_only=True,
         mapper: Callable = None,
     ):
-        visibility = self.create_sql_condition_for_visibility(visible_only)
-        query_str = """
-            SELECT * FROM c
-            WHERE {condition}
-            {visibility_condition}
-            """.format(
-            condition=create_sql_in_condition("id", activity_ids),
-            visibility_condition=visibility,
+        query_builder = (
+            CosmosDBQueryBuilder()
+            .add_sql_in_condition('id', activity_ids)
+            .add_sql_visibility_condition(visible_only)
+            .build()
         )
+        query_str = query_builder.get_query()
 
         tenant_id_value = self.find_partition_key_value(event_context)
         result = self.container.query_items(
