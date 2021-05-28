@@ -19,7 +19,7 @@ from utils.query_builder import CosmosDBQueryBuilder
 from utils.extend_model import (
     add_customer_name_to_projects,
     add_custom_attribute_in_list,
-    add_custom_attribute
+    add_custom_attribute,
 )
 
 
@@ -108,8 +108,8 @@ class ProjectCosmosDBDao(APICosmosDBDao, ProjectDao):
     def __init__(self, repository):
         CosmosDBDao.__init__(self, repository)
 
-    @add_custom_attribute('customer', customers_create_dao())
-    @add_custom_attribute('project_type', project_types_create_dao())
+    @add_custom_attribute('customer', customers_create_dao)
+    @add_custom_attribute('project_type', project_types_create_dao)
     def get(self, id) -> ProjectCosmosDBModel:
         """
         Get one project an active client
@@ -117,9 +117,11 @@ class ProjectCosmosDBDao(APICosmosDBDao, ProjectDao):
         """
         return super().get(id)
 
-    @add_custom_attribute_in_list('customer', customers_create_dao())
-    @add_custom_attribute_in_list('project_type', project_types_create_dao())
-    def get_all(self, conditions: dict = None, project_ids: List = None, **kwargs) -> list:
+    @add_custom_attribute_in_list('customer', customers_create_dao)
+    @add_custom_attribute_in_list('project_type', project_types_create_dao)
+    def get_all(
+        self, conditions: dict = None, project_ids: List = None, **kwargs
+    ) -> list:
         """
         Get all the projects an active client has
         :param (dict) conditions: Conditions for querying the database
