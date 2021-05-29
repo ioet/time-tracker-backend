@@ -16,12 +16,11 @@ def add_custom_attribute(attr, dao):
             entity_model = func(*args, **kwargs)
             attribute_id = f"{attr}_id"
 
-            try:
+            if entity_model and attribute_id in entity_model.__dict__:
                 value_id = entity_model.__dict__[attribute_id]
-                related_entity = current_dao.get(value_id)
-                setattr(entity_model, attr, related_entity)
-            except:
-                print(f"This item isn't related a {attribute_id}")
+                if value_id:
+                    related_entity = current_dao.get(value_id)
+                    setattr(entity_model, attr, related_entity)
 
             return entity_model
 
