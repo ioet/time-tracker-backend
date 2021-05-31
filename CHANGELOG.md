@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.34.0 (2021-05-31)
+### Feature
+* TT-43 return related items to projects ([#293](https://github.com/ioet/time-tracker-backend/issues/293)) ([`21d44d7`](https://github.com/ioet/time-tracker-backend/commit/21d44d73bdd7a74d339847f292a7c44484424b10))
+
 ## v0.33.4 (2021-05-26)
 ### Fix
 * TT-220 remove custom sql conditions from find all ([#292](https://github.com/ioet/time-tracker-backend/issues/292)) ([`91d6507`](https://github.com/ioet/time-tracker-backend/commit/91d6507041330363a03913398e5bd25d5e1ffa95))
