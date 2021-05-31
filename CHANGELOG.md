@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.34.1 (2021-05-31)
+### Fix
+* TT-242 refactory functions find all with id in list and review test functions ([#294](https://github.com/ioet/time-tracker-backend/issues/294)) ([`19c48f8`](https://github.com/ioet/time-tracker-backend/commit/19c48f8ba7aba1f1d052acec3d75213494d5bd54))
+
 ## v0.34.0 (2021-05-31)
 ### Feature
 * TT-43 return related items to projects ([#293](https://github.com/ioet/time-tracker-backend/issues/293)) ([`21d44d7`](https://github.com/ioet/time-tracker-backend/commit/21d44d73bdd7a74d339847f292a7c44484424b10))
