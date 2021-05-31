@@ -70,7 +70,42 @@ project_input = ns.model(
     },
 )
 
+project_type_nested_field = ns.model('ProjectType', {
+    'name': fields.String(
+        title='Name',
+        required=True,
+        max_length=50,
+        description='Name of the project type',
+        example=faker.random_element(["Customer", "Training", "Internal"]),
+    ),
+    'description': NullableString(
+        title='Description',
+        required=False,
+        max_length=250,
+        description='Comments about the project type',
+        example=faker.paragraph(),
+    )
+})
+
+customer_nested_field = ns.model('Customer', {
+    'name': fields.String(
+        title='Name',
+        required=True,
+        max_length=50,
+        description='Name of the customer',
+        example=faker.company(),
+    ),
+    'description': NullableString(
+        title='Description',
+        required=False,
+        max_length=250,
+        description='Description about the customer',
+        example=faker.paragraph(),
+    )
+})
+
 project_response_fields = {
+    # TODO: Remove this DEAD CODE
     'customer_name': fields.String(
         required=True,
         title='Customer Name',
@@ -78,6 +113,8 @@ project_response_fields = {
         description='Name of the customer of the project',
         example=faker.company(),
     ),
+    'customer': fields.Nested(customer_nested_field),
+    'project_type': fields.Nested(project_type_nested_field),
 }
 project_response_fields.update(common_fields)
 

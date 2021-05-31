@@ -38,8 +38,4 @@ migration_status.csv
 .DS_Store
 
 # windows env variables
-.env.bat
-# mac / linux env variables
-.env
-#PowerShell env variables
-.env.ps1
+env.*

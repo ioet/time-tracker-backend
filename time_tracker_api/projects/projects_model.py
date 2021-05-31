@@ -11,9 +11,16 @@ from commons.data_access_layer.database import EventContext
 from time_tracker_api.customers.customers_model import (
     create_dao as customers_create_dao,
 )
+from time_tracker_api.project_types.project_types_model import (
+    create_dao as project_types_create_dao,
+)
 from time_tracker_api.customers.customers_model import CustomerCosmosDBModel
 from utils.query_builder import CosmosDBQueryBuilder
-from utils.extend_model import add_customer_name_to_projects
+from utils.extend_model import (
+    add_customer_name_to_projects,
+    add_custom_attribute_in_list,
+    add_custom_attribute,
+)
 
 
 class ProjectDao(CRUDDao):
@@ -101,6 +108,17 @@ class ProjectCosmosDBDao(APICosmosDBDao, ProjectDao):
     def __init__(self, repository):
         CosmosDBDao.__init__(self, repository)
 
+    @add_custom_attribute('customer', customers_create_dao)
+    @add_custom_attribute('project_type', project_types_create_dao)
+    def get(self, id) -> ProjectCosmosDBModel:
+        """
+        Get one project an active client
+        :param (str) id: project's id
+        """
+        return super().get(id)
+
+    @add_custom_attribute_in_list('customer', customers_create_dao)
+    @add_custom_attribute_in_list('project_type', project_types_create_dao)
     def get_all(
         self, conditions: dict = None, project_ids: List = None, **kwargs
     ) -> list:

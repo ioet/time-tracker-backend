@@ -1,4 +1,62 @@
+from functools import wraps
 import re
+
+
+def add_custom_attribute(attr, dao):
+    """
+    Decorator to add an custom attribute in model, based on entity's id
+    :param (attr) attribute: name of the new attribute
+    :param (dao) dao: related entity to the model
+    """
+
+    def decorator_for_single_item(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            current_dao = dao()
+            entity_model = func(*args, **kwargs)
+            attribute_id = f"{attr}_id"
+
+            if entity_model and attribute_id in entity_model.__dict__:
+                value_id = entity_model.__dict__[attribute_id]
+                if value_id:
+                    related_entity = current_dao.get(value_id)
+                    setattr(entity_model, attr, related_entity)
+
+            return entity_model
+
+        return wrapper
+
+    return decorator_for_single_item
+
+
+def add_custom_attribute_in_list(attr, dao):
+    """
+    Decorator to add an custom attribute in model_list, based on entity's id
+    :param (attr) attribute: name of the new attribute
+    :param (dao) dao: related entity to the model
+    """
+
+    def decorator_for_list_item(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            current_dao = dao()
+            entity_model_list = func(*args, **kwargs)
+            attribute_id = f"{attr}_id"
+
+            related_entity_list = current_dao.get_all()
+            related_entities_ids_dict = {x.id: x for x in related_entity_list}
+
+            for entity_model in entity_model_list:
+                value_id = entity_model.__dict__[attribute_id]
+                setattr(
+                    entity_model, attr, related_entities_ids_dict.get(value_id)
+                )
+
+            return entity_model_list
+
+        return wrapper
+
+    return decorator_for_list_item
 
 
 def add_customer_name_to_projects(projects, customers):
