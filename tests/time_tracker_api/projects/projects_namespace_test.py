@@ -6,6 +6,8 @@ from flask.testing import FlaskClient
 from flask_restplus._http import HTTPStatus
 from pytest_mock import MockFixture
 
+from time_tracker_api.projects.projects_model import ProjectCosmosDBDao
+
 fake = Faker()
 
 valid_project_data = {
@@ -103,20 +105,17 @@ def test_list_all_active_projects(
 def test_get_project_should_succeed_with_valid_id(
     client: FlaskClient, mocker: MockFixture, valid_header: dict
 ):
-    from time_tracker_api.projects.projects_namespace import project_dao
-
     valid_id = fake.random_int(1, 9999)
-    repository_find_mock = mocker.patch.object(
-        project_dao.repository, 'find', return_value=fake_project
-    )
+
+    project_dao_get = mocker.patch.object(ProjectCosmosDBDao, 'get')
+    project_dao_get.return_value = fake_project
 
     response = client.get(
         "/projects/%s" % valid_id, headers=valid_header, follow_redirects=True
     )
 
     assert HTTPStatus.OK == response.status_code
-    fake_project == json.loads(response.data)
-    repository_find_mock.assert_called_once_with(str(valid_id), ANY)
+    project_dao_get.assert_called_with(str(valid_id))
 
 
 def test_get_project_should_return_not_found_with_invalid_id(

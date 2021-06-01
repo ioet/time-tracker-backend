@@ -115,7 +115,11 @@ class ProjectCosmosDBDao(APICosmosDBDao, ProjectDao):
         Get one project an active client
         :param (str) id: project's id
         """
-        return super().get(id)
+        project = super().get(id)
+        customer_dao = customers_create_dao()
+        customer = customer_dao.get(project.customer_id)
+        setattr(project, 'customer_name', customer.name)
+        return project
 
     @add_custom_attribute_in_list('customer', customers_create_dao)
     @add_custom_attribute_in_list('project_type', project_types_create_dao)
