@@ -44,13 +44,13 @@ class CustomerCosmosDBModel(CosmosDBModel):
         return "the customer \"%s\"" % self.name  # pragma: no cover
 
 
+class CustomerCosmosDBDao(APICosmosDBDao, CustomerDao):
+    def __init__(self, repository):
+        CosmosDBDao.__init__(self, repository)
+
+
 def create_dao() -> CustomerDao:
     repository = CosmosDBRepository.from_definition(
         container_definition, mapper=CustomerCosmosDBModel
     )
-
-    class CustomerCosmosDBDao(APICosmosDBDao, CustomerDao):
-        def __init__(self):
-            CosmosDBDao.__init__(self, repository)
-
-    return CustomerCosmosDBDao()
+    return CustomerCosmosDBDao(repository)
