@@ -1,3 +1,4 @@
+import copy
 from datetime import datetime, timedelta
 
 import jwt
@@ -216,14 +217,15 @@ def time_entries_dao():
     return time_entries_dao
 
 
-@pytest.yield_fixture(scope="module")
+@pytest.fixture(scope="module")
 def running_time_entry(
     time_entry_repository: TimeEntryCosmosDBRepository,
     owner_id: str,
     tenant_id: str,
     event_context: EventContext,
 ):
-    created_time_entry = time_entry_repository.create(
+    current_time_entry_repository = copy.copy(time_entry_repository)
+    created_time_entry = current_time_entry_repository.create(
         {
             "project_id": fake.uuid4(),
             "owner_id": owner_id,
@@ -234,7 +236,7 @@ def running_time_entry(
 
     yield created_time_entry
 
-    time_entry_repository.delete_permanently(
+    current_time_entry_repository.delete_permanently(
         id=created_time_entry.id, event_context=event_context
     )
 
