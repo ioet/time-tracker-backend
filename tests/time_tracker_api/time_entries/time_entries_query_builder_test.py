@@ -40,8 +40,8 @@ def test_build_with_add_sql_date_range_condition():
         TimeEntryQueryBuilder()
         .add_sql_date_range_condition(
             {
-                "start_date": "2021-03-19T05:00:00.000Z",
-                "end_date": "2021-03-20T10:00:00.000Z",
+                "start_date": "2021-04-19T05:00:00.000Z",
+                "end_date": "2021-04-20T10:00:00.000Z",
             }
         )
         .build()
@@ -60,8 +60,8 @@ def test_build_with_add_sql_date_range_condition():
 
 
 def test_add_sql_interception_with_date_range_condition():
-    start_date = "2021-03-19T05:07:00.000Z"
-    end_date = "2021-03-25T10:00:00.000Z"
+    start_date = "2021-01-19T05:07:00.000Z"
+    end_date = "2021-01-25T10:00:00.000Z"
 
     time_entry_query_builder = (
         TimeEntryQueryBuilder().add_sql_interception_with_date_range_condition(
@@ -80,8 +80,8 @@ def test_add_sql_interception_with_date_range_condition():
 
 
 def test_build_with_add_sql_interception_with_date_range_condition():
-    start_date = "2021-03-19T05:07:00.000Z"
-    end_date = "2021-03-25T10:00:00.000Z"
+    start_date = "2021-02-19T05:07:00.000Z"
+    end_date = "2021-02-25T10:00:00.000Z"
     time_entry_query_builder = (
         TimeEntryQueryBuilder()
         .add_sql_interception_with_date_range_condition(start_date, end_date)
