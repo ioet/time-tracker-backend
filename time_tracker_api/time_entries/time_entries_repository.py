@@ -42,13 +42,6 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             mapper=TimeEntryCosmosDBModel,
         )
 
-    @staticmethod
-    def create_sql_ignore_id_condition(id: str):
-        if id is None:
-            return ''
-        else:
-            return "AND c.id!=@ignore_id"
-
     def find_all_entries(
         self,
         event_context: EventContext,
@@ -247,35 +240,38 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             "owner_id": owner_id,
             "tenant_id": tenant_id,
         }
-        params = [
-            {"name": "@start_date", "value": start_date},
-            {"name": "@end_date", "value": end_date or current_datetime_str()},
-            {"name": "@ignore_id", "value": ignore_id},
+
+        not_equal_conditions = [
+            {
+                "field_name": "start_date",
+                "compare_field_name": "end_date",
+                "compare_field_value": end_date,
+            },
+            {
+                "field_name": "end_date",
+                "compare_field_name": "start_date",
+                "compare_field_value": start_date,
+            },
         ]
-        params.extend(self.generate_params(conditions))
+
+        query_builder = (
+            TimeEntryQueryBuilder()
+            .add_sql_interception_with_date_range_condition(
+                start_date, end_date
+            )
+            .add_sql_where_not_equal_condition(not_equal_conditions)
+            .add_sql_where_equal_condition(conditions)
+            .add_sql_ignore_id_condition(ignore_id)
+            .add_sql_visibility_condition(visible_only)
+            .add_sql_order_by_condition('start_date', Order.DESC)
+            .build()
+        )
+
+        query_str = query_builder.get_query()
+        params = query_builder.get_parameters()
+
         result = self.container.query_items(
-            query="""
-            SELECT * FROM c
-            WHERE (((c.start_date BETWEEN @start_date AND @end_date)
-                  OR (c.end_date BETWEEN @start_date AND @end_date))
-                  OR ((@start_date BETWEEN c.start_date AND c.end_date)
-                  OR (@end_date BETWEEN c.start_date AND c.end_date)))
-                  AND c.start_date!= @end_date
-                  AND c.end_date!= @start_date
-            {conditions_clause}
-            {ignore_id_condition}
-            {visibility_condition}
-            {order_clause}
-            """.format(
-                ignore_id_condition=self.create_sql_ignore_id_condition(
-                    ignore_id
-                ),
-                visibility_condition=self.create_sql_condition_for_visibility(
-                    visible_only
-                ),
-                conditions_clause=self.create_sql_where_conditions(conditions),
-                order_clause=self.create_sql_order_clause(),
-            ),
+            query=query_str,
             parameters=params,
             partition_key=tenant_id,
         )
@@ -290,20 +286,23 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             "owner_id": owner_id,
             "tenant_id": tenant_id,
         }
+
+        query_builder = (
+            TimeEntryQueryBuilder()
+            .add_sql_non_existent_attribute_condition('end_date')
+            .add_sql_where_equal_condition(conditions)
+            .add_sql_visibility_condition(True)
+            .add_sql_offset_condition(0)
+            .add_sql_limit_condition(1)
+            .build()
+        )
+
+        query_str = query_builder.get_query()
+        params = query_builder.get_parameters()
+
         result = self.container.query_items(
-            query="""
-            SELECT * from c
-            WHERE (NOT IS_DEFINED(c.end_date) OR c.end_date = null)
-            {conditions_clause}
-            {visibility_condition}
-            OFFSET 0 LIMIT 1
-            """.format(
-                visibility_condition=self.create_sql_condition_for_visibility(
-                    True
-                ),
-                conditions_clause=self.create_sql_where_conditions(conditions),
-            ),
-            parameters=self.generate_params(conditions),
+            query=query_str,
+            parameters=params,
             partition_key=tenant_id,
             max_item_count=1,
         )
@@ -311,7 +310,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         function_mapper = self.get_mapper_or_dict(mapper)
         try:
             return function_mapper(next(result))
-        except StopIteration as no_result:
+        except StopIteration:
             raise CustomError(HTTPStatus.NO_CONTENT)
 
     def validate_data(self, data, event_context: EventContext):
