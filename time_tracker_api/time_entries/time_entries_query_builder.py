@@ -21,3 +21,21 @@ class TimeEntryQueryBuilder(CosmosDBQueryBuilder):
                 ]
             )
         return self
+
+    def add_sql_interception_with_date_range_condition(
+        self, start_date, end_date
+    ):
+        condition = """
+        (((c.start_date BETWEEN @start_date AND @end_date)
+          OR (c.end_date BETWEEN @start_date AND @end_date))
+          OR ((@start_date BETWEEN c.start_date AND c.end_date)
+          OR (@end_date BETWEEN c.start_date AND c.end_date)))
+        """
+        self.where_conditions.append(condition)
+        self.parameters.extend(
+            [
+                {'name': '@start_date', 'value': start_date},
+                {'name': '@end_date', 'value': end_date},
+            ]
+        )
+        return self
