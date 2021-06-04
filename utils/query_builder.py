@@ -42,6 +42,22 @@ class CosmosDBQueryBuilder:
                 self.parameters.append({'name': f'@{k}', 'value': v})
         return self
 
+    def add_sql_where_not_equal_condition(self, conditions: list = None):
+        if conditions:
+            for condition_values in conditions:
+                field_name = condition_values['field_name']
+                compare_field_name = condition_values['compare_field_name']
+                compare_field_value = condition_values['compare_field_value']
+                condition = f"c.{field_name} != @{compare_field_name}"
+                self.where_conditions.append(condition)
+                parameter = {
+                    'name': f'@{compare_field_name}',
+                    'value': compare_field_value,
+                }
+                if parameter not in self.parameters:
+                    self.parameters.append(parameter)
+        return self
+
     def add_sql_visibility_condition(self, visible_only: bool):
         if visible_only:
             self.where_conditions.append('NOT IS_DEFINED(c.deleted)')
@@ -67,6 +83,19 @@ class CosmosDBQueryBuilder:
         if ids_list and attribute and len(ids_list) > 0:
             ids_values = convert_list_to_tuple_string(ids_list)
             self.where_conditions.append(f"c.{attribute} NOT IN {ids_values}")
+        return self
+
+    def add_sql_non_existent_attribute_condition(self, attribute: str):
+        condition = f"""
+        (NOT IS_DEFINED(c.{attribute}) OR c.{attribute} = null)
+        """
+        self.where_conditions.append(condition)
+        return self
+
+    def add_sql_ignore_id_condition(self, id: str = None):
+        if id:
+            self.where_conditions.append("c.id!=@ignore_id")
+            self.parameters.append({'name': '@ignore_id', 'value': id})
         return self
 
     def __build_select(self):
