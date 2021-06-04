@@ -240,6 +240,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
             "owner_id": owner_id,
             "tenant_id": tenant_id,
         }
+        end_date = end_date or current_datetime_str()
 
         not_equal_conditions = [
             {
