@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.34.3 (2021-06-08)
+### Fix
+* TT-256 Avoid creating fake users from test ([`bbbcc94`](https://github.com/ioet/time-tracker-backend/commit/bbbcc94e9ead367a44c01272525559ebf73e3a9c))
+
 ## v0.34.2 (2021-06-02)
 ### Fix
 * TT-257 Fixed customer name null on get a specific project ([#295](https://github.com/ioet/time-tracker-backend/issues/295)) ([`bf2b24d`](https://github.com/ioet/time-tracker-backend/commit/bf2b24d69614d69bd446799d3d0bdb7fa0bc2126))
