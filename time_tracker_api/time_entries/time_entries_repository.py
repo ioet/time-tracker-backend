@@ -242,25 +242,11 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         }
         end_date = end_date or current_datetime_str()
 
-        not_equal_conditions = [
-            {
-                "field_name": "start_date",
-                "compare_field_name": "end_date",
-                "compare_field_value": end_date,
-            },
-            {
-                "field_name": "end_date",
-                "compare_field_name": "start_date",
-                "compare_field_value": start_date,
-            },
-        ]
-
         query_builder = (
             TimeEntryQueryBuilder()
             .add_sql_interception_with_date_range_condition(
                 start_date, end_date
             )
-            .add_sql_where_not_equal_condition(not_equal_conditions)
             .add_sql_where_equal_condition(conditions)
             .add_sql_ignore_id_condition(ignore_id)
             .add_sql_visibility_condition(visible_only)
@@ -290,7 +276,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
         query_builder = (
             TimeEntryQueryBuilder()
-            .add_sql_non_existent_attribute_condition('end_date')
+            .add_sql_is_running_time_entry_condition()
             .add_sql_where_equal_condition(conditions)
             .add_sql_visibility_condition(True)
             .add_sql_offset_condition(0)
