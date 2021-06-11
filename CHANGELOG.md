@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.35.0 (2021-06-11)
+### Feature
+* TT 243 Refactor functions on time entries repository ([#298](https://github.com/ioet/time-tracker-backend/issues/298)) ([`3c4fb10`](https://github.com/ioet/time-tracker-backend/commit/3c4fb10b08ecd4ed28e17fb7812292255cfae0bd))
+
 ## v0.34.3 (2021-06-08)
 ### Fix
 * TT-256 Avoid creating fake users from test ([`bbbcc94`](https://github.com/ioet/time-tracker-backend/commit/bbbcc94e9ead367a44c01272525559ebf73e3a9c))
