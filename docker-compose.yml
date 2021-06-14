@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  api:
+    build: 
+        context: .
+        dockerfile: ./dockerfile.dev
+    ports:
+      - 5000:5000
+    env_file:
+      - ./.env
+    volumes: 
+      - .:/usr/src/app
+    # depends_on:
+    #   - cosmosdb
+    entrypoint:
+      - /bin/sh
+      - ./cosmosdb-emulator/entrypoint.sh
+    # networks:
+    #   services_net:
+    #     ipv4_address: 172.20.0.77
+
+  cosmosdb:
+    container_name: "azurecosmosemulator"
+    hostname: "azurecosmosemulator"
+    image: 'mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator'
+    tty: true
+    mem_limit: 3GB
+    ports:
+        - '8081:8081'
+        - '10251:10251'
+        - '10252:10252'
+        - '10253:10253'
+        - '10254:10254'
+    environment:
+        - AZURE_COSMOS_EMULATOR_PARTITION_COUNT=7
+        - AZURE_COSMOS_EMULATOR_ARGS=/alternativenames=azurecosmosemulator
+
+    # networks:
+    #   services_net:
+    #     ipv4_address: 172.20.0.78
+
+
+# networks:
+#   services_net:
+#     ipam:
+#       driver: default
+#       config:
+#         - subnet: 172.20.0.0/16

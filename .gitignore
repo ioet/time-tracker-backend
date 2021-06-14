@@ -39,3 +39,6 @@ migration_status.csv
 
 # windows env variables
 env.*
+
+# SSL certificate for cosmos emulator
+emulatorcert.crt
