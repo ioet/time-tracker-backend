@@ -27,6 +27,7 @@ htmlcov/
 .env
 timetracker-api-postman-collection.json
 swagger.json
+settings.json
 
 # SQLite databases
 *.db

@@ -1,0 +1,49 @@
+###
+# @name getProjects
+GET {{baseUrl}}/projects
+Accept: application/json, text/plain, */*
+Authorization: Bearer {{token}}
+
+###
+@firstProjectId = {{getProjects.response.body.$..id}}
+# @name getProjectById
+GET {{baseUrl}}/projects/{{firstProjectId}}
+Accept: application/json, text/plain, */*
+Authorization: Bearer {{token}}
+
+###
+# @name getUsers
+GET {{baseUrl}}/users
+Accept: application/json, text/plain, */*
+Authorization: Bearer {{token}}
+
+###
+@firstUserId = {{getUsers.response.body.$..id}}
+# @name getUsersById
+GET {{baseUrl}}/users/{{firstUserId}}
+Accept: application/json, text/plain, */*
+Authorization: Bearer {{token}}
+
+###
+# @name getRunninTimeEntries
+GET {{baseUrl}}/time-entries/running
+Accept: application/json, text/plain, */*
+Authorization: Bearer {{token}}
+
+###
+# @name getSummary
+GET {{baseUrl}}/time-entries/summary?time_offset=300
+Accept: application/json, text/plain, */*
+Authorization: Bearer {{token}}
+
+###
+# @name getActivities
+GET {{baseUrl}}/activities
+Accept: application/json, text/plain, */*
+Authorization: Bearer {{token}}
+
+###
+# @name getVendor
+GET https://timetracker.ioet.com/vendor-es2015.js
+Accept: application/json, text/plain, */*
+Authorization: Bearer {{token}}
