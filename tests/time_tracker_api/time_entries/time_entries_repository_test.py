@@ -94,7 +94,7 @@ def test_add_complementary_info_when_there_are_not_time_entries(
     time_entry_repository: TimeEntryCosmosDBRepository,
 ):
     with pytest.raises(HTTPException) as http_error:
-        entries = time_entry_repository.add_complementary_info(
+        time_entry_repository.add_complementary_info(
             time_entries=None, exist_conditions=False
         )
     status_code = http_error.value.code
