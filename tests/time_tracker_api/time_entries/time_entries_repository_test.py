@@ -1,9 +1,10 @@
+import pytest
+
 from utils.azure_users import AzureConnection, AzureUser
 from time_tracker_api.time_entries.time_entries_repository import (
     TimeEntryCosmosDBModel,
     TimeEntryCosmosDBRepository,
 )
-
 from time_tracker_api.projects.projects_model import (
     ProjectCosmosDBDao,
     ProjectCosmosDBModel,
@@ -12,6 +13,8 @@ from time_tracker_api.activities.activities_model import (
     ActivityCosmosDBDao,
     ActivityCosmosDBModel,
 )
+from flask_restplus._http import HTTPStatus
+from werkzeug.exceptions import HTTPException
 
 time_entry_data = {
     'id': 'id',
@@ -42,7 +45,7 @@ activity_data = {
 }
 
 
-def test_add_complementary_info(
+def test_add_complementary_info_when_there_are_time_entries(
     mocker,
     time_entry_repository: TimeEntryCosmosDBRepository,
 ):
@@ -85,3 +88,17 @@ def test_add_complementary_info(
         expected_time_entry_out[0].__dict__['activity_name']
         == expected_activity.__dict__['name']
     )
+
+
+def test_add_complementary_info_when_there_are_not_time_entries(
+    time_entry_repository: TimeEntryCosmosDBRepository,
+):
+    with pytest.raises(HTTPException) as http_error:
+        entries = time_entry_repository.add_complementary_info(
+            time_entries=None, exist_conditions=False
+        )
+    status_code = http_error.value.code
+    message = http_error.value.data.get('message')
+
+    assert message == 'Time entry not found'
+    assert status_code == HTTPStatus.NOT_FOUND
