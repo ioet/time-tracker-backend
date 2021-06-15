@@ -1,11 +1,7 @@
 FROM python:3.9-alpine
-
 ARG buildDeps='g++ gnupg libffi-dev openssl-dev musl-dev cargo'
-
 WORKDIR /usr/src/app
-
 COPY . .
-
 RUN apk update \
 	&& apk add --no-cache $buildDeps gcc unixodbc-dev  ca-certificates curl \
 	&& pip3 install --no-cache-dir -r requirements/time_tracker_api/dev.txt \
@@ -22,9 +18,8 @@ RUN apk update \
 	&& apk del $buildDeps \
 	&& rm -rfv /root/.cache/pip/* && \
 find /usr/local \( -type d -a -name test -o -name tests \) -o \( -type f -a -name '*.pyc' -o -name '*.pyo' \) -exec rm -rfv '{}' \+
-
+RUN apk add --no-cache --upgrade bash
 ENV FLASK_APP time_tracker_api
-
 ENV FLASK_RUN_HOST 0.0.0.0
 
 EXPOSE 5000
