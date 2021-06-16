@@ -119,7 +119,7 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
             users = AzureConnection().users()
             add_user_email_to_time_entries(time_entries, users)
-        elif not time_entries and exist_conditions:
+        elif not time_entries and not exist_conditions:
             abort(HTTPStatus.NOT_FOUND, "Time entry not found")
         return time_entries
 
