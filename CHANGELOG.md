@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.35.1 (2021-06-16)
+### Fix
+* TT-261 handle response Not found ([#299](https://github.com/ioet/time-tracker-backend/issues/299)) ([`c6fac7f`](https://github.com/ioet/time-tracker-backend/commit/c6fac7f24739dfe38735ae20d339d3bba8cc5a8d))
+
 ## v0.35.0 (2021-06-11)
 ### Feature
 * TT 243 Refactor functions on time entries repository ([#298](https://github.com/ioet/time-tracker-backend/issues/298)) ([`3c4fb10`](https://github.com/ioet/time-tracker-backend/commit/3c4fb10b08ecd4ed28e17fb7812292255cfae0bd))
