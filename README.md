@@ -438,6 +438,13 @@ They will be automatically run during the Continuous Deployment process.
 Shared file with all the Feature Toggles we create, so we can have a history of them
 [Feature Toggles dictionary](https://github.com/ioet/time-tracker-ui/wiki/Feature-Toggles-dictionary)
 
+## Support for docker-compose and cosmosdb emulator
+
+To run the dev enviroment in docker-compose:
+```bash
+docker-compose up
+```
+
 ## More information about the project
 
 [Starting in Time Tracker](https://github.com/ioet/time-tracker-ui/wiki/Time-tracker)
