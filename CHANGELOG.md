@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.35.2 (2021-06-22)
+### Fix
+* TT-270 Fix handle exceptions in create update entries ([#301](https://github.com/ioet/time-tracker-backend/issues/301)) ([`3cddc6b`](https://github.com/ioet/time-tracker-backend/commit/3cddc6b33606d02cde2f20babcbeb48d77fe941b))
+
 ## v0.35.1 (2021-06-16)
 ### Fix
 * TT-261 handle response Not found ([#299](https://github.com/ioet/time-tracker-backend/issues/299)) ([`c6fac7f`](https://github.com/ioet/time-tracker-backend/commit/c6fac7f24739dfe38735ae20d339d3bba8cc5a8d))
