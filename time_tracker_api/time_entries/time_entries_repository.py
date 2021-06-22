@@ -30,6 +30,7 @@ from time_tracker_api.time_entries.time_entries_query_builder import (
 )
 from utils.query_builder import CosmosDBQueryBuilder, Order
 from utils.time import str_to_datetime
+from utils.validate_entries import are_related_entry_entities_valid
 
 
 class TimeEntryCosmosDBRepository(CosmosDBRepository):
@@ -302,6 +303,21 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
 
     def validate_data(self, data, event_context: EventContext):
         start_date = data.get('start_date')
+
+        related_project_id = data.get('project_id')
+        related_activity_id = data.get('activity_id')
+
+        are_related_entities_valid = are_related_entry_entities_valid(
+            project_id=related_project_id, activity_id=related_activity_id
+        )
+
+        if not are_related_entities_valid.get('is_valid'):
+            status_code = are_related_entities_valid.get('status_code')
+            message = are_related_entities_valid.get('message')
+            raise CustomError(
+                status_code,
+                description=message,
+            )
 
         if data.get('end_date') is not None:
             if data['end_date'] <= start_date:
