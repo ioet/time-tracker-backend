@@ -1,6 +1,5 @@
 import copy
 from datetime import datetime, timedelta
-from http import HTTPStatus
 
 import jwt
 import pytest
@@ -218,22 +217,13 @@ def time_entries_dao():
     return time_entries_dao
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def running_time_entry(
     time_entry_repository: TimeEntryCosmosDBRepository,
     owner_id: str,
     tenant_id: str,
     event_context: EventContext,
-    mocker,
 ):
-    mocker.patch(
-        'time_tracker_api.time_entries.time_entries_repository.are_related_entry_entities_valid',
-        return_value={
-            "is_valid": True,
-            "status_code": HTTPStatus.OK,
-            "message": "Related entry entities valid",
-        },
-    )
     current_time_entry_repository = copy.copy(time_entry_repository)
     created_time_entry = current_time_entry_repository.create(
         {
