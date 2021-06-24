@@ -37,7 +37,7 @@ time_entry_input = ns.model(
         ),
         'activity_id': UUID(
             title='Activity',
-            required=True,
+            required=False,
             description='The id of the selected activity',
             example=faker.uuid4(),
         ),
