@@ -1,10 +1,11 @@
-from http import HTTPStatus
 from unittest.mock import Mock, patch
 import pytest
 from faker import Faker
 
-from commons.data_access_layer.cosmos_db import CustomError
 from commons.data_access_layer.database import EventContext
+from time_tracker_api.time_entries.time_entries_model import (
+    TimeEntryCosmosDBModel,
+)
 from time_tracker_api.time_entries.time_entries_repository import (
     TimeEntryCosmosDBRepository,
     TimeEntryCosmosDBModel,
@@ -16,7 +17,6 @@ def create_time_entry(
     end_date: str,
     owner_id: str,
     tenant_id: str,
-    mocker,
     event_context: EventContext,
     time_entry_repository: TimeEntryCosmosDBRepository,
 ) -> TimeEntryCosmosDBModel:
@@ -29,15 +29,6 @@ def create_time_entry(
         "owner_id": owner_id,
         "tenant_id": tenant_id,
     }
-
-    mocker.patch(
-        'time_tracker_api.time_entries.time_entries_repository.are_related_entry_entities_valid',
-        return_value={
-            "is_valid": True,
-            "status_code": HTTPStatus.OK,
-            "message": "Related entry entities valid",
-        },
-    )
 
     created_item = time_entry_repository.create(
         data, event_context, mapper=TimeEntryCosmosDBModel
@@ -87,7 +78,6 @@ def test_find_interception_with_date_range_should_find(
     end_date_: str,
     owner_id: str,
     tenant_id: str,
-    mocker,
     time_entry_repository: TimeEntryCosmosDBRepository,
     event_context: EventContext,
 ):
@@ -96,7 +86,6 @@ def test_find_interception_with_date_range_should_find(
         end_date,
         owner_id,
         tenant_id,
-        mocker,
         event_context,
         time_entry_repository,
     )
@@ -153,14 +142,12 @@ def test_find_interception_with_date_range_should_not_find(
     tenant_id: str,
     time_entry_repository: TimeEntryCosmosDBRepository,
     event_context: EventContext,
-    mocker,
 ):
     existing_item = create_time_entry(
         start_date,
         end_date,
         owner_id,
         tenant_id,
-        mocker,
         event_context,
         time_entry_repository,
     )
@@ -184,17 +171,14 @@ def test_find_interception_should_ignore_id_of_existing_item(
     tenant_id: str,
     time_entry_repository: TimeEntryCosmosDBRepository,
     event_context: EventContext,
-    mocker,
 ):
     start_date = "2020-10-01T05:00:00.000Z"
     end_date = "2020-10-01T10:00:00.000Z"
-
     existing_item = create_time_entry(
         start_date,
         end_date,
         owner_id,
         tenant_id,
-        mocker,
         event_context,
         time_entry_repository,
     )
@@ -245,10 +229,10 @@ def test_find_running_should_not_find_any_item(
     owner_id: str,
     time_entry_repository: TimeEntryCosmosDBRepository,
 ):
-    with pytest.raises(CustomError) as custom_error:
+    try:
         time_entry_repository.find_running(tenant_id, owner_id)
-
-    assert custom_error.value.code == HTTPStatus.NO_CONTENT
+    except Exception as e:
+        assert type(e) is StopIteration
 
 
 @patch(
