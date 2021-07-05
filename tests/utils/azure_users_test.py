@@ -1,4 +1,7 @@
+import copy
 from unittest.mock import Mock, patch
+from requests import Response
+
 from utils.azure_users import AzureConnection, ROLE_FIELD_VALUES, AzureUser
 from pytest import mark
 
@@ -14,7 +17,10 @@ from pytest import mark
     ],
 )
 def test_azure_connection_is_test_user(
-    get_mock, field_name, field_value, is_test_user_expected_value,
+    get_mock,
+    field_name,
+    field_value,
+    is_test_user_expected_value,
 ):
     response_mock = Mock()
     response_mock.status_code = 200
@@ -33,7 +39,12 @@ def test_azure_connection_get_test_user_ids(get_mock):
     response_mock = Mock()
     response_mock.status_code = 200
     response_mock.json = Mock(
-        return_value={'value': [{'objectId': 'ID1'}, {'objectId': 'ID2'},]}
+        return_value={
+            'value': [
+                {'objectId': 'ID1'},
+                {'objectId': 'ID2'},
+            ]
+        }
     )
     get_mock.return_value = response_mock
 
@@ -120,7 +131,10 @@ def test_get_groups_and_users(get_mock):
                     {'objectId': 'user-id1'},
                 ],
             },
-            {'displayName': 'test-group-3', 'members': [],},
+            {
+                'displayName': 'test-group-3',
+                'members': [],
+            },
         ]
     }
     response_mock.json = Mock(return_value=return_value)
@@ -228,3 +242,26 @@ def test_remove_user_from_group(
     get_group_id_by_group_name_mock.assert_called_once()
     get_user_mock.assert_called_once()
     assert expected_value == test_user
+
+
+@patch('utils.azure_users.AzureConnection.get_groups_and_users')
+@patch('requests.get')
+def test_users_functions_should_returns_all_users(
+    get_mock, get_groups_and_users_mock
+):
+    first_response = Response()
+    first_response.status_code = 200
+    first_response._content = (
+        b'{"odata.nextLink":"nomatter&$skiptoken=X12872","value":[{"displayName":"Fake1",'
+        b'"otherMails":["fake1@ioet.com"],"objectId":"1"}]} '
+    )
+
+    second_response = copy.copy(first_response)
+    second_response._content = b'{"value":[{"displayName":"Fake2","otherMails":["fake2@ioet.com"],"objectId":"1"}]}'
+
+    get_mock.side_effect = [first_response, second_response]
+    get_groups_and_users_mock.return_value = []
+
+    users = AzureConnection().users()
+
+    assert len(users) == 2

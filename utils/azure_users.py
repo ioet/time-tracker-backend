@@ -100,11 +100,32 @@ class AzureConnection:
             endpoint=self.config.ENDPOINT,
             role_fields_params=role_fields_params,
         )
-        response = requests.get(endpoint, auth=BearerAuth(self.access_token))
 
-        assert 200 == response.status_code
-        assert 'value' in response.json()
-        return [self.to_azure_user(item) for item in response.json()['value']]
+        exists_users = True
+        users = []
+        skip_token_attribute = '&$skiptoken='
+
+        while exists_users:
+            response = requests.get(
+                endpoint, auth=BearerAuth(self.access_token)
+            )
+            json_response = response.json()
+            assert 200 == response.status_code
+            assert 'value' in json_response
+            users = users + json_response['value']
+            remaining_users_link = json_response.get('odata.nextLink', None)
+            exists_users = (
+                False
+                if remaining_users_link is None
+                else skip_token_attribute in remaining_users_link
+            )
+            if exists_users:
+                request_token = remaining_users_link.split(
+                    skip_token_attribute
+                )[1]
+                endpoint = endpoint + skip_token_attribute + request_token
+
+        return [self.to_azure_user(user) for user in users]
 
     def to_azure_user(self, item) -> AzureUser:
         there_is_email = len(item['otherMails']) > 0
@@ -142,7 +163,8 @@ class AzureConnection:
     def add_user_to_group(self, user_id, group_name):
         group_id = self.get_group_id_by_group_name(group_name)
         endpoint = "{endpoint}/groups/{group_id}/$links/members?api-version=1.6".format(
-            endpoint=self.config.ENDPOINT, group_id=group_id,
+            endpoint=self.config.ENDPOINT,
+            group_id=group_id,
         )
         data = {'url': f'{self.config.ENDPOINT}/directoryObjects/{user_id}'}
         response = requests.post(
