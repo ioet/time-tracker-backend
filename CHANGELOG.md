@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.36.1 (2021-07-08)
+### Fix
+* TT-270 Fix handle exceptions in create update entries (#301) ([#306](https://github.com/ioet/time-tracker-backend/issues/306)) ([`7b74f46`](https://github.com/ioet/time-tracker-backend/commit/7b74f460586bc5f756067a01491a7670b6751529))
+
 ## v0.36.0 (2021-06-29)
 ### Feature
 * TT-276 The seed database was created ([#304](https://github.com/ioet/time-tracker-backend/issues/304)) ([`e1a3870`](https://github.com/ioet/time-tracker-backend/commit/e1a38705dc9747873e70a8ae92a0dfe37c92beb4))
