@@ -5,11 +5,18 @@ from time_tracker_api.customers.customers_model import (
     CustomerCosmosDBModel,
     CustomerCosmosDBDao,
 )
+from time_tracker_api.project_types.project_types_model import (
+    ProjectTypeCosmosDBModel,
+    ProjectTypeCosmosDBDao,
+)
 from time_tracker_api.projects.projects_model import (
     ProjectCosmosDBRepository,
     ProjectCosmosDBModel,
     create_dao,
 )
+from faker import Faker
+
+fake = Faker()
 
 
 @patch(
@@ -77,3 +84,57 @@ def test_get_project_with_their_customer(
 
     assert isinstance(project, ProjectCosmosDBModel)
     assert project.__dict__['customer_name'] == customer_data['name']
+
+
+def test_get_all_projects_with_customers(
+    mocker,
+):
+    customer_id = fake.uuid4()
+    project_type_id = fake.uuid4()
+
+    customer_data = {
+        'id': customer_id,
+        'name': fake.company(),
+        'description': fake.paragraph(),
+        'tenant_id': fake.uuid4(),
+    }
+
+    project_data = {
+        'customer_id': customer_id,
+        'id': fake.uuid4(),
+        'name': fake.company(),
+        'description': fake.paragraph(),
+        'project_type_id': project_type_id,
+        'tenant_id': fake.uuid4(),
+    }
+
+    project_type_dao = {
+        'id': project_type_id,
+        'name': fake.name(),
+        'description': fake.paragraph(),
+        'tenant_id': fake.uuid4(),
+    }
+
+    expected_customer = CustomerCosmosDBModel(customer_data)
+    expected_project = ProjectCosmosDBModel(project_data)
+    expected_project_type = ProjectTypeCosmosDBModel(project_type_dao)
+
+    customer_dao_get_all_mock = mocker.patch.object(
+        CustomerCosmosDBDao, 'get_all'
+    )
+    customer_dao_get_all_mock.return_value = [expected_customer]
+
+    projects_repository_find_all_mock = mocker.patch.object(
+        ProjectCosmosDBRepository, 'find_all'
+    )
+    projects_repository_find_all_mock.return_value = [expected_project]
+
+    project_type_dao_get_all_mock = mocker.patch.object(
+        ProjectTypeCosmosDBDao, 'get_all'
+    )
+    project_type_dao_get_all_mock.return_value = [expected_project_type]
+    projects = create_dao().get_all()
+
+    assert isinstance(projects[0], ProjectCosmosDBModel)
+    assert projects[0].__dict__['customer_name'] == customer_data['name']
+    assert len(projects) == 1
