@@ -749,6 +749,15 @@ def test_create_with_valid_uuid_format_should_return_created(
     valid_uuid: str,
     time_entries_dao,
 ):
+    mocker.patch(
+        'time_tracker_api.time_entries.time_entries_repository.are_related_entry_entities_valid',
+        return_value={
+            "is_valid": True,
+            "status_code": HTTPStatus.OK,
+            "message": "Related entry entities valid",
+        },
+    )
+
     repository_container_create_item_mock = mocker.patch.object(
         time_entries_dao.repository.container,
         'create_item',
