@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.36.2 (2021-07-09)
+### Fix
+* TT-287 Fix users email doesn't show in reports page ([#305](https://github.com/ioet/time-tracker-backend/issues/305)) ([`fb222c1`](https://github.com/ioet/time-tracker-backend/commit/fb222c1a5f13b8313a257159f3115cf9c0fae750))
+
 ## v0.36.1 (2021-07-08)
 ### Fix
 * TT-270 Fix handle exceptions in create update entries (#301) ([#306](https://github.com/ioet/time-tracker-backend/issues/306)) ([`7b74f46`](https://github.com/ioet/time-tracker-backend/commit/7b74f460586bc5f756067a01491a7670b6751529))
