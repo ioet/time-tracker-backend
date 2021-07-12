@@ -265,7 +265,9 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
         )
 
         function_mapper = self.get_mapper_or_dict(mapper)
-        return list(map(function_mapper, result))
+        collision_entries = list(map(function_mapper, result))
+        exist_collision_entries = len(collision_entries) > 0
+        return exist_collision_entries
 
     def find_running(
         self, tenant_id: str, owner_id: str, mapper: Callable = None
@@ -331,14 +333,15 @@ class TimeEntryCosmosDBRepository(CosmosDBRepository):
                     description="You cannot end a time entry in the future",
                 )
 
-        collision = self.find_interception_with_date_range(
+        exist_collision_entries = self.find_interception_with_date_range(
             start_date=start_date,
             end_date=data.get('end_date'),
             owner_id=event_context.user_id,
             tenant_id=event_context.tenant_id,
             ignore_id=data.get('id'),
         )
-        if len(collision) > 0:
+
+        if exist_collision_entries:
             raise CustomError(
                 HTTPStatus.UNPROCESSABLE_ENTITY,
                 description="There is another time entry in that date range",
