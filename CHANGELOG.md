@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.36.3 (2021-07-14)
+### Fix
+* TT-274 fix error on archive a customer removes the project ([#307](https://github.com/ioet/time-tracker-backend/issues/307)) ([`4538307`](https://github.com/ioet/time-tracker-backend/commit/4538307407d8f482b1419db6889b6ecc3013950e))
+
 ## v0.36.2 (2021-07-09)
 ### Fix
 * TT-287 Fix users email doesn't show in reports page ([#305](https://github.com/ioet/time-tracker-backend/issues/305)) ([`fb222c1`](https://github.com/ioet/time-tracker-backend/commit/fb222c1a5f13b8313a257159f3115cf9c0fae750))
