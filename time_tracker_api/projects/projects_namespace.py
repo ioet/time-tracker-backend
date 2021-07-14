@@ -70,39 +70,45 @@ project_input = ns.model(
     },
 )
 
-project_type_nested_field = ns.model('ProjectType', {
-    'name': fields.String(
-        title='Name',
-        required=True,
-        max_length=50,
-        description='Name of the project type',
-        example=faker.random_element(["Customer", "Training", "Internal"]),
-    ),
-    'description': NullableString(
-        title='Description',
-        required=False,
-        max_length=250,
-        description='Comments about the project type',
-        example=faker.paragraph(),
-    )
-})
+project_type_nested_field = ns.model(
+    'ProjectType',
+    {
+        'name': fields.String(
+            title='Name',
+            required=True,
+            max_length=50,
+            description='Name of the project type',
+            example=faker.random_element(["Customer", "Training", "Internal"]),
+        ),
+        'description': NullableString(
+            title='Description',
+            required=False,
+            max_length=250,
+            description='Comments about the project type',
+            example=faker.paragraph(),
+        ),
+    },
+)
 
-customer_nested_field = ns.model('Customer', {
-    'name': fields.String(
-        title='Name',
-        required=True,
-        max_length=50,
-        description='Name of the customer',
-        example=faker.company(),
-    ),
-    'description': NullableString(
-        title='Description',
-        required=False,
-        max_length=250,
-        description='Description about the customer',
-        example=faker.paragraph(),
-    )
-})
+customer_nested_field = ns.model(
+    'Customer',
+    {
+        'name': fields.String(
+            title='Name',
+            required=True,
+            max_length=50,
+            description='Name of the customer',
+            example=faker.company(),
+        ),
+        'description': NullableString(
+            title='Description',
+            required=False,
+            max_length=250,
+            description='Description about the customer',
+            example=faker.paragraph(),
+        ),
+    },
+)
 
 project_response_fields = {
     # TODO: Remove this DEAD CODE
@@ -135,7 +141,9 @@ class Projects(Resource):
     def get(self):
         """List all projects"""
         conditions = attributes_filter.parse_args()
-        return project_dao.get_all(conditions=conditions)
+        return project_dao.get_all(
+            conditions=conditions, customer_status='active'
+        )
 
     @ns.doc('create_project')
     @ns.response(HTTPStatus.CONFLICT, 'This project already exists')

@@ -2,7 +2,11 @@ from dataclasses import dataclass
 
 from azure.cosmos import PartitionKey
 
-from commons.data_access_layer.cosmos_db import CosmosDBModel, CosmosDBDao, CosmosDBRepository
+from commons.data_access_layer.cosmos_db import (
+    CosmosDBModel,
+    CosmosDBDao,
+    CosmosDBRepository,
+)
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
 
 
@@ -17,7 +21,7 @@ container_definition = {
         'uniqueKeys': [
             {'paths': ['/name', '/customer_id', '/deleted']},
         ]
-    }
+    },
 }
 
 
@@ -32,7 +36,9 @@ class ProjectTypeCosmosDBModel(CosmosDBModel):
     tenant_id: str
 
     def __init__(self, data):
-        super(ProjectTypeCosmosDBModel, self).__init__(data)  # pragma: no cover
+        super(ProjectTypeCosmosDBModel, self).__init__(
+            data
+        )  # pragma: no cover
 
     def __repr__(self):
         return '<ProjectType %r>' % self.name  # pragma: no cover
@@ -41,12 +47,13 @@ class ProjectTypeCosmosDBModel(CosmosDBModel):
         return "the project type \"%s\"" % self.name  # pragma: no cover
 
 
+class ProjectTypeCosmosDBDao(APICosmosDBDao, ProjectTypeDao):
+    def __init__(self, repository):
+        CosmosDBDao.__init__(self, repository)
+
+
 def create_dao() -> ProjectTypeDao:
-    repository = CosmosDBRepository.from_definition(container_definition,
-                                                    mapper=ProjectTypeCosmosDBModel)
-
-    class ProjectTypeCosmosDBDao(APICosmosDBDao, ProjectTypeDao):
-        def __init__(self):
-            CosmosDBDao.__init__(self, repository)
-
-    return ProjectTypeCosmosDBDao()
+    repository = CosmosDBRepository.from_definition(
+        container_definition, mapper=ProjectTypeCosmosDBModel
+    )
+    return ProjectTypeCosmosDBDao(repository)

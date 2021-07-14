@@ -42,3 +42,5 @@ env.*
 
 # SSL certificate for cosmos emulator
 emulatorcert.crt
+
+seed_database.json

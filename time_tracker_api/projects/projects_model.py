@@ -134,15 +134,17 @@ class ProjectCosmosDBDao(APICosmosDBDao, ProjectDao):
         """
         event_ctx = self.create_event_context("read-many")
         customer_dao = customers_create_dao()
-        customers = customer_dao.get_all(
-            max_count=kwargs.get('max_count', None)
+        customer_status = kwargs.get('customer_status', None)
+        customer_conditions = (
+            {'status': customer_status} if customer_status else None
         )
 
-        customers_id = [
-            customer.id
-            for customer in customers
-            if customer.status == 'active'
-        ]
+        customers = customer_dao.get_all(
+            conditions=customer_conditions,
+            max_count=kwargs.get('max_count', None),
+        )
+
+        customers_id = [customer.id for customer in customers]
 
         conditions = conditions if conditions else {}
 
