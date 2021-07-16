@@ -27,6 +27,8 @@ services:
     image: 'mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator'
     tty: true
     mem_limit: 3GB
+    cpu_count: 2
+    restart: always
     ports:
         - '8081:8081'
         - '10251:10251'
@@ -35,6 +37,7 @@ services:
         - '10254:10254'
     environment:
         - AZURE_COSMOS_EMULATOR_PARTITION_COUNT=7
+        - AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE=true
         - AZURE_COSMOS_EMULATOR_ARGS=/alternativenames=azurecosmosemulator
 
     # networks:
