@@ -11,221 +11,55 @@ from time_tracker_api.time_entries.time_entries_repository import (
 )
 
 
-def create_time_entry(
-    start_date: str,
-    end_date: str,
-    owner_id: str,
-    tenant_id: str,
-    mocker,
-    event_context: EventContext,
-    time_entry_repository: TimeEntryCosmosDBRepository,
-) -> TimeEntryCosmosDBModel:
-    data = {
+def test_find_interception_with_date_range_should_return_true_if_there_are_collisions():
+    owner_id = Faker().uuid4()
+    tenant_id = Faker().uuid4()
+    entry_start_date = "2020-10-01T05:00:00.000Z"
+    entry_end_date = "2020-10-01T10:00:00.000Z"
+
+    collision_entry = {
         "project_id": Faker().uuid4(),
         "activity_id": Faker().uuid4(),
         "description": Faker().paragraph(nb_sentences=2),
-        "start_date": start_date,
-        "end_date": end_date,
-        "owner_id": owner_id,
+        "start_date": entry_start_date,
+        "end_date": entry_end_date,
+        "owner_id": Faker().uuid4(),
         "tenant_id": tenant_id,
     }
+    time_entry_repository = TimeEntryCosmosDBRepository()
+    query_items_mock = Mock(return_value=[collision_entry])
+    time_entry_repository.container = Mock()
+    time_entry_repository.container.query_items = query_items_mock
 
-    mocker.patch(
-        'time_tracker_api.time_entries.time_entries_repository.are_related_entry_entities_valid',
-        return_value={
-            "is_valid": True,
-            "status_code": HTTPStatus.OK,
-            "message": "Related entry entities valid",
-        },
+    exist_collision_entries = (
+        time_entry_repository.find_interception_with_date_range(
+            start_date=entry_start_date,
+            end_date=entry_end_date,
+            owner_id=owner_id,
+            tenant_id=tenant_id,
+        )
     )
+    assert exist_collision_entries is True
 
-    created_item = time_entry_repository.create(
-        data, event_context, mapper=TimeEntryCosmosDBModel
+
+def test_find_interception_with_date_range_should_return_false_if_there_are_not_collisions():
+    entry_start_date = "2020-10-01T05:00:00.000Z"
+    entry_end_date = "2020-10-01T10:00:00.000Z"
+
+    time_entry_repository = TimeEntryCosmosDBRepository()
+    query_items_mock = Mock(return_value=[])
+    time_entry_repository.container = Mock()
+    time_entry_repository.container.query_items = query_items_mock
+
+    exist_collision_entries = (
+        time_entry_repository.find_interception_with_date_range(
+            start_date=entry_start_date,
+            end_date=entry_end_date,
+            owner_id=Faker().uuid4(),
+            tenant_id=Faker().uuid4(),
+        )
     )
-    return created_item
-
-
-@pytest.mark.parametrize(
-    'start_date,end_date,start_date_,end_date_',
-    [
-        (
-            "2020-10-01T05:00:00.000Z",
-            "2020-10-01T10:00:00.000Z",
-            "2020-10-01T05:00:00.000Z",
-            "2020-10-01T10:00:00.000Z",
-        ),
-        (
-            "2020-10-01T05:00:00.000Z",
-            "2020-10-01T10:00:00.000Z",
-            "2020-10-01T07:00:00.000Z",
-            "2020-10-01T12:00:00.000Z",
-        ),
-        (
-            "2020-10-01T05:00:00.000Z",
-            "2020-10-01T10:00:00.000Z",
-            "2020-10-01T02:00:00.000Z",
-            "2020-10-01T07:00:00.000Z",
-        ),
-        (
-            "2020-10-01T05:00:00.000Z",
-            "2020-10-01T10:00:00.000Z",
-            "2020-10-01T02:00:00.000Z",
-            "2020-10-01T12:00:00.000Z",
-        ),
-        (
-            "2020-10-01T05:00:00.000Z",
-            "2020-10-01T10:00:00.000Z",
-            "2020-10-01T06:00:00.000Z",
-            "2020-10-01T07:00:00.000Z",
-        ),
-    ],
-)
-def test_find_interception_with_date_range_should_find(
-    start_date: str,
-    end_date: str,
-    start_date_: str,
-    end_date_: str,
-    owner_id: str,
-    tenant_id: str,
-    mocker,
-    time_entry_repository: TimeEntryCosmosDBRepository,
-    event_context: EventContext,
-):
-    existing_item = create_time_entry(
-        start_date,
-        end_date,
-        owner_id,
-        tenant_id,
-        mocker,
-        event_context,
-        time_entry_repository,
-    )
-
-    try:
-        result = time_entry_repository.find_interception_with_date_range(
-            start_date_, end_date_, owner_id, tenant_id
-        )
-
-        assert result is not None
-        assert len(result) > 0
-        assert any([existing_item.id == item.id for item in result])
-    finally:
-        time_entry_repository.delete_permanently(
-            existing_item.id, event_context
-        )
-
-
-@pytest.mark.parametrize(
-    'start_date,end_date,start_date_,end_date_',
-    [
-        (
-            "2020-10-01T05:00:00.000Z",
-            "2020-10-01T10:00:00.000Z",
-            "2020-10-01T10:00:00.000Z",
-            "2020-10-01T15:00:00.000Z",
-        ),
-        (
-            "2020-10-01T05:00:00.000Z",
-            "2020-10-01T10:00:00.000Z",
-            "2020-10-01T12:00:00.000Z",
-            "2020-10-01T15:00:00.000Z",
-        ),
-        (
-            "2020-10-01T05:00:00.000Z",
-            "2020-10-01T10:00:00.000Z",
-            "2020-10-01T02:00:00.000Z",
-            "2020-10-01T05:00:00.000Z",
-        ),
-        (
-            "2020-10-01T05:00:00.000Z",
-            "2020-10-01T10:00:00.000Z",
-            "2020-10-01T02:00:00.000Z",
-            "2020-10-01T04:00:00.000Z",
-        ),
-    ],
-)
-def test_find_interception_with_date_range_should_not_find(
-    start_date: str,
-    end_date: str,
-    start_date_: str,
-    end_date_: str,
-    owner_id: str,
-    tenant_id: str,
-    time_entry_repository: TimeEntryCosmosDBRepository,
-    event_context: EventContext,
-    mocker,
-):
-    existing_item = create_time_entry(
-        start_date,
-        end_date,
-        owner_id,
-        tenant_id,
-        mocker,
-        event_context,
-        time_entry_repository,
-    )
-
-    try:
-        result = time_entry_repository.find_interception_with_date_range(
-            start_date_, end_date_, owner_id, tenant_id
-        )
-
-        assert result == []
-        assert len(result) == 0
-        assert not any([existing_item.id == item.id for item in result])
-    finally:
-        time_entry_repository.delete_permanently(
-            existing_item.id, event_context
-        )
-
-
-def test_find_interception_should_ignore_id_of_existing_item(
-    owner_id: str,
-    tenant_id: str,
-    time_entry_repository: TimeEntryCosmosDBRepository,
-    event_context: EventContext,
-    mocker,
-):
-    start_date = "2020-10-01T05:00:00.000Z"
-    end_date = "2020-10-01T10:00:00.000Z"
-
-    existing_item = create_time_entry(
-        start_date,
-        end_date,
-        owner_id,
-        tenant_id,
-        mocker,
-        event_context,
-        time_entry_repository,
-    )
-
-    try:
-        colliding_result = (
-            time_entry_repository.find_interception_with_date_range(
-                start_date, end_date, owner_id, tenant_id
-            )
-        )
-
-        non_colliding_result = (
-            time_entry_repository.find_interception_with_date_range(
-                start_date,
-                end_date,
-                owner_id,
-                tenant_id,
-                ignore_id=existing_item.id,
-            )
-        )
-
-        assert colliding_result is not None
-        assert any([existing_item.id == item.id for item in colliding_result])
-        assert non_colliding_result is not None
-        assert not any(
-            [existing_item.id == item.id for item in non_colliding_result]
-        )
-    finally:
-        time_entry_repository.delete_permanently(
-            existing_item.id, event_context
-        )
+    assert exist_collision_entries is False
 
 
 def test_find_running_should_return_running_time_entry(
