@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.36.4 (2021-07-16)
+### Fix
+* TT-288 Fix and improve tests on find_interception_with_date_range function ([#308](https://github.com/ioet/time-tracker-backend/issues/308)) ([`00ed5ae`](https://github.com/ioet/time-tracker-backend/commit/00ed5ae9afc1b3d5c9f60c25007132a7f737742d))
+
 ## v0.36.3 (2021-07-14)
 ### Fix
 * TT-274 fix error on archive a customer removes the project ([#307](https://github.com/ioet/time-tracker-backend/issues/307)) ([`4538307`](https://github.com/ioet/time-tracker-backend/commit/4538307407d8f482b1419db6889b6ecc3013950e))
