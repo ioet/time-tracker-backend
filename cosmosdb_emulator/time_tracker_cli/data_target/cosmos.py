@@ -1,7 +1,11 @@
 import os
+import sys
 
 from azure.cosmos import CosmosClient
-from azure.cosmos.exceptions import CosmosResourceExistsError
+from azure.cosmos.exceptions import (
+    CosmosResourceExistsError,
+    CosmosResourceNotFoundError,
+)
 
 from cosmosdb_emulator.time_tracker_cli.data_target.data_target import (
     DataTarget,
@@ -79,10 +83,13 @@ class CosmosDataTarget(DataTarget):
                 )
             )
             entity_container_id = entity_container_definition.get('id')
-            self.database.create_container_if_not_exists(
-                **entity_container_definition
-            )
-            self.database.delete_container(entity_container_id)
+            try:
+                self.database.delete_container(entity_container_id)
+                self.database.create_container_if_not_exists(
+                    **entity_container_definition
+                )
+            except CosmosResourceNotFoundError:
+                pass
 
     def save(self, entities: dict):
         for entity in entities:
