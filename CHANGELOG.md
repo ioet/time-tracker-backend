@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.37.0 (2021-07-26)
+### Feature
+* TT-293 Create Script to generate data in the Database ([#310](https://github.com/ioet/time-tracker-backend/issues/310)) ([`50f8d46`](https://github.com/ioet/time-tracker-backend/commit/50f8d468d77835a6f90b958d4642d338f36d5f37))
+
 ## v0.36.4 (2021-07-16)
 ### Fix
 * TT-288 Fix and improve tests on find_interception_with_date_range function ([#308](https://github.com/ioet/time-tracker-backend/issues/308)) ([`00ed5ae`](https://github.com/ioet/time-tracker-backend/commit/00ed5ae9afc1b3d5c9f60c25007132a7f737742d))
