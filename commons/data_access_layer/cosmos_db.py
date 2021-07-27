@@ -1,15 +1,15 @@
 import dataclasses
 import logging
-from typing import Callable, List
+from typing import Callable
 
 import azure.cosmos.cosmos_client as cosmos_client
 import azure.cosmos.exceptions as exceptions
-import flask
 from azure.cosmos import ContainerProxy, PartitionKey
 from flask import Flask
 from werkzeug.exceptions import HTTPException
 
 from commons.data_access_layer.database import CRUDDao, EventContext
+from utils.query_builder import CosmosDBQueryBuilder
 
 
 class CosmosDBFacade:
@@ -257,53 +257,38 @@ class CosmosDBRepository:
         mapper: Callable = None,
     ):
         conditions = conditions if conditions else {}
-        partition_key_value = self.find_partition_key_value(event_context)
-        max_count = self.get_page_size_or(max_count)
-        params = [
-            {"name": "@partition_key_value", "value": partition_key_value},
-            {"name": "@offset", "value": offset},
-            {"name": "@max_count", "value": max_count},
-        ]
+        max_count: int = self.get_page_size_or(max_count)
 
-        status_value = None
-        if conditions.get('status') != None:
-            status_value = conditions.get('status')
+        status_value = conditions.get('status')
+        if status_value:
             conditions.pop('status')
 
         date_range = date_range if date_range else {}
-        date_range_params = (
-            self.generate_params(date_range) if date_range else []
-        )
-        params.extend(self.generate_params(conditions))
-        params.extend(date_range_params)
 
-        query_str = """
-            SELECT * FROM c
-            WHERE c.{partition_key_attribute}=@partition_key_value
-            {conditions_clause}
-            {active_condition}
-            {date_range_sql_condition}
-            {visibility_condition}
-            {order_clause}
-            OFFSET @offset LIMIT @max_count
-            """.format(
-            partition_key_attribute=self.partition_key_attribute,
-            visibility_condition=self.create_sql_condition_for_visibility(
-                visible_only
-            ),
-            active_condition=self.create_sql_active_condition(status_value),
-            conditions_clause=self.create_sql_where_conditions(conditions),
-            date_range_sql_condition=self.create_sql_date_range_filter(
-                date_range
-            ),
-            order_clause=self.create_sql_order_clause(),
+        query_builder = (
+            CosmosDBQueryBuilder()
+            .add_sql_where_equal_condition(conditions)
+            .add_sql_active_condition(status_value)
+            .add_sql_date_range_filter(date_range)
+            .add_sql_visibility_condition(visible_only)
+            .add_sql_limit_condition(max_count)
+            .add_sql_offset_condition(offset)
+            .build()
         )
+
+        if len(self.order_fields) > 1:
+            attribute = self.order_fields[0]
+            order = self.order_fields[1]
+            query_builder.add_sql_order_by_condition(attribute, order)
+
+        query_str = query_builder.get_query()
+        params = query_builder.get_parameters()
+        partition_key_value = self.find_partition_key_value(event_context)
 
         result = self.container.query_items(
             query=query_str,
             parameters=params,
             partition_key=partition_key_value,
-            max_item_count=max_count,
         )
 
         function_mapper = self.get_mapper_or_dict(mapper)
