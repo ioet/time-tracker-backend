@@ -3,7 +3,7 @@
 # For Common dependencies
 
 # Handling requests
-requests==2.23.0
+requests==2.25.1
 
 # To create sample content in tests and API documentation
 Faker==4.0.2
