@@ -660,28 +660,6 @@ def test_delete_permanently_with_valid_id_should_succeed(
         assert e.status_code == 404
 
 
-def test_repository_create_sql_where_conditions_with_multiple_values(
-    cosmos_db_repository: CosmosDBRepository,
-):
-    result = cosmos_db_repository.create_sql_where_conditions(
-        {'owner_id': 'mark', 'customer_id': 'me'}, "c"
-    )
-
-    assert result is not None
-    assert (
-        result == "AND c.owner_id = @owner_id AND c.customer_id = @customer_id"
-    )
-
-
-def test_repository_create_sql_where_conditions_with_no_values(
-    cosmos_db_repository: CosmosDBRepository,
-):
-    result = cosmos_db_repository.create_sql_where_conditions({}, "c")
-
-    assert result is not None
-    assert result == ""
-
-
 def test_repository_append_conditions_values(
     cosmos_db_repository: CosmosDBRepository,
 ):

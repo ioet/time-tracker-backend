@@ -1,5 +1,4 @@
 from unittest.mock import Mock, patch
-import pytest
 
 from commons.data_access_layer.database import EventContext
 from time_tracker_api.activities.activities_model import (
@@ -8,9 +7,6 @@ from time_tracker_api.activities.activities_model import (
 )
 
 
-@patch(
-    'time_tracker_api.activities.activities_model.ActivityCosmosDBRepository.create_sql_condition_for_visibility'
-)
 @patch(
     'time_tracker_api.activities.activities_model.ActivityCosmosDBRepository.find_partition_key_value'
 )

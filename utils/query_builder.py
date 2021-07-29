@@ -51,21 +51,22 @@ class CosmosDBQueryBuilder:
             self.where_conditions.append(condition)
         return self
 
-    def add_sql_date_range_filter(self, date_range: dict):
-        start_date = date_range.get('start_date')
-        end_date = date_range.get('end_date')
-        if start_date and end_date:
-            condition = """
-                ((c.start_date BETWEEN @start_date AND @end_date) OR
-                 (c.end_date BETWEEN @start_date AND @end_date))
-                """
-            self.where_conditions.append(condition)
-            self.parameters.extend(
-                [
-                    {'name': '@start_date', 'value': start_date},
-                    {'name': '@end_date', 'value': end_date},
-                ]
-            )
+    def add_sql_date_range_condition(self, date_range: dict = None):
+        if date_range:
+            start_date = date_range.get('start_date')
+            end_date = date_range.get('end_date')
+            if start_date and end_date:
+                condition = """
+                    ((c.start_date BETWEEN @start_date AND @end_date) OR
+                     (c.end_date BETWEEN @start_date AND @end_date))
+                    """
+                self.where_conditions.append(condition)
+                self.parameters.extend(
+                    [
+                        {'name': '@start_date', 'value': start_date},
+                        {'name': '@end_date', 'value': end_date},
+                    ]
+                )
         return self
 
     def add_sql_where_equal_condition(self, data: dict = None):
