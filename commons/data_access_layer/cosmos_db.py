@@ -125,55 +125,6 @@ class CosmosDBRepository:
         )
 
     @staticmethod
-    def create_sql_condition_for_visibility(
-        visible_only: bool, container_name='c'
-    ) -> str:
-        if visible_only:
-            # We are considering that `deleted == null` is not a choice
-            return 'AND NOT IS_DEFINED(%s.deleted)' % container_name
-        return ''
-
-    @staticmethod
-    def create_sql_active_condition(
-        status_value: str, container_name='c'
-    ) -> str:
-        if status_value != None:
-            not_defined_condition = ''
-            condition_operand = ' AND '
-            if status_value == 'active':
-                not_defined_condition = (
-                    'AND NOT IS_DEFINED({container_name}.status)'.format(
-                        container_name=container_name
-                    )
-                )
-                condition_operand = ' OR '
-
-            defined_condition = '(IS_DEFINED({container_name}.status) \
-                AND {container_name}.status = \'{status_value}\')'.format(
-                container_name=container_name, status_value=status_value
-            )
-            return (
-                not_defined_condition + condition_operand + defined_condition
-            )
-
-        return ''
-
-    @staticmethod
-    def create_sql_where_conditions(
-        conditions: dict, container_name='c'
-    ) -> str:
-        where_conditions = []
-        for k in conditions.keys():
-            where_conditions.append(f'{container_name}.{k} = @{k}')
-
-        if len(where_conditions) > 0:
-            return "AND {where_conditions_clause}".format(
-                where_conditions_clause=" AND ".join(where_conditions)
-            )
-        else:
-            return ""
-
-    @staticmethod
     def generate_params(conditions: dict) -> list:
         result = []
         for k, v in conditions.items():
@@ -205,16 +156,6 @@ class CosmosDBRepository:
             "container_id": event_context.container_id,
             "session_id": event_context.session_id,
         }
-
-    @staticmethod
-    def create_sql_date_range_filter(date_range: dict) -> str:
-        if 'start_date' in date_range and 'end_date' in date_range:
-            return """
-                AND ((c.start_date BETWEEN @start_date AND @end_date) OR
-                 (c.end_date BETWEEN @start_date AND @end_date))
-                """
-        else:
-            return ''
 
     def create(
         self, data: dict, event_context: EventContext, mapper: Callable = None
@@ -269,7 +210,7 @@ class CosmosDBRepository:
             CosmosDBQueryBuilder()
             .add_sql_where_equal_condition(conditions)
             .add_sql_active_condition(status_value)
-            .add_sql_date_range_filter(date_range)
+            .add_sql_date_range_condition(date_range)
             .add_sql_visibility_condition(visible_only)
             .add_sql_limit_condition(max_count)
             .add_sql_offset_condition(offset)

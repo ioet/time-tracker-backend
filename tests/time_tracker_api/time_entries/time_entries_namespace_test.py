@@ -8,12 +8,8 @@ from flask_restplus._http import HTTPStatus
 from pytest_mock import MockFixture, pytest
 
 from utils.time import (
-    get_current_year,
-    get_current_month,
     current_datetime,
     current_datetime_str,
-    get_date_range_of_month,
-    datetime_str,
 )
 from utils import worked_time
 from time_tracker_api.time_entries.time_entries_model import (
@@ -205,10 +201,6 @@ def test_get_time_entry_should_succeed_with_valid_id(
     Mock(),
 )
 @patch(
-    'time_tracker_api.time_entries.time_entries_repository.TimeEntryCosmosDBRepository.create_sql_date_range_filter',
-    Mock(),
-)
-@patch(
     'commons.data_access_layer.cosmos_db.CosmosDBRepository.generate_params',
     Mock(),
 )
@@ -232,7 +224,6 @@ def test_get_time_entries_by_type_of_user_when_is_user_tester(
     expected_user_ids,
 ):
     test_user_id = "id1"
-    non_test_user_id = "id2"
     te1 = TimeEntryCosmosDBModel(
         {
             "id": '1',
@@ -286,10 +277,6 @@ def test_get_time_entries_by_type_of_user_when_is_user_tester(
     Mock(),
 )
 @patch(
-    'time_tracker_api.time_entries.time_entries_repository.TimeEntryCosmosDBRepository.create_sql_date_range_filter',
-    Mock(),
-)
-@patch(
     'commons.data_access_layer.cosmos_db.CosmosDBRepository.generate_params',
     Mock(),
 )
@@ -313,7 +300,6 @@ def test_get_time_entries_by_type_of_user_when_is_not_user_tester(
     expected_user_ids,
 ):
     test_user_id = "id1"
-    non_test_user_id = "id2"
     te1 = TimeEntryCosmosDBModel(
         {
             "id": '1',
@@ -386,7 +372,6 @@ def test_get_time_entry_should_succeed_with_valid_id(
 )
 def test_get_time_entry_raise_http_exception(
     client: FlaskClient,
-    mocker: MockFixture,
     valid_header: dict,
     valid_id: str,
     http_exception: HTTPException,
@@ -407,7 +392,6 @@ def test_get_time_entry_raise_http_exception(
 
 def test_update_time_entry_calls_partial_update_with_incoming_payload(
     client: FlaskClient,
-    mocker: MockFixture,
     valid_header: dict,
     valid_id: str,
     owner_id: str,
@@ -465,7 +449,6 @@ def test_update_time_entry_should_reject_bad_request(
 
 def test_update_time_entry_raise_not_found(
     client: FlaskClient,
-    mocker: MockFixture,
     valid_header: dict,
     valid_id: str,
     owner_id: str,
@@ -499,7 +482,6 @@ def test_update_time_entry_raise_not_found(
 
 def test_delete_time_entry_calls_delete(
     client: FlaskClient,
-    mocker: MockFixture,
     valid_header: dict,
     valid_id: str,
     time_entries_dao,
@@ -529,7 +511,6 @@ def test_delete_time_entry_calls_delete(
 )
 def test_delete_time_entry_raise_http_exception(
     client: FlaskClient,
-    mocker: MockFixture,
     valid_header: dict,
     valid_id: str,
     http_exception: HTTPException,
@@ -554,7 +535,6 @@ def test_delete_time_entry_raise_http_exception(
 
 def test_stop_time_entry_calls_partial_update(
     client: FlaskClient,
-    mocker: MockFixture,
     valid_header: dict,
     valid_id: str,
     time_entries_dao,
@@ -581,7 +561,6 @@ def test_stop_time_entry_calls_partial_update(
 
 def test_stop_time_entry_raise_unprocessable_entity(
     client: FlaskClient,
-    mocker: MockFixture,
     valid_header: dict,
     valid_id: str,
     time_entries_dao,
@@ -611,7 +590,6 @@ def test_stop_time_entry_raise_unprocessable_entity(
 
 def test_restart_time_entry_calls_partial_update(
     client: FlaskClient,
-    mocker: MockFixture,
     valid_header: dict,
     valid_id: str,
     time_entries_dao,
@@ -638,7 +616,6 @@ def test_restart_time_entry_calls_partial_update(
 
 def test_restart_time_entry_raise_unprocessable_entity(
     client: FlaskClient,
-    mocker: MockFixture,
     valid_header: dict,
     valid_id: str,
     time_entries_dao,
