@@ -148,41 +148,41 @@ def test_create_with_same_id_but_diff_partition_key_attrib_should_succeed(
     assert result["id"] == sample_item["id"], "Should have allowed same id"
 
 
-# def test_create_with_mapper_should_provide_calculated_fields(
-#     cosmos_db_repository: CosmosDBRepository,
-#     event_context: EventContext,
-#     tenant_id: str,
-# ):
-#     new_item = dict(
-#         id=fake.uuid4(),
-#         name=fake.name(),
-#         email=fake.safe_email(),
-#         age=fake.pyint(min_value=10, max_value=80),
-#         tenant_id=tenant_id,
-#     )
-#
-#     created_item: Person = cosmos_db_repository.create(
-#         new_item, event_context, mapper=Person
-#     )
-#
-#     assert created_item is not None
-#     assert all(
-#         item in created_item.__dict__.items() for item in new_item.items()
-#     )
-#     assert (
-#         type(created_item) is Person
-#     ), "The result should be wrapped with a class"
-#     assert created_item.is_adult() is (new_item["age"] >= 18)
+def test_create_with_mapper_should_provide_calculated_fields(
+    cosmos_db_repository: CosmosDBRepository,
+    event_context: EventContext,
+    tenant_id: str,
+):
+    new_item = dict(
+        id=fake.uuid4(),
+        name=fake.name(),
+        email=fake.safe_email(),
+        age=fake.pyint(min_value=10, max_value=80),
+        tenant_id=tenant_id,
+    )
+
+    created_item: Person = cosmos_db_repository.create(
+        new_item, event_context, mapper=Person
+    )
+
+    assert created_item is not None
+    assert all(
+        item in created_item.__dict__.items() for item in new_item.items()
+    )
+    assert (
+        type(created_item) is Person
+    ), "The result should be wrapped with a class"
+    assert created_item.is_adult() is (new_item["age"] >= 18)
 
 
-# def test_find_by_valid_id_should_succeed(
-#     cosmos_db_repository: CosmosDBRepository,
-#     sample_item: dict,
-#     event_context: EventContext,
-# ):
-#     found_item = cosmos_db_repository.find(sample_item["id"], event_context)
-#
-#     assert all(item in found_item.items() for item in sample_item.items())
+def test_find_by_valid_id_should_succeed(
+    cosmos_db_repository: CosmosDBRepository,
+    sample_item: dict,
+    event_context: EventContext,
+):
+    found_item = cosmos_db_repository.find(sample_item["id"], event_context)
+
+    assert all(item in found_item.items() for item in sample_item.items())
 
 
 def test_find_by_invalid_id_should_fail(
