@@ -1,12 +1,19 @@
-from unittest.mock import Mock, patch
-
+import copy
+from unittest.mock import Mock, patch, ANY
+from faker import Faker
 from commons.data_access_layer.database import EventContext
 from time_tracker_api.activities.activities_model import (
     ActivityCosmosDBRepository,
     ActivityCosmosDBModel,
+    create_dao,
 )
 
+faker = Faker()
 
+
+@patch(
+    'time_tracker_api.activities.activities_model.ActivityCosmosDBRepository.create_sql_condition_for_visibility'
+)
 @patch(
     'time_tracker_api.activities.activities_model.ActivityCosmosDBRepository.find_partition_key_value'
 )
@@ -16,10 +23,10 @@ def test_find_all_with_id_in_list(
     activity_repository: ActivityCosmosDBRepository,
 ):
     expected_item = {
-        'id': 'id1',
-        'name': 'testing',
-        'description': 'do some testing',
-        'tenant_id': 'tenantid1',
+        'id': faker.uuid4(),
+        'name': faker.name(),
+        'description': faker.sentence(nb_words=4),
+        'tenant_id': faker.uuid4(),
     }
 
     query_items_mock = Mock(return_value=[expected_item])
@@ -37,3 +44,25 @@ def test_find_all_with_id_in_list(
     activity = result[0]
     assert isinstance(activity, ActivityCosmosDBModel)
     assert activity.__dict__ == expected_item
+
+
+def test_create_activity_should_add_active_status(
+    mocker,
+):
+    activity_payload = {
+        'name': faker.name(),
+        'description': faker.sentence(nb_words=5),
+        'tenant_id': faker.uuid4(),
+    }
+    activity_repository_create_mock = mocker.patch.object(
+        ActivityCosmosDBRepository, 'create'
+    )
+
+    activity_dao = create_dao()
+    activity_dao.create(activity_payload)
+
+    expect_argument = copy.copy(activity_payload)
+    expect_argument['status'] = 'active'
+    activity_repository_create_mock.assert_called_with(
+        data=expect_argument, event_context=ANY
+    )

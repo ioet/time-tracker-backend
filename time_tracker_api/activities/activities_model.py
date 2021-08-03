@@ -10,11 +10,7 @@ from commons.data_access_layer.cosmos_db import (
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
 from typing import List, Callable
 from commons.data_access_layer.database import EventContext
-from utils.repository import (
-    convert_list_to_tuple_string,
-    create_sql_in_condition,
-)
-from utils.query_builder import CosmosDBQueryBuilder, Order
+from utils.query_builder import CosmosDBQueryBuilder
 
 
 class ActivityDao(CRUDDao):
@@ -149,6 +145,13 @@ class ActivityCosmosDBDao(APICosmosDBDao, ActivityDao):
             max_count=max_count,
         )
         return activities
+
+    def create(self, activity_payload: dict):
+        event_ctx = self.create_event_context('create')
+        activity_payload['status'] = 'active'
+        return self.repository.create(
+            data=activity_payload, event_context=event_ctx
+        )
 
 
 def create_dao() -> ActivityDao:
