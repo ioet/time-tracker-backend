@@ -314,32 +314,25 @@ coverage erase
 <hr/>
 
 ### Git hooks
-We use [pre-commit](https://github.com/pre-commit/pre-commit) library to manage local git hooks, 
-as developers we just need to run in our virtual environment.
+We use [pre-commit](https://github.com/pre-commit/pre-commit) library to manage local git hooks.
 
-<hr>
-<details>
-    <summary><b>Open if you use Development mode</b></summary>
-    
+This library allows you to execute code right before the commit, for example:
+- Check if the commit contains the correct formatting.
+- Format modified files based on a Style Guide such as PEP 8, etc
+
 To install and use `pre-commit` in development mode we have to perform the next command:
 
 ```shell
 python3 -m pip install pre-commit
 ```
-> Remember to execute this command with the virtual environment active. 
 
-Once `pre-commit` library is installed, we can continue with the guide
-</details>
-
-<hr>
-This library allows you to execute code right before the commit, for example:
-- Check if the commit contains the correct formatting.
-- Format modified files based on a Style Guide such as PEP 8, etc.
-
-As developers, we just need to run in our virtual environment:
+Once `pre-commit` library is installed, we just need to run in our virtual environment:
 ```shell
 pre-commit install -t pre-commit -t commit-msg
 ```
+
+> Remember to execute these commands with the virtual environment active. 
+
 For more details, see section Development > Git hooks.
 
 With this command the library will take configuration from `.pre-commit-config.yaml` and will set up the hooks by us.

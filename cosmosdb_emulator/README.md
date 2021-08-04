@@ -47,7 +47,7 @@ Currently, the CLI only allows the creation of Time-entries and allows the delet
 Available Actions:
 
 - Create: Allows creating new fake data about a certain entity.
-- Delete: Allows creating cosmos data about a certain entity.
+- Delete: Allows deleting information of an entity in the cosmos emulator.
 
 > To delete information about a certain entity you have to take into account the relationship 
 that this entity has with other entities, since this related information will also be eliminated, 
