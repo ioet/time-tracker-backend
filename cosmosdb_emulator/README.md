@@ -4,6 +4,8 @@ Here you can find all the source code of the Time Tracker CLI.
 This is responsible for automatically generating fake data for the Cosmos emulator, 
 in order to have information when testing new features or correcting bugs.
 
+> This feature is only available in development mode.  
+
 ## Prerequisites
 
 - Backend and cosmos emulator containers up.

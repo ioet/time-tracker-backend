@@ -6,16 +6,59 @@ This is the mono-repository for the backend services and their common codebase
 
 ## Getting started
 
-Follow the following instructions to get the project ready to use ASAP.
+Follow the next instructions to get the project ready to use ASAP.
 
-### Requirements
+Currently, there are two ways to run the project, the production mode using a virtual environment and installing all the necessary libraries 
+there and the other way is using the development mode with Docker and docker-compose. It is recommended to use the development mode and in special cases the production mode. 
 
-Be sure you have installed in your system:
+## Requirements:
+
+For both modes it is necessary to have the following requirements installed:
 
 - [Python version 3](https://www.python.org/download/releases/3.0/) (recommended 3.8 or less) in your path. It will install
   automatically [pip](https://pip.pypa.io/en/stable/) as well.
 - A virtual environment, namely [.venv](https://docs.python.org/3/library/venv.html).
 - Optionally for running Azure functions locally: [Azure functions core tool](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=macos%2Ccsharp%2Cbash).
+
+## Settings for each mode
+
+Before proceeding to the configuration for each of the modes, 
+it is important to perform the following step regardless of the mode to be used.
+
+### Create a virtual environment
+
+Execute the next command at the root of the project:
+
+```shell
+python -m venv .venv
+```
+
+> **Note:** We can replace python for python3 or python3.8 according to the version you have installed,
+> but do not forget the initial requirements.
+
+**Activate the environment**
+
+Windows:
+```shell
+.venv\Scripts\activate.bat
+```
+
+In Unix based operative systems:
+
+```shell
+source .venv/bin/activate
+```
+
+### Setup for each mode
+
+The configuration required for each of the modes is as follows:
+
+<details>
+    <summary><b>Development Mode</b></summary>
+    
+### Requirements:
+
+In addition to the initial requirements, it is necessary to have the following requirements installed:
 
 - Docker
   
@@ -28,7 +71,7 @@ Be sure you have installed in your system:
 
   To install Docker Compose, please choose the operating system you use and follow the steps [here](https://docs.docker.com/compose/install/).
 
-### Setup
+### Setup 
 
 Once installed Docker and Docker Compose we must create a `.env` file in the root of our project where we will put the following environment variables.
 
@@ -56,7 +99,7 @@ Once all the project configuration is done, we are going to execute the followin
 docker-compose up --build
 ```
 
-This command will build all images with the necessary configurations for each one, aslo
+This command will build all images with the necessary configurations for each one, also
 raises the cosmos emulator in combination with the backend, now you can open in the browser:
 
 - `http://127.0.0.1:5000/` open backend API.
@@ -66,12 +109,12 @@ raises the cosmos emulator in combination with the backend, now you can open in 
 > it is not necessary to execute it again, instead it should be executed like this: 
 > `docker-compose up`
 
-> It is also important to clarify that if packages or any extra configuration is added to the images construction,
+> It is also important to clarify that if packages or any extra configuration is added to the image's construction,
 > you need to run again `docker-compose up --build`, you can see more information about this flag [here](https://docs.docker.com/compose/reference/up/)
 
-## Development
+### Development
 
-### Generate Fake Data
+#### Generate Fake Data
 
 In order to generate fake data to test functionalities or correct errors, 
 we have built a CLI, called 'Time Tracker CLI', which is in charge of generating 
@@ -79,86 +122,25 @@ the fake information inside the Cosmos emulator.
 
 To learn how this CLI works, you can see the instructions [here](https://github.com/ioet/time-tracker-backend/tree/master/cosmosdb_emulator) 
 
-### Git hooks
-
-We use [pre-commit](https://github.com/pre-commit/pre-commit) library to manage local git hooks, 
-as developers we just need to run in our virtual environment.
-
-This library allows you to execute code right before the commit, for example:
-- Check if the commit contains the correct formatting.
-- Format modified files based on a Style Guide such as PEP 8, etc.
-
-To install and use `pre-commit` we have to perform the following steps:
-
-**Create the environment**
-
-Execute the next command at the root of the project:
-
-```shell
-python -m venv .venv
-```
-
-> **Note:** We can replace python for python3 or python3.8 according to the version you have installed,
-> but do not forget the initial requirements.
-
-**Activate the environment**
-
-Windows:
-```shell
-.venv\Scripts\activate.bat
-```
-
-In Unix based operative systems:
-
-```shell
-source .venv/bin/activate
-```
-
-Once the environment has been created and activated we have to run:
-```shell
-python3 -m pip install pre-commit
-```
-
-Once `pre-commit` library is installed, we are going to execute the following command:
-
-```shell
-pre-commit install -t pre-commit -t commit-msg
-```
-For more details, see section Development > Git hooks.
-
-With this command the library will take configuration from `.pre-commit-config.yaml` and will set up the hooks by us.
-
-### Commit message style
-
-Use the following commit message style. e.g:
-
-```shell
-'feat: TT-123 Applying some changes'
-'fix: TT-321 Fixing something broken'
-'feat(config): TT-00 Fix something in config files'
-```
-
-The value `TT-###` refers to the Jira issue that is being solved. Use TT-00 if the commit does not refer to any issue.
-
-### Branch names format
-
-For example if your task in Jira is **TT-48 implement semantic versioning** your branch name is:
-
-```shell
-TT-48-implement-semantic-versioning
-```
+> It is important to clarify that Time Tracker CLI only works in development mode.
 
 ### Test
 
 We are using [Pytest](https://docs.pytest.org/en/latest/index.html) for tests. The tests are located in the package
 `tests` and use the [conventions for python test discovery](https://docs.pytest.org/en/latest/goodpractices.html#test-discovery).
 
-> Remember To run any available test command we have to have the containers up (`docker-compose up`).
+> Remember to run any available test command we have to have the containers up (`docker-compose up`).
 
 This command run all tests:
 
 ```shell
 ./time-tracker.sh pytest -v
+```
+
+Run a single test:
+
+```shell
+./time-tracker.sh pytest -v -k name-test
 ```
 
 #### Coverage
@@ -186,6 +168,200 @@ If you want that previously collected coverage data is erased, you can execute:
 
 ```shell
 ./time-tracker.sh coverage erase
+```
+
+</details>
+
+<hr>
+
+<details>
+  <summary><b>Production Mode</b></summary>
+
+### Setup
+
+#### Install the requirements:
+
+```
+python3 -m pip install -r requirements/<app>/<stage>.txt
+```
+
+If you use Windows, you will use this command:
+
+```
+python -m pip install -r requirements/<app>/<stage>.txt
+```
+
+Where `<app>` is one of the executable app namespace, e.g. `time_tracker_api` or `time_tracker_events` (**Note:** Currently, only `time_tracker_api` is used.). The `stage` can be
+
+- `dev`: Used for working locally
+- `prod`: For anything deployed
+
+Bear in mind that the requirements for `time_tracker_events`, must be located on its local requirements.txt, by
+[convention](https://docs.microsoft.com/en-us/azure/azure-functions/functions-reference-python#folder-structure).
+
+### Set environment variables
+
+When you use Bash or GitBash you should create a .env file and add the next variables:
+
+```
+export MS_AUTHORITY=XXX
+export MS_CLIENT_ID=XXX
+export MS_SCOPE=XXX
+export MS_SECRET=XXX
+export MS_ENDPOINT=XXX
+export DATABASE_ACCOUNT_URI=XXX
+export DATABASE_MASTER_KEY=XXX
+export DATABASE_NAME=XXX
+export FLASK_APP=XXX
+export AZURE_APP_CONFIGURATION_CONNECTION_STRING=XXX
+export FLASK_DEBUG=True
+```
+
+If you use PowerShell, you should create a .env.bat file and add the next variables:
+
+```
+$env:MS_AUTHORITY="XXX"
+$env:MS_CLIENT_ID="XXX"
+$env:MS_SCOPE="XXX"
+$env:MS_SECRET="XXX"
+$env:MS_ENDPOINT="XXX"
+$env:DATABASE_ACCOUNT_URI="XXX"
+$env:DATABASE_MASTER_KEY="XXX"
+$env:DATABASE_NAME="XXX"
+$env:FLASK_APP="XXX"
+$env:AZURE_APP_CONFIGURATION_CONNECTION_STRING="XXX"
+$env:FLASK_DEBUG="True"
+```
+
+If you use Command Prompt, you should create a .env.ps1 file and add the next variables:
+
+```
+set "MS_AUTHORITY=XXX"
+set "MS_CLIENT_ID=XXX"
+set "MS_SCOPE=XXX"
+set "MS_SECRET=XXX"
+set "MS_ENDPOINT=XXX"
+set "DATABASE_ACCOUNT_URI=XXX"
+set "DATABASE_MASTER_KEY=XXX"
+set "DATABASE_NAME=XXX"
+set "FLASK_APP=XXX"
+set "AZURE_APP_CONFIGURATION_CONNECTION_STRING=XXX"
+set "FLASK_DEBUG=True"
+```
+
+> **Important:** Ask the development team for the values of the environment variables, also
+> you should set the environment variables each time the application is run.
+
+### Run application
+
+- Start the app:
+
+```shell
+flask run
+```
+
+- Open `http://127.0.0.1:5000/` in a browser. You will find in the presented UI
+  a link to the swagger.json with the definition of the api.
+
+### Test
+
+We are using [Pytest](https://docs.pytest.org/en/latest/index.html) for tests. The tests are located in the package
+`tests` and use the [conventions for python test discovery](https://docs.pytest.org/en/latest/goodpractices.html#test-discovery).
+
+This command run all tests:
+
+```shell
+pytest -v
+```
+
+> **Note:** If you get the error "No module named azure.functions", execute the command `pip install azure-functions`:
+
+To run a single test:
+
+```shell
+pytest -v -k name-test
+```
+
+#### Coverage
+
+To check the coverage of the tests execute:
+
+```shell
+coverage run -m pytest -v
+```
+
+To get a report table:
+
+```shell
+coverage report
+```
+
+To get a full report in html:
+
+```shell
+coverage html
+```
+Then check in the [htmlcov/index.html](./htmlcov/index.html) to see it.
+
+If you want that previously collected coverage data is erased, you can execute:
+
+```shell
+coverage erase
+```
+
+</details>
+
+<hr/>
+
+### Git hooks
+We use [pre-commit](https://github.com/pre-commit/pre-commit) library to manage local git hooks, 
+as developers we just need to run in our virtual environment.
+
+<hr>
+<details>
+    <summary><b>Open if you use Development mode</b></summary>
+    
+To install and use `pre-commit` in development mode we have to perform the next command:
+
+```shell
+python3 -m pip install pre-commit
+```
+> Remember to execute this command with the virtual environment active. 
+
+Once `pre-commit` library is installed, we can continue with the guide
+</details>
+
+<hr>
+This library allows you to execute code right before the commit, for example:
+- Check if the commit contains the correct formatting.
+- Format modified files based on a Style Guide such as PEP 8, etc.
+
+As developers, we just need to run in our virtual environment:
+```shell
+pre-commit install -t pre-commit -t commit-msg
+```
+For more details, see section Development > Git hooks.
+
+With this command the library will take configuration from `.pre-commit-config.yaml` and will set up the hooks by us.
+
+### Commit message style
+
+Use the following commit message style. e.g:
+
+```shell
+'feat: TT-123 Applying some changes'
+'fix: TT-321 Fixing something broken'
+'feat(config): TT-00 Fix something in config files'
+```
+
+The value `TT-###` refers to the Jira issue that is being solved. Use TT-00 if the commit does not refer to any issue.
+
+### Branch names format
+
+For example if your task in Jira is **TT-48 implement semantic versioning** your branch name is:
+
+```shell
+TT-48-implement-semantic-versioning
 ```
 
 ### Handling Cosmos DB triggers for creating events with time_tracker_events
