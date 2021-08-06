@@ -95,7 +95,7 @@ def test_add_complementary_info_when_there_are_not_time_entries(
 ):
     with pytest.raises(HTTPException) as http_error:
         time_entry_repository.add_complementary_info(
-            time_entries=None, exist_conditions=False
+            time_entries=None, exist_conditions=True
         )
     status_code = http_error.value.code
     message = http_error.value.data.get('message')
