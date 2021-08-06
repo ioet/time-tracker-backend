@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.37.1 (2021-08-06)
+### Fix
+* TT-302 Fix URLLIB3 dependencies vulnerabilities ([#313](https://github.com/ioet/time-tracker-backend/issues/313)) ([`f7aba96`](https://github.com/ioet/time-tracker-backend/commit/f7aba96802a629d2829fc09606c67a07364c3016))
+
+### Documentation
+* TT-301 Update readme documentation and add Time Tracker CLI docs ([#314](https://github.com/ioet/time-tracker-backend/issues/314)) ([`58dbc15`](https://github.com/ioet/time-tracker-backend/commit/58dbc1588576d1603162e5d29780b315f5f784a5))
+
 ## v0.37.0 (2021-07-26)
 ### Feature
 * TT-293 Create Script to generate data in the Database ([#310](https://github.com/ioet/time-tracker-backend/issues/310)) ([`50f8d46`](https://github.com/ioet/time-tracker-backend/commit/50f8d468d77835a6f90b958d4642d338f36d5f37))
