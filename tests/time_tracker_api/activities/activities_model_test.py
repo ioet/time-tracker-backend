@@ -12,9 +12,6 @@ faker = Faker()
 
 
 @patch(
-    'time_tracker_api.activities.activities_model.ActivityCosmosDBRepository.create_sql_condition_for_visibility'
-)
-@patch(
     'time_tracker_api.activities.activities_model.ActivityCosmosDBRepository.find_partition_key_value'
 )
 def test_find_all_with_id_in_list(
