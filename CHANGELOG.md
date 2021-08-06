@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.37.2 (2021-08-06)
+### Fix
+* TT-303 Create activity with active status ([#315](https://github.com/ioet/time-tracker-backend/issues/315)) ([`9ef736f`](https://github.com/ioet/time-tracker-backend/commit/9ef736fbbe824246351d51b355a975b83c95bfe9))
+
 ## v0.37.1 (2021-08-06)
 ### Fix
 * TT-302 Fix URLLIB3 dependencies vulnerabilities ([#313](https://github.com/ioet/time-tracker-backend/issues/313)) ([`f7aba96`](https://github.com/ioet/time-tracker-backend/commit/f7aba96802a629d2829fc09606c67a07364c3016))
