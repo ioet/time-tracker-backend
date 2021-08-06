@@ -331,3 +331,93 @@ def test_add_sql_not_in_condition(
     )
     assert len(query_builder.where_conditions) == len(expected_not_in_list)
     assert query_builder.where_conditions == expected_not_in_list
+
+
+def test_add_sql_date_range_condition_should_update_where_list():
+    start_date = "2021-03-19T05:07:00.000Z"
+    end_date = "2021-03-25T10:00:00.000Z"
+    query_builder = CosmosDBQueryBuilder().add_sql_date_range_condition(
+        {
+            "start_date": start_date,
+            "end_date": end_date,
+        }
+    )
+    expected_params = [
+        {"name": "@start_date", "value": start_date},
+        {"name": "@end_date", "value": end_date},
+    ]
+    assert len(query_builder.where_conditions) == 1
+    assert len(query_builder.parameters) == len(expected_params)
+    assert query_builder.get_parameters() == expected_params
+
+
+def test_build_with_add_sql_date_range_condition():
+    query_builder = (
+        CosmosDBQueryBuilder()
+        .add_sql_date_range_condition(
+            {
+                "start_date": "2021-04-19T05:00:00.000Z",
+                "end_date": "2021-04-20T10:00:00.000Z",
+            }
+        )
+        .build()
+    )
+
+    expected_query = """
+                    SELECT * FROM c
+                    WHERE ((c.start_date BETWEEN @start_date AND @end_date) OR
+                    (c.end_date BETWEEN @start_date AND @end_date))
+                    """
+    query = query_builder.get_query()
+
+    assert remove_white_spaces(query) == remove_white_spaces(expected_query)
+    assert len(query_builder.where_conditions) == 1
+    assert len(query_builder.get_parameters()) == 2
+
+
+def test_add_sql_active_condition_should_update_where_conditions():
+    status_value = 'active'
+    expected_active_query = f"""
+        SELECT * FROM c
+        WHERE NOT IS_DEFINED(c.status) OR (IS_DEFINED(c.status) AND c.status = '{status_value}')
+    """
+    expected_condition = f"NOT IS_DEFINED(c.status) OR (IS_DEFINED(c.status) AND c.status = '{status_value}')"
+
+    query_builder = (
+        CosmosDBQueryBuilder()
+        .add_sql_active_condition(status_value=status_value)
+        .build()
+    )
+
+    active_query = query_builder.get_query()
+
+    assert remove_white_spaces(active_query) == remove_white_spaces(
+        expected_active_query
+    )
+    assert len(query_builder.where_conditions) == 1
+    assert query_builder.where_conditions[0] == expected_condition
+
+
+def test_add_sql_inactive_condition_should_update_where_conditions():
+    status_value = 'inactive'
+    expected_inactive_query = f"""
+        SELECT * FROM c
+        WHERE (IS_DEFINED(c.status) AND c.status = '{status_value}')
+    """
+    expected_condition = (
+        f"(IS_DEFINED(c.status) AND c.status = '{status_value}')"
+    )
+
+    query_builder = (
+        CosmosDBQueryBuilder()
+        .add_sql_active_condition(status_value=status_value)
+        .build()
+    )
+
+    inactive_query = query_builder.get_query()
+
+    assert remove_white_spaces(inactive_query) == remove_white_spaces(
+        expected_inactive_query
+    )
+    assert len(query_builder.where_conditions) == 1
+    assert query_builder.where_conditions[0] == expected_condition

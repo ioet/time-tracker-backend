@@ -34,6 +34,41 @@ class CosmosDBQueryBuilder:
             self.where_conditions.append(f"c.{attribute} IN {ids_values}")
         return self
 
+    def add_sql_active_condition(self, status_value: str):
+        if status_value:
+            not_defined_condition = ''
+            condition_operand = ''
+            if status_value == 'active':
+                not_defined_condition = 'NOT IS_DEFINED(c.status)'
+                condition_operand = ' OR '
+
+            defined_condition = (
+                f"(IS_DEFINED(c.status) AND c.status = '{status_value}')"
+            )
+            condition = (
+                not_defined_condition + condition_operand + defined_condition
+            )
+            self.where_conditions.append(condition)
+        return self
+
+    def add_sql_date_range_condition(self, date_range: dict = None):
+        if date_range:
+            start_date = date_range.get('start_date')
+            end_date = date_range.get('end_date')
+            if start_date and end_date:
+                condition = """
+                    ((c.start_date BETWEEN @start_date AND @end_date) OR
+                     (c.end_date BETWEEN @start_date AND @end_date))
+                    """
+                self.where_conditions.append(condition)
+                self.parameters.extend(
+                    [
+                        {'name': '@start_date', 'value': start_date},
+                        {'name': '@end_date', 'value': end_date},
+                    ]
+                )
+        return self
+
     def add_sql_where_equal_condition(self, data: dict = None):
         if data:
             for k, v in data.items():
