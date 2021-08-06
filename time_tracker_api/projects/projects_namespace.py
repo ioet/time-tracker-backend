@@ -11,6 +11,7 @@ from time_tracker_api.api import (
     NullableString,
 )
 from time_tracker_api.projects.projects_model import create_dao
+from utils.enums.status import Status
 
 faker = Faker()
 
@@ -61,8 +62,8 @@ project_input = ns.model(
             example=Faker().words(
                 2,
                 [
-                    'active',
-                    'inactive',
+                    Status.ACTIVE.value,
+                    Status.INACTIVE.value,
                 ],
                 unique=True,
             ),
@@ -142,7 +143,7 @@ class Projects(Resource):
         """List all projects"""
         conditions = attributes_filter.parse_args()
         return project_dao.get_all(
-            conditions=conditions, customer_status='active'
+            conditions=conditions, customer_status=Status.ACTIVE.value
         )
 
     @ns.doc('create_project')
@@ -190,5 +191,5 @@ class Project(Resource):
     @ns.response(HTTPStatus.NO_CONTENT, 'Project successfully deleted')
     def delete(self, id):
         """Delete a project"""
-        project_dao.update(id, {'status': 'inactive'})
+        project_dao.update(id, {'status': Status.INACTIVE.value})
         return None, HTTPStatus.NO_CONTENT

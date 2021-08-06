@@ -10,6 +10,7 @@ from commons.data_access_layer.cosmos_db import (
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
 from typing import List, Callable
 from commons.data_access_layer.database import EventContext
+from utils.enums.status import Status
 from utils.query_builder import CosmosDBQueryBuilder
 
 
@@ -148,7 +149,7 @@ class ActivityCosmosDBDao(APICosmosDBDao, ActivityDao):
 
     def create(self, activity_payload: dict):
         event_ctx = self.create_event_context('create')
-        activity_payload['status'] = 'active'
+        activity_payload['status'] = Status.ACTIVE.value
         return self.repository.create(
             data=activity_payload, event_context=event_ctx
         )

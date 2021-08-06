@@ -9,6 +9,7 @@ from time_tracker_api.api import (
     NullableString,
 )
 from time_tracker_api.customers.customers_model import create_dao
+from utils.enums.status import Status
 
 faker = Faker()
 
@@ -41,8 +42,8 @@ customer_input = ns.model(
             example=Faker().words(
                 2,
                 [
-                    'active',
-                    'inactive',
+                    Status.ACTIVE.value,
+                    Status.INACTIVE.value,
                 ],
                 unique=True,
             ),
@@ -122,5 +123,5 @@ class Customer(Resource):
     @ns.response(HTTPStatus.NO_CONTENT, 'Customer successfully deleted')
     def delete(self, id):
         """Delete a customer"""
-        customer_dao.update(id, {'status': 'inactive'})
+        customer_dao.update(id, {'status': Status.INACTIVE.value})
         return None, HTTPStatus.NO_CONTENT
