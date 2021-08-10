@@ -13,7 +13,7 @@ For more details in commit message format, review https://github.com/angular/ang
 
 SUCCESS_MSG = "Commit succeed!. Semantic commit message is correct."
 
-COMMIT_MSG_REGEX = r'(build|ci|docs|feat|fix|perf|refactor|style|test|chore|revert)(\([\w\-]+\))?: TT-[0-9]+ .*'
+COMMIT_MSG_REGEX = r'(build|ci|docs|feat|fix|perf|refactor|test|chore|revert|code-smell)(\([\w\-]+\))?: TT-[0-9]+ .*'
 
 # Get the commit message file
 commit_msg_file = open(sys.argv[1])  # The first argument is the file
