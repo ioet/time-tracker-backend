@@ -8,6 +8,7 @@ from commons.data_access_layer.cosmos_db import (
     CosmosDBDao,
 )
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
+from utils.enums.status import Status
 
 
 class CustomerDao(CRUDDao):
@@ -32,7 +33,7 @@ class CustomerCosmosDBModel(CosmosDBModel):
     description: str
     deleted: str
     tenant_id: str
-    status: str = field(default='active')
+    status: str = field(default=Status.ACTIVE.value)
 
     def __init__(self, data):
         super(CustomerCosmosDBModel, self).__init__(data)  # pragma: no cover

@@ -1,4 +1,6 @@
 from typing import List
+
+from utils.enums.status import Status
 from utils.repository import convert_list_to_tuple_string
 from enum import Enum
 
@@ -38,7 +40,7 @@ class CosmosDBQueryBuilder:
         if status_value:
             not_defined_condition = ''
             condition_operand = ''
-            if status_value == 'active':
+            if status_value == Status.ACTIVE.value:
                 not_defined_condition = 'NOT IS_DEFINED(c.status)'
                 condition_operand = ' OR '
 

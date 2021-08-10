@@ -6,6 +6,8 @@ from flask.testing import FlaskClient
 from flask_restplus._http import HTTPStatus
 from pytest_mock import MockFixture
 
+from utils.enums.status import Status
+
 fake = Faker()
 
 valid_customer_data = {
@@ -229,7 +231,7 @@ def test_delete_customer_should_succeed_with_valid_id(
     assert HTTPStatus.NO_CONTENT == response.status_code
     assert b'' == response.data
     repository_remove_mock.assert_called_once_with(
-        str(valid_id), {'status': 'inactive'}, ANY
+        str(valid_id), {'status': Status.INACTIVE.value}, ANY
     )
 
 
@@ -253,7 +255,7 @@ def test_delete_customer_should_return_not_found_with_invalid_id(
 
     assert HTTPStatus.NOT_FOUND == response.status_code
     repository_remove_mock.assert_called_once_with(
-        str(invalid_id), {'status': 'inactive'}, ANY
+        str(invalid_id), {'status': Status.INACTIVE.value}, ANY
     )
 
 
@@ -282,7 +284,7 @@ def test_delete_customer_should_return_422_for_invalid_id_format(
 
     assert HTTPStatus.UNPROCESSABLE_ENTITY == response.status_code
     repository_remove_mock.assert_called_once_with(
-        str(invalid_id), {'status': 'inactive'}, ANY
+        str(invalid_id), {'status': Status.INACTIVE.value}, ANY
     )
 
 

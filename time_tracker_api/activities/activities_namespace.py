@@ -9,6 +9,7 @@ from time_tracker_api.api import (
     remove_required_constraint,
     NullableString,
 )
+from utils.enums.status import Status
 
 faker = Faker()
 
@@ -40,8 +41,8 @@ activity_input = ns.model(
             example=Faker().words(
                 2,
                 [
-                    'active',
-                    'inactive',
+                    Status.ACTIVE.value,
+                    Status.INACTIVE.value,
                 ],
                 unique=True,
             ),
@@ -117,5 +118,5 @@ class Activity(Resource):
     @ns.response(HTTPStatus.NO_CONTENT, 'Activity deleted successfully')
     def delete(self, id):
         """Delete an activity"""
-        activity_dao.update(id, {'status': 'inactive'})
+        activity_dao.update(id, {'status': Status.INACTIVE.value})
         return None, HTTPStatus.NO_CONTENT

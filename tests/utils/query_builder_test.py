@@ -1,4 +1,6 @@
 from unittest.mock import patch
+
+from utils.enums.status import Status
 from utils.query_builder import CosmosDBQueryBuilder, Order
 from utils.repository import remove_white_spaces
 import pytest
@@ -376,7 +378,7 @@ def test_build_with_add_sql_date_range_condition():
 
 
 def test_add_sql_active_condition_should_update_where_conditions():
-    status_value = 'active'
+    status_value = Status.ACTIVE.value
     expected_active_query = f"""
         SELECT * FROM c
         WHERE NOT IS_DEFINED(c.status) OR (IS_DEFINED(c.status) AND c.status = '{status_value}')
@@ -399,7 +401,7 @@ def test_add_sql_active_condition_should_update_where_conditions():
 
 
 def test_add_sql_inactive_condition_should_update_where_conditions():
-    status_value = 'inactive'
+    status_value = Status.INACTIVE.value
     expected_inactive_query = f"""
         SELECT * FROM c
         WHERE (IS_DEFINED(c.status) AND c.status = '{status_value}')

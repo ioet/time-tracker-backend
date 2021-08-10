@@ -7,6 +7,7 @@ from time_tracker_api.activities.activities_model import (
     ActivityCosmosDBModel,
     create_dao,
 )
+from utils.enums.status import Status
 
 faker = Faker()
 
@@ -59,7 +60,7 @@ def test_create_activity_should_add_active_status(
     activity_dao.create(activity_payload)
 
     expect_argument = copy.copy(activity_payload)
-    expect_argument['status'] = 'active'
+    expect_argument['status'] = Status.ACTIVE.value
     activity_repository_create_mock.assert_called_with(
         data=expect_argument, event_context=ANY
     )
