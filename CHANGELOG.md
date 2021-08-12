@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.37.3 (2021-08-12)
+### Fix
+* TT-304 Handle message: the data could not be load ([#316](https://github.com/ioet/time-tracker-backend/issues/316)) ([`ac06aab`](https://github.com/ioet/time-tracker-backend/commit/ac06aab9b3f07886462b116d67534c3ce7f02a6f))
+
 ## v0.37.2 (2021-08-06)
 ### Fix
 * TT-303 Create activity with active status ([#315](https://github.com/ioet/time-tracker-backend/issues/315)) ([`9ef736f`](https://github.com/ioet/time-tracker-backend/commit/9ef736fbbe824246351d51b355a975b83c95bfe9))
