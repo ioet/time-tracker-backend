@@ -193,3 +193,11 @@ class Project(Resource):
         """Delete a project"""
         project_dao.update(id, {'status': Status.INACTIVE.value})
         return None, HTTPStatus.NO_CONTENT
+
+
+@ns.route('/recent')
+class RecentProjects(Resource):
+    @ns.doc('list_recent_projects')
+    @ns.marshal_list_with(project)
+    def get(self):
+        return project_dao.get_recent_projects()

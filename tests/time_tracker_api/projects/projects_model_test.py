@@ -13,8 +13,17 @@ from time_tracker_api.projects.projects_model import (
     ProjectCosmosDBRepository,
     ProjectCosmosDBModel,
     create_dao,
+    ProjectCosmosDBDao,
 )
 from faker import Faker
+
+from time_tracker_api.time_entries.time_entries_dao import (
+    TimeEntriesCosmosDBDao,
+)
+from time_tracker_api.time_entries.time_entries_model import (
+    TimeEntryCosmosDBModel,
+)
+from utils.enums.status import Status
 
 fake = Faker()
 
@@ -138,3 +147,55 @@ def test_get_all_projects_with_customers(
     assert isinstance(projects[0], ProjectCosmosDBModel)
     assert projects[0].__dict__['customer_name'] == customer_data['name']
     assert len(projects) == 1
+
+
+def test_get_recent_projects_get_all_method_should_have_been_called_with_specific_arguments(
+    mocker,
+):
+    projects_amount = 5
+    expected_conditions = {'status': Status.ACTIVE.value}
+    expected_projects_ids = list(
+        set([fake.uuid4() for i in range(projects_amount)])
+    )
+    user_time_entries = []
+
+    for project_id in expected_projects_ids:
+        current_entry = TimeEntryCosmosDBModel(
+            {'project_id': project_id, 'id': fake.uuid4()}
+        )
+        user_time_entries.append(current_entry)
+
+    mocker.patch.object(
+        TimeEntriesCosmosDBDao,
+        'get_latest_entries',
+        return_value=user_time_entries,
+    )
+    project_cosmos_db_dao_get_all_mock = mocker.patch.object(
+        ProjectCosmosDBDao, 'get_all'
+    )
+    projects_dao = create_dao()
+
+    projects_dao.get_recent_projects()
+
+    project_cosmos_db_dao_get_all_mock.assert_called_once_with(
+        conditions=expected_conditions,
+        project_ids=expected_projects_ids,
+        customer_status=Status.ACTIVE.value,
+    )
+
+
+def test_get_recent_projects_should_return_an_empty_array_if_the_user_has_no_entries(
+    mocker,
+):
+    user_time_entries = []
+    mocker.patch.object(
+        TimeEntriesCosmosDBDao,
+        'get_latest_entries',
+        return_value=user_time_entries,
+    )
+
+    projects_dao = create_dao()
+
+    recent_projects = projects_dao.get_recent_projects()
+
+    assert len(recent_projects) == 0

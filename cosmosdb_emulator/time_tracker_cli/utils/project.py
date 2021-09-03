@@ -32,5 +32,6 @@ def get_project_json(project_factory: ProjectFactory) -> dict:
         'customer_id': project_factory.customer_id,
         'project_type_id': project_factory.project_type_id,
         'tenant_id': project_factory.tenant_id,
+        'status': project_factory.status,
     }
     return project

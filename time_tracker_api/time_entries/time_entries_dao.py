@@ -2,12 +2,10 @@ import abc
 from commons.data_access_layer.cosmos_db import (
     CosmosDBDao,
     CustomError,
-    CosmosDBRepository,
 )
 from utils.extend_model import (
     add_project_info_to_time_entries,
     add_activity_name_to_time_entries,
-    create_custom_query_from_str,
     create_list_from_str,
 )
 from utils.time import (
@@ -120,6 +118,27 @@ class TimeEntriesCosmosDBDao(APICosmosDBDao, TimeEntriesDao):
         )
 
         return time_entries_list
+
+    def get_latest_entries(self, conditions: dict = None):
+        """
+        Get the latest entries without taking into account a data range.
+        It would only be necessary to pass the number of last entries that
+        you need, this parameter must be passed by the conditions.
+        The default value for the entries amount is 20.
+        """
+        conditions = conditions if conditions else {}
+
+        default_entries_amount = 20
+        event_context = self.create_event_context('read_many')
+        conditions.update({'owner_id': event_context.user_id})
+        entries_amount = conditions.pop("limit", default_entries_amount)
+        time_entries = self.repository.find_all(
+            conditions=conditions,
+            max_count=entries_amount,
+            event_context=event_context,
+        )
+
+        return time_entries
 
     def get_lastest_entries_by_project(
         self, conditions: dict = None, **kwargs
