@@ -14,6 +14,7 @@ class Project(NamedTuple):
     project_type_id: int
     customer_id: str
     tenant_id: str
+    status: str
 
 
 class ProjectFactory(Factory):
@@ -28,3 +29,4 @@ class ProjectFactory(Factory):
     name = Faker('name')
     description = Faker('sentence', nb_words=10)
     tenant_id = get_time_tracker_tenant_id()
+    status = 'active'

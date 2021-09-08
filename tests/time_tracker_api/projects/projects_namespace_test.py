@@ -309,3 +309,20 @@ def test_delete_project_should_return_unprocessable_entity_for_invalid_id_format
     repository_remove_mock.assert_called_once_with(
         str(invalid_id), {'status': Status.INACTIVE.value}, ANY
     )
+
+
+def test_get_recent_projects_should_call_method_get_recent_projects_from_project_dao(
+    client: FlaskClient, mocker: MockFixture, valid_header: dict
+):
+    project_dao_get_recent_projects_mock = mocker.patch.object(
+        ProjectCosmosDBDao, 'get_recent_projects', return_value=[]
+    )
+
+    response = client.get(
+        "/projects/recent",
+        headers=valid_header,
+        follow_redirects=True,
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    project_dao_get_recent_projects_mock.assert_called_once()

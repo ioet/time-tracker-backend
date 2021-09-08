@@ -15,6 +15,7 @@ from time_tracker_api.project_types.project_types_model import (
     create_dao as project_types_create_dao,
 )
 from time_tracker_api.customers.customers_model import CustomerCosmosDBModel
+from utils.enums.status import Status
 from utils.query_builder import CosmosDBQueryBuilder
 from utils.extend_model import (
     add_customer_name_to_projects,
@@ -158,8 +159,37 @@ class ProjectCosmosDBDao(APICosmosDBDao, ProjectDao):
         add_customer_name_to_projects(projects, customers)
         return projects
 
+    def get_recent_projects(self):
+        """
+        Gets the last projects in which the person has generated entries.
+        The import had to be carried out within the method to avoid circular dependency.
+        """
+        from time_tracker_api.time_entries.time_entries_dao import (
+            create_dao as create_entries_dao,
+        )
+
+        recent_projects = []
+        time_entries_dao = create_entries_dao()
+        last_time_entries = time_entries_dao.get_latest_entries()
+
+        last_time_entries_amount = len(last_time_entries)
+
+        if last_time_entries_amount == 0:
+            return recent_projects
+
+        project_ids = list(
+            set([entry.project_id for entry in last_time_entries])
+        )
+        conditions = {'status': Status.ACTIVE.value}
+        recent_projects = self.get_all(
+            conditions=conditions,
+            project_ids=project_ids,
+            customer_status=Status.ACTIVE.value,
+        )
+
+        return recent_projects
+
 
 def create_dao() -> ProjectDao:
     repository = ProjectCosmosDBRepository()
-
     return ProjectCosmosDBDao(repository)
