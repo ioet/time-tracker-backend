@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.38.0 (2021-09-08)
+### Feature
+* TT-326 Get recent projects feature added ([#319](https://github.com/ioet/time-tracker-backend/issues/319)) ([`8e2aadc`](https://github.com/ioet/time-tracker-backend/commit/8e2aadc0937d3a26752b7fb8a1dd837af2f6d6a0))
+
 ## v0.37.3 (2021-08-12)
 ### Fix
 * TT-304 Handle message: the data could not be load ([#316](https://github.com/ioet/time-tracker-backend/issues/316)) ([`ac06aab`](https://github.com/ioet/time-tracker-backend/commit/ac06aab9b3f07886462b116d67534c3ce7f02a6f))
