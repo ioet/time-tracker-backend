@@ -1,0 +1,66 @@
+[
+    {
+        "name": "Development",
+        "description": "Development",
+        "tenant_id": "cc925a5d-9644-4a4f-8d99-0bee49aadd05",
+        "id": "c61a4a49-3364-49a3-a7f7-0c5f2d15072b",
+        "_rid": "QUwFAPuumiRhAAAAAAAAAA==",
+        "_self": "dbs/QUwFAA==/colls/QUwFAPuumiQ=/docs/QUwFAPuumiRhAAAAAAAAAA==/",
+        "_etag": "\"4e006cc9-0000-0500-0000-607dcc0d0000\"",
+        "_attachments": "attachments/",
+        "_last_event_ctx": {
+            "user_id": "dd76e5d6-3949-46fd-b418-f15bf7c354fa",
+            "tenant_id": "cc925a5d-9644-4a4f-8d99-0bee49aadd05",
+            "action": "delete",
+            "description": null,
+            "container_id": "activity",
+            "session_id": null
+        },
+        "deleted": "b4327ba6-9f96-49ee-a9ac-3c1edf525172",
+        "status": null,
+        "_ts": 1618856973
+    },
+    {
+        "name": "Management",
+        "description": null,
+        "tenant_id": "cc925a5d-9644-4a4f-8d99-0bee49aadd05",
+        "id": "94ec92e2-a500-4700-a9f6-e41eb7b5507c",
+        "_last_event_ctx": {
+            "user_id": "dd76e5d6-3949-46fd-b418-f15bf7c354fa",
+            "tenant_id": "cc925a5d-9644-4a4f-8d99-0bee49aadd05",
+            "action": "delete",
+            "description": null,
+            "container_id": "activity",
+            "session_id": null
+        },
+        "_rid": "QUwFAPuumiRfAAAAAAAAAA==",
+        "_self": "dbs/QUwFAA==/colls/QUwFAPuumiQ=/docs/QUwFAPuumiRfAAAAAAAAAA==/",
+        "_etag": "\"4e0069c9-0000-0500-0000-607dcc0d0000\"",
+        "_attachments": "attachments/",
+        "deleted": "7cf6efe5-a221-4fe4-b94f-8945127a489a",
+        "status": null,
+        "_ts": 1618856973
+    },
+    {
+        "name": "Operations",
+        "description": "Operation activities performed.",
+        "tenant_id": "cc925a5d-9644-4a4f-8d99-0bee49aadd05",
+        "id": "d45c770a-b1a0-4bd8-a713-22c01a23e41b",
+        "_rid": "QUwFAPuumiRjAAAAAAAAAA==",
+        "_self": "dbs/QUwFAA==/colls/QUwFAPuumiQ=/docs/QUwFAPuumiRjAAAAAAAAAA==/",
+        "_etag": "\"09009a4d-0000-0500-0000-614b66fb0000\"",
+        "_attachments": "attachments/",
+        "_last_event_ctx": {
+            "user_id": "82ed0f65-051c-4898-890f-870805900e21",
+            "tenant_id": "cc925a5d-9644-4a4f-8d99-0bee49aadd05",
+            "action": "update",
+            "description": null,
+            "container_id": "activity",
+            "session_id": null
+        },
+        "deleted": "7cf6efe5-a221-4fe4-b94f-8945127a489a",
+        "status": "active",
+        "_ts": 1632331515
+    }
+]
+
