@@ -15,7 +15,7 @@ class ActivitiesJsonDao(ActivitiesDaoInterface):
             activities = json.load(file)
             file.close()
 
-        except FileNotFoundError as e:
+        except FileNotFoundError:
             return HTTPStatus.NOT_FOUND
 
         activity = next(
