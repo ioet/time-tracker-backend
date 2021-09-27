@@ -5,11 +5,11 @@ import json
 
 
 class ActivitiesJsonDao(ActivitiesDaoInterface):
-    def __init__(self, json_data_file_path):
+    def __init__(self, json_data_file_path: str):
         self.json_data_file_path = json_data_file_path
         self.activity_keys = ActivityDto.__dataclass_fields__.keys()
 
-    def get_by_id(self, id):
+    def get_by_id(self, id: str) -> ActivityDto:
         try:
             file = open(self.json_data_file_path)
             activities = json.load(file)
@@ -31,7 +31,7 @@ class ActivitiesJsonDao(ActivitiesDaoInterface):
 
         return activity_dto
 
-    def get_all(self):
+    def get_all(self) -> list:
         try:
             file = open(self.json_data_file_path)
             activities = json.load(file)
