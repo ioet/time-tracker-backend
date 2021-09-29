@@ -23,9 +23,9 @@ class ActivitiesJsonDao(ActivitiesDaoInterface):
         except Exception:
             return HTTPStatus.NOT_FOUND
 
-        activity = self.__create_activity_dto(activity)
+        activity_dto = self.__create_activity_dto(activity)
 
-        return activity
+        return activity_dto
 
     def get_all(self) -> list:
         activities = self.__get_activities_from_file()
