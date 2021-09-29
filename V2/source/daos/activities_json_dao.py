@@ -20,7 +20,7 @@ class ActivitiesJsonDao(ActivitiesDaoInterface):
                     if activity.get('id') == id
                 )
             )
-        except:
+        except Exception:
             return HTTPStatus.NOT_FOUND
 
         activity = self.__create_activity_dto(activity)
