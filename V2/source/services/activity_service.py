@@ -3,9 +3,6 @@ from V2.source.dtos.activity import ActivityDto
 
 
 class ActivityService:
-
-    activities_dao: ActivitiesDaoInterface
-
     def __init__(self, activities_dao: ActivitiesDaoInterface):
         self.activities_dao = activities_dao
 

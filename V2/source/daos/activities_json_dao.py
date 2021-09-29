@@ -10,41 +10,45 @@ class ActivitiesJsonDao(ActivitiesDaoInterface):
         self.activity_keys = ActivityDto.__dataclass_fields__.keys()
 
     def get_by_id(self, id: str) -> ActivityDto:
+        activities = self.__get_activities_from_file()
+
         try:
-            file = open(self.json_data_file_path)
-            activities = json.load(file)
-            file.close()
-
-        except FileNotFoundError:
+            activity = next(
+                (
+                    activity
+                    for activity in activities
+                    if activity.get('id') == id
+                )
+            )
+        except:
             return HTTPStatus.NOT_FOUND
 
-        activity = next(
-            (activity for activity in activities if activity.get('id') == id),
-            None,
-        )
+        activity = self.__create_activity_dto(activity)
 
-        if activity == None:
-            return HTTPStatus.NOT_FOUND
-
-        activity = {key: activity.get(key) for key in self.activity_keys}
-        activity_dto = ActivityDto(**activity)
-
-        return activity_dto
+        return activity
 
     def get_all(self) -> list:
-        try:
-            file = open(self.json_data_file_path)
-            activities = json.load(file)
-            file.close()
-
-        except FileNotFoundError:
-            return HTTPStatus.NOT_FOUND
-
+        activities = self.__get_activities_from_file()
         list_activities = []
 
         for activity in activities:
-            activity = {key: activity.get(key) for key in self.activity_keys}
-            activity_dto = ActivityDto(**activity)
-            list_activities.append(activity_dto)
+            activity = self.__create_activity_dto(activity)
+            list_activities.append(activity)
 
         return list_activities
+
+    def __get_activities_from_file(self) -> list:
+        try:
+            file = open(self.json_data_file_path)
+            activities = json.load(file)
+            file.close()
+
+            return activities
+
+        except FileNotFoundError:
+            return []
+
+    def __create_activity_dto(self, activity: dict) -> ActivityDto:
+        activity = {key: activity.get(key) for key in self.activity_keys}
+        activity_dto = ActivityDto(**activity)
+        return activity_dto
