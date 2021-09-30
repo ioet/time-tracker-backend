@@ -1,78 +1,85 @@
 from V2.source.daos.activities_json_dao import ActivitiesJsonDao
-from V2.source.dtos.activity import ActivityDto
-from http import HTTPStatus
+from V2.source.dtos.activity import Activity
+from faker import Faker
 import json
+import pytest
+import typing
 
 
-OPEN_FILE = 'builtins.open'
+@pytest.fixture(name='create_fake_activities')
+def _create_fake_activities(mocker) -> typing.List[Activity]:
+    def _creator(activities):
+        read_data = json.dumps(activities)
+        mocker.patch('builtins.open', mocker.mock_open(read_data=read_data))
+        return [Activity(**activity) for activity in activities]
+
+    return _creator
 
 
-def test_get_by_id__return_activity_dto__when_find_activity_that_matches_its_id(
-    mocker,
+def test_get_by_id__returns_an_activity_dto__when_found_one_activity_that_matches_its_id(
+    create_fake_activities,
 ):
-    activities_json_dao = ActivitiesJsonDao('non-important-path')
-    activities = [
-        {
-            "name": "test_name",
-            "description": "test_description",
-            "tenant_id": "test_tenant_id",
-            "id": "test_id",
-            "deleted": "test_deleted",
-            "status": "test_status",
-        }
-    ]
-    read_data = json.dumps(activities)
-    activity_dto = ActivityDto(**activities.pop())
+    activities_json_dao = ActivitiesJsonDao(Faker().file_path())
+    activities = create_fake_activities(
+        [
+            {
+                "name": "test_name",
+                "description": "test_description",
+                "tenant_id": "test_tenant_id",
+                "id": "test_id",
+                "deleted": "test_deleted",
+                "status": "test_status",
+            }
+        ]
+    )
+    activity_dto = activities.pop()
 
-    mocker.patch(OPEN_FILE, mocker.mock_open(read_data=read_data))
     result = activities_json_dao.get_by_id(activity_dto.id)
 
     assert result == activity_dto
 
 
-def test__get_by_id__return_httpstatus_not_found__when_no_activity_matches_its_id(
-    mocker,
+def test__get_by_id__returns_none__when_no_activity_matches_its_id(
+    create_fake_activities,
 ):
-    activities_json_dao = ActivitiesJsonDao('non-important-path')
-    activities = []
-    read_data = json.dumps(activities)
+    activities_json_dao = ActivitiesJsonDao(Faker().file_path())
+    create_fake_activities([])
 
-    mocker.patch(OPEN_FILE, mocker.mock_open(read_data=read_data))
-    result = activities_json_dao.get_by_id('non-important-id')
+    result = activities_json_dao.get_by_id(Faker().uuid4())
 
-    assert result == HTTPStatus.NOT_FOUND
+    assert result == None
 
 
-def test_get_all__return_list_of_activity_dto__when_find_one_or_more_activities(
-    mocker,
+def test__get_all__returns_a_list_of_activity_dto_objects__when_one_or_more_activities_are_found(
+    create_fake_activities,
 ):
-    activities_json_dao = ActivitiesJsonDao('non-important-path')
-    activity = {
-        "name": "test_name",
-        "description": "test_description",
-        "tenant_id": "test_tenant_id",
-        "id": "test_id",
-        "deleted": "test_deleted",
-        "status": "test_status",
-    }
+    activities_json_dao = ActivitiesJsonDao(Faker().file_path())
     number_of_activities = 3
-    activity_dto = ActivityDto(**activity)
-    list_activities_dto = [activity_dto] * number_of_activities
-    activities = [activity] * number_of_activities
-    read_data = json.dumps(activities)
+    activities = create_fake_activities(
+        [
+            {
+                "name": "test_name",
+                "description": "test_description",
+                "tenant_id": "test_tenant_id",
+                "id": "test_id",
+                "deleted": "test_deleted",
+                "status": "test_status",
+            }
+        ]
+        * number_of_activities
+    )
 
-    mocker.patch(OPEN_FILE, mocker.mock_open(read_data=read_data))
     result = activities_json_dao.get_all()
 
-    assert result == list_activities_dto
+    assert result == activities
 
 
-def test_get_all__return_empty_list__when_doesnt_found_any_activities(mocker):
-    activities_json_dao = ActivitiesJsonDao('non-important-path')
-    activities = []
-    read_data = json.dumps(activities)
+def test_get_all__returns_an_empty_list__when_doesnt_found_any_activities(
+    create_fake_activities,
+):
+    activities_json_dao = ActivitiesJsonDao(Faker().file_path())
+    activities = create_fake_activities([])
 
-    mocker.patch(OPEN_FILE, mocker.mock_open(read_data=read_data))
     result = activities_json_dao.get_all()
 
     assert result == activities
