@@ -1,5 +1,4 @@
 from V2.source.services.activity_service import ActivityService
-from V2.source.daos.activities_dao_interface import ActivitiesDaoInterface
 from V2.source.daos.activities_json_dao import ActivitiesJsonDao
 
 def get_list_activities():
