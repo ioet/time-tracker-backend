@@ -42,5 +42,4 @@ class ActivitiesJsonDao(ActivitiesDao):
 
     def __create_activity_dto(self, activity: dict) -> Activity:
         activity = {key: activity.get(key) for key in self.activity_keys}
-        activity_dto = Activity(**activity)
-        return activity_dto
+        return Activity(**activity)
