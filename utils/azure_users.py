@@ -129,9 +129,7 @@ class AzureConnection:
                 endpoint = endpoint + skip_token_attribute + request_token
                 
         for i in range(len(users)):
-            if users[i]['mail'] is not None:
-                pass
-            else:
+            if users[i]['mail'] is None:
                 valid_users.append(users[i])
         
         return [self.to_azure_user(user) for user in valid_users]
