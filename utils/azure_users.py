@@ -13,6 +13,7 @@ class MSConfig:
         'MS_SECRET',
         'MS_SCOPE',
         'MS_ENDPOINT',
+        'USER-ID',
     ]
 
     check_variables_are_defined(ms_variables)
@@ -22,6 +23,7 @@ class MSConfig:
     SECRET = os.environ.get('MS_SECRET')
     SCOPE = os.environ.get('MS_SCOPE')
     ENDPOINT = os.environ.get('MS_ENDPOINT')
+    USERID =os.environ.get('USER-ID')
 
 
 class BearerAuth(requests.auth.AuthBase):
@@ -96,13 +98,14 @@ class AzureConnection:
         role_fields_params = ','.join(
             [field_name for field_name, _ in ROLE_FIELD_VALUES.values()]
         )
-        endpoint = "{endpoint}/users?api-version=1.6&$select=displayName,otherMails,objectId,{role_fields_params}".format(
+        endpoint = "{endpoint}/users?api-version=1.6&$select=displayName,otherMails,mail,objectId,{role_fields_params}".format(
             endpoint=self.config.ENDPOINT,
             role_fields_params=role_fields_params,
         )
 
         exists_users = True
         users = []
+        valid_users = []
         skip_token_attribute = '&$skiptoken='
 
         while exists_users:
@@ -124,8 +127,14 @@ class AzureConnection:
                     skip_token_attribute
                 )[1]
                 endpoint = endpoint + skip_token_attribute + request_token
-
-        return [self.to_azure_user(user) for user in users]
+                
+        for i in range(len(users)):
+            if users[i]['mail'] is not None:
+                pass
+            else:
+                valid_users.append(users[i])
+        
+        return [self.to_azure_user(user) for user in valid_users]
 
     def to_azure_user(self, item) -> AzureUser:
         there_is_email = len(item['otherMails']) > 0
@@ -255,7 +264,9 @@ class AzureConnection:
             item['displayName'],
             [member['objectId'] for member in item['members']],
         )
-        result = list(map(parse_item, response.json()['value']))
+        result = list(map(parse_item, response.json()['value']))        
+        result[0][1].append(self.config.USERID)
+        
         return result
 
     def is_user_in_group(self, user_id, data: dict):
