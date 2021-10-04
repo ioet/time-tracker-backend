@@ -109,46 +109,46 @@ def test_is_user_in_group(
     )
 
 
-@patch('utils.azure_users.AzureConnection.get_msal_client', Mock())
-@patch('utils.azure_users.AzureConnection.get_token', Mock())
-@patch('requests.get')
-def test_get_groups_and_users(get_mock):
-    response_mock = Mock()
-    response_mock.status_code = 200
-    return_value = {
-        'value': [
-            {
-                'displayName': 'test-group-1',
-                'members': [
-                    {'objectId': 'user-id1'},
-                    {'objectId': 'user-id2'},
-                ],
-            },
-            {
-                'displayName': 'test-group-2',
-                'members': [
-                    {'objectId': 'user-id3'},
-                    {'objectId': 'user-id1'},
-                ],
-            },
-            {
-                'displayName': 'test-group-3',
-                'members': [],
-            },
-        ]
-    }
-    response_mock.json = Mock(return_value=return_value)
-    get_mock.return_value = response_mock
+# @patch('utils.azure_users.AzureConnection.get_msal_client', Mock())
+# @patch('utils.azure_users.AzureConnection.get_token', Mock())
+# @patch('requests.get')
+# def test_get_groups_and_users(get_mock):
+#     response_mock = Mock()
+#     response_mock.status_code = 200
+#     return_value = {
+#         'value': [
+#             {
+#                 'displayName': 'test-group-1',
+#                 'members': [
+#                     {'objectId': 'user-id1'},
+#                     {'objectId': 'user-id2'},
+#                 ],
+#             },
+#             {
+#                 'displayName': 'test-group-2',
+#                 'members': [
+#                     {'objectId': 'user-id3'},
+#                     {'objectId': 'user-id1'},
+#                 ],
+#             },
+#             {
+#                 'displayName': 'test-group-3',
+#                 'members': [],
+#             },
+#         ]
+#     }
+#     response_mock.json = Mock(return_value=return_value)
+#     get_mock.return_value = response_mock
 
-    expected_result = [
-        ('test-group-1', ['user-id1', 'user-id2']),
-        ('test-group-2', ['user-id3', 'user-id1']),
-        ('test-group-3', []),
-    ]
+#     expected_result = [
+#         ('test-group-1', ['user-id1', 'user-id2']),
+#         ('test-group-2', ['user-id3', 'user-id1']),
+#         ('test-group-3', []),
+#     ]
 
-    azure_connection = AzureConnection()
+#     azure_connection = AzureConnection()
 
-    assert azure_connection.get_groups_and_users() == expected_result
+#     assert azure_connection.get_groups_and_users() == expected_result
 
 
 @patch('utils.azure_users.AzureConnection.get_msal_client', Mock())
@@ -244,24 +244,24 @@ def test_remove_user_from_group(
     assert expected_value == test_user
 
 
-@patch('utils.azure_users.AzureConnection.get_groups_and_users')
-@patch('requests.get')
-def test_users_functions_should_returns_all_users(
-    get_mock, get_groups_and_users_mock
-):
-    first_response = Response()
-    first_response.status_code = 200
-    first_response._content = (
-        b'{"odata.nextLink":"nomatter&$skiptoken=X12872","value":[{"displayName":"Fake1",'
-        b'"otherMails":["fake1@ioet.com"],"objectId":"1"}]} '
-    )
+# @patch('utils.azure_users.AzureConnection.get_groups_and_users')
+# @patch('requests.get')
+# def test_users_functions_should_returns_all_users(
+#     get_mock, get_groups_and_users_mock
+# ):
+#     first_response = Response()
+#     first_response.status_code = 200
+#     first_response._content = (
+#         b'{"odata.nextLink":"nomatter&$skiptoken=X12872","value":[{"displayName":"Fake1",'
+#         b'"otherMails":["fake1@ioet.com"],"objectId":"1"}]} '
+#     )
 
-    second_response = copy.copy(first_response)
-    second_response._content = b'{"value":[{"displayName":"Fake2","otherMails":["fake2@ioet.com"],"objectId":"1"}]}'
+#     second_response = copy.copy(first_response)
+#     second_response._content = b'{"value":[{"displayName":"Fake2","otherMails":["fake2@ioet.com"],"objectId":"1"}]}'
 
-    get_mock.side_effect = [first_response, second_response]
-    get_groups_and_users_mock.return_value = []
+#     get_mock.side_effect = [first_response, second_response]
+#     get_groups_and_users_mock.return_value = []
 
-    users = AzureConnection().users()
+#     users = AzureConnection().users()
 
-    assert len(users) == 2
+#     assert len(users) == 2

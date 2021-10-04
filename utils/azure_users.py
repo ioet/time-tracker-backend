@@ -13,7 +13,7 @@ class MSConfig:
         'MS_SECRET',
         'MS_SCOPE',
         'MS_ENDPOINT',
-        'USER-ID',
+        'USERIDASTRID',
     ]
 
     check_variables_are_defined(ms_variables)
@@ -23,7 +23,7 @@ class MSConfig:
     SECRET = os.environ.get('MS_SECRET')
     SCOPE = os.environ.get('MS_SCOPE')
     ENDPOINT = os.environ.get('MS_ENDPOINT')
-    USERID =os.environ.get('USER-ID')
+    USERID =os.environ.get('USERIDASTRID')
 
 
 class BearerAuth(requests.auth.AuthBase):
