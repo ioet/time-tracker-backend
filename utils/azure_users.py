@@ -96,13 +96,14 @@ class AzureConnection:
         role_fields_params = ','.join(
             [field_name for field_name, _ in ROLE_FIELD_VALUES.values()]
         )
-        endpoint = "{endpoint}/users?api-version=1.6&$select=displayName,otherMails,objectId,{role_fields_params}".format(
+        endpoint = "{endpoint}/users?api-version=1.6&$select=displayName,otherMails,mail,objectId,{role_fields_params}".format(
             endpoint=self.config.ENDPOINT,
             role_fields_params=role_fields_params,
         )
 
         exists_users = True
         users = []
+        valid_users = []
         skip_token_attribute = '&$skiptoken='
 
         while exists_users:
@@ -124,8 +125,12 @@ class AzureConnection:
                     skip_token_attribute
                 )[1]
                 endpoint = endpoint + skip_token_attribute + request_token
-
-        return [self.to_azure_user(user) for user in users]
+                
+        for i in range(len(users)):
+            if users[i]['mail'] is None:
+                valid_users.append(users[i])
+        
+        return [self.to_azure_user(user) for user in valid_users]
 
     def to_azure_user(self, item) -> AzureUser:
         there_is_email = len(item['otherMails']) > 0
