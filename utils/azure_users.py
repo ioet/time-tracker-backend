@@ -13,6 +13,7 @@ class MSConfig:
         'MS_SECRET',
         'MS_SCOPE',
         'MS_ENDPOINT',
+        'USERID'
     ]
 
     check_variables_are_defined(ms_variables)
@@ -22,6 +23,7 @@ class MSConfig:
     SECRET = os.environ.get('MS_SECRET')
     SCOPE = os.environ.get('MS_SCOPE')
     ENDPOINT = os.environ.get('MS_ENDPOINT')
+    USERID = os.environ.get('USERID')
 
 
 class BearerAuth(requests.auth.AuthBase):
@@ -261,6 +263,8 @@ class AzureConnection:
             [member['objectId'] for member in item['members']],
         )
         result = list(map(parse_item, response.json()['value']))
+        result[0][1].append(self.config.USERID)
+        
         return result
 
     def is_user_in_group(self, user_id, data: dict):
