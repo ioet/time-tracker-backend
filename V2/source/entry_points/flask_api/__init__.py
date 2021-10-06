@@ -5,7 +5,7 @@ from . import activities_endpoints
 
 
 def create_app(test_config=None):
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask(__name__)
 
     api = Api(
         app,
