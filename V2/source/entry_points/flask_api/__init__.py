@@ -1,11 +1,13 @@
 from flask import Flask
+from flask_wtf.csrf import CSRFProtect
 from flask_restplus import Namespace, Resource, Api
 from http import HTTPStatus
 from . import activities_endpoints
 
-
+csrf = CSRFProtect()
 def create_app(test_config=None):
     app = Flask(__name__)
+    csrf.init_app(app)
 
     api = Api(
         app,
@@ -22,5 +24,6 @@ def create_app(test_config=None):
     ns_activities.route('/<string:activity_id>')(activities_endpoints.Activity)
 
     api.add_namespace(ns_activities)
+
 
     return app
