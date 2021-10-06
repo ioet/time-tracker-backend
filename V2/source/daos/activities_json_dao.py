@@ -1,33 +1,29 @@
 from V2.source.daos.activities_dao import ActivitiesDao
 from V2.source.dtos.activity import Activity
+import dataclasses
 import json
 import typing
-
 
 class ActivitiesJsonDao(ActivitiesDao):
     def __init__(self, json_data_file_path: str):
         self.json_data_file_path = json_data_file_path
-        self.activity_keys = Activity.__dataclass_fields__.keys()
-
-    def get_by_id(self, activity_id: str) -> Activity:
-        activities_grouped_by_id = {
-            activity.get('id'): activity
-            for activity in self.__get_activities_from_file()
-        }
-        activity = activities_grouped_by_id.get(activity_id)
-        activity_dto = (
-            self.__create_activity_dto(activity) if activity else None
-        )
-
-        return activity_dto
-
-    def get_all(self) -> typing.List[Activity]:
-        all_activities = self.__get_activities_from_file()
-        activity_dtos = [
-            self.__create_activity_dto(activity) for activity in all_activities
+        self.activity_keys = [
+            field.name for field in dataclasses.fields(Activity)
         ]
 
-        return activity_dtos
+    def get_by_id(self, activity_id: str) -> Activity:
+        activity = {
+            activity.get('id'): activity
+            for activity in self.__get_activities_from_file()
+        }.get(activity_id)
+
+        return self.__create_activity_dto(activity) if activity else None
+
+    def get_all(self) -> typing.List[Activity]:
+        return [
+            self.__create_activity_dto(activity)
+            for activity in self.__get_activities_from_file()
+        ]
 
     def __get_activities_from_file(self) -> typing.List[dict]:
         try:
@@ -42,5 +38,4 @@ class ActivitiesJsonDao(ActivitiesDao):
 
     def __create_activity_dto(self, activity: dict) -> Activity:
         activity = {key: activity.get(key) for key in self.activity_keys}
-        activity_dto = Activity(**activity)
-        return activity_dto
+        return Activity(**activity)

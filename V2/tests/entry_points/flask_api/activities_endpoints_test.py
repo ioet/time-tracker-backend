@@ -1,15 +1,13 @@
+from V2.source.entry_points.flask_api import create_app
+from V2.source import use_cases
+from V2.source.dtos.activity import Activity
 import json
-
 import pytest
 from http import HTTPStatus
 from pytest_mock import MockFixture
 from flask.testing import FlaskClient
 from faker import Faker
 from werkzeug.exceptions import NotFound
-
-from V2.source.entry_points.flask_api import create_app
-from V2.source import use_cases
-from V2.source.dtos.activity import Activity
 
 fake = Faker()
 

@@ -1,7 +1,6 @@
 from flask import Flask
 from flask_restplus import Namespace, Resource, Api
 from http import HTTPStatus
-
 from . import activities_endpoints
 
 

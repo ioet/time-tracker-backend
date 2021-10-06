@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.39.0 (2021-10-04)
+### Feature
+* TT-353 Create V2 Activities DAO ([#320](https://github.com/ioet/time-tracker-backend/issues/320)) ([`328ad43`](https://github.com/ioet/time-tracker-backend/commit/328ad43e3058de3c824b2feec47530bee5b23823))
+
 ## v0.38.0 (2021-09-08)
 ### Feature
 * TT-326 Get recent projects feature added ([#319](https://github.com/ioet/time-tracker-backend/issues/319)) ([`8e2aadc`](https://github.com/ioet/time-tracker-backend/commit/8e2aadc0937d3a26752b7fb8a1dd837af2f6d6a0))
