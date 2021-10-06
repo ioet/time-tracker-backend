@@ -31,24 +31,31 @@ def client():
         yield client
 
 
-def test_get_all_activities_endpoint(client: FlaskClient, mocker: MockFixture):
+def test__activities_class__uses_the_get_activities_use_case__to_retrieve_activities(client: FlaskClient,
+                                                                                     mocker: MockFixture):
     use_cases.get_list_activities = mocker.Mock(return_value=[])
-    response = client.get("/activities/")
-    assert response.status_code == HTTPStatus.OK
 
+    response = client.get("/activities/")
     json_data = json.loads(response.data)
+
+    assert response.status_code == HTTPStatus.OK
     assert [] == json_data
 
 
-def test_get_activity_by_id_using_a_valid_id(client: FlaskClient, mocker: MockFixture):
+def test__activity_class__returns_an_activity__when_activity_matches_its_id(client: FlaskClient, mocker: MockFixture):
     use_cases.get_activity_by_id = mocker.Mock(return_value=fake_activity_dto)
+
     response = client.get("/activities/%s" % valid_id)
+
     assert response.status_code == HTTPStatus.OK
     assert fake_activity == json.loads(response.data)
 
 
-def test_get_activity_by_id_using_an_invalid_id(client: FlaskClient, mocker: MockFixture):
+def test__activity_class__returns_an_activity__when_no_activity_matches_its_id(client: FlaskClient,
+                                                                               mocker: MockFixture):
     invalid_id = fake.uuid4()
     use_cases.get_activity_by_id = mocker.Mock(side_effect=NotFound)
+
     response = client.get("/activities/%s" % invalid_id)
+
     assert response.status_code == HTTPStatus.NOT_FOUND

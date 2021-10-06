@@ -4,6 +4,7 @@ import dataclasses
 import json
 import typing
 
+
 class ActivitiesJsonDao(ActivitiesDao):
     def __init__(self, json_data_file_path: str):
         self.json_data_file_path = json_data_file_path
