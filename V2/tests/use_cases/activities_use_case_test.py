@@ -10,7 +10,7 @@ fake = Faker()
 
 def test__get_list_activities_function__uses_the_activities_service__to_retrieve_activities(mocker: MockFixture):
     expected_activities = mocker.Mock()
-    use_cases.get_list_activities = mocker.Mock(return_value=expected_activities)
+    mocker.patch('V2.source.use_cases.get_list_activities', return_value=expected_activities);
 
     actual_activities = use_cases.get_list_activities()
 
@@ -20,7 +20,7 @@ def test__get_list_activities_function__uses_the_activities_service__to_retrieve
 
 def test__get_activity_by_id_function__uses_the_activities_service__to_retrieve_activity(mocker: MockFixture):
     expected_activity = mocker.Mock()
-    use_cases.get_activity_by_id = mocker.Mock(return_value=expected_activity)
+    mocker.patch('V2.source.use_cases.get_activity_by_id', return_value=expected_activity);
 
     actual_activity = use_cases.get_activity_by_id(fake.uuid4())
 
