@@ -31,9 +31,10 @@ def client():
         yield client
 
 
-def test__activities_class__uses_the_get_activities_use_case__to_retrieve_activities(client: FlaskClient,
-                                                                                     mocker: MockFixture):
-    use_cases.get_list_activities = mocker.Mock(return_value=[])
+def test__activity_endpoint__returns_all_activities(
+    client: FlaskClient, mocker: MockFixture
+):
+    mocker.patch('V2.source.use_cases.get_list_activities', return_value=[])
 
     response = client.get("/activities/")
     json_data = json.loads(response.data)
@@ -42,8 +43,13 @@ def test__activities_class__uses_the_get_activities_use_case__to_retrieve_activi
     assert [] == json_data
 
 
-def test__activity_class__returns_an_activity__when_activity_matches_its_id(client: FlaskClient, mocker: MockFixture):
-    use_cases.get_activity_by_id = mocker.Mock(return_value=fake_activity_dto)
+def test__activity_endpoint__returns_an_activity__when_activity_matches_its_id(
+    client: FlaskClient, mocker: MockFixture
+):
+    mocker.patch(
+        'V2.source.use_cases.get_activity_by_id',
+        return_value=fake_activity_dto,
+    )
 
     response = client.get("/activities/%s" % valid_id)
 
@@ -51,10 +57,13 @@ def test__activity_class__returns_an_activity__when_activity_matches_its_id(clie
     assert fake_activity == json.loads(response.data)
 
 
-def test__activity_class__returns_an_activity__when_no_activity_matches_its_id(client: FlaskClient,
-                                                                               mocker: MockFixture):
+def test__activity_endpoint__returns_a_not_found_status__when_no_activity_matches_its_id(
+    client: FlaskClient, mocker: MockFixture
+):
     invalid_id = fake.uuid4()
-    use_cases.get_activity_by_id = mocker.Mock(side_effect=NotFound)
+    mocker.patch(
+        'V2.source.use_cases.get_activity_by_id', side_effect=NotFound
+    )
 
     response = client.get("/activities/%s" % invalid_id)
 
