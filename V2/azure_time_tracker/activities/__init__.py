@@ -9,12 +9,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info(
         'Python HTTP trigger function processed a request to get an activity.'
     )
-    mimetype = "application/json"
-    id = req.route_params.get('id')
+    activity_id = req.route_params.get('id')
 
-    if id:
-        response = json.dumps(get_by_id(id))
+    if activity_id:
+        response = json.dumps(get_by_id(activity_id))
     else:
         response = json.dumps(get_all())
 
-    return func.HttpResponse(body=response, status_code=200, mimetype=mimetype)
+    return func.HttpResponse(
+        body=response, status_code=200, mimetype="application/json"
+    )
