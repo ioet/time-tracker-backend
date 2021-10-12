@@ -1,27 +1,11 @@
 from V2.source.entry_points.flask_api import create_app
-from V2.source import use_cases
-from V2.source.dtos.activity import Activity
 import json
 import pytest
-from http import HTTPStatus
-from pytest_mock import MockFixture
+import typing
 from flask.testing import FlaskClient
+from http import HTTPStatus
 from faker import Faker
-from werkzeug.exceptions import NotFound
-
-fake = Faker()
-
-valid_id = fake.uuid4()
-
-fake_activity = {
-    "name": fake.company(),
-    "description": fake.paragraph(),
-    "tenant_id": fake.uuid4(),
-    "id": valid_id,
-    "deleted": fake.date(),
-    "status": fake.boolean(),
-}
-fake_activity_dto = Activity(**fake_activity)
+import shutil
 
 
 @pytest.fixture
@@ -31,40 +15,72 @@ def client():
         yield client
 
 
-def test__activity_endpoint__returns_all_activities(
-    client: FlaskClient, mocker: MockFixture
-):
-    mocker.patch('V2.source.use_cases.get_list_activities', return_value=[])
+@pytest.fixture
+def activities_json(tmpdir_factory):
+    temporary_directory = tmpdir_factory.mktemp("tmp")
+    json_file = temporary_directory.join("activities.json")
+    activities = [
+        {
+            'id': 'c61a4a49-3364-49a3-a7f7-0c5f2d15072b',
+            'name': 'Development',
+            'description': 'Development',
+            'deleted': 'b4327ba6-9f96-49ee-a9ac-3c1edf525172',
+            'status': None,
+            'tenant_id': 'cc925a5d-9644-4a4f-8d99-0bee49aadd05',
+        },
+        {
+            'id': '94ec92e2-a500-4700-a9f6-e41eb7b5507c',
+            'name': 'Management',
+            'description': None,
+            'deleted': '7cf6efe5-a221-4fe4-b94f-8945127a489a',
+            'status': None,
+            'tenant_id': 'cc925a5d-9644-4a4f-8d99-0bee49aadd05',
+        },
+        {
+            'id': 'd45c770a-b1a0-4bd8-a713-22c01a23e41b',
+            'name': 'Operations',
+            'description': 'Operation activities performed.',
+            'deleted': '7cf6efe5-a221-4fe4-b94f-8945127a489a',
+            'status': 'active',
+            'tenant_id': 'cc925a5d-9644-4a4f-8d99-0bee49aadd05',
+        },
+    ]
 
+    with open(json_file, 'w') as outfile:
+        json.dump(activities, outfile)
+
+    with open(json_file) as outfile:
+        activities_json = json.load(outfile)
+
+    yield activities_json
+    shutil.rmtree(temporary_directory)
+
+
+def test_test__activity_endpoint__returns_all_activities(
+    client: FlaskClient, activities_json: typing.List[dict]
+):
     response = client.get("/activities/")
     json_data = json.loads(response.data)
 
     assert response.status_code == HTTPStatus.OK
-    assert [] == json_data
+    assert json_data == activities_json
 
 
 def test__activity_endpoint__returns_an_activity__when_activity_matches_its_id(
-    client: FlaskClient, mocker: MockFixture
+    client: FlaskClient, activities_json: typing.List[dict]
 ):
-    mocker.patch(
-        'V2.source.use_cases.get_activity_by_id',
-        return_value=fake_activity_dto,
-    )
-
-    response = client.get("/activities/%s" % valid_id)
+    response = client.get("/activities/%s" % activities_json[0]['id'])
+    json_data = json.loads(response.data)
 
     assert response.status_code == HTTPStatus.OK
-    assert fake_activity == json.loads(response.data)
+    assert json_data == activities_json[0]
 
 
 def test__activity_endpoint__returns_a_not_found_status__when_no_activity_matches_its_id(
-    client: FlaskClient, mocker: MockFixture
+    client: FlaskClient,
 ):
-    invalid_id = fake.uuid4()
-    mocker.patch(
-        'V2.source.use_cases.get_activity_by_id', side_effect=NotFound
-    )
-
-    response = client.get("/activities/%s" % invalid_id)
+    response = client.get("/activities/%s" % Faker().uuid4())
+    json_data = json.loads(response.data)
 
     assert response.status_code == HTTPStatus.NOT_FOUND
+    assert json_data['message'] == 'Activity not found'
