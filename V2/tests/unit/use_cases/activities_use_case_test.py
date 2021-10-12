@@ -9,14 +9,16 @@ def test__get_list_activities_function__uses_the_activities_service__to_retrieve
     mocker: MockFixture,
 ):
     expected_activities = mocker.Mock()
-    mocker.patch(
-        'V2.source.use_cases.get_list_activities',
+    mocker.patch.object(
+        use_cases.GetActivitiesUseCase,
+        'get_activities',
         return_value=expected_activities,
     )
 
-    actual_activities = use_cases.get_list_activities()
+    activities_use_case = use_cases.GetActivitiesUseCase()
+    actual_activities = activities_use_case.get_activities()
 
-    assert use_cases.get_list_activities.called
+    assert activities_use_case.get_activities.called
     assert expected_activities == actual_activities
 
 
@@ -24,12 +26,14 @@ def test__get_activity_by_id_function__uses_the_activities_service__to_retrieve_
     mocker: MockFixture,
 ):
     expected_activity = mocker.Mock()
-    mocker.patch(
-        'V2.source.use_cases.get_activity_by_id',
+    mocker.patch.object(
+        use_cases.GetActivityUseCase,
+        'get_activity_by_id',
         return_value=expected_activity,
     )
 
-    actual_activity = use_cases.get_activity_by_id(fake.uuid4())
+    activity_use_case = use_cases.GetActivityUseCase()
+    actual_activity = activity_use_case.get_activity_by_id(fake.uuid4())
 
-    assert use_cases.get_activity_by_id.called
+    assert activity_use_case.get_activity_by_id.called
     assert expected_activity == actual_activity

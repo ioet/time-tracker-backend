@@ -4,8 +4,8 @@ from V2.source.dtos.activity import Activity
 import typing
 
 
-def get_list_activities() -> typing.List[Activity]:
-    activity_json = ActivitiesJsonDao('./V2/source/activities_data.json')
-    activities = ActivityService(activity_json)
-
-    return activities.get_all()
+class GetActivitiesUseCase:
+    def get_activities(self) -> typing.List[Activity]:
+        activity_json = ActivitiesJsonDao('./V2/source/activities_data.json')
+        activities = ActivityService(activity_json)
+        return activities.get_all()

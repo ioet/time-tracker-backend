@@ -3,8 +3,8 @@ from V2.source.daos.activities_json_dao import ActivitiesJsonDao
 from V2.source.dtos.activity import Activity
 
 
-def get_activity_by_id(id: str) -> Activity:
-    activity_json = ActivitiesJsonDao('./V2/source/activities_data.json')
-    activity = ActivityService(activity_json)
-
-    return activity.get_by_id(id)
+class GetActivityUseCase:
+    def get_activity_by_id(self, id: str) -> Activity:
+        activity_json = ActivitiesJsonDao('./V2/source/activities_data.json')
+        activity = ActivityService(activity_json)
+        return activity.get_by_id(id)

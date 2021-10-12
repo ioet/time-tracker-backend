@@ -5,12 +5,14 @@ from http import HTTPStatus
 
 class Activities(Resource):
     def get(self):
-        return [activity.__dict__ for activity in use_cases.get_list_activities()]
+        activities = use_cases.GetActivitiesUseCase()
+        return [activity.__dict__ for activity in activities.get_activities()]
 
 
 class Activity(Resource):
     def get(self, activity_id: str):
         try:
-            return use_cases.get_activity_by_id(activity_id).__dict__
+            activity = use_cases.GetActivityUseCase()
+            return activity.get_activity_by_id(activity_id).__dict__
         except AttributeError:
             return {'message': 'Activity not found'}, HTTPStatus.NOT_FOUND

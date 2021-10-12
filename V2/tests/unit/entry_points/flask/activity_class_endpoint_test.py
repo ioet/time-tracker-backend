@@ -26,25 +26,30 @@ fake_activity_dto = ActivityDTO(**fake_activity)
 def test__activities_class__uses_the_get_activities_use_case__to_retrieve_activities(
     mocker: MockFixture,
 ):
-    mocker.patch('V2.source.use_cases.get_list_activities', return_value=[])
+    mocker.patch.object(
+        use_cases.GetActivitiesUseCase,
+        'get_activities',
+        return_value=[],
+    )
 
     activities_class_endpoint = Activities()
     activities = activities_class_endpoint.get()
 
-    assert use_cases.get_list_activities.called
+    assert use_cases.GetActivitiesUseCase.get_activities.called
     assert [] == activities
 
 
 def test__activity_class__uses_the_get_activity_by_id_use_case__to_retrieve__an_activity(
     mocker: MockFixture,
 ):
-    mocker.patch(
-        'V2.source.use_cases.get_activity_by_id',
+    mocker.patch.object(
+        use_cases.GetActivityUseCase,
+        'get_activity_by_id',
         return_value=fake_activity_dto,
     )
 
     activity_class_endpoint = Activity()
     activity = activity_class_endpoint.get(valid_id)
 
-    assert use_cases.get_activity_by_id.called
+    assert use_cases.GetActivityUseCase.get_activity_by_id.called
     assert fake_activity == activity
