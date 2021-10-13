@@ -21,9 +21,13 @@ def create_app(test_config=None):
     if test_config is not None:
         app.config.from_mapping(test_config)
 
-    activities_namespace = Namespace('activities', description='Endpoint for activities')
+    activities_namespace = Namespace(
+        'activities', description='Endpoint for activities'
+    )
     activities_namespace.route('/')(activities_endpoints.Activities)
-    activities_namespace.route('/<string:activity_id>')(activities_endpoints.Activity)
+    activities_namespace.route('/<string:activity_id>')(
+        activities_endpoints.Activity
+    )
 
     api.add_namespace(activities_namespace)
 

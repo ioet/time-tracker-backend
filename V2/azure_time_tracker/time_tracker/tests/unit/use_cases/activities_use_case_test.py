@@ -1,5 +1,5 @@
-from V2.source.services.activity_service import ActivityService
-from V2.source import use_cases
+from time_tracker.source.services.activity_service import ActivityService
+from time_tracker.source import use_cases
 from pytest_mock import MockFixture
 from faker import Faker
 

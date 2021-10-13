@@ -1,5 +1,5 @@
-from V2.source.daos.activities_dao import ActivitiesDao
-from V2.source.dtos.activity import Activity
+from time_tracker.source.daos.activities_dao import ActivitiesDao
+from time_tracker.source.dtos.activity import Activity
 import dataclasses
 import json
 import typing

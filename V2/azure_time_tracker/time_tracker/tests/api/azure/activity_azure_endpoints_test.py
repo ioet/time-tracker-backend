@@ -1,18 +1,9 @@
-from V2.source.entry_points.flask_api import create_app
+from activities import main
+import azure.functions as func
 import json
 import pytest
 import typing
-from flask.testing import FlaskClient
-from http import HTTPStatus
-from faker import Faker
 import shutil
-
-
-@pytest.fixture
-def client():
-    app = create_app({'TESTING': True})
-    with app.test_client() as client:
-        yield client
 
 
 @pytest.fixture
@@ -56,31 +47,30 @@ def activities_json(tmpdir_factory):
     shutil.rmtree(temporary_directory)
 
 
-def test_test__activity_endpoint__returns_all_activities(
-    client: FlaskClient, activities_json: typing.List[dict]
+def test__activity_azure_endpoint__returns_all_activities(
+    activities_json: typing.List[dict],
 ):
-    response = client.get("/activities/")
-    json_data = json.loads(response.data)
+    req = func.HttpRequest(method='GET', body=None, url='/api/activities')
 
-    assert response.status_code == HTTPStatus.OK
-    assert json_data == activities_json
+    response = main(req)
+    activities_json_data = response.get_body().decode("utf-8")
+
+    assert response.status_code == 200
+    assert activities_json_data == json.dumps(activities_json)
 
 
-def test__activity_endpoint__returns_an_activity__when_activity_matches_its_id(
-    client: FlaskClient, activities_json: typing.List[dict]
+def test__activity_azure_endpoint__returns_an_activity__when_activity_matches_its_id(
+    activities_json: typing.List[dict],
 ):
-    response = client.get("/activities/%s" % activities_json[0]['id'])
-    json_data = json.loads(response.data)
+    req = func.HttpRequest(
+        method='GET',
+        body=None,
+        url='/api/activities/',
+        route_params={"id": activities_json[0]['id']},
+    )
 
-    assert response.status_code == HTTPStatus.OK
-    assert json_data == activities_json[0]
+    response = main(req)
+    activitiy_json_data = response.get_body().decode("utf-8")
 
-
-def test__activity_endpoint__returns_a_not_found_status__when_no_activity_matches_its_id(
-    client: FlaskClient,
-):
-    response = client.get("/activities/%s" % Faker().uuid4())
-    json_data = json.loads(response.data)
-
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    assert json_data['message'] == 'Activity not found'
+    assert response.status_code == 200
+    assert activitiy_json_data == json.dumps(activities_json[0])

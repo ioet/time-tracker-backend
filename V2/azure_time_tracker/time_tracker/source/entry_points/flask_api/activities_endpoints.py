@@ -1,10 +1,10 @@
-from V2.source.daos.activities_json_dao import ActivitiesJsonDao
-from V2.source.services.activity_service import ActivityService
-from V2.source import use_cases
+from time_tracker.source.daos.activities_json_dao import ActivitiesJsonDao
+from time_tracker.source.services.activity_service import ActivityService
+from time_tracker.source import use_cases
 from flask_restplus import Resource
 from http import HTTPStatus
 
-JSON_PATH = './V2/source/activities_data.json'
+JSON_PATH = 'V2/azure_time_tracker/time_tracker/source/activities_data.json'
 
 
 class Activities(Resource):

@@ -1,5 +1,5 @@
-from V2.source.services.activity_service import ActivityService
-from V2.source.dtos.activity import Activity
+from time_tracker.source.services.activity_service import ActivityService
+from time_tracker.source.dtos.activity import Activity
 import typing
 
 

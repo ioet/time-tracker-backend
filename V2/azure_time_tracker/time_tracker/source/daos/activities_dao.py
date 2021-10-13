@@ -1,4 +1,4 @@
-from V2.source.dtos.activity import Activity
+from time_tracker.source.dtos.activity import Activity
 import abc
 import typing
 
