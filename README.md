@@ -530,5 +530,4 @@ Shared file with all the Feature Toggles we create, so we can have a history of 
 [Starting in Time Tracker](https://github.com/ioet/time-tracker-ui/wiki/Time-tracker)
 
 ## License
-
 Copyright 2020 ioet Inc. All Rights Reserved.
