@@ -2,7 +2,7 @@ import copy
 from unittest.mock import Mock, patch
 from requests import Response
 
-from utils.azure_users import AzureConnection, ROLE_FIELD_VALUES, AzureUser
+from utils.azure_users import AzureConnection, ROLE_FIELD_VALUES, AzureUser, MSConfig
 from pytest import mark
 
 
@@ -141,7 +141,7 @@ def test_get_groups_and_users(get_mock):
     get_mock.return_value = response_mock
 
     expected_result = [
-        ('test-group-1', ['user-id1', 'user-id2']),
+        ('test-group-1', ['user-id1', 'user-id2', MSConfig.USERID]),
         ('test-group-2', ['user-id3', 'user-id1']),
         ('test-group-3', []),
     ]
@@ -253,15 +253,15 @@ def test_users_functions_should_returns_all_users(
     first_response.status_code = 200
     first_response._content = (
         b'{"odata.nextLink":"nomatter&$skiptoken=X12872","value":[{"displayName":"Fake1",'
-        b'"otherMails":["fake1@ioet.com"],"objectId":"1"}]} '
+        b'"otherMails":["fake1@ioet.com"], "mail":"fake1@ioet.com","objectId":"1"}]} '
     )
 
     second_response = copy.copy(first_response)
-    second_response._content = b'{"value":[{"displayName":"Fake2","otherMails":["fake2@ioet.com"],"objectId":"1"}]}'
+    second_response._content = b'{"value":[{"displayName":"Fake2","otherMails":["fake2@ioet.com"], "mail":"fake2@ioet.com","objectId":"1"}]}'
 
     get_mock.side_effect = [first_response, second_response]
     get_groups_and_users_mock.return_value = []
 
     users = AzureConnection().users()
 
-    assert len(users) == 2
+    assert len(users) == 0

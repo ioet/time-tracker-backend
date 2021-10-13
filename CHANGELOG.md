@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.39.1 (2021-10-06)
+### Fix
+* TT-339 skip users with azureioet.onmicrosoft.com extension from user search ([#322](https://github.com/ioet/time-tracker-backend/issues/322)) ([`8b37d4a`](https://github.com/ioet/time-tracker-backend/commit/8b37d4a7a890b9e4880efedd19dc733e60c5e7cf))
+
 ## v0.39.0 (2021-10-04)
 ### Feature
 * TT-353 Create V2 Activities DAO ([#320](https://github.com/ioet/time-tracker-backend/issues/320)) ([`328ad43`](https://github.com/ioet/time-tracker-backend/commit/328ad43e3058de3c824b2feec47530bee5b23823))
