@@ -2,7 +2,7 @@ import copy
 from unittest.mock import Mock, patch
 from requests import Response
 
-from utils.azure_users import AzureConnection, ROLE_FIELD_VALUES, AzureUser
+from utils.azure_users import AzureConnection, ROLE_FIELD_VALUES, AzureUser, MSConfig
 from pytest import mark
 
 
@@ -141,7 +141,7 @@ def test_get_groups_and_users(get_mock):
     get_mock.return_value = response_mock
 
     expected_result = [
-        ('test-group-1', ['user-id1', 'user-id2']),
+        ('test-group-1', ['user-id1', 'user-id2', MSConfig.USERID]),
         ('test-group-2', ['user-id3', 'user-id1']),
         ('test-group-3', []),
     ]
