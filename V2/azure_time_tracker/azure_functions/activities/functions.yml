@@ -1,0 +1,9 @@
+activities:
+  handler: azure_functions/activities/activities.main
+  events:
+    - http: true
+      x-azure-settings:
+        methods:
+          - GET
+        route: activities/{id:?}
+        authLevel: anonymous

@@ -23,6 +23,10 @@ htmlcov/
 # virtual environments
 .venv
 
+# Dependency directories
+node_modules
+.serverless
+
 # Files generated for development
 .env
 timetracker-api-postman-collection.json

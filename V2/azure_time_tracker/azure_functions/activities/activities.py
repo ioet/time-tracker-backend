@@ -6,7 +6,6 @@ import logging
 import json
 import azure.functions as func
 
-
 JSON_PATH = 'V2/azure_time_tracker/time_tracker/source/activities_data.json'
 
 

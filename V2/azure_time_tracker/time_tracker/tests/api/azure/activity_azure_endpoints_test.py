@@ -1,4 +1,4 @@
-from activities import main
+from azure_functions.activities.activities import main
 import azure.functions as func
 import json
 import typing
