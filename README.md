@@ -344,7 +344,7 @@ Use the following commit message style. e.g:
 ```shell
 'feat: TT-123 Applying some changes'
 'fix: TT-321 Fixing something broken'
-'feat(config): TT-00 Fix something in config files'
+'feat(config): TT-00 Fix something in config files
 ```
 
 The value `TT-###` refers to the Jira issue that is being solved. Use TT-00 if the commit does not refer to any issue.
@@ -530,4 +530,5 @@ Shared file with all the Feature Toggles we create, so we can have a history of 
 [Starting in Time Tracker](https://github.com/ioet/time-tracker-ui/wiki/Time-tracker)
 
 ## License
-Copyright 2020 ioet Inc. All Rights Reserved.
+
+Copyright 2021 ioet Inc. All Rights Reserved.
