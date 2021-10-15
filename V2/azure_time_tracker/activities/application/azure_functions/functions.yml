@@ -1,5 +1,5 @@
 activities:
-  handler: azure_functions/activities/activities.main
+  handler: activities/application/azure_functions/activities.main
   events:
     - http: true
       x-azure-settings:

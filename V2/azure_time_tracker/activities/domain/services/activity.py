@@ -1,5 +1,5 @@
-from time_tracker.source.daos.activities_dao import ActivitiesDao
-from time_tracker.source.dtos.activity import Activity
+from activities.domain import ActivitiesDao
+from activities.domain import Activity
 import typing
 
 

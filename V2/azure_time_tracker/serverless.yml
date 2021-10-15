@@ -37,4 +37,13 @@ package:
     - "!.git/**"
 
 functions:
-  - ${file(azure_functions/activities/functions.yml)}
+  activities:
+    handler: activities/application/azure_functions/activities.main
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - GET
+          route: activities/{id:?}
+          authLevel: anonymous
+#  - ${file(activities/application/azure_functions/functions.yml)}

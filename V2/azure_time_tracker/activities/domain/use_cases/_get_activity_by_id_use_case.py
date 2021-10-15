@@ -1,5 +1,5 @@
-from time_tracker.source.services.activity_service import ActivityService
-from time_tracker.source.dtos.activity import Activity
+from activities.domain import ActivityService
+from activities.domain import Activity
 
 
 class GetActivityUseCase:
