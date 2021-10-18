@@ -7,7 +7,7 @@ import azure.functions as func
 import json
 import logging
 
-JSON_PATH = 'time_entries/infrastructure/data_persistence/activities_data.json'
+JSON_PATH = 'V2/azure_time_tracker/time_entries/infrastructure/data_persistence/activities_data.json'
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
