@@ -1,5 +1,5 @@
-from activities.domain import ActivityService
-from activities.domain import Activity
+from time_entries.domain import ActivityService
+from time_entries.domain import Activity
 import typing
 
 

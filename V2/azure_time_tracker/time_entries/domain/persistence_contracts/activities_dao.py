@@ -1,4 +1,4 @@
-from activities.domain import Activity
+from time_entries.domain import Activity
 import abc
 import typing
 

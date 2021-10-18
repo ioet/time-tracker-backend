@@ -1,9 +1,9 @@
-from time_tracker.source.entry_points.flask_api.activities_endpoints import (
+from time_entries.application import (
     Activities,
     Activity,
 )
-from time_tracker.source import use_cases
-from time_tracker.source.dtos.activity import Activity as ActivityDTO
+from time_entries.domain import use_cases
+from time_entries.domain import Activity as ActivityDTO
 from pytest_mock import MockFixture
 from faker import Faker
 from werkzeug.exceptions import NotFound

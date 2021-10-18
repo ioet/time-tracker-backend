@@ -1,13 +1,13 @@
-from activities.infrastructure import ActivitiesJsonDao
-from activities.domain import ActivityService
-from activities.domain import Activity
-from activities.domain import use_cases
+from time_entries.infrastructure import ActivitiesJsonDao
+from time_entries.domain import ActivityService
+from time_entries.domain import Activity
+from time_entries.domain import use_cases
 
 import azure.functions as func
 import json
 import logging
 
-JSON_PATH = 'activities/infrastructure/data_persistence/activities_data.json'
+JSON_PATH = 'time_entries/infrastructure/data_persistence/activities_data.json'
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
@@ -18,29 +18,29 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     status_code = 200
 
     if activity_id:
-        response = get_by_id(activity_id)
+        response = _get_by_id(activity_id)
         if response == b'Not Found':
             status_code = 404
     else:
-        response = get_all()
+        response = _get_all()
 
     return func.HttpResponse(
         body=response, status_code=status_code, mimetype="application/json"
     )
 
 
-def get_by_id(activity_id: str) -> str:
+def _get_by_id(activity_id: str) -> str:
     activity_use_case = use_cases.GetActivityUseCase(
-        create_activity_service(JSON_PATH)
+        _create_activity_service(JSON_PATH)
     )
     activity = activity_use_case.get_activity_by_id(activity_id)
 
     return json.dumps(activity.__dict__) if activity else b'Not Found'
 
 
-def get_all() -> str:
+def _get_all() -> str:
     activities_use_case = use_cases.GetActivitiesUseCase(
-        create_activity_service(JSON_PATH)
+        _create_activity_service(JSON_PATH)
     )
     return json.dumps(
         [
@@ -50,6 +50,6 @@ def get_all() -> str:
     )
 
 
-def create_activity_service(path: str):
+def _create_activity_service(path: str):
     activity_json = ActivitiesJsonDao(path)
     return ActivityService(activity_json)

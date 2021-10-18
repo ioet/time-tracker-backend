@@ -38,7 +38,7 @@ package:
 
 functions:
   activities:
-    handler: activities/application/azure_functions/activities.main
+    handler: time_entries/application/azure_functions/activities.main
     events:
       - http: true
         x-azure-settings:

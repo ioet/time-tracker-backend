@@ -1,5 +1,5 @@
-from time_tracker.source.daos.activities_json_dao import ActivitiesJsonDao
-from time_tracker.source.dtos.activity import Activity
+from time_entries.infrastructure import ActivitiesJsonDao
+from time_entries.domain import Activity
 from faker import Faker
 import json
 import pytest

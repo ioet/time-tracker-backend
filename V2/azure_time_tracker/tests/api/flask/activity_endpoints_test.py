@@ -1,4 +1,4 @@
-from time_tracker.source.entry_points.flask_api import create_app
+from time_entries.application import create_app
 import json
 import pytest
 import typing

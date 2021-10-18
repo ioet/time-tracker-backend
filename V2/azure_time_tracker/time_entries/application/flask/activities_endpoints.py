@@ -1,10 +1,10 @@
-from activities.infrastructure import ActivitiesJsonDao
-from activities.domain import ActivityService
-from activities.domain import use_cases
+from time_entries.infrastructure import ActivitiesJsonDao
+from time_entries.domain import ActivityService
+from time_entries.domain import use_cases
 from flask_restplus import Resource
 from http import HTTPStatus
 
-JSON_PATH = 'V2/azure_time_tracker/activities/infrastructure/data_persistence/activities_data.json'
+JSON_PATH = 'V2/azure_time_tracker/time_entries/infrastructure/data_persistence/activities_data.json'
 
 
 class Activities(Resource):

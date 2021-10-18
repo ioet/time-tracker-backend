@@ -2,6 +2,7 @@ from flask import Flask
 from flask_wtf.csrf import CSRFProtect
 from flask_restplus import Namespace, Resource, Api
 from http import HTTPStatus
+from .activities_endpoints import Activities, Activity
 from . import activities_endpoints
 
 csrf = CSRFProtect()

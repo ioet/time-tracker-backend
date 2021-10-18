@@ -1,4 +1,4 @@
-from azure_functions.activities.activities import main
+from time_entries.application import main
 import azure.functions as func
 import json
 import typing

@@ -1,5 +1,5 @@
-from activities.domain import ActivitiesDao
-from activities.domain import Activity
+from time_entries.domain import ActivitiesDao
+from time_entries.domain import Activity
 import dataclasses
 import json
 import typing
