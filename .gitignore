@@ -25,7 +25,13 @@ htmlcov/
 
 # Dependency directories
 node_modules
-.serverless
+
+# Serverless directories
+.serverless/
+
+# Azure Functions json config
+host.json
+local.settings.json
 
 # Files generated for development
 .env
