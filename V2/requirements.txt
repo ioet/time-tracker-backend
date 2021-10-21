@@ -1,0 +1,12 @@
+#Azure
+azure.functions
+azure-functions-worker
+
+# Tests
+pytest
+
+# Mocking
+pytest-mock
+
+# To create sample content in tests and API documentation
+Faker==4.0.2

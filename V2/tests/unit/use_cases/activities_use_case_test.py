@@ -1,5 +1,5 @@
-from V2.source.services.activity_service import ActivityService
-from V2.source import use_cases
+from time_entries._domain import ActivityService
+from time_entries._domain import _use_cases
 from pytest_mock import MockFixture
 from faker import Faker
 
@@ -14,7 +14,7 @@ def test__get_list_activities_function__uses_the_activities_service__to_retrieve
         get_all=mocker.Mock(return_value=expected_activities)
     )
 
-    activities_use_case = use_cases.GetActivitiesUseCase(activity_service)
+    activities_use_case = _use_cases.GetActivitiesUseCase(activity_service)
     actual_activities = activities_use_case.get_activities()
 
     assert activity_service.get_all.called
@@ -29,7 +29,7 @@ def test__get_activity_by_id_function__uses_the_activities_service__to_retrieve_
         get_by_id=mocker.Mock(return_value=expected_activity)
     )
 
-    activity_use_case = use_cases.GetActivityUseCase(activity_service)
+    activity_use_case = _use_cases.GetActivityUseCase(activity_service)
     actual_activity = activity_use_case.get_activity_by_id(fake.uuid4())
 
     assert activity_service.get_by_id.called
