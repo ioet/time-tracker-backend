@@ -1,1 +1,1 @@
-from tests.api.api_fixtures import activities_json
+from tests.api.api_fixtures import create_temp_activities

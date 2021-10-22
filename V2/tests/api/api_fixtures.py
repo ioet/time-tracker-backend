@@ -4,7 +4,7 @@ import shutil
 
 
 @pytest.fixture
-def activities_json(tmpdir_factory):
+def create_temp_activities(tmpdir_factory):
     temporary_directory = tmpdir_factory.mktemp("tmp")
     json_file = temporary_directory.join("activities.json")
     activities = [
@@ -13,15 +13,15 @@ def activities_json(tmpdir_factory):
             'name': 'Development',
             'description': 'Development',
             'deleted': 'b4327ba6-9f96-49ee-a9ac-3c1edf525172',
-            'status': None,
+            'status': 'active',
             'tenant_id': 'cc925a5d-9644-4a4f-8d99-0bee49aadd05',
         },
         {
             'id': '94ec92e2-a500-4700-a9f6-e41eb7b5507c',
             'name': 'Management',
-            'description': None,
+            'description': 'Description of management',
             'deleted': '7cf6efe5-a221-4fe4-b94f-8945127a489a',
-            'status': None,
+            'status': 'active',
             'tenant_id': 'cc925a5d-9644-4a4f-8d99-0bee49aadd05',
         },
         {
@@ -37,8 +37,5 @@ def activities_json(tmpdir_factory):
     with open(json_file, 'w') as outfile:
         json.dump(activities, outfile)
 
-    with open(json_file) as outfile:
-        activities_json = json.load(outfile)
-
-    yield activities_json
+    yield activities, json_file
     shutil.rmtree(temporary_directory)
