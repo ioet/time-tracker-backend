@@ -6,7 +6,7 @@ import json
 import logging
 
 JSON_PATH = (
-    'V2/time_entries/_infrastructure/_data_persistence/activities_data.json'
+    'time_entries/_infrastructure/_data_persistence/activities_data.json'
 )
 
 
@@ -23,7 +23,7 @@ def get_activities(req: func.HttpRequest) -> func.HttpResponse:
             status_code = 404
     else:
         response = _get_all()
-    print("llego")
+
     return func.HttpResponse(
         body=response, status_code=status_code, mimetype="application/json"
     )
