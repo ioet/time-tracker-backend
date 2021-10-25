@@ -77,10 +77,6 @@ typings/
 # Serverless directories
 .serverless/
 
-# Azure Functions json config
-host.json
-local.settings.json
-
 # FuseBox cache
 .fusebox/
 
