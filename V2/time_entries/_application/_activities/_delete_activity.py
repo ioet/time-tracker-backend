@@ -16,7 +16,7 @@ def delete_activity(req: func.HttpRequest) -> func.HttpResponse:
     )
     activity_id = req.route_params.get('id')
     response = _delete(activity_id)
-    status_code = 200 if response == b'Not found' else 404
+    status_code = 200 if response != b'Not found' else 404
 
     return func.HttpResponse(
         body=response, status_code=status_code, mimetype="application/json"
