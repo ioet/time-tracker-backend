@@ -6,12 +6,15 @@ import json
 import typing
 
 
+ACTIVITY_URL = '/api/activities/'
+
+
 def test__activity_azure_endpoint__returns_all_activities(
     create_temp_activities,
 ):
     activities_json, tmp_directory = create_temp_activities
     activities._get_activities.JSON_PATH = tmp_directory
-    req = func.HttpRequest(method='GET', body=None, url='/api/activities')
+    req = func.HttpRequest(method='GET', body=None, url=ACTIVITY_URL)
 
     response = activities.get_activities(req)
     activities_json_data = response.get_body().decode("utf-8")
@@ -28,7 +31,7 @@ def test__activity_azure_endpoint__returns_an_activity__when_activity_matches_it
     req = func.HttpRequest(
         method='GET',
         body=None,
-        url='/api/activities/',
+        url=ACTIVITY_URL,
         route_params={"id": activities_json[0]['id']},
     )
 
@@ -47,7 +50,7 @@ def test__activity_azure_endpoint__returns_an_activity_with_inactive_status__whe
     req = func.HttpRequest(
         method='DELETE',
         body=None,
-        url='/api/activities/',
+        url=ACTIVITY_URL,
         route_params={"id": activities_json[0]['id']},
     )
 
@@ -67,7 +70,7 @@ def test__update_activity_azure_endpoint__returns_an_activity__when_found_an_act
     req = func.HttpRequest(
         method='PUT',
         body=json.dumps(activity_data).encode("utf-8"),
-        url='/api/activities/',
+        url=ACTIVITY_URL,
         route_params={"id": activities_json[0]['id']},
     )
 
