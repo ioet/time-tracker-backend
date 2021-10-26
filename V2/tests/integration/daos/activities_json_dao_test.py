@@ -6,6 +6,18 @@ import pytest
 import typing
 
 
+fake_activities = [
+    {
+        'id': Faker().uuid4(),
+        'name': Faker().user_name(),
+        'description': Faker().sentence(),
+        'deleted': Faker().uuid4(),
+        'status': 'active',
+        'tenant_id': Faker().uuid4(),
+    }
+]
+
+
 @pytest.fixture(name='create_fake_activities')
 def _create_fake_activities(mocker) -> typing.List[Activity]:
     def _creator(activities):
@@ -20,18 +32,7 @@ def test_get_by_id__returns_an_activity_dto__when_found_one_activity_that_matche
     create_fake_activities,
 ):
     activities_json_dao = ActivitiesJsonDao(Faker().file_path())
-    activities = create_fake_activities(
-        [
-            {
-                "name": "test_name",
-                "description": "test_description",
-                "tenant_id": "test_tenant_id",
-                "id": "test_id",
-                "deleted": "test_deleted",
-                "status": "test_status",
-            }
-        ]
-    )
+    activities = create_fake_activities(fake_activities)
     activity_dto = activities.pop()
 
     result = activities_json_dao.get_by_id(activity_dto.id)
@@ -55,19 +56,7 @@ def test__get_all__returns_a_list_of_activity_dto_objects__when_one_or_more_acti
 ):
     activities_json_dao = ActivitiesJsonDao(Faker().file_path())
     number_of_activities = 3
-    activities = create_fake_activities(
-        [
-            {
-                "name": "test_name",
-                "description": "test_description",
-                "tenant_id": "test_tenant_id",
-                "id": "test_id",
-                "deleted": "test_deleted",
-                "status": "test_status",
-            }
-        ]
-        * number_of_activities
-    )
+    activities = create_fake_activities(fake_activities * number_of_activities)
 
     result = activities_json_dao.get_all()
 
@@ -117,3 +106,29 @@ def test_delete__returns_none__when_no_activity_matching_its_id_is_found(
     result = activities_json_dao.delete(Faker().uuid4())
 
     assert result is None
+
+
+def test_update__returns_an_activity_dto__when_found_one_activity_to_update(
+    create_fake_activities,
+):
+    activities_json_dao = ActivitiesJsonDao(Faker().file_path())
+    activities = create_fake_activities(fake_activities)
+    activity_dto = activities.pop()
+    activity_data = {"description": Faker().sentence()}
+
+    result = activities_json_dao.update(activity_dto.id, activity_data)
+    new_activity = {**activity_dto.__dict__, **activity_data}
+
+    assert result == Activity(**new_activity)
+
+
+def test_update__returns_none__when_doesnt_found_one_activity_to_update(
+    create_fake_activities,
+):
+    activities_json_dao = ActivitiesJsonDao(Faker().file_path())
+    create_fake_activities([])
+    activity_data = {"description": Faker().sentence()}
+
+    result = activities_json_dao.update('', activity_data)
+
+    assert result == None

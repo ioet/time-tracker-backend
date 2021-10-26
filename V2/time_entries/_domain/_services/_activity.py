@@ -14,3 +14,6 @@ class ActivityService:
 
     def delete(self, activity_id: str) -> Activity:
         return self.activities_dao.delete(activity_id)
+
+    def update(self, activity_id: str, new_activity: dict) -> Activity:
+        return self.activities_dao.update(activity_id, new_activity)

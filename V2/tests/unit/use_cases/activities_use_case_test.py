@@ -49,3 +49,20 @@ def test__delete_activity_function__uses_the_activity_service__to_change_activit
 
     assert activity_service.delete.called
     assert expected_activity == deleted_activity
+
+
+def test__update_activity_function__uses_the_activities_service__to_update_an_activity(
+    mocker: MockFixture,
+):
+    expected_activity = mocker.Mock()
+    activity_service = mocker.Mock(
+        update=mocker.Mock(return_value=expected_activity)
+    )
+
+    activity_use_case = _use_cases.UpdateActivityUseCase(activity_service)
+    updated_activity = activity_use_case.update_activity(
+        fake.uuid4(), fake.pydict()
+    )
+
+    assert activity_service.update.called
+    assert expected_activity == updated_activity

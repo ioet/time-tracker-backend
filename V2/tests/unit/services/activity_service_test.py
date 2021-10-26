@@ -41,3 +41,20 @@ def test__delete_activity__uses_the_activity_dao__to_change_activity_status(
 
     assert activity_dao.delete.called
     assert expected_activity == deleted_activity
+
+
+def test__update_activity__uses_the_activity_dao__to_update_one_activity(
+    mocker,
+):
+    expected_activity = mocker.Mock()
+    activity_dao = mocker.Mock(
+        update=mocker.Mock(return_value=expected_activity)
+    )
+    activity_service = ActivityService(activity_dao)
+
+    updated_activity = activity_service.update(
+        Faker().uuid4(), Faker().pydict()
+    )
+
+    assert activity_dao.update.called
+    assert expected_activity == updated_activity
