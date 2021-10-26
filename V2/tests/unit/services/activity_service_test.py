@@ -26,3 +26,18 @@ def test__get_by_id__uses_the_activity_dao__to_retrieve_one_activity(mocker):
 
     assert activity_dao.get_by_id.called
     assert expected_activity == actual_activity
+
+
+def test__delete_activity__uses_the_activity_dao__to_change_activity_status(
+    mocker,
+):
+    expected_activity = mocker.Mock()
+    activity_dao = mocker.Mock(
+        delete=mocker.Mock(return_value=expected_activity)
+    )
+
+    activity_service = ActivityService(activity_dao)
+    deleted_activity = activity_service.delete(Faker().uuid4())
+
+    assert activity_dao.delete.called
+    assert expected_activity == deleted_activity
