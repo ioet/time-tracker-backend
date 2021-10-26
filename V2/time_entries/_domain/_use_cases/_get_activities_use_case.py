@@ -1,5 +1,4 @@
-from V2.source.services.activity_service import ActivityService
-from V2.source.dtos.activity import Activity
+from time_entries._domain import ActivityService, Activity
 import typing
 
 

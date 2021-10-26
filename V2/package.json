@@ -1,0 +1,17 @@
+{
+  "name": "time-tracker-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "offline": "serverless offline",
+    "deploy": "serverless deploy"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "serverless": "^2.64.1",
+    "serverless-azure-functions": "1.0.2-22"
+  }
+}

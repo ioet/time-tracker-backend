@@ -38,6 +38,8 @@ PyJWT==1.7.1
 
 #Azure
 msal==1.3.0
+azure-functions==1.7.2
+azure-functions-worker==1.1.9
 
 # Time utils
 pytz==2019.3

@@ -23,6 +23,16 @@ htmlcov/
 # virtual environments
 .venv
 
+# Dependency directories
+node_modules
+
+# Serverless directories
+.serverless/
+
+# Azure Functions json config
+host.json
+local.settings.json
+
 # Files generated for development
 .env
 timetracker-api-postman-collection.json

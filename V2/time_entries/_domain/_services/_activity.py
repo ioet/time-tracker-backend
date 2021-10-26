@@ -1,5 +1,4 @@
-from V2.source.daos.activities_dao import ActivitiesDao
-from V2.source.dtos.activity import Activity
+from time_entries._domain import ActivitiesDao, Activity
 import typing
 
 
