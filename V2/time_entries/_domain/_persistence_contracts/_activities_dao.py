@@ -11,3 +11,7 @@ class ActivitiesDao(abc.ABC):
     @abc.abstractmethod
     def get_all(self) -> typing.List[Activity]:
         pass
+
+    @abc.abstractmethod
+    def delete(self, id: str) -> Activity:
+        pass

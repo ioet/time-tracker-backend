@@ -25,6 +25,32 @@ class ActivitiesJsonDao(ActivitiesDao):
             for activity in self.__get_activities_from_file()
         ]
 
+    def delete(self, activity_id: str) -> Activity:
+        activity = self.get_by_id(activity_id)
+        if activity:
+            activity_deleted = {**activity.__dict__, 'status': 'inactive'}
+            activities_updated = list(
+                map(
+                    lambda activity: activity
+                    if activity.get('id') != activity_id
+                    else activity_deleted,
+                    self.__get_activities_from_file(),
+                )
+            )
+
+            try:
+                file = open(self.json_data_file_path, 'w')
+                json.dump(activities_updated, file)
+                file.close()
+
+                return self.__create_activity_dto(activity_deleted)
+
+            except FileNotFoundError:
+                return None
+
+        else:
+            return None
+
     def __get_activities_from_file(self) -> typing.List[dict]:
         try:
             file = open(self.json_data_file_path)

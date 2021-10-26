@@ -47,7 +47,7 @@ def test__get_by_id__returns_none__when_no_activity_matches_its_id(
 
     result = activities_json_dao.get_by_id(Faker().uuid4())
 
-    assert result == None
+    assert result is None
 
 
 def test__get_all__returns_a_list_of_activity_dto_objects__when_one_or_more_activities_are_found(
@@ -83,3 +83,37 @@ def test_get_all__returns_an_empty_list__when_doesnt_found_any_activities(
     result = activities_json_dao.get_all()
 
     assert result == activities
+
+
+def test_delete__returns_an_activity_with_inactive_status__when_an_activity_matching_its_id_is_found(
+    create_fake_activities,
+):
+    activities_json_dao = ActivitiesJsonDao(Faker().file_path())
+    activities = create_fake_activities(
+        [
+            {
+                "name": "test_name",
+                "description": "test_description",
+                "tenant_id": "test_tenant_id",
+                "id": "test_id",
+                "deleted": "test_deleted",
+                "status": "test_status",
+            }
+        ]
+    )
+
+    activity_dto = activities.pop()
+    result = activities_json_dao.delete(activity_dto.id)
+
+    assert result.status == 'inactive'
+
+
+def test_delete__returns_none__when_no_activity_matching_its_id_is_found(
+    create_fake_activities,
+):
+    activities_json_dao = ActivitiesJsonDao(Faker().file_path())
+    create_fake_activities([])
+
+    result = activities_json_dao.delete(Faker().uuid4())
+
+    assert result is None

@@ -6,7 +6,7 @@ from faker import Faker
 fake = Faker()
 
 
-def test__get_list_activities_function__uses_the_activities_service__to_retrieve_activities(
+def test__get_list_activities_function__uses_the_activity_service__to_retrieve_activities(
     mocker: MockFixture,
 ):
     expected_activities = mocker.Mock()
@@ -21,7 +21,7 @@ def test__get_list_activities_function__uses_the_activities_service__to_retrieve
     assert expected_activities == actual_activities
 
 
-def test__get_activity_by_id_function__uses_the_activities_service__to_retrieve_activity(
+def test__get_activity_by_id_function__uses_the_activity_service__to_retrieve_activity(
     mocker: MockFixture,
 ):
     expected_activity = mocker.Mock()
@@ -34,3 +34,18 @@ def test__get_activity_by_id_function__uses_the_activities_service__to_retrieve_
 
     assert activity_service.get_by_id.called
     assert expected_activity == actual_activity
+
+
+def test__delete_activity_function__uses_the_activity_service__to_change_activity_status(
+    mocker: MockFixture,
+):
+    expected_activity = mocker.Mock()
+    activity_service = mocker.Mock(
+        delete=mocker.Mock(return_value=expected_activity)
+    )
+
+    activity_use_case = _use_cases.DeleteActivityUseCase(activity_service)
+    deleted_activity = activity_use_case.delete_activity(fake.uuid4())
+
+    assert activity_service.delete.called
+    assert expected_activity == deleted_activity

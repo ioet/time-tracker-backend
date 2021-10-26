@@ -11,3 +11,6 @@ class ActivityService:
 
     def get_all(self) -> typing.List[Activity]:
         return self.activities_dao.get_all()
+
+    def delete(self, activity_id: str) -> Activity:
+        return self.activities_dao.delete(activity_id)
