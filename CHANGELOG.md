@@ -2,6 +2,19 @@
 
 <!--next-version-placeholder-->
 
+## v0.40.0 (2021-10-27)
+### Feature
+* TT-367  V2 - Delete Activity ([#330](https://github.com/ioet/time-tracker-backend/issues/330)) ([`6ba8320`](https://github.com/ioet/time-tracker-backend/commit/6ba8320c6ddd6599679dfbbbaf9ac1dba9addb8d))
+* TT-358 Use serverless to create Azure endpoint ([#328](https://github.com/ioet/time-tracker-backend/issues/328)) ([`464f281`](https://github.com/ioet/time-tracker-backend/commit/464f28193d986f12ccea6c785eee1f818b5989fb))
+
+### Fix
+* TT-385 adding library Flask-SQLAlchemy ([#332](https://github.com/ioet/time-tracker-backend/issues/332)) ([`22de108`](https://github.com/ioet/time-tracker-backend/commit/22de108ef0bd7de0f130a697e5068cad308f76e2))
+* TT-001 commit to bring the changes to production ([#327](https://github.com/ioet/time-tracker-backend/issues/327)) ([`1d65c1d`](https://github.com/ioet/time-tracker-backend/commit/1d65c1d65c5a29bb6330dc8d52ae1bd5c38003be))
+* TT-335 patch to give admin permissions to certain users ([#323](https://github.com/ioet/time-tracker-backend/issues/323)) ([`c0b51c9`](https://github.com/ioet/time-tracker-backend/commit/c0b51c9b3127c7d231448e038a713fcc6126c093))
+
+### Documentation
+* TT-000 test 2 release ([#326](https://github.com/ioet/time-tracker-backend/issues/326)) ([`7294e2e`](https://github.com/ioet/time-tracker-backend/commit/7294e2e14641ee45f408c593e768cc7f2e07e742))
+
 ## v0.39.1 (2021-10-06)
 ### Fix
 * TT-339 skip users with azureioet.onmicrosoft.com extension from user search ([#322](https://github.com/ioet/time-tracker-backend/issues/322)) ([`8b37d4a`](https://github.com/ioet/time-tracker-backend/commit/8b37d4a7a890b9e4880efedd19dc733e60c5e7cf))
