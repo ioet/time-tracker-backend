@@ -80,3 +80,23 @@ def test__update_activity_azure_endpoint__returns_an_activity__when_found_an_act
 
     assert response.status_code == 200
     assert activitiy_json_data == json.dumps(new_activity)
+
+def test__activity_azure_endpoint__creates_an_activity__when_activity_has_all_attributes(
+     create_temp_activities,
+ ):
+     activities_json, tmp_directory = create_temp_activities
+     activities._create_activity.JSON_PATH = tmp_directory
+
+     activity_body = {'id': Faker().uuid4(), 'name': Faker().user_name(), 'description': Faker().sentence(),'deleted': Faker().uuid4() ,'status': 'active', 'tenant_id': Faker().uuid4()}
+     body = json.dumps(activity_body).encode("utf-8")
+     req = func.HttpRequest(
+         method='POST',
+         body= body,
+         url='/api/activities/',
+     )
+
+     response = activities._create_activity.create_activity(req)
+     activitiy_json_data = response.get_body()
+
+     assert response.status_code == 200
+     assert activitiy_json_data ==  body

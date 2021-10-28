@@ -3,11 +3,12 @@
 # Dependencies
 -r ../commons.txt
 -r ../azure_cosmos.txt
--r ../sql_db.txt
+# -r ../sql_db.txt
 
 # For production releases
 
 #Required by Flask
+Faker==4.0.2
 Flask==1.1.1
 Flask-WTF==0.15.1
 flake8==3.7.9

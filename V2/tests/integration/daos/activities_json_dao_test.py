@@ -132,3 +132,18 @@ def test_update__returns_none__when_doesnt_found_one_activity_to_update(
     result = activities_json_dao.update('', activity_data)
 
     assert result == None
+
+def test_create_activity__returns_an_activity_dto__when_create_an_activity_that_matches_attributes(create_fake_activities):
+     create_fake_activities([])
+
+     activities_json_dao = ActivitiesJsonDao(Faker().file_path())
+     activity_data = {
+         "name": "test_name",
+         "description": "test_description",
+         "tenant_id": "test_tenant_id",
+         "id": "test_id",
+         "deleted": "test_deleted",
+         "status": "test_status",
+     }
+     result = activities_json_dao.create_activity(activity_data)
+     assert result == Activity(**activity_data)
