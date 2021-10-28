@@ -56,3 +56,13 @@ functions:
             - DELETE
           route: activities/{id}
           authLevel: anonymous
+
+  update_activity:
+    handler: time_entries/interface.update_activity
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - PUT
+          route: activities/{id}
+          authLevel: anonymous

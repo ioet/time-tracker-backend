@@ -51,6 +51,32 @@ class ActivitiesJsonDao(ActivitiesDao):
         else:
             return None
 
+    def update(self, activity_id: str, new_activity: dict) -> Activity:
+        activity = self.get_by_id(activity_id)
+        if not activity:
+            return None
+
+        new_activity = {**activity.__dict__, **new_activity}
+
+        activities_updated = list(
+            map(
+                lambda activity: activity
+                if activity.get('id') != activity_id
+                else new_activity,
+                self.__get_activities_from_file(),
+            )
+        )
+
+        try:
+            file = open(self.json_data_file_path, 'w')
+            json.dump(activities_updated, file)
+            file.close()
+
+            return self.__create_activity_dto(new_activity)
+
+        except FileNotFoundError:
+            return None
+
     def __get_activities_from_file(self) -> typing.List[dict]:
         try:
             file = open(self.json_data_file_path)

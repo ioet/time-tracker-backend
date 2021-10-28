@@ -15,3 +15,7 @@ class ActivitiesDao(abc.ABC):
     @abc.abstractmethod
     def delete(self, id: str) -> Activity:
         pass
+
+    @abc.abstractmethod
+    def update(self, id: str, new_activity: dict) -> Activity:
+        pass
