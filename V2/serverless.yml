@@ -63,6 +63,16 @@ functions:
       - http: true
         x-azure-settings:
           methods:
-            - PUT
+            - PUT   
           route: activities/{id}
+          authLevel: anonymous    
+
+  create_activity:
+    handler: time_entries/interface.create_activity
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - POST
+          route: activities/
           authLevel: anonymous

@@ -19,3 +19,11 @@ class ActivitiesDao(abc.ABC):
     @abc.abstractmethod
     def update(self, id: str, new_activity: dict) -> Activity:
         pass
+
+    @abc.abstractmethod
+    def create_activity(self, activity_data: dict) -> Activity:
+        pass
+
+    @abc.abstractmethod
+    def delete(self, id: str) -> Activity:
+        pass
