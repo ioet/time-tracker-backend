@@ -1,48 +1,59 @@
-from time_entries._infrastructure import ActivitiesJsonDao
-from time_entries._domain import ActivityService, _use_cases, Activity
-
-import azure.functions as func
 import json
 import logging
 import dataclasses
+import typing
 
+import azure.functions as func
 
-JSON_PATH = (
+from ... import _domain
+from ... import _infrastructure
+
+_JSON_PATH = (
     'time_entries/_infrastructure/_data_persistence/activities_data.json'
 )
 
 
-
 def create_activity(req: func.HttpRequest) -> func.HttpResponse:
+    activity_dao = _infrastructure.ActivitiesJsonDao(_JSON_PATH)
+    activity_service = _domain.ActivityService(activity_dao)
+    use_case = _domain._use_cases.CreateActivityUseCase(activity_service)
     logging.info(
         'Python HTTP trigger function processed a request to create an activity.'
     )
     activity_data = req.get_json()
-    status_code = 200
-    if _validate_activity(activity_data):
-        response = _create_activity(activity_data)
-    else:
-        status_code = 404
-        response = b'Not possible to create activity, attributes are not correct '
+    validation_errors = _validate_activity(activity_data)
+    if validation_errors:
+        return func.HttpResponse(
+            body=validation_errors, status_code=400, mimetype="application/json"
+        )
+    activity_to_create = _domain.Activity(
+        id= None,
+        name=activity_data['name'],
+        description=activity_data['description'],
+        status=activity_data['status'],
+        deleted=activity_data['deleted'],
+        tenant_id=activity_data['tenant_id']
+    )
 
+    created_activity = use_case.create_activity(activity_to_create.__dict__)
+    if not create_activity:
+        return func.HttpResponse(
+            body={'error': 'activity could not be created'},
+            status_code=500,
+            mimetype="application/json",
+        )
     return func.HttpResponse(
-        body=response, status_code=status_code, mimetype="application/json"
+        body=json.dumps(created_activity.__dict__),
+        status_code=201,
+        mimetype="application/json"
     )
 
-def _create_activity(activity_data: dict) -> str:
-    activity_use_case = _use_cases.CreateActivityUseCase(
-        _create_activity_service(JSON_PATH)
-    )
-    activity = activity_use_case.create_activity(activity_data)
-    return json.dumps(activity.__dict__) if activity else b'Not Found'
 
-def _validate_activity(activity_data: dict) -> bool:
-    activity_keys = [field.name for field in dataclasses.fields(Activity)]
-    new_activity_keys = list(activity_data.keys())
-    return  all(map(lambda key: key in activity_keys, new_activity_keys)) and len(activity_keys) == len(new_activity_keys)
+def _validate_activity(activity_data: dict) -> typing.List[str]:
+    activity_fields = [field.name for field in dataclasses.fields(_domain.Activity)]
 
-def _create_activity_service(path: str):
-    activity_json = ActivitiesJsonDao(path)
-    return ActivityService(activity_json)
-
-
+    missing_keys = [field for field in activity_fields if field not in activity_data]
+    return [
+        f'The {missing_key} key is missing in the input data'
+        for missing_key in missing_keys
+    ]
