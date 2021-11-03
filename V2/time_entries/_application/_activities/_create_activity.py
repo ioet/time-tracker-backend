@@ -17,15 +17,18 @@ def create_activity(req: func.HttpRequest) -> func.HttpResponse:
     activity_dao = _infrastructure.ActivitiesJsonDao(_JSON_PATH)
     activity_service = _domain.ActivityService(activity_dao)
     use_case = _domain._use_cases.CreateActivityUseCase(activity_service)
-    logging.info(
-        'Python HTTP trigger function processed a request to create an activity.'
-    )
+
+
     activity_data = req.get_json()
+
+
     validation_errors = _validate_activity(activity_data)
     if validation_errors:
         return func.HttpResponse(
             body=validation_errors, status_code=400, mimetype="application/json"
         )
+
+
     activity_to_create = _domain.Activity(
         id= None,
         name=activity_data['name'],
@@ -34,6 +37,7 @@ def create_activity(req: func.HttpRequest) -> func.HttpResponse:
         deleted=activity_data['deleted'],
         tenant_id=activity_data['tenant_id']
     )
+
 
     created_activity = use_case.create_activity(activity_to_create.__dict__)
     if not create_activity:
@@ -51,7 +55,6 @@ def create_activity(req: func.HttpRequest) -> func.HttpResponse:
 
 def _validate_activity(activity_data: dict) -> typing.List[str]:
     activity_fields = [field.name for field in dataclasses.fields(_domain.Activity)]
-
     missing_keys = [field for field in activity_fields if field not in activity_data]
     return [
         f'The {missing_key} key is missing in the input data'
