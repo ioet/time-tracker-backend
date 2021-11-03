@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.42.0 (2021-11-03)
+### Feature
+* TT-365 / TT-369  POST V2 Activity ([#329](https://github.com/ioet/time-tracker-backend/issues/329)) ([`6c3687b`](https://github.com/ioet/time-tracker-backend/commit/6c3687b5ca60893be23b6ad663de3081af964272))
+
+## v0.41.0 (2021-10-28)
+### Feature
+* TT-366 V2 - PUT update activity ([#331](https://github.com/ioet/time-tracker-backend/issues/331)) ([`500a5d0`](https://github.com/ioet/time-tracker-backend/commit/500a5d0261497ce9aa9a9040342fea94dbe70704))
+
 ## v0.40.0 (2021-10-27)
 ### Feature
 * TT-367  V2 - Delete Activity ([#330](https://github.com/ioet/time-tracker-backend/issues/330)) ([`6ba8320`](https://github.com/ioet/time-tracker-backend/commit/6ba8320c6ddd6599679dfbbbaf9ac1dba9addb8d))

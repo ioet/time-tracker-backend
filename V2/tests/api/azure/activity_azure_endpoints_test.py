@@ -85,18 +85,17 @@ def test__activity_azure_endpoint__creates_an_activity__when_activity_has_all_at
      create_temp_activities,
  ):
      activities_json, tmp_directory = create_temp_activities
-     activities._create_activity.JSON_PATH = tmp_directory
+     activities._create_activity._JSON_PATH = tmp_directory
 
-     activity_body = {'id': Faker().uuid4(), 'name': Faker().user_name(), 'description': Faker().sentence(),'deleted': Faker().uuid4() ,'status': 'active', 'tenant_id': Faker().uuid4()}
+     activity_body = {'id': None, 'name': Faker().user_name(), 'description': Faker().sentence(),'deleted': Faker().uuid4() ,'status': 'active', 'tenant_id': Faker().uuid4()}
      body = json.dumps(activity_body).encode("utf-8")
      req = func.HttpRequest(
          method='POST',
          body= body,
-         url='/api/activities/',
+         url=ACTIVITY_URL,
      )
 
-     response = activities._create_activity.create_activity(req)
+     response = activities.create_activity(req)
      activitiy_json_data = response.get_body()
-
-     assert response.status_code == 200
+     assert response.status_code == 201
      assert activitiy_json_data ==  body
