@@ -6,6 +6,7 @@
 # For development
 
 # Tests
+Faker==4.0.2
 pytest==5.2.0
 Flask_sqlalchemy
 
