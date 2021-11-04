@@ -8,21 +8,21 @@ import typing
 
 fake_activities = [
     {
-        'id': Faker().uuid4(),
-        'name': Faker().user_name(),
-        'description': Faker().sentence(),
-        'deleted': Faker().uuid4(),
-        'status': 'active',
-        'tenant_id': Faker().uuid4(),
+        "id": Faker().uuid4(),
+        "name": Faker().user_name(),
+        "description": Faker().sentence(),
+        "deleted": Faker().uuid4(),
+        "status": "active",
+        "tenant_id": Faker().uuid4(),
     }
 ]
 
 
-@pytest.fixture(name='create_fake_activities')
+@pytest.fixture(name="create_fake_activities")
 def _create_fake_activities(mocker) -> typing.List[Activity]:
     def _creator(activities):
         read_data = json.dumps(activities)
-        mocker.patch('builtins.open', mocker.mock_open(read_data=read_data))
+        mocker.patch("builtins.open", mocker.mock_open(read_data=read_data))
         return [Activity(**activity) for activity in activities]
 
     return _creator
@@ -94,7 +94,7 @@ def test_delete__returns_an_activity_with_inactive_status__when_an_activity_matc
     activity_dto = activities.pop()
     result = activities_json_dao.delete(activity_dto.id)
 
-    assert result.status == 'inactive'
+    assert result.status == "inactive"
 
 
 def test_delete__returns_none__when_no_activity_matching_its_id_is_found(
@@ -129,21 +129,24 @@ def test_update__returns_none__when_doesnt_found_one_activity_to_update(
     create_fake_activities([])
     activity_data = {"description": Faker().sentence()}
 
-    result = activities_json_dao.update('', activity_data)
+    result = activities_json_dao.update("", activity_data)
 
-    assert result == None
+    assert result is None
 
-def test_create_activity__returns_an_activity_dto__when_create_an_activity_that_matches_attributes(create_fake_activities):
-     create_fake_activities([])
 
-     activities_json_dao = ActivitiesJsonDao(Faker().file_path())
-     activity_data = {
-         "name": "test_name",
-         "description": "test_description",
-         "tenant_id": "test_tenant_id",
-         "id": "test_id",
-         "deleted": "test_deleted",
-         "status": "test_status",
-     }
-     result = activities_json_dao.create_activity(activity_data)
-     assert result == Activity(**activity_data)
+def test_create_activity__returns_an_activity_dto__when_create_an_activity_that_matches_attributes(
+    create_fake_activities,
+):
+    create_fake_activities([])
+
+    activities_json_dao = ActivitiesJsonDao(Faker().file_path())
+    activity_data = {
+        "name": "test_name",
+        "description": "test_description",
+        "tenant_id": "test_tenant_id",
+        "id": "test_id",
+        "deleted": "test_deleted",
+        "status": "test_status",
+    }
+    result = activities_json_dao.create_activity(activity_data)
+    assert result == Activity(**activity_data)

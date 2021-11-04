@@ -59,6 +59,7 @@ def test__update_activity__uses_the_activity_dao__to_update_one_activity(
     assert activity_dao.update.called
     assert expected_activity == updated_activity
 
+
 def test__create_activity__uses_the_activity_dao__to_create_an_activity(mocker):
     expected_activity = mocker.Mock()
     activity_dao = mocker.Mock(
