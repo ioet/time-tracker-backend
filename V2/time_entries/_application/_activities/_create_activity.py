@@ -25,7 +25,7 @@ def create_activity(req: func.HttpRequest) -> func.HttpResponse:
     validation_errors = _validate_activity(activity_data)
     if validation_errors:
         return func.HttpResponse(
-            body=validation_errors, status_code=400, mimetype="application/json"
+            body=json.dumps(validation_errors), status_code=400, mimetype="application/json"
         )
 
 
