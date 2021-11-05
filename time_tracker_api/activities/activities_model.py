@@ -113,13 +113,16 @@ class ActivityCosmosDBRepository(CosmosDBRepository):
         function_mapper = self.get_mapper_or_dict(mapper)
         return list(map(function_mapper, result))
 
-    def find_all_from_blob_storage(self,conditions: dict = None, mapper: Callable = None):
-        import json
-        fs = FileStream("storagefiles2","ioetfiles")
-        result = fs.get_file_stream("activity.json")
-
+    def find_all_from_blob_storage(self, event_context: EventContext, mapper: Callable = None):
+        tenant_id_value = self.find_partition_key_value(event_context)
         function_mapper = self.get_mapper_or_dict(mapper)
-        return list(map(function_mapper, json.load(result)))
+        if tenant_id_value is None:
+            return []
+            
+        import json
+        fs = FileStream("storageaccounteystr82c5","tt-common-files")
+        result = fs.get_file_stream("activity.json")
+        return list(map(function_mapper, json.load(result))) if result is not None else []
 
 class ActivityCosmosDBDao(APICosmosDBDao, ActivityDao):
     def __init__(self, repository):
@@ -154,9 +157,10 @@ class ActivityCosmosDBDao(APICosmosDBDao, ActivityDao):
         )
         return activities
 
-    def get_all(self,conditions: dict = None) -> list:
-        activities = self.repository.find_all_from_blob_storage()
-        return activities
+    def get_all(self, conditions: dict = None) -> list:
+            event_ctx = self.create_event_context("read-many")
+            activities = self.repository.find_all_from_blob_storage(event_context=event_ctx)
+            return activities
 
     def create(self, activity_payload: dict):
         event_ctx = self.create_event_context('create')
