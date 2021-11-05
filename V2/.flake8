@@ -1,4 +1,4 @@
 [flake8]
-exclude = .git,__pycache__,
+exclude = .git,__pycache__,./node_modules
 max-complexity = 10
 max_line_length = 120
