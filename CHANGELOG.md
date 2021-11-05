@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.42.1 (2021-11-04)
+### Fix
+* TT-365 v2 post method fix ([#333](https://github.com/ioet/time-tracker-backend/issues/333)) ([`cb892c3`](https://github.com/ioet/time-tracker-backend/commit/cb892c338c1139640a5527772b398b3b34ff68a7))
+
 ## v0.42.0 (2021-11-03)
 ### Feature
 * TT-365 / TT-369  POST V2 Activity ([#329](https://github.com/ioet/time-tracker-backend/issues/329)) ([`6c3687b`](https://github.com/ioet/time-tracker-backend/commit/6c3687b5ca60893be23b6ad663de3081af964272))
