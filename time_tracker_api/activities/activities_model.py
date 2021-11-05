@@ -12,7 +12,7 @@ from typing import List, Callable
 from commons.data_access_layer.database import EventContext
 from utils.enums.status import Status
 from utils.query_builder import CosmosDBQueryBuilder
-
+from commons.data_access_layer.file_stream import FileStream
 
 class ActivityDao(CRUDDao):
     pass
@@ -113,6 +113,13 @@ class ActivityCosmosDBRepository(CosmosDBRepository):
         function_mapper = self.get_mapper_or_dict(mapper)
         return list(map(function_mapper, result))
 
+    def find_all_from_blob_storage(self,conditions: dict = None, mapper: Callable = None):
+        import json
+        fs = FileStream("storagefiles2","ioetfiles")
+        result = fs.get_file_stream("activity.json")
+
+        function_mapper = self.get_mapper_or_dict(mapper)
+        return list(map(function_mapper, json.load(result)))
 
 class ActivityCosmosDBDao(APICosmosDBDao, ActivityDao):
     def __init__(self, repository):
@@ -128,7 +135,7 @@ class ActivityCosmosDBDao(APICosmosDBDao, ActivityDao):
             activity_ids,
         )
 
-    def get_all(
+    def get_all_old(
         self,
         conditions: dict = None,
         activities_id: List = None,
@@ -145,6 +152,10 @@ class ActivityCosmosDBDao(APICosmosDBDao, ActivityDao):
             visible_only=visible_only,
             max_count=max_count,
         )
+        return activities
+
+    def get_all(self,conditions: dict = None) -> list:
+        activities = self.repository.find_all_from_blob_storage()
         return activities
 
     def create(self, activity_payload: dict):
