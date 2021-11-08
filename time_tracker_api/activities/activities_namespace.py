@@ -75,7 +75,7 @@ class Activities(Resource):
     def get(self):
         """List all activities"""
         conditions = list_activities_attribs_parser.parse_args()
-        return activity_dao.get_all(conditions)
+        return activity_dao.get_all(conditions=conditions)
 
     @ns.doc('create_activity')
     @ns.response(HTTPStatus.CONFLICT, 'This activity already exists')
