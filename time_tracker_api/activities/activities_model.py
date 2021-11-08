@@ -113,7 +113,12 @@ class ActivityCosmosDBRepository(CosmosDBRepository):
         function_mapper = self.get_mapper_or_dict(mapper)
         return list(map(function_mapper, result))
 
-    def find_all_from_blob_storage(self, event_context: EventContext, mapper: Callable = None):
+    def find_all_from_blob_storage(
+        self,
+        event_context: EventContext,
+        mapper: Callable = None,
+        file_name: str = "activity.json",
+        ):
         tenant_id_value = self.find_partition_key_value(event_context)
         function_mapper = self.get_mapper_or_dict(mapper)
         if tenant_id_value is None:
@@ -121,7 +126,7 @@ class ActivityCosmosDBRepository(CosmosDBRepository):
             
         import json
         fs = FileStream("storageaccounteystr82c5","tt-common-files")
-        result = fs.get_file_stream("activity.json")
+        result = fs.get_file_stream(file_name)
         return list(map(function_mapper, json.load(result))) if result is not None else []
 
 class ActivityCosmosDBDao(APICosmosDBDao, ActivityDao):
