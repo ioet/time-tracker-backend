@@ -1,13 +1,13 @@
-name: Time Tacker  CI/ CD
+name: Time Tacker V2 CI
 
 on:
   push:
     branches:
-    - TT-394-Git-Hub-Action-to-Time-tracker-Backend-V2
+    - master
     
   pull_request:
     branches: 
-    - TT-394-Git-Hub-Action-to-Time-tracker-Backend-V2
+    - master
 
 jobs:
   build-ci-time-tracker:
