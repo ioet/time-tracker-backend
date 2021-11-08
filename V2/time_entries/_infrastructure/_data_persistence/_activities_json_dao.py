@@ -3,6 +3,7 @@ import dataclasses
 import json
 import typing
 
+
 class ActivitiesJsonDao(ActivitiesDao):
     def __init__(self, json_data_file_path: str):
         self.json_data_file_path = json_data_file_path
@@ -87,7 +88,6 @@ class ActivitiesJsonDao(ActivitiesDao):
             return self.__create_activity_dto(activity_data)
         except FileNotFoundError:
             print("Can not create activity")
-
 
     def __get_activities_from_file(self) -> typing.List[dict]:
         try:

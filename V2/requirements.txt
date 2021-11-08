@@ -4,6 +4,7 @@ azure-functions-worker
 
 # Tests
 pytest
+flake8==4.0.1
 
 # Mocking
 pytest-mock

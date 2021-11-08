@@ -1,0 +1,39 @@
+name: Time Tacker V2 CI
+
+on:
+  push:
+    branches:
+    - master
+    
+  pull_request:
+    branches: 
+    - master
+
+jobs:
+  build-ci-time-tracker:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 5
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.10.0
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.10.0
+
+    - name: Add conda to system path
+      run: |
+        echo $CONDA/bin >> $GITHUB_PATH
+
+    - name: Install dependencies
+      run: |
+        pip install -r V2/requirements.txt
+
+    - name: Lint with flake8
+      run: |
+        cd V2
+        flake8 . --show-source --statistics
+    - name: Test with pytest
+      run: |
+        cd V2
+        python -m pytest -v

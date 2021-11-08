@@ -1,5 +1,4 @@
 import json
-import logging
 import dataclasses
 import typing
 
@@ -18,9 +17,7 @@ def create_activity(req: func.HttpRequest) -> func.HttpResponse:
     activity_service = _domain.ActivityService(activity_dao)
     use_case = _domain._use_cases.CreateActivityUseCase(activity_service)
 
-
     activity_data = req.get_json()
-
 
     validation_errors = _validate_activity(activity_data)
     if validation_errors:
@@ -28,16 +25,14 @@ def create_activity(req: func.HttpRequest) -> func.HttpResponse:
             body=json.dumps(validation_errors), status_code=400, mimetype="application/json"
         )
 
-
     activity_to_create = _domain.Activity(
-        id= None,
+        id=None,
         name=activity_data['name'],
         description=activity_data['description'],
         status=activity_data['status'],
         deleted=activity_data['deleted'],
         tenant_id=activity_data['tenant_id']
     )
-
 
     created_activity = use_case.create_activity(activity_to_create.__dict__)
     if not create_activity:
