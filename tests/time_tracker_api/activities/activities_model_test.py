@@ -65,7 +65,7 @@ def test_create_activity_should_add_active_status(
         data=expect_argument, event_context=ANY
     )
 
-def test_find_all_from_blob_storage(
+def test__find_all_from_blob_storage__return_list__when_send_event_context_and_correct_file_name(
     event_context: EventContext,
     activity_repository: ActivityCosmosDBRepository,
 ):
@@ -76,3 +76,15 @@ def test_find_all_from_blob_storage(
       file_name="activity_test.json"
     )
     assert len(result) == 15
+
+def test__find_all_from_blob_storage__return_empty_list__when_send_event_context_and_incorrect_file_name(
+    event_context: EventContext,
+    activity_repository: ActivityCosmosDBRepository,
+):
+    activity_repository.container = Mock()
+
+    result = activity_repository.find_all_from_blob_storage(
+      event_context=event_context,
+      file_name="incorrect.json"
+    )
+    assert result == []

@@ -19,7 +19,7 @@ valid_activity_data = {
 
 fake_activity = ({"id": fake.random_int(1, 9999)}).update(valid_activity_data)
 
-def test_get_all_activities_return_list_activities_when_send_get_request(
+def test__get_all_activities__return_response__when_send_activities_get_request(
     client: FlaskClient, valid_header: dict
 ):
     response = client.get(
