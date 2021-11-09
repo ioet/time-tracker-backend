@@ -23,7 +23,7 @@ class MSConfig:
     SECRET = os.environ.get('MS_SECRET')
     SCOPE = os.environ.get('MS_SCOPE')
     ENDPOINT = os.environ.get('MS_ENDPOINT')
-    USERID = json.loads(os.environ.get('USERID'))
+    USERID = os.environ.get('USERID').split(" ")
 
 
 class BearerAuth(requests.auth.AuthBase):
