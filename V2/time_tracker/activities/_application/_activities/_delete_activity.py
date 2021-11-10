@@ -1,12 +1,12 @@
-from time_entries._infrastructure import ActivitiesJsonDao
-from time_entries._domain import ActivityService, _use_cases
+from time_tracker.activities._infrastructure import ActivitiesJsonDao
+from time_tracker.activities._domain import ActivityService, _use_cases
 
 import azure.functions as func
 import json
 import logging
 
 JSON_PATH = (
-    'time_entries/_infrastructure/_data_persistence/activities_data.json'
+    'activities/_infrastructure/_data_persistence/activities_data.json'
 )
 
 

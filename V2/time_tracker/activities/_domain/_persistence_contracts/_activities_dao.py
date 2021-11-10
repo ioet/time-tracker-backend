@@ -1,4 +1,4 @@
-from time_entries._domain import Activity
+from time_tracker.activities._domain import Activity
 import abc
 import typing
 
