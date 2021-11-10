@@ -8,7 +8,7 @@ from ... import _domain
 from ... import _infrastructure
 
 _JSON_PATH = (
-    'time_entries/_infrastructure/_data_persistence/activities_data.json'
+    'activities/_infrastructure/_data_persistence/activities_data.json'
 )
 
 

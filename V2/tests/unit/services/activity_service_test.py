@@ -1,4 +1,4 @@
-from time_entries._domain import ActivityService
+from time_tracker.activities._domain import ActivityService
 from faker import Faker
 
 

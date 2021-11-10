@@ -1,4 +1,4 @@
-from time_entries._application import _activities as activities
+from time_tracker.activities._application import _activities as activities
 from faker import Faker
 
 import azure.functions as func

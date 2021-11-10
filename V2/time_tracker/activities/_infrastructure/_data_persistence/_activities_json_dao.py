@@ -1,4 +1,4 @@
-from time_entries._domain import ActivitiesDao, Activity
+from time_tracker.activities._domain import ActivitiesDao, Activity
 import dataclasses
 import json
 import typing
