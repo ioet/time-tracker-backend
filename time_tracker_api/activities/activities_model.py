@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+import json
 from azure.cosmos import PartitionKey
 
 from commons.data_access_layer.cosmos_db import (
@@ -124,7 +125,6 @@ class ActivityCosmosDBRepository(CosmosDBRepository):
         if tenant_id_value is None:
             return []
             
-        import json
         fs = FileStream("storageaccounteystr82c5","tt-common-files")
         result = fs.get_file_stream(file_name)
         return list(map(function_mapper, json.load(result))) if result is not None else []
@@ -143,7 +143,7 @@ class ActivityCosmosDBDao(APICosmosDBDao, ActivityDao):
             activity_ids,
         )
 
-    def get_all_old(
+    def get_all_v1(
         self,
         conditions: dict = None,
         activities_id: List = None,
