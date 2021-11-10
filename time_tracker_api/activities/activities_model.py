@@ -142,7 +142,7 @@ class ActivityCosmosDBDao(APICosmosDBDao, ActivityDao):
             activity_ids,
         )
 
-    def get_all_old(
+    def get_all_v1(
         self,
         conditions: dict = None,
         activities_id: List = None,
