@@ -1,41 +1,23 @@
-import json
 import pytest
-import shutil
 
+import time_tracker.activities._domain as domain 
+import time_tracker.activities._infrastructure as infrastructure 
+from time_tracker._infrastructure import DB
 
-@pytest.fixture
-def create_temp_activities(tmpdir_factory):
-    temporary_directory = tmpdir_factory.mktemp("tmp")
-    json_file = temporary_directory.join("activities.json")
-    activities = [
-        {
-            'id': 'c61a4a49-3364-49a3-a7f7-0c5f2d15072b',
-            'name': 'Development',
-            'description': 'Development',
-            'deleted': 'b4327ba6-9f96-49ee-a9ac-3c1edf525172',
-            'status': 'active',
-            'tenant_id': 'cc925a5d-9644-4a4f-8d99-0bee49aadd05',
-        },
-        {
-            'id': '94ec92e2-a500-4700-a9f6-e41eb7b5507c',
-            'name': 'Management',
-            'description': 'Description of management',
-            'deleted': '7cf6efe5-a221-4fe4-b94f-8945127a489a',
-            'status': 'active',
-            'tenant_id': 'cc925a5d-9644-4a4f-8d99-0bee49aadd05',
-        },
-        {
-            'id': 'd45c770a-b1a0-4bd8-a713-22c01a23e41b',
-            'name': 'Operations',
-            'description': 'Operation activities performed.',
-            'deleted': '7cf6efe5-a221-4fe4-b94f-8945127a489a',
-            'status': 'active',
-            'tenant_id': 'cc925a5d-9644-4a4f-8d99-0bee49aadd05',
-        },
-    ]
+@pytest.fixture(name='activity_factory')
+def _activity_factory() -> domain.Activity:
+    def _make_activity(data: dict):
+        activity = domain.Activity(**data)
+        return activity
+    return _make_activity    
 
-    with open(json_file, 'w') as outfile:
-        json.dump(activities, outfile)
+@pytest.fixture(name='create_fake_dao')
+def _create_fake_dao() -> domain.ActivitiesDao:
+    db_fake = DB('sqlite:///:memory:')
+    dao = infrastructure.ActivitiesSQLDao(db_fake)
+    return dao
 
-    yield activities, json_file
-    shutil.rmtree(temporary_directory)
+@pytest.fixture(name='create_fake_database')
+def _create_fake_database() -> domain.ActivitiesDao:
+    db_fake = DB('sqlite:///:memory:')
+    return db_fake

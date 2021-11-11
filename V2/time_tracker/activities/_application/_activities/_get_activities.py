@@ -1,13 +1,13 @@
-from time_tracker.activities._infrastructure import ActivitiesJsonDao
-from time_tracker.activities._domain import ActivityService, _use_cases
-
-import azure.functions as func
 import json
 import logging
 
-JSON_PATH = (
-    'activities/_infrastructure/_data_persistence/activities_data.json'
-)
+import azure.functions as func
+
+from ... import _domain
+from ... import _infrastructure
+from time_tracker._infrastructure import DB
+
+DATABASE = DB()
 
 
 def get_activities(req: func.HttpRequest) -> func.HttpResponse:
@@ -30,8 +30,8 @@ def get_activities(req: func.HttpRequest) -> func.HttpResponse:
 
 
 def _get_by_id(activity_id: str) -> str:
-    activity_use_case = _use_cases.GetActivityUseCase(
-        _create_activity_service(JSON_PATH)
+    activity_use_case = _domain._use_cases.GetActivityUseCase(
+        _create_activity_service(DATABASE)
     )
     activity = activity_use_case.get_activity_by_id(activity_id)
 
@@ -39,8 +39,8 @@ def _get_by_id(activity_id: str) -> str:
 
 
 def _get_all() -> str:
-    activities_use_case = _use_cases.GetActivitiesUseCase(
-        _create_activity_service(JSON_PATH)
+    activities_use_case = _domain._use_cases.GetActivitiesUseCase(
+        _create_activity_service(DATABASE)
     )
     return json.dumps(
         [
@@ -50,6 +50,6 @@ def _get_all() -> str:
     )
 
 
-def _create_activity_service(path: str):
-    activity_json = ActivitiesJsonDao(path)
-    return ActivityService(activity_json)
+def _create_activity_service(db: DB) -> _domain.ActivityService:
+    activity_sql = _infrastructure.ActivitiesSQLDao(db)
+    return _domain.ActivityService(activity_sql)

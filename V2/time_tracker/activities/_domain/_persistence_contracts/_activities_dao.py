@@ -21,5 +21,5 @@ class ActivitiesDao(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def create_activity(self, activity_data: dict) -> Activity:
+    def create(self, activity_data: dict) -> Activity:
         pass

@@ -1,2 +1,1 @@
-# flake8: noqa
-from ._activities_json_dao import ActivitiesJsonDao
+from ._activities_sql_dao import ActivitiesSQLDao

@@ -18,5 +18,5 @@ class ActivityService:
     def update(self, activity_id: str, new_activity: dict) -> Activity:
         return self.activities_dao.update(activity_id, new_activity)
 
-    def create_activity(self, activity_data: dict) -> Activity:
-        return self.activities_dao.create_activity(activity_data)
+    def create(self, activity_data: dict) -> Activity:
+        return self.activities_dao.create(activity_data)

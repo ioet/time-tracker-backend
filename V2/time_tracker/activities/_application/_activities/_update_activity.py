@@ -1,14 +1,14 @@
-from time_tracker.activities._infrastructure import ActivitiesJsonDao
-from time_tracker.activities._domain import ActivityService, Activity, _use_cases
-
-import azure.functions as func
 import dataclasses
 import json
 import logging
 
-JSON_PATH = (
-    'activities/_infrastructure/_data_persistence/activities_data.json'
-)
+import azure.functions as func
+
+from ... import _domain
+from ... import _infrastructure
+from time_tracker._infrastructure import DB
+
+DATABASE = DB()
 
 
 def update_activity(req: func.HttpRequest) -> func.HttpResponse:
@@ -17,7 +17,7 @@ def update_activity(req: func.HttpRequest) -> func.HttpResponse:
     )
     activity_id = req.route_params.get('id')
     activity_data = req.get_json() if req.get_body() else {}
-    activity_keys = [field.name for field in dataclasses.fields(Activity)]
+    activity_keys = [field.name for field in dataclasses.fields(_domain.Activity)]
 
     if all(key in activity_keys for key in activity_data.keys()):
         response = _update(activity_id, activity_data)
@@ -32,13 +32,13 @@ def update_activity(req: func.HttpRequest) -> func.HttpResponse:
 
 
 def _update(activity_id: str, activity_data: dict) -> str:
-    activity_use_case = _use_cases.UpdateActivityUseCase(
-        _create_activity_service(JSON_PATH)
+    activity_use_case = _domain._use_cases.UpdateActivityUseCase(
+        _create_activity_service(DATABASE)
     )
     activity = activity_use_case.update_activity(activity_id, activity_data)
     return json.dumps(activity.__dict__) if activity else b'Not Found'
 
 
-def _create_activity_service(path: str):
-    activity_json = ActivitiesJsonDao(path)
-    return ActivityService(activity_json)
+def _create_activity_service(db: DB) -> _domain.ActivityService:
+    activity_sql = _infrastructure.ActivitiesSQLDao(db)
+    return _domain.ActivityService(activity_sql)
