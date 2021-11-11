@@ -1,10 +1,7 @@
-import uuid
-
 import sqlalchemy
 
 from . import _config
 
-DIALECT = 'postgresql'
 class DB():
     config = _config.load_config()
     connection = None

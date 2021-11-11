@@ -3,48 +3,27 @@ import json
 from faker import Faker
 
 import azure.functions as func
-import sqlalchemy
-from sqlalchemy.sql.sqltypes import Integer
 
 import time_tracker.activities._application._activities as azure_activities
-import time_tracker.activities._domain as domain 
 import time_tracker.activities._infrastructure as infrastructure 
 from time_tracker._infrastructure import DB
 
 ACTIVITY_URL = '/api/activities/'
 
-DEMO_DATA = [
-        {
-        'id': 1,
-        'name': 'Activity Demo create',
-        'description': 'test demo create an new activity',
-        'deleted': None,
-        'status': None,
-        },
-        {
-        'id': 2,
-        'name': 'Activity Demo create',
-        'description': 'test demo create an new activity',
-        'deleted':  None,
-        'status': None,
-        },
-    ]
-
-
 @pytest.fixture(name='insert_activity')
-def _insert_activity() -> domain.Activity:
+def _insert_activity() -> dict:
     def _new_activity(activity: dict, database: DB):
         dao = infrastructure.ActivitiesSQLDao(database)
         new_activity = dao.create(activity)
-        return new_activity
+        return new_activity.__dict__
     return _new_activity
 
 def test__activity_azure_endpoint__returns_all_activities(
     create_fake_database, activity_factory, insert_activity
 ):
     fake_database = create_fake_database
-    existent_activities= [activity_factory(DEMO_DATA[0]), activity_factory(DEMO_DATA[1])]
-    inserted_activities = [insert_activity(existent_activities[0].__dict__, fake_database).__dict__, insert_activity(existent_activities[1].__dict__, fake_database).__dict__]
+    existent_activities= [activity_factory(), activity_factory()]
+    inserted_activities = [insert_activity(existent_activities[0].__dict__, fake_database), insert_activity(existent_activities[1].__dict__, fake_database)]
 
     azure_activities._get_activities.DATABASE = fake_database
     req = func.HttpRequest(method='GET', body=None, url=ACTIVITY_URL)
@@ -59,8 +38,8 @@ def test__activity_azure_endpoint__returns_an_activity__when_activity_matches_it
     create_fake_database, activity_factory, insert_activity
 ):
     fake_database = create_fake_database
-    existent_activity= activity_factory(DEMO_DATA[0])
-    inserted_activity = insert_activity(existent_activity.__dict__, fake_database).__dict__
+    existent_activity= activity_factory()
+    inserted_activity = insert_activity(existent_activity.__dict__, fake_database)
 
     azure_activities._get_activities.DATABASE = fake_database
     req = func.HttpRequest(
@@ -81,8 +60,8 @@ def test__activity_azure_endpoint__returns_an_activity_with_inactive_status__whe
     create_fake_database,activity_factory, insert_activity
 ):  
     fake_database = create_fake_database
-    existent_activity= activity_factory(DEMO_DATA[0])
-    inserted_activity = insert_activity(existent_activity.__dict__, fake_database).__dict__
+    existent_activity= activity_factory()
+    inserted_activity = insert_activity(existent_activity.__dict__, fake_database)
 
     azure_activities._delete_activity.DATABASE = fake_database
     req = func.HttpRequest(
@@ -104,8 +83,8 @@ def test__update_activity_azure_endpoint__returns_an_activity__when_found_an_act
     create_fake_database, activity_factory, insert_activity
 ):
     fake_database = create_fake_database
-    existent_activity= activity_factory(DEMO_DATA[0])
-    inserted_activity = insert_activity(existent_activity.__dict__, fake_database).__dict__
+    existent_activity= activity_factory()
+    inserted_activity = insert_activity(existent_activity.__dict__, fake_database)
 
     azure_activities._update_activity.DATABASE = fake_database
     activity_body = {"description": Faker().sentence()}

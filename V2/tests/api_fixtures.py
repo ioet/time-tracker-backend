@@ -3,11 +3,18 @@ import pytest
 import time_tracker.activities._domain as domain 
 import time_tracker.activities._infrastructure as infrastructure 
 from time_tracker._infrastructure import DB
+from faker import Faker
 
 @pytest.fixture(name='activity_factory')
 def _activity_factory() -> domain.Activity:
-    def _make_activity(data: dict):
-        activity = domain.Activity(**data)
+    def _make_activity(name: str = Faker().name(), description: str = Faker().sentence(), deleted: bool = False, status: int = 1):
+        activity = domain.Activity(
+            id = None,
+            name = name,
+            description = description,
+            deleted = deleted,
+            status = status 
+            )
         return activity
     return _make_activity    
 

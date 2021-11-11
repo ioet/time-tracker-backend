@@ -1,28 +1,10 @@
 import pytest
 import typing
 
-from sqlalchemy.sql.expression import update
-
 import time_tracker.activities._domain as domain 
 import time_tracker.activities._infrastructure as infrastructure 
 from time_tracker._infrastructure import DB
 
-DEMO_DATA = [
-        {
-        'id': 1,
-        'name': 'Activity Demo create',
-        'description': 'test demo create an new activity',
-        'deleted': None,
-        'status': None,
-        },
-        {
-        'id': 2,
-        'name': 'Activity Demo create',
-        'description': 'test demo create an new activity',
-        'deleted':  None,
-        'status': None,
-        },
-    ]
 
 @pytest.fixture(name='insert_activity')
 def _insert_activity() -> domain.Activity:
@@ -41,7 +23,7 @@ def _clean_database():
 
 def test__create_activity__returns_a_activity_dto__when_saves_correctly_with_sql_database(create_fake_dao, activity_factory):
     dao = create_fake_dao
-    existent_activity = activity_factory(DEMO_DATA[0])
+    existent_activity = activity_factory()
     
     inserted_activity = dao.create(existent_activity.__dict__)
     
@@ -51,7 +33,7 @@ def test__create_activity__returns_a_activity_dto__when_saves_correctly_with_sql
 
 def test_update__returns_an_update_activity__when_an_activity_matching_its_id_is_found_with_sql_database(create_fake_dao, activity_factory, insert_activity):
     dao = create_fake_dao
-    existent_activity = activity_factory(DEMO_DATA[0])
+    existent_activity = activity_factory()
     inserted_activity = insert_activity(existent_activity.__dict__, dao)
     
     updated_activity = dao.update(inserted_activity.id, {'description': 'test demo 2 create an new activity'})
@@ -63,7 +45,7 @@ def test_update__returns_an_update_activity__when_an_activity_matching_its_id_is
 
 def test_update__returns_none__when_no_activity_matching_its_id_is_found_with_sql_database(create_fake_dao, activity_factory):
     dao = create_fake_dao
-    existent_activity = activity_factory(DEMO_DATA[0])
+    existent_activity = activity_factory()
 
     results = dao.update(existent_activity.id,{'description': 'test demo'})
     
@@ -72,7 +54,7 @@ def test_update__returns_none__when_no_activity_matching_its_id_is_found_with_sq
 
 def test__get_all__returns_a_list_of_activity_dto_objects__when_one_or_more_activities_are_found_with_sql_database(create_fake_dao, activity_factory, insert_activity):
     dao = create_fake_dao
-    existent_activities= [activity_factory(DEMO_DATA[0]), activity_factory(DEMO_DATA[1])]
+    existent_activities= [activity_factory(), activity_factory()]
     inserted_activities = [insert_activity(existent_activities[0].__dict__, dao), insert_activity(existent_activities[1].__dict__, dao)]
 
     activities = dao.get_all()
@@ -83,7 +65,7 @@ def test__get_all__returns_a_list_of_activity_dto_objects__when_one_or_more_acti
 
 def test_get_by_id__returns_an_activity_dto__when_found_one_activity_that_matches_its_id_with_sql_database(create_fake_dao, activity_factory, insert_activity):
     dao = create_fake_dao
-    existent_activity = activity_factory(DEMO_DATA[0])
+    existent_activity = activity_factory()
     inserted_activity = insert_activity(existent_activity.__dict__, dao)
 
     activity = dao.get_by_id(inserted_activity.id)
@@ -95,7 +77,7 @@ def test_get_by_id__returns_an_activity_dto__when_found_one_activity_that_matche
 
 def test__get_by_id__returns_none__when_no_activity_matches_its_id_with_sql_database(create_fake_dao, activity_factory): 
     dao = create_fake_dao
-    existent_activity = activity_factory(DEMO_DATA[0])  
+    existent_activity = activity_factory()  
 
     activity = dao.get_by_id(existent_activity.id)
 
@@ -111,7 +93,7 @@ def test_get_all__returns_an_empty_list__when_doesnt_found_any_activities_with_s
 
 def test_delete__returns_an_activity_with_inactive_status__when_an_activity_matching_its_id_is_found_with_sql_database(create_fake_dao, activity_factory, insert_activity):
     dao = create_fake_dao
-    existent_activity = activity_factory(DEMO_DATA[0])
+    existent_activity = activity_factory()
     inserted_activity = insert_activity(existent_activity.__dict__, dao)
 
     activity = dao.delete(inserted_activity.id)
@@ -124,7 +106,7 @@ def test_delete__returns_an_activity_with_inactive_status__when_an_activity_matc
 
 def test_delete__returns_none__when_no_activity_matching_its_id_is_found_with_sql_database(create_fake_dao, activity_factory):
     dao = create_fake_dao
-    existent_activity = activity_factory(DEMO_DATA[0])  
+    existent_activity = activity_factory()  
 
     results = dao.delete(existent_activity.id)
 

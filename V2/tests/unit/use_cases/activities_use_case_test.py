@@ -1,4 +1,3 @@
-from time_tracker.activities._domain import ActivityService
 from time_tracker.activities._domain import _use_cases
 from pytest_mock import MockFixture
 from faker import Faker
