@@ -25,7 +25,7 @@ def create_activity(req: func.HttpRequest) -> func.HttpResponse:
         )
 
     activity_to_create = _domain.Activity(
-        id= None,
+        id=None,
         name=activity_data['name'],
         description=activity_data['description'],
         status=activity_data['status'],

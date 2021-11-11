@@ -8,7 +8,9 @@ from faker import Faker
 
 @pytest.fixture(name='activity_factory')
 def _activity_factory() -> domain.Activity:
-    def _make_activity(name: str = Faker().name(), description: str = Faker().sentence(), deleted: bool = False, status: int = 1):
+    def _make_activity(
+        name: str = Faker().name(), description: str = Faker().sentence(), deleted: bool = False, status: int = 1
+    ):
         activity = domain.Activity(
             id=None,
             name=name,
