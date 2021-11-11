@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+import json
 from azure.cosmos import PartitionKey
 
 from commons.data_access_layer.cosmos_db import (
@@ -12,7 +13,7 @@ from typing import List, Callable
 from commons.data_access_layer.database import EventContext
 from utils.enums.status import Status
 from utils.query_builder import CosmosDBQueryBuilder
-
+from commons.data_access_layer.file_stream import FileStream
 
 class ActivityDao(CRUDDao):
     pass
@@ -113,6 +114,20 @@ class ActivityCosmosDBRepository(CosmosDBRepository):
         function_mapper = self.get_mapper_or_dict(mapper)
         return list(map(function_mapper, result))
 
+    def find_all_from_blob_storage(
+        self,
+        event_context: EventContext,
+        mapper: Callable = None,
+        file_name: str = "activity.json",
+        ):
+        tenant_id_value = self.find_partition_key_value(event_context)
+        function_mapper = self.get_mapper_or_dict(mapper)
+        if tenant_id_value is None:
+            return []
+            
+        fs = FileStream("storageaccounteystr82c5","tt-common-files")
+        result = fs.get_file_stream(file_name)
+        return list(map(function_mapper, json.load(result))) if result is not None else []
 
 class ActivityCosmosDBDao(APICosmosDBDao, ActivityDao):
     def __init__(self, repository):
@@ -128,7 +143,7 @@ class ActivityCosmosDBDao(APICosmosDBDao, ActivityDao):
             activity_ids,
         )
 
-    def get_all(
+    def get_all_v1(
         self,
         conditions: dict = None,
         activities_id: List = None,
@@ -145,6 +160,11 @@ class ActivityCosmosDBDao(APICosmosDBDao, ActivityDao):
             visible_only=visible_only,
             max_count=max_count,
         )
+        return activities
+
+    def get_all(self, conditions: dict = None) -> list:
+        event_ctx = self.create_event_context("read-many")
+        activities = self.repository.find_all_from_blob_storage(event_context=event_ctx)
         return activities
 
     def create(self, activity_payload: dict):
