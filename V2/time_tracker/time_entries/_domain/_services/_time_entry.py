@@ -8,3 +8,6 @@ class TimeEntryService:
 
     def create(self, time_entry_data: TimeEntry) -> TimeEntry:
         return self.time_entry_dao.create(time_entry_data)
+
+    def delete(self, time_entry_id: int) -> TimeEntry:
+        return self.time_entry_dao.delete(time_entry_id)
