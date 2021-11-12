@@ -33,3 +33,35 @@ def _create_fake_dao() -> domain.ActivitiesDao:
 def _create_fake_database() -> domain.ActivitiesDao:
     db_fake = DB('sqlite:///:memory:')
     return db_fake
+
+
+@pytest.fixture(name='time_entry_factory')
+def _time_entry_factory() -> TimeEntry:
+    def _make_time_entry(
+        id=Faker().random_int(),
+        start_date=Faker().date(),
+        owner_id=Faker().random_int(),
+        description=Faker().sentence(),
+        activity_id=Faker().random_int(),
+        uri="http://time-tracker.com",
+        technologies=["jira", "git"],
+        end_date=Faker().date(),
+        deleted=Faker().random_int(),
+        timezone_offset="300",
+        project_id=Faker().random_int(),
+    ):
+        time_entry = TimeEntry(
+            id=id,
+            start_date=start_date,
+            owner_id=owner_id,
+            description=description,
+            activity_id=activity_id,
+            uri=uri,
+            technologies=technologies,
+            end_date=end_date,
+            deleted=deleted,
+            timezone_offset=timezone_offset,
+            project_id=project_id,
+            )
+        return time_entry
+    return _make_time_entry

@@ -15,15 +15,15 @@ def test__time_entry_azure_endpoint__creates_an_time_entry__when_time_entry_has_
     time_entries._create_time_entry._JSON_PATH = tmp_directory
 
     time_entry_body = {
-        "id" : None,
-        "start_date" : Faker().date(),
-        "owner_id" : Faker().random_int(),
+        "id": None,
+        "start_date": Faker().date(),
+        "owner_id": Faker().random_int(),
         "description": Faker().sentence(),
-        "activity_id" : Faker().random_int(),
+        "activity_id": Faker().random_int(),
         "uri": "http://timetracker.com",
-        "technologies" : ["jira","git"],
+        "technologies": ["jira", "git"],
         "end_date": Faker().date(),
-        "deleted": Faker().random_int(),
+        "deleted": False,
         "timezone_offset": "300",
         "project_id": Faker().random_int(),
     }
