@@ -42,7 +42,7 @@ def test_delete__returns_an_time_entry_with_true_deleted__when_an_time_entry_mat
     time_entry_dto = time_entries[0]
     result = time_entries_json_dao.delete(time_entry_dto.id)
 
-    assert result.deleted == True
+    assert result.deleted is True
 
 
 def test_delete__returns_none__when_no_time_entry_matching_its_id_is_found(

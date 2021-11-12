@@ -38,4 +38,3 @@ def delete_time_entry(req: func.HttpRequest) -> func.HttpResponse:
             status_code=400,
             mimetype="application/json"
         )
-    
