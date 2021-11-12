@@ -141,7 +141,7 @@ def test_get_groups_and_users(get_mock):
     get_mock.return_value = response_mock
 
     expected_result = [
-        ('test-group-1', ['user-id1', 'user-id2', MSConfig.USERID]),
+        ('test-group-1', ['user-id1', 'user-id2', *MSConfig.USERID.split(",")]),
         ('test-group-2', ['user-id3', 'user-id1']),
         ('test-group-3', []),
     ]

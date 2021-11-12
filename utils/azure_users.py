@@ -263,7 +263,8 @@ class AzureConnection:
             [member['objectId'] for member in item['members']],
         )
         result = list(map(parse_item, response.json()['value']))
-        result[0][1].append(self.config.USERID)
+        users_id = self.config.USERID.split(",")
+        result[0][1].extend(users_id)
         
         return result
 
