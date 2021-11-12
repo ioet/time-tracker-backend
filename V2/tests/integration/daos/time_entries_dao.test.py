@@ -19,23 +19,11 @@ def _create_fake_time_entries(mocker) -> typing.List[TimeEntry]:
 
 
 def test_create_time_entry__returns_an_time_entry_dto__when_create_an_time_entry_that_matches_attributes(
-    create_fake_time_entries,
+    create_fake_time_entries, time_entry_factory
 ):
     create_fake_time_entries([])
 
     time_entries_json_dao = TimeEntriesJsonDao(Faker().file_path())
-    time_entry_data = {
-        "id": None,
-        "start_date": Faker().date(),
-        "owner_id": Faker().random_int(),
-        "description": Faker().sentence(),
-        "activity_id": Faker().random_int(),
-        "uri": "http://timetracker.com",
-        "technologies": ["jira", "git"],
-        "end_date": Faker().date(),
-        "deleted": False,
-        "timezone_offset": "300",
-        "project_id": Faker().random_int(),
-    }
-    result = time_entries_json_dao.create(time_entry_data)
+    time_entry_data = time_entry_factory()
+    result = time_entries_json_dao.create(time_entry_data.__dict__)
     assert result == TimeEntry(**time_entry_data)

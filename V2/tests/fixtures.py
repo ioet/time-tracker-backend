@@ -34,6 +34,25 @@ def _create_fake_database() -> domain.ActivitiesDao:
     db_fake = DB('sqlite:///:memory:')
     return db_fake
 
+@pytest.fixture
+def create_temp_time_entries(tmpdir_factory):
+    temporary_directory = tmpdir_factory.mktemp("tmp")
+    json_file = temporary_directory.join("time_entries.json")
+    time_entries = [
+        {
+            "id": Faker().random_int(),
+            "start_date": Faker().date(),
+            "owner_id": Faker().random_int(),
+            "description": Faker().sentence(),
+            "activity_id": Faker().random_int(),
+            "uri": Faker().domain_name(),
+            "technologies": ["jira", "git"],
+            "end_date": Faker().date(),
+            "deleted": Faker().random_int(),
+            "timezone_offset": "300",
+            "project_id": Faker().random_int(),
+        }
+    ]
 
 @pytest.fixture(name='time_entry_factory')
 def _time_entry_factory() -> TimeEntry:
@@ -43,10 +62,10 @@ def _time_entry_factory() -> TimeEntry:
         owner_id=Faker().random_int(),
         description=Faker().sentence(),
         activity_id=Faker().random_int(),
-        uri="http://time-tracker.com",
+        uri=Faker().domain_name(),
         technologies=["jira", "git"],
         end_date=Faker().date(),
-        deleted=Faker().random_int(),
+        deleted=False,
         timezone_offset="300",
         project_id=Faker().random_int(),
     ):
