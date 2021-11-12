@@ -1,6 +1,8 @@
 import typing
 import os
 
+CONNECTION_STRING = 'postgresql://root:root@localhost:5433/timetracker'
+
 
 class Config(typing.NamedTuple):
     DB_CONNECTION_STRING: str
@@ -11,7 +13,7 @@ class Config(typing.NamedTuple):
 
 def load_config():
     return Config(
-        os.environ.get("DB_CONNECTION_STRING"),
+        CONNECTION_STRING if os.environ.get("DB_CONNECTION_STRING") is None else os.environ.get("DB_CONNECTION_STRING"),
         os.environ.get("DB_USER"),
         os.environ.get("DB_PASS"),
         os.environ.get("DB_NAME")
