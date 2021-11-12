@@ -1,0 +1,22 @@
+{
+  "disabled": false,
+  "bindings": [
+    {
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "req",
+      "route": "activities/",
+      "authLevel": "anonymous",
+      "methods": [
+        "POST"
+      ]
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "$return"
+    }
+  ],
+  "entryPoint": "create_activity",
+  "scriptFile": "../time_tracker/activities/interface.py"
+}

@@ -1,6 +1,7 @@
-from time_tracker.activities._domain import _use_cases
-from pytest_mock import MockFixture
 from faker import Faker
+from pytest_mock import MockFixture
+
+from time_tracker.activities._domain import _use_cases
 
 fake = Faker()
 
@@ -36,7 +37,7 @@ def test__get_activity_by_id_function__uses_the_activity_service__to_retrieve_ac
 
 
 def test__create_activity_function__uses_the_activities_service__to_create_activity(
-     mocker: MockFixture,
+     mocker: MockFixture, activity_factory
  ):
     expected_activity = mocker.Mock()
     activity_service = mocker.Mock(
@@ -44,7 +45,7 @@ def test__create_activity_function__uses_the_activities_service__to_create_activ
     )
 
     activity_use_case = _use_cases.CreateActivityUseCase(activity_service)
-    actual_activity = activity_use_case.create_activity(fake.pydict())
+    actual_activity = activity_use_case.create_activity(activity_factory())
 
     assert activity_service.create.called
     assert expected_activity == actual_activity
@@ -66,16 +67,17 @@ def test__delete_activity_function__uses_the_activity_service__to_change_activit
 
 
 def test__update_activity_function__uses_the_activities_service__to_update_an_activity(
-    mocker: MockFixture,
+    mocker: MockFixture, activity_factory
 ):
     expected_activity = mocker.Mock()
     activity_service = mocker.Mock(
         update=mocker.Mock(return_value=expected_activity)
     )
+    new_activity = activity_factory()
 
     activity_use_case = _use_cases.UpdateActivityUseCase(activity_service)
     updated_activity = activity_use_case.update_activity(
-        fake.uuid4(), fake.pydict()
+        fake.uuid4(), new_activity.name, new_activity.description, new_activity.status, new_activity.deleted
     )
 
     assert activity_service.update.called

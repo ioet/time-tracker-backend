@@ -17,19 +17,24 @@ def get_activities(req: func.HttpRequest) -> func.HttpResponse:
     activity_id = req.route_params.get('id')
     status_code = 200
 
-    if activity_id:
-        response = _get_by_id(activity_id)
-        if response == b'Not Found':
-            status_code = 404
-    else:
-        response = _get_all()
+    try:
+        if activity_id:
+            response = _get_by_id(int(activity_id))
+            if response == b'Not Found':
+                status_code = 404
+        else:
+            response = _get_all()
 
-    return func.HttpResponse(
-        body=response, status_code=status_code, mimetype="application/json"
-    )
+        return func.HttpResponse(
+            body=response, status_code=status_code, mimetype="application/json"
+        )
+    except ValueError:
+        return func.HttpResponse(
+            body=b"Invalid format id", status_code=400, mimetype="application/json"
+        )
 
 
-def _get_by_id(activity_id: str) -> str:
+def _get_by_id(activity_id: int) -> str:
     activity_use_case = _domain._use_cases.GetActivityUseCase(
         _create_activity_service(DATABASE)
     )

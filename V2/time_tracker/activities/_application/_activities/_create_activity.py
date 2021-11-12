@@ -32,7 +32,7 @@ def create_activity(req: func.HttpRequest) -> func.HttpResponse:
         deleted=activity_data['deleted']
     )
 
-    created_activity = use_case.create_activity(activity_to_create.__dict__)
+    created_activity = use_case.create_activity(activity_to_create)
     if not create_activity:
         return func.HttpResponse(
             body={'error': 'activity could not be created'},

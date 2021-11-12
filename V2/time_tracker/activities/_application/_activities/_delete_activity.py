@@ -14,16 +14,21 @@ def delete_activity(req: func.HttpRequest) -> func.HttpResponse:
     logging.info(
         'Python HTTP trigger function processed a request to delete an activity.'
     )
-    activity_id = req.route_params.get('id')
-    response = _delete(activity_id)
-    status_code = 200 if response != b'Not found' else 404
+    try:
+        activity_id = int(req.route_params.get('id'))
+        response = _delete(activity_id)
+        status_code = 200 if response != b'Not found' else 404
 
-    return func.HttpResponse(
-        body=response, status_code=status_code, mimetype="application/json"
-    )
+        return func.HttpResponse(
+            body=response, status_code=status_code, mimetype="application/json"
+        )
+    except ValueError:
+        return func.HttpResponse(
+            body=b"Invalid format id", status_code=400, mimetype="application/json"
+        )
 
 
-def _delete(activity_id: str) -> str:
+def _delete(activity_id: int) -> str:
     activity_use_case = _domain._use_cases.DeleteActivityUseCase(
         _create_activity_service(DATABASE)
     )
