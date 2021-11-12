@@ -45,3 +45,6 @@ azure-functions-worker==1.1.9
 # Time utils
 pytz==2019.3
 python-dateutil==2.8.1
+
+# azure blob storage
+azure-storage-blob==2.1.0
