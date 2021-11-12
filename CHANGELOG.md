@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.43.1 (2021-11-12)
+### Fix
+* TT-393 userid convert to list ([#339](https://github.com/ioet/time-tracker-backend/issues/339)) ([`6e2108e`](https://github.com/ioet/time-tracker-backend/commit/6e2108ee03dcfd48fa9676a69591248a2467f27c))
+
 ## v0.43.0 (2021-11-11)
 ### Feature
 * TT-384 Refactor Tables ([#337](https://github.com/ioet/time-tracker-backend/issues/337)) ([`568e047`](https://github.com/ioet/time-tracker-backend/commit/568e0479859b0a92cc2780fb5cb522da664c0a92))
