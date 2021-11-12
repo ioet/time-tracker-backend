@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.43.0 (2021-11-11)
+### Feature
+* TT-384 Refactor Tables ([#337](https://github.com/ioet/time-tracker-backend/issues/337)) ([`568e047`](https://github.com/ioet/time-tracker-backend/commit/568e0479859b0a92cc2780fb5cb522da664c0a92))
+
 ## v0.42.1 (2021-11-04)
 ### Fix
 * TT-365 v2 post method fix ([#333](https://github.com/ioet/time-tracker-backend/issues/333)) ([`cb892c3`](https://github.com/ioet/time-tracker-backend/commit/cb892c338c1139640a5527772b398b3b34ff68a7))

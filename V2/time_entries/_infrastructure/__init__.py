@@ -1,1 +1,0 @@
-from ._data_persistence import ActivitiesJsonDao

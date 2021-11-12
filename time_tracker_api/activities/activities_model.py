@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+
 import json
 from azure.cosmos import PartitionKey
 
