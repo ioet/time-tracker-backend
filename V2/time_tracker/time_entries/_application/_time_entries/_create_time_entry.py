@@ -9,6 +9,7 @@ from ... import _infrastructure
 from time_tracker._infrastructure import DB
 
 
+
 def create_time_entry(req: func.HttpRequest) -> func.HttpResponse:
     database = DB()
     time_entry_dao = _infrastructure.TimeEntriesSQLDao(database)
