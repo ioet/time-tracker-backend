@@ -5,7 +5,7 @@ import typing
 
 class ActivitiesDao(abc.ABC):
     @abc.abstractmethod
-    def get_by_id(self, id: str) -> Activity:
+    def get_by_id(self, id: int) -> Activity:
         pass
 
     @abc.abstractmethod
@@ -13,13 +13,13 @@ class ActivitiesDao(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def delete(self, id: str) -> Activity:
+    def delete(self, id: int) -> Activity:
         pass
 
     @abc.abstractmethod
-    def update(self, id: str, new_activity: dict) -> Activity:
+    def update(self, id: int, name: str, description: str, status: int, deleted: bool) -> Activity:
         pass
 
     @abc.abstractmethod
-    def create_activity(self, activity_data: dict) -> Activity:
+    def create(self, activity_data: Activity) -> Activity:
         pass

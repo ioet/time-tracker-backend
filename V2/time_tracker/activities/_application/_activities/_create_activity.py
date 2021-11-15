@@ -6,14 +6,13 @@ import azure.functions as func
 
 from ... import _domain
 from ... import _infrastructure
+from time_tracker._infrastructure import DB
 
-_JSON_PATH = (
-    'activities/_infrastructure/_data_persistence/activities_data.json'
-)
+DATABASE = DB()
 
 
 def create_activity(req: func.HttpRequest) -> func.HttpResponse:
-    activity_dao = _infrastructure.ActivitiesJsonDao(_JSON_PATH)
+    activity_dao = _infrastructure.ActivitiesSQLDao(DATABASE)
     activity_service = _domain.ActivityService(activity_dao)
     use_case = _domain._use_cases.CreateActivityUseCase(activity_service)
 
@@ -30,11 +29,10 @@ def create_activity(req: func.HttpRequest) -> func.HttpResponse:
         name=activity_data['name'],
         description=activity_data['description'],
         status=activity_data['status'],
-        deleted=activity_data['deleted'],
-        tenant_id=activity_data['tenant_id']
+        deleted=activity_data['deleted']
     )
 
-    created_activity = use_case.create_activity(activity_to_create.__dict__)
+    created_activity = use_case.create_activity(activity_to_create)
     if not create_activity:
         return func.HttpResponse(
             body={'error': 'activity could not be created'},

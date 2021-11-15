@@ -11,3 +11,7 @@ pytest-mock
 
 # To create sample content in tests and API documentation
 Faker==4.0.2
+
+#SQL ALCHEMY
+SQLAlchemy==1.4.24
+psycopg2==2.9.1
