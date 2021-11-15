@@ -1,0 +1,22 @@
+{
+  "disabled": false,
+  "bindings": [
+    {
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "req",
+      "route": "time-entries/{id}",
+      "authLevel": "anonymous",
+      "methods": [
+        "DELETE"
+      ]
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "$return"
+    }
+  ],
+  "entryPoint": "delete_time_entry",
+  "scriptFile": "../time_tracker/time_entries/interface.py"
+}
