@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.44.0 (2021-11-15)
+### Feature
+* TT-357 Create V2 Activities Azure DAO ([#334](https://github.com/ioet/time-tracker-backend/issues/334)) ([`3a99add`](https://github.com/ioet/time-tracker-backend/commit/3a99add39a3130c540d86b02c5a69dbda8536e8e))
+
+### Fix
+* TT-384 Revert  get all activities from blob storage (#348) ([#349](https://github.com/ioet/time-tracker-backend/issues/349)) ([`b869c09`](https://github.com/ioet/time-tracker-backend/commit/b869c09f890b6867a923b5a11331b1902870126f))
+
 ## v0.43.1 (2021-11-12)
 ### Fix
 * TT-393 userid convert to list ([#339](https://github.com/ioet/time-tracker-backend/issues/339)) ([`6e2108e`](https://github.com/ioet/time-tracker-backend/commit/6e2108ee03dcfd48fa9676a69591248a2467f27c))
