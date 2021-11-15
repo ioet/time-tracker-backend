@@ -143,7 +143,7 @@ class ActivityCosmosDBDao(APICosmosDBDao, ActivityDao):
             activity_ids,
         )
 
-    def get_all(
+    def get_all_v1(
         self,
         conditions: dict = None,
         activities_id: List = None,
@@ -162,7 +162,7 @@ class ActivityCosmosDBDao(APICosmosDBDao, ActivityDao):
         )
         return activities
 
-    def get_all_test(self, conditions: dict = None) -> list:
+    def get_all(self, conditions: dict = None) -> list:
         event_ctx = self.create_event_context("read-many")
         activities = self.repository.find_all_from_blob_storage(event_context=event_ctx)
         return activities
