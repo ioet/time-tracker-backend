@@ -1,10 +1,10 @@
-from time_tracker.time_entries._application import _time_entries as time_entries
-
-import azure.functions as func
 import json
 
+import azure.functions as func
 
-ACTIVITY_URL = "/api/time-entries/"
+from time_tracker.time_entries._application import _time_entries as time_entries
+
+TIME_ENTRY_URL = "/api/time-entries/"
 
 
 def test__time_entry_azure_endpoint__creates_an_time_entry__when_time_entry_has_all_attributes(
@@ -18,7 +18,7 @@ def test__time_entry_azure_endpoint__creates_an_time_entry__when_time_entry_has_
     req = func.HttpRequest(
         method="POST",
         body=body,
-        url=ACTIVITY_URL,
+        url=TIME_ENTRY_URL,
     )
 
     response = time_entries.create_time_entry(req)
