@@ -4,6 +4,7 @@ from . import _config
 
 _TEST_DIALECT = "sqlite"
 
+
 class DB():
     config = _config.load_config()
     connection = None
