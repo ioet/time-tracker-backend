@@ -2,6 +2,7 @@ import sqlalchemy
 
 from . import _config
 
+_TEST_DIALECT = "sqlite"
 
 class DB():
     config = _config.load_config()
@@ -17,4 +18,6 @@ class DB():
         self.metadata.create_all(self.engine)
         if self.connection is None:
             self.connection = self.engine.connect()
+            if self.engine.dialect.name == _TEST_DIALECT:
+                self.connection.execute("pragma foreign_keys=ON")
         return self.connection

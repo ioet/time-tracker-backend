@@ -49,32 +49,12 @@ class TimeEntriesSQLDao(domain.TimeEntriesDao):
         return domain.TimeEntry(**time_entry)
 
     def delete(self, time_entry_id: int) -> TimeEntry:
-        time_entry = {
-            time_entry.get('id'): time_entry
-            for time_entry in self.__get_time_entries_from_file()
-        }.get(int(time_entry_id))
-
-        if time_entry:
-            time_entry_deleted = {**time_entry, 'deleted': True}
-
-            time_entries_updated = list(
-                map(
-                    lambda time_entry: time_entry
-                    if time_entry.get('id') != time_entry_id
-                    else time_entry_deleted,
-                    self.__get_time_entries_from_file(),
-                )
-            )
-
-            try:
-                file = open(self.json_data_file_path, 'w')
-                json.dump(time_entries_updated, file)
-                file.close()
-
-                return self.__create_time_entry_dto(time_entry_deleted)
-
-            except FileNotFoundError:
-                return None
-
-        else:
-            return None
+        query = (
+            self.time_entry.update()
+            .where(self.time_entry.c.id == time_entry_id)
+            .values({"deleted": True})
+        )
+        self.db.get_session().execute(query)
+        query_deleted_time_entry = sql.select(self.time_entry).where(self.time_entry.c.id == time_entry_id)
+        time_entry = self.db.get_session().execute(query_deleted_time_entry).one_or_none()
+        return self.__create_time_entry_dto(dict(time_entry)) if time_entry else None
