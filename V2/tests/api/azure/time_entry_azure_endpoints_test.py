@@ -1,27 +1,43 @@
+import pytest
 import json
 
 import azure.functions as func
 
-from time_tracker.time_entries._application import _time_entries as time_entries
+import time_tracker.time_entries._application._time_entries as azure_time_entries
+from time_tracker._infrastructure import DB
+from time_tracker.activities import _domain as domain_activities
+from time_tracker.activities import _infrastructure as infrastructure_activities
 
 TIME_ENTRY_URL = "/api/time-entries/"
 
 
-def test__time_entry_azure_endpoint__creates_an_time_entry__when_time_entry_has_all_attributes(
-    create_temp_time_entries, time_entry_factory
-):
-    time_entries_json, tmp_directory = create_temp_time_entries
-    time_entries._create_time_entry._JSON_PATH = tmp_directory
+@pytest.fixture(name='insert_activity')
+def _insert_activity() -> dict:
+    def _new_activity(activity: domain_activities.Activity, database: DB):
+        dao = infrastructure_activities.ActivitiesSQLDao(database)
+        new_activity = dao.create(activity)
+        return new_activity.__dict__
+    return _new_activity
 
-    time_entry_body = time_entry_factory(None).__dict__
+
+def test__time_entry_azure_endpoint__creates_an_time_entry__when_time_entry_has_all_attributes(
+    create_fake_database, time_entry_factory, activity_factory, insert_activity
+):
+    db = create_fake_database
+    inserted_activity = insert_activity(activity_factory(), db)
+    time_entry_body = time_entry_factory(activity_id=inserted_activity["id"], technologies="[jira,sql]").__dict__
+
+    azure_time_entries._create_time_entry._DATABASE = db
     body = json.dumps(time_entry_body).encode("utf-8")
     req = func.HttpRequest(
-        method="POST",
-        body=body,
-        url=TIME_ENTRY_URL,
+         method='POST',
+         body=body,
+         url=TIME_ENTRY_URL,
     )
 
-    response = time_entries.create_time_entry(req)
-    time_entry_json_data = response.get_body()
+    response = azure_time_entries._create_time_entry.create_time_entry(req)
+    time_entry_json_data = json.loads(response.get_body())
+    time_entry_body['id'] = time_entry_json_data['id']
+
     assert response.status_code == 201
-    assert time_entry_json_data == body
+    assert time_entry_json_data == time_entry_body

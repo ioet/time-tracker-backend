@@ -1,39 +1,49 @@
-import json
 import dataclasses
-import typing
 
-from time_tracker.time_entries._domain import TimeEntriesDao, TimeEntry
+import sqlalchemy
+
+import time_tracker.time_entries._domain as domain
+from time_tracker._infrastructure import _db
 
 
-class TimeEntriesJsonDao(TimeEntriesDao):
+class TimeEntriesJsonDao(domain.TimeEntriesDao):
 
-    def __init__(self, json_data_file_path: str):
-        self.json_data_file_path = json_data_file_path
-        self.time_entry_key = [field.name for field in dataclasses.fields(TimeEntry)]
+    def __init__(self, database: _db.DB):
+        self.time_entry_key = [field.name for field in dataclasses.fields(domain.TimeEntry)]
+        self.db = database
+        self.time_entry = sqlalchemy.Table(
+            'time_entry',
+            self.db.metadata,
+            sqlalchemy.Column('id', sqlalchemy.Integer, primary_key=True, autoincrement=True),
+            sqlalchemy.Column('start_date', sqlalchemy.DateTime().with_variant(sqlalchemy.String, "sqlite")),
+            sqlalchemy.Column('owner_id', sqlalchemy.Integer),
+            sqlalchemy.Column('description', sqlalchemy.String),
+            sqlalchemy.Column('activity_id', sqlalchemy.Integer, sqlalchemy.ForeignKey('activity.id')),
+            sqlalchemy.Column('uri', sqlalchemy.String),
+            sqlalchemy.Column(
+                'technologies',
+                sqlalchemy.ARRAY(sqlalchemy.String).with_variant(sqlalchemy.String, "sqlite")
+            ),
+            sqlalchemy.Column('end_date', sqlalchemy.DateTime().with_variant(sqlalchemy.String, "sqlite")),
+            sqlalchemy.Column('deleted', sqlalchemy.Boolean),
+            sqlalchemy.Column('timezone_offset', sqlalchemy.String),
+            sqlalchemy.Column('project_id', sqlalchemy.Integer),
+            extend_existing=True,
+        )
 
-    def create(self, time_entry_data: dict) -> TimeEntry:
-        time_entries = self.__get_time_entries_from_file()
-        time_entries.append(time_entry_data)
-
+    def create(self, time_entry_data: domain.TimeEntry) -> domain.TimeEntry:
         try:
-            with open(self.json_data_file_path, 'w') as outfile:
-                json.dump(time_entries, outfile)
+            new_time_entry = time_entry_data.__dict__
+            new_time_entry.pop('id', None)
 
-            return self.__create_time_entry_dto(time_entry_data)
-        except FileNotFoundError:
-            print("Can not create activity")
+            query = self.time_entry.insert().values(new_time_entry).return_defaults()
+            time_entry = self.db.get_session().execute(query)
+            new_time_entry.update({"id": time_entry.inserted_primary_key[0]})
+            return self.__create_time_entry_dto(new_time_entry)
 
-    def __get_time_entries_from_file(self) -> typing.List[dict]:
-        try:
-            file = open(self.json_data_file_path)
-            time_entries = json.load(file)
-            file.close()
+        except sqlalchemy.exc.SQLAlchemyError:
+            return None
 
-            return time_entries
-
-        except FileNotFoundError:
-            return []
-
-    def __create_time_entry_dto(self, time_entry: dict) -> TimeEntry:
+    def __create_time_entry_dto(self, time_entry: dict) -> domain.TimeEntry:
         time_entry = {key: time_entry.get(key) for key in self.time_entry_key}
-        return TimeEntry(**time_entry)
+        return domain.TimeEntry(**time_entry)

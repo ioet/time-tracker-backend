@@ -6,5 +6,5 @@ class TimeEntryService:
     def __init__(self, time_entry_dao: TimeEntriesDao):
         self.time_entry_dao = time_entry_dao
 
-    def create(self, time_entry_data: dict) -> TimeEntry:
+    def create(self, time_entry_data: TimeEntry) -> TimeEntry:
         return self.time_entry_dao.create(time_entry_data)

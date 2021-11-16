@@ -15,6 +15,13 @@ def _insert_activity() -> domain.Activity:
     return _new_activity
 
 
+@pytest.fixture(name='create_fake_dao')
+def _create_fake_dao() -> domain.ActivitiesDao:
+    db_fake = DB('sqlite:///:memory:')
+    dao = infrastructure.ActivitiesSQLDao(db_fake)
+    return dao
+
+
 @pytest.fixture(name='clean_database', autouse=True)
 def _clean_database():
     yield
