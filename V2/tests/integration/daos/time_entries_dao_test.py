@@ -2,25 +2,14 @@ import pytest
 
 
 import time_tracker.time_entries._domain as domain
-import time_tracker.activities._domain as domain_activities
 import time_tracker.time_entries._infrastructure as infrastructure
-import time_tracker.activities._infrastructure as infrastructure_activities
 from time_tracker._infrastructure import DB
-
-
-@pytest.fixture(name='insert_activity')
-def _insert_activity() -> domain_activities.Activity:
-    def _new_activity(activity: domain_activities.Activity, database: DB):
-        dao = infrastructure_activities.ActivitiesSQLDao(database)
-        new_activity = dao.create(activity)
-        return new_activity
-    return _new_activity
 
 
 @pytest.fixture(name='create_fake_dao')
 def _create_fake_dao() -> domain.TimeEntriesDao:
     db_fake = DB('sqlite:///:memory:')
-    dao = infrastructure.TimeEntriesJsonDao(db_fake)
+    dao = infrastructure.TimeEntriesSQLDao(db_fake)
     return dao
 
 
@@ -28,7 +17,7 @@ def _create_fake_dao() -> domain.TimeEntriesDao:
 def _clean_database():
     yield
     db_fake = DB('sqlite:///:memory:')
-    dao = infrastructure.TimeEntriesJsonDao(db_fake)
+    dao = infrastructure.TimeEntriesSQLDao(db_fake)
     query = dao.time_entry.delete()
     dao.db.get_session().execute(query)
 

@@ -1,23 +1,10 @@
-import pytest
 import json
 
 import azure.functions as func
 
 import time_tracker.time_entries._application._time_entries as azure_time_entries
-from time_tracker._infrastructure import DB
-from time_tracker.activities import _domain as domain_activities
-from time_tracker.activities import _infrastructure as infrastructure_activities
 
 TIME_ENTRY_URL = "/api/time-entries/"
-
-
-@pytest.fixture(name='insert_activity')
-def _insert_activity() -> dict:
-    def _new_activity(activity: domain_activities.Activity, database: DB):
-        dao = infrastructure_activities.ActivitiesSQLDao(database)
-        new_activity = dao.create(activity)
-        return new_activity.__dict__
-    return _new_activity
 
 
 def test__time_entry_azure_endpoint__creates_an_time_entry__when_time_entry_has_all_attributes(
@@ -25,7 +12,7 @@ def test__time_entry_azure_endpoint__creates_an_time_entry__when_time_entry_has_
 ):
     db = create_fake_database
     inserted_activity = insert_activity(activity_factory(), db)
-    time_entry_body = time_entry_factory(activity_id=inserted_activity["id"], technologies="[jira,sql]").__dict__
+    time_entry_body = time_entry_factory(activity_id=inserted_activity.id, technologies="[jira,sql]").__dict__
 
     azure_time_entries._create_time_entry._DATABASE = db
     body = json.dumps(time_entry_body).encode("utf-8")

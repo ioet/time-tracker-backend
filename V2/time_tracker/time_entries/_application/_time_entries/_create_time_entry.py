@@ -13,7 +13,7 @@ _DATABASE = DB()
 
 def create_time_entry(req: func.HttpRequest) -> func.HttpResponse:
 
-    time_entry_dao = _infrastructure.TimeEntriesJsonDao(_DATABASE)
+    time_entry_dao = _infrastructure.TimeEntriesSQLDao(_DATABASE)
     time_entry_service = _domain.TimeEntryService(time_entry_dao)
     use_case = _domain._use_cases.CreateTimeEntryUseCase(time_entry_service)
 

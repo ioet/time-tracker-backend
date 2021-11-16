@@ -2,6 +2,7 @@ import pytest
 from faker import Faker
 
 import time_tracker.activities._domain as domain_activities
+import time_tracker.activities._infrastructure as infrastructure_activities
 import time_tracker.time_entries._domain as domain_time_entries
 from time_tracker._infrastructure import DB
 
@@ -58,3 +59,12 @@ def _time_entry_factory() -> domain_time_entries.TimeEntry:
             )
         return time_entry
     return _make_time_entry
+
+
+@pytest.fixture(name='insert_activity')
+def _insert_activity() -> dict:
+    def _new_activity(activity: domain_activities.Activity, database: DB):
+        dao = infrastructure_activities.ActivitiesSQLDao(database)
+        new_activity = dao.create(activity)
+        return new_activity
+    return _new_activity

@@ -1,2 +1,2 @@
 # flake8: noqa
-from ._data_persistence import TimeEntriesJsonDao
+from ._data_persistence import TimeEntriesSQLDao

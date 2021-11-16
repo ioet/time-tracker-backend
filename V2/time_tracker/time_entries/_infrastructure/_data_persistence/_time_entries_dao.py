@@ -6,7 +6,7 @@ import time_tracker.time_entries._domain as domain
 from time_tracker._infrastructure import _db
 
 
-class TimeEntriesJsonDao(domain.TimeEntriesDao):
+class TimeEntriesSQLDao(domain.TimeEntriesDao):
 
     def __init__(self, database: _db.DB):
         self.time_entry_key = [field.name for field in dataclasses.fields(domain.TimeEntry)]
