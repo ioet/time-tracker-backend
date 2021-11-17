@@ -14,6 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 5
+    env:
+      ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+      TEST_DB_CONNECTION:  ${{ secrets.TEST_DB_CONNECTION }}
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.10.0
@@ -28,14 +31,6 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -r V2/requirements.txt
-
-    - name: Inject Secrets
-      env:
-        ENVIRONMENT: ${{ secrets.environment }}
-        TEST_DB_CONNECTION: ${{ secrets.test_db_connection }}
-      run: |
-        echo  $ENVIRONMENT
-        echo  $TEST_DB_CONNECTION
 
     - name: Lint with flake8
       run: |
