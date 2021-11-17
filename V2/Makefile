@@ -16,6 +16,8 @@ install:
 		@echo "Completed! "
 
 .PHONY: test
+test: export ENVIRONMENT = test
+test: export TEST_DB_CONNECTION = sqlite:///:memory:
 test:
 		@echo "=========================================Lint with flake8========================================="
 		flake8 . --show-source --statistics
