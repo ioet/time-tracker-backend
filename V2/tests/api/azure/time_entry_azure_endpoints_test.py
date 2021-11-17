@@ -14,7 +14,6 @@ def test__time_entry_azure_endpoint__creates_an_time_entry__when_time_entry_has_
     inserted_activity = insert_activity(activity_factory(), db)
     time_entry_body = time_entry_factory(activity_id=inserted_activity.id, technologies="[jira,sql]").__dict__
 
-    azure_time_entries._create_time_entry._DATABASE = db
     body = json.dumps(time_entry_body).encode("utf-8")
     req = func.HttpRequest(
          method='POST',

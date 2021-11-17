@@ -8,12 +8,10 @@ from ... import _domain
 from ... import _infrastructure
 from time_tracker._infrastructure import DB
 
-_DATABASE = DB()
-
 
 def create_time_entry(req: func.HttpRequest) -> func.HttpResponse:
-
-    time_entry_dao = _infrastructure.TimeEntriesSQLDao(_DATABASE)
+    database = DB()
+    time_entry_dao = _infrastructure.TimeEntriesSQLDao(database)
     time_entry_service = _domain.TimeEntryService(time_entry_dao)
     use_case = _domain._use_cases.CreateTimeEntryUseCase(time_entry_service)
 

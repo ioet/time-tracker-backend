@@ -25,7 +25,8 @@ def _activity_factory() -> domain_activities.Activity:
 
 @pytest.fixture(name='create_fake_database')
 def _create_fake_database() -> DB:
-    db_fake = DB('sqlite:///:memory:')
+    db_fake = DB()
+    db_fake.get_session().execute("pragma foreign_keys=ON")
     return db_fake
 
 
