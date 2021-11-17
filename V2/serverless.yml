@@ -89,13 +89,24 @@ functions:
 
   delete_time_entry:
     handler: time_tracker/time_entries/interface.delete_time_entry
-    events:
+     events:
       - http: true
         x-azure-settings:
           methods:
             - DELETE
           route: time-entries/{id}
           authLevel: anonymous
+
+    
+  update_time_entry:
+    handler: time_tracker/time_entries/interface.update_time_entry
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - PUT   
+          route: time-entries/{id}
+          authLevel: anonymous   
 
   create_customer:
     handler: time_tracker/customers/interface.create_customer
@@ -106,3 +117,4 @@ functions:
             - POST
           route: customers/
           authLevel: anonymous
+         

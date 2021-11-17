@@ -11,3 +11,7 @@ class TimeEntriesDao(abc.ABC):
     @abc.abstractmethod
     def delete(self, id: int) -> TimeEntry:
         pass
+
+    @abc.abstractmethod
+    def update(self, id: int, new_time_entry: dict) -> TimeEntry:
+        pass

@@ -1,3 +1,4 @@
+from faker import Faker
 from pytest_mock import MockFixture
 from faker import Faker
 
@@ -30,3 +31,16 @@ def test__delete_time_entry_function__uses_the_time_entry_service__to_delete_tim
 
     assert time_entry_service.delete.called
     assert expected_time_entry == deleted_time_entry
+
+
+def test__update_time_entries_function__uses_the_time_entry_service__to_update_an_time_entry(
+    mocker: MockFixture,
+):
+    expected_time_entry = mocker.Mock()
+    time_entry_service = mocker.Mock(update=mocker.Mock(return_value=expected_time_entry))
+
+    time_entry_use_case = _use_cases.UpdateTimeEntryUseCase(time_entry_service)
+    updated_time_entry = time_entry_use_case.update_time_entry(Faker().uuid4(), Faker().pydict())
+
+    assert time_entry_service.update.called
+    assert expected_time_entry == updated_time_entry

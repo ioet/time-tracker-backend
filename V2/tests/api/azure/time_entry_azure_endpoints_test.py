@@ -1,5 +1,7 @@
 import pytest
 import json
+import pytest
+from faker import Faker
 
 import azure.functions as func
 
@@ -76,3 +78,43 @@ def test__delete_time_entries_azure_endpoint__returns_a_status_code_400__when_ti
 
     assert response.status_code == 400
     assert response.get_body() == b'Invalid Format ID'
+
+
+def test__update_activity_azure_endpoint__returns_an_activity__when_found_an_activity_to_update(
+    test_db, time_entry_factory, insert_time_entry, activity_factory, insert_activity
+):
+    inserted_activity = insert_activity(activity_factory(), test_db)
+    existent_time_entries = time_entry_factory(activity_id=inserted_activity.id, technologies="[jira,sql]")
+    inserted_time_entries = insert_time_entry(existent_time_entries, test_db).__dict__
+
+    time_entry_body = {"description": Faker().sentence()}
+
+    req = func.HttpRequest(
+        method='PUT',
+        body=json.dumps(time_entry_body).encode("utf-8"),
+        url=TIME_ENTRY_URL,
+        route_params={"id": inserted_time_entries["id"]},
+    )
+
+    response = azure_time_entries._update_time_entry.update_time_entry(req)
+    activitiy_json_data = response.get_body().decode("utf-8")
+    inserted_time_entries.update(time_entry_body)
+
+    assert response.status_code == 200
+    assert activitiy_json_data == json.dumps(inserted_time_entries)
+
+
+def test__update_time_entries_azure_endpoint__returns_a_status_code_400__when_time_entry_recive_invalid_id():
+    time_entry_body = {"description": Faker().sentence()}
+
+    req = func.HttpRequest(
+        method="PUT",
+        body=json.dumps(time_entry_body).encode("utf-8"),
+        url=TIME_ENTRY_URL,
+        route_params={"id": "invalid id"},
+    )
+
+    response = azure_time_entries._update_time_entry.update_time_entry(req)
+
+    assert response.status_code == 400
+    assert response.get_body() == b'Invalid ID'
