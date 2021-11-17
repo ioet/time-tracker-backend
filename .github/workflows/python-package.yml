@@ -29,6 +29,14 @@ jobs:
       run: |
         pip install -r V2/requirements.txt
 
+    - name: Inject Secrets
+      env:
+        ENVIRONMENT: ${{ secrets.environment }}
+        TEST_DB_CONNECTION: ${{ secrets.test_db_connection }}
+      run: |
+        echo  $ENVIRONMENT
+        echo  $TEST_DB_CONNECTION
+
     - name: Lint with flake8
       run: |
         cd V2
