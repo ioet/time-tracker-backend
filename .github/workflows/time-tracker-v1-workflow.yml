@@ -29,6 +29,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements/time_tracker_api/dev.txt
         pip install -r requirements/time_tracker_events/dev.txt
+    
+    - name: Inject secrets
+      env:
+        ENVIRONMENT: ${{ secrets.environment }}
+      # remove it
+      run: |
+        echo $ENVIRONMENT
 
     - name: Run tests
       run: |
