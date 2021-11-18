@@ -38,11 +38,15 @@ jobs:
         uses: Azure/get-keyvault-secrets@v1
         with:
           keyvault: "time-tracker-secrets"
-          secrets: "MS-CLIENT-ID"
+          secrets: "MS-CLIENT-ID, MS-AUTHORITY, MS-SCOPE, MS-SECRET, MS-ENDPOINT"
         id: timeTrackerAzureVault
 
       - name: Run tests
         env:
+          MS_AUTHORITY: ${{ steps.timeTrackerAzureVault.outputs.MS-AUTHORITY }}
           MS_CLIENT_ID: ${{ steps.timeTrackerAzureVault.outputs.MS-CLIENT-ID }}
+          MS_SCOPE: ${{ steps.timeTrackerAzureVault.outputs.MS-SCOPE }}
+          MS_SECRET: ${{ steps.timeTrackerAzureVault.outputs.MS-SECRET }}
+          MS_ENDPOINT: ${{ steps.timeTrackerAzureVault.outputs.MS-ENDPOINT }}
         run: |
           pytest tests
