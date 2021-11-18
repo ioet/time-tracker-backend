@@ -9,9 +9,9 @@ ACTIVITY_URL = '/api/activities/'
 
 
 def test__activity_azure_endpoint__returns_all_activities(
-    create_fake_database, activity_factory, insert_activity
+    test_db, activity_factory, insert_activity
 ):
-    fake_database = create_fake_database
+    fake_database = test_db
     existent_activities = [activity_factory(), activity_factory()]
     inserted_activities = [
         insert_activity(existent_activities[0], fake_database).__dict__,
@@ -28,9 +28,9 @@ def test__activity_azure_endpoint__returns_all_activities(
 
 
 def test__activity_azure_endpoint__returns_an_activity__when_activity_matches_its_id(
-    create_fake_database, activity_factory, insert_activity
+    test_db, activity_factory, insert_activity
 ):
-    fake_database = create_fake_database
+    fake_database = test_db
     existent_activity = activity_factory()
     inserted_activity = insert_activity(existent_activity, fake_database).__dict__
 
@@ -50,9 +50,9 @@ def test__activity_azure_endpoint__returns_an_activity__when_activity_matches_it
 
 
 def test__activity_azure_endpoint__returns_an_activity_with_inactive_status__when_an_activity_matching_its_id_is_found(
-    create_fake_database, activity_factory, insert_activity
+    test_db, activity_factory, insert_activity
 ):
-    fake_database = create_fake_database
+    fake_database = test_db
     existent_activity = activity_factory()
     inserted_activity = insert_activity(existent_activity, fake_database).__dict__
 
@@ -73,9 +73,9 @@ def test__activity_azure_endpoint__returns_an_activity_with_inactive_status__whe
 
 
 def test__update_activity_azure_endpoint__returns_an_activity__when_found_an_activity_to_update(
-    create_fake_database, activity_factory, insert_activity
+    test_db, activity_factory, insert_activity
 ):
-    fake_database = create_fake_database
+    fake_database = test_db
     existent_activity = activity_factory()
     inserted_activity = insert_activity(existent_activity, fake_database).__dict__
 
@@ -97,9 +97,9 @@ def test__update_activity_azure_endpoint__returns_an_activity__when_found_an_act
 
 
 def test__activity_azure_endpoint__creates_an_activity__when_activity_has_all_attributes(
-     create_fake_database,
+     test_db,
  ):
-    azure_activities._create_activity.DATABASE = create_fake_database
+    azure_activities._create_activity.DATABASE = test_db
     activity_body = {
         'id': None,
         'name': Faker().user_name(),

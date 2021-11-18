@@ -24,9 +24,9 @@ def _clean_database():
 
 
 def test__time_entry__returns_a_time_entry_dto__when_saves_correctly_with_sql_database(
-    create_fake_database, time_entry_factory, create_fake_dao, insert_activity, activity_factory
+    test_db, time_entry_factory, create_fake_dao, insert_activity, activity_factory
 ):
-    dao = create_fake_dao(create_fake_database)
+    dao = create_fake_dao(test_db)
     inserted_activity = insert_activity(activity_factory(), dao.db)
 
     time_entry_to_insert = time_entry_factory(activity_id=inserted_activity.id, technologies="[jira,sql]")
@@ -38,9 +38,9 @@ def test__time_entry__returns_a_time_entry_dto__when_saves_correctly_with_sql_da
 
 
 def test__time_entry__returns_None__when_not_saves_correctly(
-    time_entry_factory, create_fake_dao, create_fake_database
+    time_entry_factory, create_fake_dao, test_db
 ):
-    dao = create_fake_dao(create_fake_database)
+    dao = create_fake_dao(test_db)
     time_entry_to_insert = time_entry_factory(activity_id=1203, technologies="[jira,sql]")
 
     inserted_time_entry = dao.create(time_entry_to_insert)
