@@ -45,9 +45,8 @@ jobs:
     - name: Inject secrets
       env:
         MS_CLIENT_ID: ${{ steps.timeTrackerAzureVault.outputs.MS-CLIENT-ID }}
-      run: |
-        echo $MS_CLIENT_ID
-
+     
     - name: Run tests
       run: |
+        echo $MS_CLIENT_ID
         pytest tests
