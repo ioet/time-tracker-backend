@@ -1,0 +1,35 @@
+name: Time Tacker V1 CI
+
+on:
+  # rename to pull_request
+  push:
+    # rename to master
+    branches: [TT-412]
+
+jobs:
+  time-tracker-ci:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [3.9]
+    
+    steps:
+    - name: Checking out code from the repository
+      uses: actions/checkout@v2
+    
+    - name: Setting up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements/time_tracker_api/dev.txt
+        pip install -r requirements/time_tracker_events/dev.txt
+
+    - name: Run tests
+      run: |
+        pytest tests
