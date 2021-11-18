@@ -30,6 +30,11 @@ jobs:
         pip install -r requirements/time_tracker_api/dev.txt
         pip install -r requirements/time_tracker_events/dev.txt
     
+    - name: Login to azure
+      uses: Azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
     - name: Get vault from azure
       uses: Azure/get-keyvault-secrets@v1
       with:
