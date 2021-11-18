@@ -38,7 +38,7 @@ jobs:
         uses: Azure/get-keyvault-secrets@v1
         with:
           keyvault: "time-tracker-secrets"
-          secrets: "MS-CLIENT-ID, MS-AUTHORITY, MS-SCOPE, MS-SECRET, MS-ENDPOINT, USERID, AZURE-APP-CONFIGURATION-CONNECTION-STRING, DATABASE-ACCOUNT-URI"
+          secrets: "MS-CLIENT-ID, MS-AUTHORITY, MS-SCOPE, MS-SECRET, MS-ENDPOINT, USERID, AZURE-APP-CONFIGURATION-CONNECTION-STRING, DATABASE-ACCOUNT-URI, DATABASE-MASTER-KEY"
         id: timeTrackerAzureVault
 
       - name: Run tests
@@ -51,5 +51,6 @@ jobs:
           USERID: ${{ steps.timeTrackerAzureVault.outputs.USERID }}
           AZURE_APP_CONFIGURATION_CONNECTION_STRING: ${{ steps.timeTrackerAzureVault.outputs.AZURE-APP-CONFIGURATION-CONNECTION-STRING }}
           DATABASE_ACCOUNT_URI: ${{ steps.timeTrackerAzureVault.outputs.DATABASE-ACCOUNT-URI }}
+          DATABASE_MASTER_KEY: ${{ steps.timeTrackerAzureVault.outputs.DATABASE-MASTER-KEY }}
         run: |
           pytest tests
