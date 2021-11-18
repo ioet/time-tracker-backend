@@ -30,12 +30,18 @@ jobs:
         pip install -r requirements/time_tracker_api/dev.txt
         pip install -r requirements/time_tracker_events/dev.txt
     
+    - name: Get vault from azure
+      uses: Azure/get-keyvault-secrets@v1
+      with:
+        keyvault: "time-tracker-secrets"
+        secrets: 'MS-CLIENT-ID'
+      id: timeTrackerAzureVault
+
     - name: Inject secrets
       env:
-        ENVIRONMENT: ${{ secrets.environment }}
-      # remove it
+        MS_CLIENT_ID: ${{ steps.timeTrackerAzureVault.outputs.MS-CLIENT-ID }}
       run: |
-        echo $ENVIRONMENT
+        echo $MS_CLIENT_ID
 
     - name: Run tests
       run: |
