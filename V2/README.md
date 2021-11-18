@@ -2,11 +2,11 @@
 
 Refer to [Serverless docs](https://serverless.com/framework/docs/providers/azure/guide/intro/) for more information.
 
-## Requierements to use makefile
+## Requirements to use makefile
 
 - Python version 3.6 or 3.7.
 
-- Use a environment to install requirements (pyenv).
+- Use an environment to install requirements (pyenv).
 
 ## How to use makefile
 
