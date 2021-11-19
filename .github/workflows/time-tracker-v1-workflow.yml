@@ -56,3 +56,7 @@ jobs:
           AZURE_STORAGE_ACCOUNT_KEY: ${{ steps.timeTrackerAzureVault.outputs.AZURE-STORAGE-ACCOUNT-KEY }}
         run: |
           pytest tests
+
+      - name: Build APP
+        run: |
+          docker build .
