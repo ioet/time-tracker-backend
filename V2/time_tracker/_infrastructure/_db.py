@@ -14,7 +14,7 @@ class DB():
         self.engine = sqlalchemy.create_engine(conn_string)
 
     def get_session(self):
+        self.metadata.create_all(self.engine)
         if self.connection is None:
-            self.metadata.create_all(self.engine)
             self.connection = self.engine.connect()
         return self.connection
