@@ -43,13 +43,11 @@ def test__time_entry_azure_endpoint__creates_an_time_entry__when_time_entry_has_
 
 
 def test__delete_time_entries_azure_endpoint__returns_an_time_entry_with_true_deleted__when_its_id_is_found(
-    create_fake_database, time_entry_factory, insert_time_entry, insert_activity, activity_factory,
+    test_db, time_entry_factory, insert_time_entry, insert_activity, activity_factory,
 ):
-    db = create_fake_database
-    azure_time_entries._delete_time_entry.DATABASE = db
-    inserted_activity = insert_activity(activity_factory(), db).__dict__
+    inserted_activity = insert_activity(activity_factory(), test_db).__dict__
     time_entry_body = time_entry_factory(activity_id=inserted_activity["id"], technologies="[jira,sql]")
-    inserted_time_entry = insert_time_entry(time_entry_body, db)
+    inserted_time_entry = insert_time_entry(time_entry_body, test_db)
 
     req = func.HttpRequest(
         method='DELETE',
@@ -66,11 +64,8 @@ def test__delete_time_entries_azure_endpoint__returns_an_time_entry_with_true_de
 
 
 def test__delete_time_entries_azure_endpoint__returns_a_status_code_400__when_time_entry_recive_invalid_id(
-    create_fake_database,
+    test_db,
 ):
-    db = create_fake_database
-    azure_time_entries._delete_time_entry.DATABASE = db
-
     req = func.HttpRequest(
         method="DELETE",
         body=None,

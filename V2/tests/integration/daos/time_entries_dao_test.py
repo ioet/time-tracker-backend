@@ -1,5 +1,5 @@
 import pytest
-
+from faker import Faker
 
 import time_tracker.time_entries._domain as domain
 import time_tracker.time_entries._infrastructure as infrastructure
@@ -48,11 +48,10 @@ def test__time_entry__returns_None__when_not_saves_correctly(
     assert inserted_time_entry is None
 
 
-
 def test_delete__returns_an_time_entry_with_true_deleted__when_an_time_entry_matching_its_id_is_found(
-    create_fake_dao, time_entry_factory, insert_activity, activity_factory
+    create_fake_dao, test_db, time_entry_factory, insert_activity, activity_factory
 ):
-    dao = create_fake_dao
+    dao = create_fake_dao(test_db)
     inserted_activity = insert_activity(activity_factory(), dao.db)
     existent_time_entry = time_entry_factory(activity_id=inserted_activity.id, technologies="[jira,sql]")
     inserted_time_entry = dao.create(existent_time_entry)
@@ -63,9 +62,9 @@ def test_delete__returns_an_time_entry_with_true_deleted__when_an_time_entry_mat
 
 
 def test_delete__returns_none__when_no_time_entry_matching_its_id_is_found(
-    create_fake_dao,
+    create_fake_dao, test_db
 ):
-    dao = create_fake_dao
+    dao = create_fake_dao(test_db)
 
     result = dao.delete(Faker().pyint())
 

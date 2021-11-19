@@ -6,15 +6,12 @@ import azure.functions as func
 
 from ... import _domain
 from ... import _infrastructure
-
-_JSON_PATH = (
-    'time_tracker/time_entries/_infrastructure/_data_persistence/time_entries_data.json'
-)
+from time_tracker._infrastructure import DB
 
 
 def create_time_entry(req: func.HttpRequest) -> func.HttpResponse:
-
-    time_entry_dao = _infrastructure.TimeEntriesJsonDao(_JSON_PATH)
+    database = DB()
+    time_entry_dao = _infrastructure.TimeEntriesSQLDao(database)
     time_entry_service = _domain.TimeEntryService(time_entry_dao)
     use_case = _domain._use_cases.CreateTimeEntryUseCase(time_entry_service)
 

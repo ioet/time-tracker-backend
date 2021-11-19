@@ -6,11 +6,9 @@ from ... import _domain
 from ... import _infrastructure
 from time_tracker._infrastructure import DB
 
-DATABASE = DB()
-
 
 def delete_time_entry(req: func.HttpRequest) -> func.HttpResponse:
-    time_entry_dao = _infrastructure.TimeEntriesSQLDao(DATABASE)
+    time_entry_dao = _infrastructure.TimeEntriesSQLDao(DB())
     time_entry_service = _domain.TimeEntryService(time_entry_dao)
     use_case = _domain._use_cases.DeleteTimeEntryUseCase(time_entry_service)
 

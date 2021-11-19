@@ -1,3 +1,5 @@
+from faker import Faker
+
 from time_tracker.time_entries._domain import TimeEntryService
 
 
