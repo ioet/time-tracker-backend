@@ -10,8 +10,7 @@ TIME_ENTRY_URL = "/api/time-entries/"
 def test__time_entry_azure_endpoint__creates_an_time_entry__when_time_entry_has_all_attributes(
     test_db, time_entry_factory, activity_factory, insert_activity
 ):
-    db = test_db
-    inserted_activity = insert_activity(activity_factory(), db)
+    inserted_activity = insert_activity(activity_factory(), test_db)
     time_entry_body = time_entry_factory(activity_id=inserted_activity.id, technologies="[jira,sql]").__dict__
 
     body = json.dumps(time_entry_body).encode("utf-8")
