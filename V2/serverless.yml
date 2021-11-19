@@ -77,6 +77,16 @@ functions:
           route: activities/
           authLevel: anonymous
 
+  create_time_entry:
+    handler: time_tracker/time_entries/interface.create_time_entry
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - POST
+          route: time-entries/
+          authLevel: anonymous
+
   delete_time_entry:
     handler: time_tracker/time_entries/interface.delete_time_entry
     events:

@@ -5,7 +5,6 @@ import azure.functions as func
 
 import time_tracker.activities._application._activities as azure_activities
 
-
 ACTIVITY_URL = '/api/activities/'
 
 

@@ -64,7 +64,6 @@ def test__delete_time_entries_azure_endpoint__returns_an_time_entry_with_true_de
 
 
 def test__delete_time_entries_azure_endpoint__returns_a_status_code_400__when_time_entry_recive_invalid_id(
-    test_db,
 ):
     req = func.HttpRequest(
         method="DELETE",
