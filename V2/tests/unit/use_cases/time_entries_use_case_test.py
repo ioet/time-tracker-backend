@@ -19,7 +19,7 @@ def test__create_time_entry_function__uses_the_time_entries_service__to_create_t
     assert expected_time_entry == actual_time_entry
 
 
-def test__delete_time_entry_function__uses_the_time_entry_service__to_change_time_entry_deleted(
+def test__delete_time_entry_function__uses_the_time_entry_service__to_delete_time_entry_selected(
     mocker: MockFixture,
 ):
     expected_time_entry = mocker.Mock()

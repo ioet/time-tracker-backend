@@ -16,7 +16,7 @@ def test__create_time_entries__uses_the_time_entry_dao__to_create_an_time_entry(
     assert expected_time_entry == actual_time_entry
 
 
-def test__delete_time_entry__uses_the_time_entry_dao__to_change_time_entry_deleted(
+def test__delete_time_entry__uses_the_time_entry_dao__to_delete_time_entry_selected(
     mocker,
 ):
     expected_time_entry = mocker.Mock()
