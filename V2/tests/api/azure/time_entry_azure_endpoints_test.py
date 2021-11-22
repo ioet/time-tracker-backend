@@ -139,6 +139,45 @@ def test__get_time_entries_azure_endpoint__returns_a_status_code_400__when_time_
     assert response.get_body() == b'Invalid Format ID'
 
 
+def test__get_latest_entries_azure_endpoint__returns_a_list_of_latest_time_entries__when_an_owner_id_match(
+    test_db, time_entry_factory, insert_time_entry, insert_activity, activity_factory,
+):
+    inserted_activity = insert_activity(activity_factory(), test_db).__dict__
+    time_entry_body = time_entry_factory(activity_id=inserted_activity["id"], technologies="[jira,sql]")
+    inserted_time_entry = insert_time_entry(time_entry_body, test_db).__dict__
+
+    req = func.HttpRequest(
+        method='GET',
+        body=None,
+        url=TIME_ENTRY_URL+"latest/",
+        params={"owner_id": inserted_time_entry["owner_id"]},
+    )
+
+    response = azure_time_entries._get_latest_entries.get_latest_entries(req)
+    time_entry_json_data = json.loads(response.get_body().decode("utf-8"))
+
+    assert response.status_code == 200
+    assert time_entry_json_data == [inserted_time_entry]
+
+
+def test__get_latest_entries_azure_endpoint__returns_no_time_entries_found__when_recieve_an_invalid_owner_id(
+    test_db, insert_activity, activity_factory,
+):
+    insert_activity(activity_factory(), test_db)
+
+    req = func.HttpRequest(
+        method='GET',
+        body=None,
+        url=TIME_ENTRY_URL+"latest/",
+        params={"owner_id": Faker().pyint()},
+    )
+
+    response = azure_time_entries._get_latest_entries.get_latest_entries(req)
+
+    assert response.status_code == 404
+    assert response.get_body() == b'No time entries found'
+
+
 def test__update_time_entry_azure_endpoint__returns_an_time_entry__when_found_an_time_entry_to_update(
     test_db, time_entry_factory, insert_time_entry, activity_factory, insert_activity
 ):

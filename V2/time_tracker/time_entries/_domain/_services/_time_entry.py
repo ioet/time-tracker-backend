@@ -1,6 +1,7 @@
 import typing
 
 from time_tracker.time_entries._domain import TimeEntry, TimeEntriesDao
+import typing
 
 
 class TimeEntryService:
@@ -12,6 +13,9 @@ class TimeEntryService:
 
     def delete(self, id: int) -> TimeEntry:
         return self.time_entry_dao.delete(id)
+
+    def get_latest_entries(self, owner_id: int, limit: int) -> typing.List[TimeEntry]:
+        return self.time_entry_dao.get_latest_entries(owner_id, limit)
 
     def update(self, time_entry_id: int, new_time_entry: dict) -> TimeEntry:
         return self.time_entry_dao.update(time_entry_id, new_time_entry)

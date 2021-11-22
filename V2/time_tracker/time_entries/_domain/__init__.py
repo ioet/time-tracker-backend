@@ -5,6 +5,7 @@ from ._services import TimeEntryService
 from ._use_cases import (
     CreateTimeEntryUseCase,
     DeleteTimeEntryUseCase,
+    GetLastestTimeEntryUseCase,
     UpdateTimeEntryUseCase,
     GetTimeEntriesUseCase,
     GetTimeEntryUseCase,

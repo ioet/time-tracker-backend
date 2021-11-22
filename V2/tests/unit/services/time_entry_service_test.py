@@ -31,6 +31,21 @@ def test__delete_time_entry__uses_the_time_entry_dao__to_delete_time_entry_selec
     assert expected_time_entry == deleted_time_entry
 
 
+def test__get_latest_entries__uses_the_time_entry_dao__to_get_last_entries(
+    mocker,
+):
+    expected_latest_time_entries = mocker.Mock()
+    time_entry_dao = mocker.Mock(
+        get_latest_entries=mocker.Mock(return_value=expected_latest_time_entries)
+    )
+
+    time_entry_service = TimeEntryService(time_entry_dao)
+    latest_time_entries = time_entry_service.get_latest_entries(Faker().pyint(), Faker().pyint())
+
+    assert expected_latest_time_entries == latest_time_entries
+    assert time_entry_dao.get_latest_entries.called
+
+
 def test__update_time_entry__uses_the_time_entry_dao__to_update_one_time_entry(
     mocker,
 ):
