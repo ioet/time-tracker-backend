@@ -215,7 +215,7 @@ def test__get_latest_entries_azure_endpoint__returns_a_list_of_latest_time_entri
 ):
     inserted_activity = insert_activity(activity_factory(), test_db).__dict__
     time_entry_body = time_entry_factory(activity_id=inserted_activity["id"], technologies="[jira,sql]")
-    inserted_time_entry = insert_time_entry(time_entry_body, test_db)
+    inserted_time_entry = insert_time_entry(time_entry_body, test_db).__dict__
 
     req = func.HttpRequest(
         method='GET',

@@ -1,7 +1,6 @@
 from faker import Faker
 
 from time_tracker.time_entries._domain import TimeEntryService
-from faker import Faker
 
 
 def test__create_time_entries__uses_the_time_entry_dao__to_create_an_time_entry(mocker, time_entry_factory):
