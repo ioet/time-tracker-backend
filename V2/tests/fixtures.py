@@ -10,7 +10,10 @@ from time_tracker._infrastructure import DB
 @pytest.fixture(name='activity_factory')
 def _activity_factory() -> activities_domain.Activity:
     def _make_activity(
-        name: str = Faker().name(), description: str = Faker().sentence(), deleted: bool = False, status: int = 1
+        name: str = Faker().name(),
+        description: str = Faker().sentence(),
+        deleted: bool = False,
+        status: int = 1,
     ):
         activity = activities_domain.Activity(
             id=None,
@@ -20,6 +23,7 @@ def _activity_factory() -> activities_domain.Activity:
             status=status
             )
         return activity
+
     return _make_activity
 
 

@@ -86,3 +86,13 @@ functions:
             - POST
           route: time-entries/
           authLevel: anonymous
+
+  delete_time_entry:
+    handler: time_tracker/time_entries/interface.delete_time_entry
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - DELETE
+          route: time-entries/{id}
+          authLevel: anonymous
