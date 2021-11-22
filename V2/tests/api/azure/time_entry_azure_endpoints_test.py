@@ -1,6 +1,5 @@
 import pytest
 import json
-import pytest
 from faker import Faker
 
 import azure.functions as func

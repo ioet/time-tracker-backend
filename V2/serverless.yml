@@ -89,7 +89,7 @@ functions:
 
   delete_time_entry:
     handler: time_tracker/time_entries/interface.delete_time_entry
-     events:
+    events:
       - http: true
         x-azure-settings:
           methods:

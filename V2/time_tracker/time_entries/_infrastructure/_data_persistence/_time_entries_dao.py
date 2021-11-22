@@ -64,7 +64,6 @@ class TimeEntriesSQLDao(domain.TimeEntriesDao):
         time_entry = self.db.get_session().execute(query_deleted_time_entry).one_or_none()
         return self.__create_time_entry_dto(dict(time_entry)) if time_entry else None
 
-
     def __create_time_entry_dto(self, time_entry: dict) -> domain.TimeEntry:
         time_entry.update({
             "start_date": str(time_entry.get("start_date")),

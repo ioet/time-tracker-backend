@@ -1,4 +1,3 @@
-from faker import Faker
 from pytest_mock import MockFixture
 from faker import Faker
 
