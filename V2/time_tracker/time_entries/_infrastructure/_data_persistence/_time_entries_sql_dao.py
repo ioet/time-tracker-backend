@@ -90,3 +90,17 @@ class TimeEntriesSQLDao(domain.TimeEntriesDao):
             "end_date": str(time_entry.get("end_date"))})
         time_entry = {key: time_entry.get(key) for key in self.time_entry_key}
         return domain.TimeEntry(**time_entry)
+
+    def get_latest_entries(self, owner_id: int, limit: int = 20) -> typing.List[domain.TimeEntry]:
+        query = (
+            self.time_entry.select()
+            .where(sqlalchemy.and_(
+                self.time_entry.c.owner_id == owner_id,
+                self.time_entry.c.deleted.is_(False)
+            ))
+            .order_by(self.time_entry.c.start_date.desc())
+            .limit(limit)
+        )
+        time_entries_data = self.db.get_session().execute(query)
+        list_time_entries = [dict(entry) for entry in time_entries_data]
+        return list_time_entries if len(list_time_entries) > 0 else None

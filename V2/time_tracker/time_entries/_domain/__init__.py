@@ -7,5 +7,6 @@ from ._use_cases import (
     DeleteTimeEntryUseCase,
     UpdateTimeEntryUseCase,
     GetTimeEntriesUseCase,
-    GetTimeEntryUseCase
+    GetTimeEntryUseCase,
+    GetLastestTimeEntryUseCase,
 )

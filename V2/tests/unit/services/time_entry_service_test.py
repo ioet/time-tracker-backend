@@ -1,6 +1,7 @@
 from faker import Faker
 
 from time_tracker.time_entries._domain import TimeEntryService
+from faker import Faker
 
 
 def test__create_time_entries__uses_the_time_entry_dao__to_create_an_time_entry(mocker, time_entry_factory):
@@ -72,3 +73,18 @@ def test__get_by_id__uses_the_time_entry_dao__to_retrieve_one_time_entry(mocker)
 
     assert time_entry_dao.get_by_id.called
     assert expected_time_entry == actual_time_entry
+
+
+def test__get_latest_entries__uses_the_time_entry_dao__to_get_last_entries(
+    mocker,
+):
+    expected_latest_time_entries = mocker.Mock()
+    time_entry_dao = mocker.Mock(
+        get_latest_entries=mocker.Mock(return_value=expected_latest_time_entries)
+    )
+
+    time_entry_service = TimeEntryService(time_entry_dao)
+    latest_time_entries = time_entry_service.get_latest_entries(Faker().pyint(), Faker().pyint())
+
+    assert expected_latest_time_entries == latest_time_entries
+    assert time_entry_dao.get_latest_entries.called
