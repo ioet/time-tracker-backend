@@ -1,6 +1,6 @@
 import dataclasses
 import sqlalchemy as sq
-import sqlalchemy.sql as sql
+# import sqlalchemy.sql as sql
 
 import time_tracker.customers._domain as domain
 from time_tracker._infrastructure import _db
@@ -27,7 +27,7 @@ class CustomersSQLDao(domain.CustomersDao):
             new_customer = data.__dict__
             new_customer.pop('id', None)
             new_customer['deleted'] = False
-            new_customer['status'] = 0
+            new_customer['status'] = 1
 
             query = self.customer.insert().values(new_customer).return_defaults()
             customer = self.db.get_session().execute(query)
