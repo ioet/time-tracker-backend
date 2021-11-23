@@ -1,6 +1,5 @@
 import dataclasses
 import sqlalchemy as sq
-import sqlalchemy.sql as sql
 import typing
 
 import time_tracker.customers._domain as domain
@@ -24,12 +23,12 @@ class CustomersSQLDao(domain.CustomersDao):
         )
         
     def get_by_id(self, customer_id: int) -> domain.Customer:
-        query = sql.select(self.customer).where(self.customer.c.id == customer_id)
+        query = sq.sql.select(self.customer).where(self.customer.c.id == customer_id)
         customer = self.db.get_session().execute(query).one_or_none()
         return self.__create_customer_dto(dict(customer)) if customer else None
 
     def get_all(self) -> typing.List[domain.Customer]:
-        query = sql.select(self.customer)
+        query = sq.sql.select(self.customer)
         result = self.db.get_session().execute(query)
         return [
             self.__create_customer_dto(dict(customer))
@@ -41,7 +40,7 @@ class CustomersSQLDao(domain.CustomersDao):
             new_customer = data.__dict__
             new_customer.pop('id', None)
             new_customer['deleted'] = False
-            new_customer['status'] = 0
+            new_customer['status'] = 1
 
             query = self.customer.insert().values(new_customer).return_defaults()
             customer = self.db.get_session().execute(query)
