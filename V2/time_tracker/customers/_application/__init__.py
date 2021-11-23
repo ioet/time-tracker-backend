@@ -1,2 +1,2 @@
 # flake8: noqa
-from ._time_entries import create_customer
+from ._customers import create_customer
