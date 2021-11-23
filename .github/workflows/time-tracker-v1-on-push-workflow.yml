@@ -1,11 +1,12 @@
-name: Time Tacker V1 CI - ON PR
+name: Time Tacker V1 CI - ON PUSH
 
 on:
-  pull_request:
-    branches: [master]
+  push:
+    # update to master
+    branches: [TT-412-onpush]
 
 jobs:
-  time-tracker-ci-v1-on-pr:
+  time-tracker-ci-v1-on-push:
     runs-on: ubuntu-latest
 
     strategy:
@@ -55,6 +56,12 @@ jobs:
         run: |
           pytest tests
 
-      - name: Test the build of the app
+      - name: Build and push image
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
         run: |
-          docker build .
+          docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/timetrackerapi:${{ github.sha }}
+          docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/timetrackerapi:${{ github.sha }}
