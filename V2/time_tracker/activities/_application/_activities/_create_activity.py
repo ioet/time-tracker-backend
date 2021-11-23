@@ -8,11 +8,10 @@ from ... import _domain
 from ... import _infrastructure
 from time_tracker._infrastructure import DB
 
-DATABASE = DB()
-
 
 def create_activity(req: func.HttpRequest) -> func.HttpResponse:
-    activity_dao = _infrastructure.ActivitiesSQLDao(DATABASE)
+    database = DB()
+    activity_dao = _infrastructure.ActivitiesSQLDao(database)
     activity_service = _domain.ActivityService(activity_dao)
     use_case = _domain._use_cases.CreateActivityUseCase(activity_service)
 
