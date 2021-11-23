@@ -23,7 +23,7 @@ class MSConfig:
     SECRET = os.environ.get('MS_SECRET')
     SCOPE = os.environ.get('MS_SCOPE')
     ENDPOINT = os.environ.get('MS_ENDPOINT')
-    USERID = os.environ.get('USERID').split(" ")
+    USERID = os.environ.get('USERID')
 
 
 class BearerAuth(requests.auth.AuthBase):
@@ -263,7 +263,8 @@ class AzureConnection:
             [member['objectId'] for member in item['members']],
         )
         result = list(map(parse_item, response.json()['value']))
-        result[0][1].extend(self.config.USERID)
+        list_of_userid = self.config.USERID.split(" ")
+        result[0][1].extend(list_of_userid)
         
         return result
 
