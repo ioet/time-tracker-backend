@@ -1,6 +1,5 @@
 import dataclasses
 import json
-import typing
 
 import azure.functions as func
 
@@ -19,19 +18,13 @@ def update_project(req: func.HttpRequest) -> func.HttpResponse:
         project_id = int(req.route_params.get("id"))
         project_data = req.get_json()
         status_code = 200
-        
+
         if not _validate_project(project_data):
             status_code = 400
-            response = "Incorrect project body" 
-        
-        response = use_case.update_project(
-                          project_id, 
-                          project_data.get("name"),
-                          project_data.get("description"),
-                          project_data.get("customer_id"),
-                          project_data.get("status")
-        ).__dict__
-        
+            response = "Incorrect project body"
+
+        response = use_case.update_project(project_id, project_data).__dict__
+
         if not update_project:
             status_code = 404
             response = "Not found"

@@ -27,10 +27,11 @@ def create_project(req: func.HttpRequest) -> func.HttpResponse:
       id=None,
       name=project_data["name"],
       description=project_data["description"],
-      project_type_id=1,
+      project_type_id=project_data["project_type_id"],
       customer_id=project_data["customer_id"],
-      status=1,
-      deleted=False
+      status=project_data["status"],
+      deleted=False,
+      technologies=project_data["technologies"]
     )
 
     created_project = use_case.create_project(project_to_create)
@@ -50,11 +51,8 @@ def create_project(req: func.HttpRequest) -> func.HttpResponse:
 
 
 def _validate_project(project_data: dict) -> typing.List[str]:
-    project_fields = [field.name for field in dataclasses.fields(_domain.Project)]
-    project_fields.pop(6)
-    project_fields.pop(5)
-    project_fields.pop(3)
-    project_fields.pop(0)
+    project_fields = [field.name for field in dataclasses.fields(_domain.Project)
+                      if field.type != typing.Optional[field.type]]
     missing_keys = [field for field in project_fields if field not in project_data]
     return [
         f'The {missing_key} key is missing in the input data'

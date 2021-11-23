@@ -22,6 +22,10 @@ class ProjectsSQLDao(domain.ProjectsDao):
             sq.Column('customer_id', sq.Integer),
             sq.Column('status', sq.SmallInteger),
             sq.Column('deleted', sq.BOOLEAN),
+            sq.Column(
+                'technologies',
+                sq.ARRAY(sq.String).with_variant(sq.String, "sqlite")
+            ),
             extend_existing=True,
         )
 
@@ -37,7 +41,7 @@ class ProjectsSQLDao(domain.ProjectsDao):
 
         except sq.exc.sqError:
             return None
-    
+
     def get_by_id(self, id: int) -> domain.Project:
         query = sq.sql.select(self.project).where(self.project.c.id == id)
         project = self.db.get_session().execute(query).one_or_none()
@@ -60,11 +64,8 @@ class ProjectsSQLDao(domain.ProjectsDao):
         self.db.get_session().execute(query)
         return self.get_by_id(id)
 
-    def update(self, id: int, name: str, description: str, customer_id: int, status: int) -> domain.Project:
-        new_project = {"name": name, "description": description, "customer_id": customer_id, "status": status}
-        project_data_validated = {key: value for (key, value) in new_project.items() if value is not None}
-
-        query = self.project.update().where(self.project.c.id == id).values(project_data_validated)
+    def update(self, id: int, project_data: dict) -> domain.Project:
+        query = self.project.update().where(self.project.c.id == id).values(project_data)
         self.db.get_session().execute(query)
         return self.get_by_id(id)
 

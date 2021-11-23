@@ -17,7 +17,7 @@ class ProjectsDao(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def update(self, id: int, name: str, description: str, customer_id: int, status: int) -> Project:
+    def update(self, id: int, project_data: dict) -> Project:
         pass
 
     @abc.abstractmethod

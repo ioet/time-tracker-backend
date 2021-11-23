@@ -1,4 +1,3 @@
-import dataclasses
 import json
 import typing
 
@@ -36,8 +35,8 @@ def get_projects(req: func.HttpRequest) -> func.HttpResponse:
 
     except ValueError:
         return func.HttpResponse(
-            body=b"Invalid format id", 
-            status_code=400, 
+            body=b"Invalid Format ID",
+            status_code=400,
             mimetype="application/json"
         )
 

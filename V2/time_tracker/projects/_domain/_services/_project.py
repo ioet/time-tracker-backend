@@ -17,8 +17,8 @@ class ProjectService:
     def get_by_id(self, id: int) -> Project:
         return self.project_dao.get_by_id(id)
 
-    def update(self, id: int, name: str, description: str, customer_id: int, status: int) -> Project:
-        return self.project_dao.update(id, name, description, customer_id, status)
+    def update(self, id: int, project_data: dict) -> Project:
+        return self.project_dao.update(id, project_data)
 
     def delete(self, id: int) -> Project:
         return self.project_dao.delete(id)
