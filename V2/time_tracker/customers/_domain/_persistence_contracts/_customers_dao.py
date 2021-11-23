@@ -1,5 +1,5 @@
 import abc
-# import typing
+import typing
 
 from time_tracker.customers._domain import Customer
 
