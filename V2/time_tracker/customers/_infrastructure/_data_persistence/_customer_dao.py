@@ -1,4 +1,5 @@
 import dataclasses
+
 import sqlalchemy as sq
 
 import time_tracker.customers._domain as domain

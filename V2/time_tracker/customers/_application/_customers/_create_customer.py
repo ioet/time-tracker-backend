@@ -1,13 +1,12 @@
 import dataclasses
 import json
+import typing
 
 import azure.functions as func
 
 from ... import _domain
 from ... import _infrastructure
 from time_tracker._infrastructure import DB
-
-DEFAULT_FIELDS = ["id", "deleted", "status"]
 
 
 def create_customer(req: func.HttpRequest) -> func.HttpResponse:
@@ -23,7 +22,9 @@ def create_customer(req: func.HttpRequest) -> func.HttpResponse:
             raise ValueError
 
         customer_to_create = _domain.Customer(
-            **dict.fromkeys(DEFAULT_FIELDS),
+            id=None,
+            deleted=None,
+            status=None,
             name=str(customer_data["name"]).strip(),
             description=str(customer_data["description"]),
         )
@@ -51,6 +52,6 @@ def create_customer(req: func.HttpRequest) -> func.HttpResponse:
 
 def _validate_customer(customer_data: dict) -> bool:
     if [field.name for field in dataclasses.fields(_domain.Customer)
-            if (field.name not in customer_data) and (field.name not in DEFAULT_FIELDS)]:
+            if (field.name not in customer_data) and (field.type != typing.Optional[field.type])]:
         return False
     return True

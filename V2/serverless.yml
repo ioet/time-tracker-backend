@@ -104,5 +104,5 @@ functions:
         x-azure-settings:
           methods:
             - POST
-          route: customer/
+          route: customers/
           authLevel: anonymous
