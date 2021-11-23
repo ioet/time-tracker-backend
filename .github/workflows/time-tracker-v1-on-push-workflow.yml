@@ -2,8 +2,7 @@ name: Time Tacker V1 CI - ON PUSH
 
 on:
   push:
-    # update to master
-    branches: [TT-412-onpush]
+    branches: [master]
 
 jobs:
   time-tracker-ci-v1-on-push:
@@ -56,12 +55,13 @@ jobs:
         run: |
           pytest tests
 
-      - name: Build and push image
+      - name: Login to docker registry
         uses: azure/docker-login@v1
         with:
           login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
+      - name: Build and push image
         run: |
           docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/timetrackerapi:${{ github.sha }}
           docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/timetrackerapi:${{ github.sha }}
