@@ -13,14 +13,14 @@ class CustomersDao(abc.ABC):
     # def update(self, data: Customer) -> Customer:
     #     pass
 
-    # @abc.abstractmethod
-    # def get_by_id(self, id: int) -> Customer:
-    #     pass
+    @abc.abstractmethod
+    def get_by_id(self, id: int) -> Customer:
+        pass
 
-    # @abc.abstractmethod
-    # def get_all(self) -> typing.List[Customer]:
-    #     pass
+    @abc.abstractmethod
+    def get_all(self) -> typing.List[Customer]:
+        pass
 
-    # @abc.abstractmethod
-    # def delete(self, id: int) -> Customer:
-    #     pass
+    @abc.abstractmethod
+    def delete(self, id: int) -> Customer:
+        pass

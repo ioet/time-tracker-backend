@@ -1,6 +1,7 @@
 import dataclasses
 import sqlalchemy as sq
 import sqlalchemy.sql as sql
+import typing
 
 import time_tracker.customers._domain as domain
 from time_tracker._infrastructure import _db
@@ -21,6 +22,19 @@ class CustomersSQLDao(domain.CustomersDao):
             sq.Column('status', sq.Integer),
             extend_existing=True,
         )
+        
+    def get_by_id(self, customer_id: int) -> domain.Customer:
+        query = sql.select(self.customer).where(self.customer.c.id == customer_id)
+        customer = self.db.get_session().execute(query).one_or_none()
+        return self.__create_customer_dto(dict(customer)) if customer else None
+
+    def get_all(self) -> typing.List[domain.Customer]:
+        query = sql.select(self.customer)
+        result = self.db.get_session().execute(query)
+        return [
+            self.__create_customer_dto(dict(customer))
+            for customer in result
+        ]
 
     def create(self, data: domain.Customer) -> domain.Customer:
         try:
@@ -48,13 +62,13 @@ class CustomersSQLDao(domain.CustomersDao):
         customer = {key: customer.get(key) for key in self.customer_key}
         return domain.Customer(**customer)
 
-    # def delete(self, customer_id: int) -> domain.Customer:
-    #     query = (
-    #         self.customer.update()
-    #         .where(self.customer.c.id == customer_id)
-    #         .values({"deleted": True})
-    #     )
-    #     self.db.get_session().execute(query)
-    #     query_deleted_customer = sq.sql.select(self.customer).where(self.customer.c.id == customer_id)
-    #     customer = self.db.get_session().execute(query_deleted_customer).one_or_none()
-    #     return self.__create_customer_dto(dict(customer)) if customer else None
+    def delete(self, customer_id: int) -> domain.Customer:
+        query = (
+            self.customer.update()
+            .where(self.customer.c.id == customer_id)
+            .values({"deleted": True})
+        )
+        self.db.get_session().execute(query)
+        query_deleted_customer = sq.sql.select(self.customer).where(self.customer.c.id == customer_id)
+        customer = self.db.get_session().execute(query_deleted_customer).one_or_none()
+        return self.__create_customer_dto(dict(customer)) if customer else None
