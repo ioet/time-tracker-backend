@@ -1,47 +1,46 @@
 import dataclasses
 import json
-import logging
 
 import azure.functions as func
 
-from time_tracker.time_entries._infrastructure import TimeEntriesSQLDao
-from time_tracker.time_entries._domain import TimeEntryService, TimeEntry, _use_cases
+from ... import _domain
+from ... import _infrastructure
 from time_tracker._infrastructure import DB
 
 
 def update_time_entry(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info(
-        'Python HTTP trigger function processed a request to update an time entry.'
-    )
-    time_entry_id = req.route_params.get('id')
-    time_entry_data = req.get_json() if req.get_body() else {}
-    time_entry_keys = [field.name for field in dataclasses.fields(TimeEntry)]
-
-    if all(key in time_entry_keys for key in time_entry_data.keys()):
-        try:
-            response = _update(int(time_entry_id), time_entry_data)
-            status_code = 200
-        except ValueError:
-            response = b'Invalid Format ID'
-            status_code = 404
-    else:
-        response = b'Incorrect time entry body'
-        status_code = 400
-
-    return func.HttpResponse(
-        body=response, status_code=status_code, mimetype="application/json"
-    )
-
-
-def _update(time_entry_id: int, time_entry_data: dict) -> str:
     database = DB()
-    time_entry_use_case = _use_cases.UpdateTimeEntryUseCase(
-        _create_time_entry_service(database)
-    )
-    time_entry = time_entry_use_case.update_time_entry(time_entry_id, time_entry_data)
-    return json.dumps(time_entry.__dict__) if time_entry else b'Not Found'
+    time_entry_dao = _infrastructure.TimeEntriesSQLDao(database)
+    time_entry_service = _domain.TimeEntryService(time_entry_dao)
+    use_case = _domain._use_cases.UpdateTimeEntryUseCase(time_entry_service)
+
+    try:
+        time_entry_id = int(req.route_params.get("id"))
+        time_entry_data = req.get_json()
+
+        if not _validate_time_entry(time_entry_data):
+            status_code = 400
+            response = b"Incorrect time entry body"
+        else:
+            updated_time_entry = use_case.update_time_entry(time_entry_id, time_entry_data)
+            status_code, response = [
+                404, b"Not found"
+            ] if not updated_time_entry else [200, json.dumps(updated_time_entry.__dict__)]
+
+        return func.HttpResponse(
+            body=response,
+            status_code=status_code,
+            mimetype="application/json",
+        )
+
+    except ValueError:
+        return func.HttpResponse(
+            body=b"Invalid Format ID",
+            status_code=400,
+            mimetype="application/json"
+        )
 
 
-def _create_time_entry_service(db: DB):
-    time_entry_dao = TimeEntriesSQLDao(db)
-    return TimeEntryService(time_entry_dao)
+def _validate_time_entry(time_entry_data: dict) -> bool:
+    time_entry_keys = [field.name for field in dataclasses.fields(_domain.TimeEntry)]
+    return all(key in time_entry_keys for key in time_entry_data.keys())
