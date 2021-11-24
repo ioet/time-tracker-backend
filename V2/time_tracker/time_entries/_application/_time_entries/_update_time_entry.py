@@ -22,8 +22,8 @@ def update_time_entry(req: func.HttpRequest) -> func.HttpResponse:
             response = _update(int(time_entry_id), time_entry_data)
             status_code = 200
         except ValueError:
-            response = b'Invalid ID'
-            status_code = 400
+            response = b'Invalid Format ID'
+            status_code = 404
     else:
         response = b'Incorrect time entry body'
         status_code = 400

@@ -79,7 +79,7 @@ def test__delete_time_entries_azure_endpoint__returns_a_status_code_400__when_ti
     assert response.get_body() == b'Invalid Format ID'
 
 
-def test__update_activity_azure_endpoint__returns_an_activity__when_found_an_activity_to_update(
+def test__update_time_entry_azure_endpoint__returns_an_time_entry__when_found_an_time_entry_to_update(
     test_db, time_entry_factory, insert_time_entry, activity_factory, insert_activity
 ):
     inserted_activity = insert_activity(activity_factory(), test_db)
@@ -103,7 +103,7 @@ def test__update_activity_azure_endpoint__returns_an_activity__when_found_an_act
     assert activitiy_json_data == json.dumps(inserted_time_entries)
 
 
-def test__update_time_entries_azure_endpoint__returns_a_status_code_400__when_time_entry_recive_invalid_id():
+def test__update_time_entries_azure_endpoint__returns_a_status_code_404__when_time_entry_recive_invalid_id():
     time_entry_body = {"description": Faker().sentence()}
 
     req = func.HttpRequest(
@@ -115,5 +115,21 @@ def test__update_time_entries_azure_endpoint__returns_a_status_code_400__when_ti
 
     response = azure_time_entries._update_time_entry.update_time_entry(req)
 
+    assert response.status_code == 404
+    assert response.get_body() == b'Invalid Format ID'
+
+
+def test__update_time_entries_azure_endpoint__returns_a_status_code_400__when_time_entry_recive_invalid_body():
+
+    time_entry_body = Faker().pydict(5, True, str)
+    req = func.HttpRequest(
+        method="PUT",
+        body=json.dumps(time_entry_body).encode("utf-8"),
+        url=TIME_ENTRY_URL,
+        route_params={"id": Faker().pyint()},
+    )
+
+    response = azure_time_entries._update_time_entry.update_time_entry(req)
+
     assert response.status_code == 400
-    assert response.get_body() == b'Invalid ID'
+    assert response.get_body() == b'Incorrect time entry body'
