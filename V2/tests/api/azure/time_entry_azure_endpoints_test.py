@@ -26,7 +26,7 @@ def test__time_entry_azure_endpoint__creates_an_time_entry__when_time_entry_has_
     test_db, time_entry_factory, activity_factory, insert_activity
 ):
     inserted_activity = insert_activity(activity_factory(), test_db)
-    time_entry_body = time_entry_factory(activity_id=inserted_activity.id, technologies="[jira,sql]").__dict__
+    time_entry_body = time_entry_factory(activity_id=inserted_activity.id).__dict__
 
     body = json.dumps(time_entry_body).encode("utf-8")
     req = func.HttpRequest(
@@ -47,7 +47,7 @@ def test__delete_time_entries_azure_endpoint__returns_an_time_entry_with_true_de
     test_db, time_entry_factory, insert_time_entry, insert_activity, activity_factory,
 ):
     inserted_activity = insert_activity(activity_factory(), test_db).__dict__
-    time_entry_body = time_entry_factory(activity_id=inserted_activity["id"], technologies="[jira,sql]")
+    time_entry_body = time_entry_factory(activity_id=inserted_activity["id"])
     inserted_time_entry = insert_time_entry(time_entry_body, test_db)
 
     req = func.HttpRequest(
@@ -83,7 +83,7 @@ def test__update_time_entry_azure_endpoint__returns_an_time_entry__when_found_an
     test_db, time_entry_factory, insert_time_entry, activity_factory, insert_activity
 ):
     inserted_activity = insert_activity(activity_factory(), test_db)
-    existent_time_entries = time_entry_factory(activity_id=inserted_activity.id, technologies="[jira,sql]")
+    existent_time_entries = time_entry_factory(activity_id=inserted_activity.id)
     inserted_time_entries = insert_time_entry(existent_time_entries, test_db).__dict__
 
     time_entry_body = {"description": Faker().sentence()}

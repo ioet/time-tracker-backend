@@ -48,8 +48,8 @@ class TimeEntriesSQLDao(domain.TimeEntriesDao):
 
         query = self.time_entry.update().where(self.time_entry.c.id == time_entry_id).values(time_entry_data)
         self.db.get_session().execute(query)
-        query_deleted_time_entry = sqlalchemy.sql.select(self.time_entry).where(self.time_entry.c.id == time_entry_id)
-        time_entry = self.db.get_session().execute(query_deleted_time_entry).one_or_none()
+        query_updated_time_entry = sqlalchemy.sql.select(self.time_entry).where(self.time_entry.c.id == time_entry_id)
+        time_entry = self.db.get_session().execute(query_updated_time_entry).one_or_none()
 
         return self.__create_time_entry_dto(dict(time_entry)) if time_entry else None
 

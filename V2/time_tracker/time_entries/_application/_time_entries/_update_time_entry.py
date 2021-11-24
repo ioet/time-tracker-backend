@@ -43,5 +43,5 @@ def _update(time_entry_id: int, time_entry_data: dict) -> str:
 
 
 def _create_time_entry_service(db: DB):
-    time_entry_sql = TimeEntriesSQLDao(db)
-    return TimeEntryService(time_entry_sql)
+    time_entry_dao = TimeEntriesSQLDao(db)
+    return TimeEntryService(time_entry_dao)
