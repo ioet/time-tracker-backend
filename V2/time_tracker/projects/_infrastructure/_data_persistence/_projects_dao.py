@@ -19,7 +19,7 @@ class ProjectsSQLDao(domain.ProjectsDao):
             sq.Column('name', sq.String),
             sq.Column('description', sq.String),
             sq.Column('project_type_id', sq.Integer),
-            sq.Column('customer_id', sq.Integer),
+            sq.Column('customer_id', sq.Integer, sq.ForeignKey('customer.id')),
             sq.Column('status', sq.SmallInteger),
             sq.Column('deleted', sq.BOOLEAN),
             sq.Column(
@@ -39,7 +39,7 @@ class ProjectsSQLDao(domain.ProjectsDao):
             new_project.update({"id": project.inserted_primary_key[0]})
             return self.__create_project_dto(new_project)
 
-        except sq.exc.sqError:
+        except sq.exc.SQLAlchemyError:
             return None
 
     def get_by_id(self, id: int) -> domain.Project:

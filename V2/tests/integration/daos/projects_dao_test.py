@@ -24,10 +24,11 @@ def _clean_database():
 
 
 def test__create_project__returns_a_project_dto__when_saves_correctly_with_sql_database(
-    create_fake_dao, project_factory
+    create_fake_dao, project_factory, insert_customer, customer_factory
 ):
     dao = create_fake_dao
-    project_to_insert = project_factory()
+    inserted_customer = insert_customer(customer_factory(), dao.db)
+    project_to_insert = project_factory(customer_id=inserted_customer.id)
 
     inserted_project = dao.create(project_to_insert)
 
@@ -36,10 +37,12 @@ def test__create_project__returns_a_project_dto__when_saves_correctly_with_sql_d
 
 
 def test_update__returns_an_update_project__when_an_project_matching_its_id_is_found_with_sql_database(
-    create_fake_dao, project_factory
+    create_fake_dao, project_factory, insert_customer, customer_factory
 ):
     dao = create_fake_dao
-    project_to_insert = project_factory()
+    inserted_customer = insert_customer(customer_factory(), dao.db)
+    project_to_insert = project_factory(customer_id=inserted_customer.id)
+
     inserted_project = dao.create(project_to_insert)
 
     expected_description = Faker().sentence()
@@ -62,10 +65,13 @@ def test_update__returns_none__when_no_project_matching_its_id_is_found_with_sql
 
 
 def test__get_all__returns_a_list_of_project_dto_objects__when_one_or_more_projects_are_found_with_sql_database(
-    create_fake_dao, project_factory
+    create_fake_dao, project_factory, insert_customer, customer_factory
 ):
     dao = create_fake_dao
-    project_to_inserts = [project_factory(), project_factory()]
+    inserted_customer = insert_customer(customer_factory(), dao.db)
+    project_to_inserts = [project_factory(customer_id=inserted_customer.id),
+                          project_factory(customer_id=inserted_customer.id)]
+
     inserted_projects = [
         dao.create(project_to_inserts[0]),
         dao.create(project_to_inserts[1])
@@ -77,10 +83,12 @@ def test__get_all__returns_a_list_of_project_dto_objects__when_one_or_more_proje
 
 
 def test_get_by_id__returns_an_project_dto__when_found_one_project_that_matches_its_id_with_sql_database(
-    create_fake_dao, project_factory
+    create_fake_dao, project_factory, insert_customer, customer_factory
 ):
     dao = create_fake_dao
-    project_to_insert = project_factory()
+    inserted_customer = insert_customer(customer_factory(), dao.db)
+    project_to_insert = project_factory(customer_id=inserted_customer.id)
+
     inserted_project = dao.create(project_to_insert)
 
     project = dao.get_by_id(inserted_project.id)
@@ -111,10 +119,11 @@ def test_get_all__returns_an_empty_list__when_doesnt_found_any_projects_with_sql
 
 
 def test_delete__returns_an_project_with_inactive_status__when_an_project_matching_its_id_is_found_with_sql_database(
-    create_fake_dao, project_factory
+    create_fake_dao, project_factory, insert_customer, customer_factory
 ):
     dao = create_fake_dao
-    project_to_insert = project_factory()
+    inserted_customer = insert_customer(customer_factory(), dao.db)
+    project_to_insert = project_factory(customer_id=inserted_customer.id)
     inserted_project = dao.create(project_to_insert)
 
     project = dao.delete(inserted_project.id)

@@ -22,9 +22,11 @@ def _insert_project() -> domain.Project:
 
 
 def test__project_azure_endpoint__returns_all_projects(
-    test_db, project_factory, insert_project
+    test_db, project_factory, insert_project, insert_customer, customer_factory
 ):
-    project_to_insert = [project_factory(), project_factory()]
+    inserted_customer = insert_customer(customer_factory(), test_db)
+    project_to_insert = [project_factory(customer_id=inserted_customer.id),
+                         project_factory(customer_id=inserted_customer.id)]
     inserted_projects = [
         insert_project(project_to_insert[0], test_db).__dict__,
         insert_project(project_to_insert[1], test_db).__dict__
@@ -39,9 +41,10 @@ def test__project_azure_endpoint__returns_all_projects(
 
 
 def test__project_azure_endpoint__returns_an_project__when_project_matches_its_id(
-    test_db, project_factory, insert_project
+    test_db, project_factory, insert_project, insert_customer, customer_factory
 ):
-    project_to_insert = project_factory()
+    inserted_customer = insert_customer(customer_factory(), test_db)
+    project_to_insert = project_factory(customer_id=inserted_customer.id)
     inserted_project = insert_project(project_to_insert, test_db).__dict__
 
     req = func.HttpRequest(
@@ -74,9 +77,10 @@ def test__projects_azure_endpoint__returns_a_status_code_400__when_project_reciv
 
 
 def test__project_azure_endpoint__returns_an_project_with_inactive_status__when_an_project_matching_its_id_is_found(
-    test_db, project_factory, insert_project
+    test_db, project_factory, insert_project, insert_customer, customer_factory
 ):
-    project_to_insert = project_factory()
+    inserted_customer = insert_customer(customer_factory(), test_db)
+    project_to_insert = project_factory(customer_id=inserted_customer.id)
     inserted_project = insert_project(project_to_insert, test_db).__dict__
 
     req = func.HttpRequest(
@@ -110,9 +114,10 @@ def test__delete_projects_azure_endpoint__returns_a_status_code_400__when_projec
 
 
 def test__update_project_azure_endpoint__returns_an_project__when_found_an_project_to_update(
-    test_db, project_factory, insert_project
+    test_db, project_factory, insert_project, insert_customer, customer_factory
 ):
-    project_to_insert = project_factory()
+    inserted_customer = insert_customer(customer_factory(), test_db)
+    project_to_insert = project_factory(customer_id=inserted_customer.id)
     inserted_project = insert_project(project_to_insert, test_db).__dict__
 
     project_body = {"description": Faker().sentence()}
@@ -147,9 +152,10 @@ def test__update_projects_azure_endpoint__returns_a_status_code_400__when_projec
 
 
 def test__project_azure_endpoint__creates_an_project__when_project_has_all_attributes(
-    project_factory
+    test_db, project_factory, insert_customer, customer_factory
 ):
-    project_body = project_factory().__dict__
+    inserted_customer = insert_customer(customer_factory(), test_db)
+    project_body = project_factory(customer_id=inserted_customer.id).__dict__
     body = json.dumps(project_body).encode("utf-8")
     req = func.HttpRequest(
          method='POST',
