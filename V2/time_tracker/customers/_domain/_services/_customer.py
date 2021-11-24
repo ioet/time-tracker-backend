@@ -11,8 +11,8 @@ class CustomerService:
     def create(self, data: Customer) -> Customer:
         return self.customer_dao.create(data)
 
-    # def update(self, data: Customer) -> Customer:
-    #     return self.customer_dao.update(data)
+    def update(self, id: int, data: Customer) -> Customer:
+        return self.customer_dao.update(id, data)
 
     def get_by_id(self, id: int) -> Customer:
         return self.customer_dao.get_by_id(id)

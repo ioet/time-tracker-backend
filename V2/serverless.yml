@@ -121,7 +121,7 @@ functions:
         x-azure-settings:
           methods:
             - POST
-          route: customer/
+          route: customers/
           authLevel: anonymous
 
   get_customers:
@@ -132,6 +132,16 @@ functions:
           methods:
             - GET
           route: customers/{id:?}
+          authLevel: anonymous
+
+  update_customer:
+    handler: time_tracker/customers/interface.update_customer
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - PUT
+          route: customers/{id}
           authLevel: anonymous
 
   delete_customer:
@@ -147,3 +157,4 @@ functions:
 #endregion Fin Customer
 
 #endregion Fin Funciones
+            

@@ -6,7 +6,8 @@ from ... import _domain
 from ... import _infrastructure
 from time_tracker._infrastructure import DB
 
-DATATYPE="application/json"
+DATATYPE = "application/json"
+
 
 def delete_customer(req: func.HttpRequest) -> func.HttpResponse:
     customer_dao = _infrastructure.CustomersSQLDao(DB())

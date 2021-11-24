@@ -5,6 +5,7 @@ import time_tracker.activities._domain as activities_domain
 import time_tracker.time_entries._domain as time_entries_domain
 import time_tracker.customers._domain as customers_domain
 import time_tracker.activities._infrastructure as activities_infrastructure
+import time_tracker.customers._infrastructure as customer_infrastructure
 from time_tracker._infrastructure import DB
 
 
@@ -94,3 +95,12 @@ def _customer_factory() -> customers_domain.Customer:
         return customer
 
     return _make_customer
+
+
+@pytest.fixture(name='insert_customer')
+def _insert_customer() -> dict:
+    def _new_customer(customer: customers_domain.Customer, database: DB):
+        dao = customer_infrastructure.CustomersSQLDao(database)
+        new_customer = dao.create(customer)
+        return new_customer
+    return _new_customer

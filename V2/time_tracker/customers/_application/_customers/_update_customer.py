@@ -9,32 +9,29 @@ from ... import _infrastructure
 from time_tracker._infrastructure import DB
 
 
-def create_customer(req: func.HttpRequest) -> func.HttpResponse:
+def update_customer(req: func.HttpRequest) -> func.HttpResponse:
     try:
         database = DB()
+        customer_id = int(req.route_params.get('id'))
         customer_dao = _infrastructure.CustomersSQLDao(database)
         customer_service = _domain.CustomerService(customer_dao)
-        use_case = _domain._use_cases.CreateCustomerUseCase(customer_service)
-        customer_data = req.get_json()
+        use_case = _domain._use_cases.UpdateCustomerUseCase(customer_service)
 
+        customer_data = req.get_json()
         customer_is_invalid = _validate_customer(customer_data)
         if customer_is_invalid:
             raise ValueError
 
-        customer_to_create = _domain.Customer(
-            id=None,
-            deleted=None,
-            status=None,
-            name=str(customer_data["name"]).strip(),
-            description=str(customer_data["description"]),
+        customer_to_update = _domain.Customer(
+            **{field.name: customer_data.get(field.name) for field in dataclasses.fields(_domain.Customer)}
         )
-        created_customer = use_case.create_customer(customer_to_create)
+        updated_customer = use_case.update_customer(customer_id, customer_to_update)
 
-        if created_customer:
-            body = json.dumps(created_customer.__dict__)
-            status_code = 201
+        if updated_customer:
+            body = json.dumps(updated_customer.__dict__)
+            status_code = 200
         else:
-            body = b'This customer already exists'
+            body = b'This customer does not exist'
             status_code = 409
 
         return func.HttpResponse(
@@ -50,6 +47,6 @@ def create_customer(req: func.HttpRequest) -> func.HttpResponse:
         )
 
 
-def _validate_customer(customer_data: dict) -> bool:
+def _validate_customer(customer_data: dict) -> typing.List[str]:
     return [field.name for field in dataclasses.fields(_domain.Customer)
-            if (field.name not in customer_data) and (field.type != typing.Optional[field.type])]
+            if field.name not in customer_data]

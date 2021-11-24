@@ -1,5 +1,4 @@
 import json
-import logging
 
 import azure.functions as func
 
@@ -7,13 +6,8 @@ from ... import _domain
 from ... import _infrastructure
 from time_tracker._infrastructure import DB
 
-DATABASE = DB()
-
 
 def get_customers(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info(
-        'Python HTTP trigger function processed a request to get an activity.'
-    )
     customer_id = req.route_params.get('id')
     status_code = 200
 
@@ -36,7 +30,7 @@ def get_customers(req: func.HttpRequest) -> func.HttpResponse:
 
 def _get_by_id(customer_id: int) -> str:
     customer_use_case = _domain._use_cases.GetByIdCustomerUseCase(
-        _create_customer_service(DATABASE)
+        _create_customer_service(DB())
     )
     customer = customer_use_case.get_customer_by_id(customer_id)
 
@@ -45,7 +39,7 @@ def _get_by_id(customer_id: int) -> str:
 
 def _get_all() -> str:
     customer_sql = _domain._use_cases.GetAllCustomerUseCase(
-        _create_customer_service(DATABASE)
+        _create_customer_service(DB())
     )
     return json.dumps(
         [

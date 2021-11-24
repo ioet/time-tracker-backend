@@ -9,9 +9,9 @@ class CustomersDao(abc.ABC):
     def create(self, data: Customer) -> Customer:
         pass
 
-    # @abc.abstractmethod
-    # def update(self, data: Customer) -> Customer:
-    #     pass
+    @abc.abstractmethod
+    def update(self, id: int, data: Customer) -> Customer:
+        pass
 
     @abc.abstractmethod
     def get_by_id(self, id: int) -> Customer:

@@ -1,10 +1,11 @@
 from dataclasses import dataclass
+import typing
 
 
 @dataclass(frozen=True)
 class Customer:
-    id: int
+    id: typing.Optional[int]
     name: str
     description: str
-    deleted: bool
-    status: int
+    deleted: typing.Optional[bool]
+    status: typing.Optional[int]
