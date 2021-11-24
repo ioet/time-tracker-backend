@@ -96,3 +96,13 @@ functions:
             - DELETE
           route: time-entries/{id}
           authLevel: anonymous
+
+  create_customer:
+    handler: time_tracker/customers/interface.create_customer
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - POST
+          route: customers/
+          authLevel: anonymous

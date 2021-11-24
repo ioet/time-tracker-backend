@@ -2,8 +2,9 @@ import pytest
 from faker import Faker
 
 import time_tracker.activities._domain as activities_domain
-import time_tracker.activities._infrastructure as activities_infrastructure
 import time_tracker.time_entries._domain as time_entries_domain
+import time_tracker.customers._domain as customers_domain
+import time_tracker.activities._infrastructure as activities_infrastructure
 from time_tracker._infrastructure import DB
 
 
@@ -73,3 +74,23 @@ def _insert_activity() -> dict:
         new_activity = dao.create(activity)
         return new_activity
     return _new_activity
+
+
+@pytest.fixture(name='customer_factory')
+def _customer_factory() -> customers_domain.Customer:
+    def _make_customer(
+        name: str = Faker().name(),
+        description: str = Faker().sentence(),
+        deleted: bool = False,
+        status: int = 1,
+    ):
+        customer = customers_domain.Customer(
+            id=None,
+            name=name,
+            description=description,
+            deleted=deleted,
+            status=status
+            )
+        return customer
+
+    return _make_customer
