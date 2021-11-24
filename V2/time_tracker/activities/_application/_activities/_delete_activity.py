@@ -7,8 +7,6 @@ from ... import _domain
 from ... import _infrastructure
 from time_tracker._infrastructure import DB
 
-DATABASE = DB()
-
 
 def delete_activity(req: func.HttpRequest) -> func.HttpResponse:
     logging.info(
@@ -29,8 +27,9 @@ def delete_activity(req: func.HttpRequest) -> func.HttpResponse:
 
 
 def _delete(activity_id: int) -> str:
+    database = DB()
     activity_use_case = _domain._use_cases.DeleteActivityUseCase(
-        _create_activity_service(DATABASE)
+        _create_activity_service(database)
     )
     activity = activity_use_case.delete_activity(activity_id)
     return json.dumps(activity.__dict__) if activity else b'Not found'

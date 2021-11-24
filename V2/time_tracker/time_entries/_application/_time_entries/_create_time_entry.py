@@ -54,8 +54,8 @@ def create_time_entry(req: func.HttpRequest) -> func.HttpResponse:
 
 
 def _validate_time_entry(time_entry_data: dict) -> typing.List[str]:
-    time_entry_fields = [field.name for field in dataclasses.fields(_domain.TimeEntry)]
-    time_entry_fields.pop(8)
+    time_entry_fields = [field.name for field in dataclasses.fields(_domain.TimeEntry)
+                         if field.type != typing.Optional[field.type]]
     missing_keys = [field for field in time_entry_fields if field not in time_entry_data]
     return [
         f'The {missing_key} key is missing in the input data'

@@ -8,8 +8,6 @@ from ... import _domain
 from ... import _infrastructure
 from time_tracker._infrastructure import DB
 
-DATABASE = DB()
-
 
 def update_activity(req: func.HttpRequest) -> func.HttpResponse:
     logging.info(
@@ -37,8 +35,9 @@ def update_activity(req: func.HttpRequest) -> func.HttpResponse:
 
 
 def _update(activity_id: int, activity_data: dict) -> str:
+    database = DB()
     activity_use_case = _domain._use_cases.UpdateActivityUseCase(
-        _create_activity_service(DATABASE)
+        _create_activity_service(database)
     )
     activity = activity_use_case.update_activity(
         activity_id, activity_data.get("name"),

@@ -9,7 +9,7 @@ from time_tracker._infrastructure import DB
 
 @pytest.fixture(name='create_fake_dao')
 def _create_fake_dao() -> domain.ActivitiesDao:
-    db_fake = DB('sqlite:///:memory:')
+    db_fake = DB()
     dao = infrastructure.ActivitiesSQLDao(db_fake)
     return dao
 
@@ -17,7 +17,7 @@ def _create_fake_dao() -> domain.ActivitiesDao:
 @pytest.fixture(name='clean_database', autouse=True)
 def _clean_database():
     yield
-    db_fake = DB('sqlite:///:memory:')
+    db_fake = DB()
     dao = infrastructure.ActivitiesSQLDao(db_fake)
     query = dao.activity.delete()
     dao.db.get_session().execute(query)
