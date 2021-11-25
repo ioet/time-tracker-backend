@@ -4,12 +4,12 @@ import azure.functions as func
 
 from ... import _domain
 from ... import _infrastructure
-from time_tracker._infrastructure import DB
+from time_tracker._infrastructure import DB as database
 from time_tracker.utils.enums import ResponseEnums as enums
 
 
 def delete_project(req: func.HttpRequest) -> func.HttpResponse:
-    project_dao = _infrastructure.ProjectsSQLDao(DB())
+    project_dao = _infrastructure.ProjectsSQLDao(database())
     project_service = _domain.ProjectService(project_dao)
     use_case = _domain._use_cases.DeleteProjectUseCase(project_service)
 

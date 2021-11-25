@@ -65,9 +65,12 @@ class ProjectsSQLDao(domain.ProjectsDao):
         return self.get_by_id(id)
 
     def update(self, id: int, project_data: dict) -> domain.Project:
-        query = self.project.update().where(self.project.c.id == id).values(project_data)
-        self.db.get_session().execute(query)
-        return self.get_by_id(id)
+        try:
+            query = self.project.update().where(self.project.c.id == id).values(project_data)
+            self.db.get_session().execute(query)
+            return self.get_by_id(id)
+        except sq.exc.SQLAlchemyError as error:
+            raise Exception(error.orig)
 
     def __create_project_dto(self, project: dict) -> domain.Project:
         project = {key: project.get(key) for key in self.project_key}

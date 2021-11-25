@@ -5,13 +5,12 @@ import azure.functions as func
 
 from ... import _domain
 from ... import _infrastructure
-from time_tracker._infrastructure import DB
+from time_tracker._infrastructure import DB as database
 from time_tracker.utils.enums import ResponseEnums as enums
 
 
 def update_project(req: func.HttpRequest) -> func.HttpResponse:
-    database = DB()
-    project_dao = _infrastructure.ProjectsSQLDao(database)
+    project_dao = _infrastructure.ProjectsSQLDao(database())
     project_service = _domain.ProjectService(project_dao)
     use_case = _domain._use_cases.UpdateProjectUseCase(project_service)
 
@@ -38,6 +37,12 @@ def update_project(req: func.HttpRequest) -> func.HttpResponse:
     except ValueError:
         return func.HttpResponse(
             body=enums.INVALID_ID.value.encode(),
+            status_code=enums.STATUS_BAD_REQUEST.value,
+            mimetype=enums.MIME_TYPE.value,
+        )
+    except Exception as error:
+        return func.HttpResponse(
+            body=str(error).encode(),
             status_code=enums.STATUS_BAD_REQUEST.value,
             mimetype=enums.MIME_TYPE.value,
         )

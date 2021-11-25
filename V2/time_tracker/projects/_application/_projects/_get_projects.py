@@ -5,13 +5,12 @@ import azure.functions as func
 
 from ... import _domain
 from ... import _infrastructure
-from time_tracker._infrastructure import DB
+from time_tracker._infrastructure import DB as database
 from time_tracker.utils.enums import ResponseEnums as enums
 
 
 def get_projects(req: func.HttpRequest) -> func.HttpResponse:
-    database = DB()
-    project_dao = _infrastructure.ProjectsSQLDao(database)
+    project_dao = _infrastructure.ProjectsSQLDao(database())
     project_service = _domain.ProjectService(project_dao)
 
     project_id = req.route_params.get("id")
