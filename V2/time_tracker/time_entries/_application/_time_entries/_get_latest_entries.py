@@ -1,4 +1,5 @@
 import json
+from http import HTTPStatus
 
 import azure.functions as func
 
@@ -20,7 +21,7 @@ def get_latest_entries(req: func.HttpRequest) -> func.HttpResponse:
         if not owner_id:
             return func.HttpResponse(
                 body="No owner id found",
-                status_code=404,
+                status_code=HTTPStatus.NOT_FOUND,
                 mimetype="application/json"
             )
 
@@ -29,19 +30,19 @@ def get_latest_entries(req: func.HttpRequest) -> func.HttpResponse:
         if not time_entries or len(time_entries) == 0:
             return func.HttpResponse(
                 body="No time entries found",
-                status_code=404,
+                status_code=HTTPStatus.NOT_FOUND,
                 mimetype="application/json"
             )
 
         return func.HttpResponse(
             body=json.dumps(time_entries, default=str),
-            status_code=200,
+            status_code=HTTPStatus.OK,
             mimetype="application/json",
         )
 
     except ValueError:
         return func.HttpResponse(
             body=b"Invalid Format ID",
-            status_code=400,
+            status_code=HTTPStatus.BAD_REQUEST,
             mimetype="application/json"
         )

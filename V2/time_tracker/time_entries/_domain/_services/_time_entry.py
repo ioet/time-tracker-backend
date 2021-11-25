@@ -1,7 +1,6 @@
 import typing
 
 from time_tracker.time_entries._domain import TimeEntry, TimeEntriesDao
-import typing
 
 
 class TimeEntryService:
