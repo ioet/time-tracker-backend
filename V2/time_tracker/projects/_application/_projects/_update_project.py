@@ -6,6 +6,7 @@ import azure.functions as func
 from ... import _domain
 from ... import _infrastructure
 from time_tracker._infrastructure import DB
+from time_tracker.utils.enums import ResponseEnums as enums
 
 
 def update_project(req: func.HttpRequest) -> func.HttpResponse:
@@ -17,29 +18,28 @@ def update_project(req: func.HttpRequest) -> func.HttpResponse:
     try:
         project_id = int(req.route_params.get("id"))
         project_data = req.get_json()
-        status_code = 200
 
         if not _validate_project(project_data):
-            status_code = 400
-            response = "Incorrect project body"
+            status_code = enums.STATUS_BAD_REQUEST.value
+            response = bytes(f"{enums.INCORRECT_BODY.value} project")
 
-        response = use_case.update_project(project_id, project_data).__dict__
-
-        if not update_project:
-            status_code = 404
-            response = "Not found"
+        else:
+            updated_project = use_case.update_project(project_id, project_data)
+            status_code, response = [
+              enums.STATUS_NOT_FOUND.value, enums.NOT_FOUND.value.encode()
+            ] if not updated_project else [enums.STATUS_OK.value, json.dumps(updated_project.__dict__)]
 
         return func.HttpResponse(
-            body=json.dumps(response, default=str),
+            body=response,
             status_code=status_code,
-            mimetype="application/json",
+            mimetype=enums.MIME_TYPE.value,
         )
 
     except ValueError:
         return func.HttpResponse(
-            body=b"Invalid Format ID",
-            status_code=400,
-            mimetype="application/json"
+            body=enums.INVALID_ID.value.encode(),
+            status_code=enums.STATUS_BAD_REQUEST.value,
+            mimetype=enums.MIME_TYPE.value,
         )
 
 

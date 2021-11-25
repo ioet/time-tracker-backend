@@ -6,6 +6,7 @@ import azure.functions as func
 from ... import _domain
 from ... import _infrastructure
 from time_tracker._infrastructure import DB
+from time_tracker.utils.enums import ResponseEnums as enums
 
 
 def get_projects(req: func.HttpRequest) -> func.HttpResponse:
@@ -20,24 +21,24 @@ def get_projects(req: func.HttpRequest) -> func.HttpResponse:
             response = _get_by_id(int(project_id), project_service)
             if not response:
                 return func.HttpResponse(
-                    body="Not found",
-                    status_code=404,
-                    mimetype="application/json"
+                    body=enums.NOT_FOUND.value.encode(),
+                    status_code=enums.STATUS_NOT_FOUND.value,
+                    mimetype=enums.MIME_TYPE.value
                 )
         else:
             response = _get_all(project_service)
 
         return func.HttpResponse(
-            body=json.dumps(response, default=str),
-            status_code=200,
-            mimetype="application/json",
+            body=json.dumps(response),
+            status_code=enums.STATUS_OK.value,
+            mimetype=enums.MIME_TYPE.value,
         )
 
     except ValueError:
         return func.HttpResponse(
-            body=b"Invalid Format ID",
-            status_code=400,
-            mimetype="application/json"
+            body=enums.INVALID_ID.value.encode(),
+            status_code=enums.STATUS_BAD_REQUEST.value,
+            mimetype=enums.MIME_TYPE.value
         )
 
 

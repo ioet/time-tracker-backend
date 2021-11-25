@@ -125,9 +125,9 @@ def _project_factory() -> projects_domain.Project:
 
 
 @pytest.fixture(name='insert_customer')
-def _insert_customer() -> dict:
-    def _new_customer(activity: customers_domain.Customer, database: DB):
+def _insert_customer() -> customers_domain.Customer:
+    def _new_customer(customer: customers_domain.Customer, database: DB):
         dao = customers_infrastructure.CustomersSQLDao(database)
-        new_activity = dao.create(activity)
-        return new_activity
+        new_customer = dao.create(customer)
+        return new_customer
     return _new_customer
