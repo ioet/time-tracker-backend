@@ -110,7 +110,7 @@ def test__update_time_entries_azure_endpoint__returns_a_status_code_400__when_ti
         method="PUT",
         body=json.dumps(time_entry_body).encode("utf-8"),
         url=TIME_ENTRY_URL,
-        route_params={"id": "invalid id"},
+        route_params={"id": Faker().sentence()},
     )
 
     response = azure_time_entries._update_time_entry.update_time_entry(req)
@@ -119,7 +119,7 @@ def test__update_time_entries_azure_endpoint__returns_a_status_code_400__when_ti
     assert response.get_body() == b'Invalid Format ID'
 
 
-def test__update_time_entries_azure_endpoint__returns_a_status_code_404__when_time_entry_recive_invalid_id():
+def test__update_time_entries_azure_endpoint__returns_a_status_code_404__when_not_found_an_time_entry_to_update():
     time_entry_body = {"description": Faker().sentence()}
 
     req = func.HttpRequest(
