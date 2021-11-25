@@ -21,7 +21,7 @@ def update_project(req: func.HttpRequest) -> func.HttpResponse:
 
         if not _validate_project(project_data):
             status_code = enums.STATUS_BAD_REQUEST.value
-            response = bytes(f"{enums.INCORRECT_BODY.value} project")
+            response = enums.INCORRECT_BODY.value.encode()
 
         else:
             updated_project = use_case.update_project(project_id, project_data)

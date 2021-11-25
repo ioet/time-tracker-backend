@@ -6,13 +6,13 @@ import azure.functions as func
 
 from ... import _domain
 from ... import _infrastructure
-from time_tracker._infrastructure import DB
+from time_tracker._infrastructure import DB as database
 from time_tracker.utils.enums import ResponseEnums as enums
 
 
 def create_project(req: func.HttpRequest) -> func.HttpResponse:
-    database = DB()
-    project_dao = _infrastructure.ProjectsSQLDao(database)
+
+    project_dao = _infrastructure.ProjectsSQLDao(database())
     project_service = _domain.ProjectService(project_dao)
     use_case = _domain._use_cases.CreateProjectUseCase(project_service)
 
@@ -37,7 +37,7 @@ def create_project(req: func.HttpRequest) -> func.HttpResponse:
         created_project = use_case.create_project(project_to_create)
 
         status_code, response = [
-          enums.INTERNAL_SERVER_ERROR.value, json.dumps({'error': f'project {enums.NOT_CREATED.value}'})
+            enums.INTERNAL_SERVER_ERROR.value, enums.NOT_CREATED.value.encode()
         ] if not created_project else [enums.STATUS_CREATED.value, json.dumps(created_project.__dict__)]
 
     return func.HttpResponse(
