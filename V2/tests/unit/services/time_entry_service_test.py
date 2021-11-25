@@ -29,3 +29,20 @@ def test__delete_time_entry__uses_the_time_entry_dao__to_delete_time_entry_selec
 
     assert time_entry_dao.delete.called
     assert expected_time_entry == deleted_time_entry
+
+
+def test__update_time_entry__uses_the_time_entry_dao__to_update_one_time_entry(
+    mocker,
+):
+    expected_time_entry = mocker.Mock()
+    time_entry_dao = mocker.Mock(
+        update=mocker.Mock(return_value=expected_time_entry)
+    )
+    time_entry_service = TimeEntryService(time_entry_dao)
+
+    updated_time_entry = time_entry_service.update(
+        Faker().pyint(), Faker().pydict()
+    )
+
+    assert time_entry_dao.update.called
+    assert expected_time_entry == updated_time_entry

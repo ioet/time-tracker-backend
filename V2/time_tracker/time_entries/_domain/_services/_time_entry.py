@@ -11,3 +11,6 @@ class TimeEntryService:
 
     def delete(self, id: int) -> TimeEntry:
         return self.time_entry_dao.delete(id)
+
+    def update(self, time_entry_id: int, new_time_entry: dict) -> TimeEntry:
+        return self.time_entry_dao.update(time_entry_id, new_time_entry)

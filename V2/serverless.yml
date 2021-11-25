@@ -97,6 +97,17 @@ functions:
           route: time-entries/{id}
           authLevel: anonymous
 
+    
+  update_time_entry:
+    handler: time_tracker/time_entries/interface.update_time_entry
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - PUT   
+          route: time-entries/{id}
+          authLevel: anonymous   
+
   create_customer:
     handler: time_tracker/customers/interface.create_customer
     events:
@@ -106,3 +117,4 @@ functions:
             - POST
           route: customers/
           authLevel: anonymous
+         

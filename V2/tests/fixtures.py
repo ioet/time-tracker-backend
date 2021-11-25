@@ -44,7 +44,7 @@ def _time_entry_factory() -> time_entries_domain.TimeEntry:
         description=Faker().sentence(),
         activity_id=Faker().random_int(),
         uri=Faker().domain_name(),
-        technologies=["jira", "git"],
+        technologies=str(Faker().pylist()),
         end_date=str(Faker().date_time()),
         deleted=False,
         timezone_offset="300",
