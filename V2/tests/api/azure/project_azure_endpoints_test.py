@@ -1,4 +1,5 @@
 import json
+from http import HTTPStatus
 
 import pytest
 from faker import Faker
@@ -7,7 +8,6 @@ import azure.functions as func
 from time_tracker.projects._application import _projects as azure_projects
 from time_tracker.projects import _domain as domain
 from time_tracker.projects import _infrastructure as infrastructure
-from time_tracker.utils.enums import ResponseEnums as enums
 
 PROJECT_URL = '/api/projects/'
 
@@ -36,7 +36,7 @@ def test__project_azure_endpoint__returns_all_projects(
     response = azure_projects._get_projects.get_projects(req)
     projects_json_data = response.get_body().decode("utf-8")
 
-    assert response.status_code == enums.STATUS_OK.value
+    assert response.status_code == HTTPStatus.OK
     assert projects_json_data == json.dumps(inserted_projects)
 
 
@@ -55,7 +55,7 @@ def test__project_azure_endpoint__returns_an_project__when_project_matches_its_i
     response = azure_projects._get_projects.get_projects(req)
     activitiy_json_data = response.get_body().decode("utf-8")
 
-    assert response.status_code == enums.STATUS_OK.value
+    assert response.status_code == HTTPStatus.OK
     assert activitiy_json_data == json.dumps(inserted_project)
 
 
@@ -70,8 +70,8 @@ def test__projects_azure_endpoint__returns_a_status_code_400__when_project_reciv
 
     response = azure_projects._get_projects.get_projects(req)
 
-    assert response.status_code == enums.STATUS_BAD_REQUEST.value
-    assert response.get_body() == enums.INVALID_ID.value.encode()
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.get_body() == b"Invalid Format ID"
 
 
 def test__project_azure_endpoint__returns_an_project_with_inactive_status__when_a_project_matching_its_id_is_found(
@@ -89,7 +89,7 @@ def test__project_azure_endpoint__returns_an_project_with_inactive_status__when_
     response = azure_projects._delete_project.delete_project(req)
     project_json_data = json.loads(response.get_body().decode("utf-8"))
 
-    assert response.status_code == enums.STATUS_OK.value
+    assert response.status_code == HTTPStatus.OK
     assert project_json_data['status'] == 0
     assert project_json_data['deleted'] is True
 
@@ -105,8 +105,8 @@ def test__delete_projects_azure_endpoint__returns_a_status_code_400__when_projec
 
     response = azure_projects._delete_project.delete_project(req)
 
-    assert response.status_code == enums.STATUS_BAD_REQUEST.value
-    assert response.get_body() == enums.INVALID_ID.value.encode()
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.get_body() == b"Invalid Format ID"
 
 
 def test__delete_projects_azure_endpoint__returns_a_status_code_404__when_no_found_a_project_to_delete(
@@ -120,8 +120,8 @@ def test__delete_projects_azure_endpoint__returns_a_status_code_404__when_no_fou
 
     response = azure_projects._delete_project.delete_project(req)
 
-    assert response.status_code == enums.STATUS_NOT_FOUND.value
-    assert response.get_body() == enums.NOT_FOUND.value.encode()
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.get_body() == b"Not found"
 
 
 def test__update_project_azure_endpoint__returns_an_project__when_found_a_project_to_update(
@@ -141,7 +141,7 @@ def test__update_project_azure_endpoint__returns_an_project__when_found_a_projec
     activitiy_json_data = response.get_body().decode("utf-8")
     inserted_project.update(project_body)
 
-    assert response.status_code == enums.STATUS_OK.value
+    assert response.status_code == HTTPStatus.OK
     assert activitiy_json_data == json.dumps(inserted_project)
 
 
@@ -159,8 +159,8 @@ def test__update_projects_azure_endpoint__returns_a_status_code_404__when_no_fou
 
     response = azure_projects._update_project.update_project(req)
 
-    assert response.status_code == enums.STATUS_NOT_FOUND.value
-    assert response.get_body() == enums.NOT_FOUND.value.encode()
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.get_body() == b"Not found"
 
 
 def test__update_projects_azure_endpoint__returns_a_status_code_400__when_recive_an_incorrect_body(
@@ -175,8 +175,8 @@ def test__update_projects_azure_endpoint__returns_a_status_code_400__when_recive
 
     response = azure_projects._update_project.update_project(req)
 
-    assert response.status_code == enums.STATUS_BAD_REQUEST.value
-    assert response.get_body() == enums.INCORRECT_BODY.value.encode()
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.get_body() == b"Incorrect body"
 
 
 def test__update_projects_azure_endpoint__returns_a_status_code_400__when_project_recive_invalid_id(
@@ -190,8 +190,8 @@ def test__update_projects_azure_endpoint__returns_a_status_code_400__when_projec
 
     response = azure_projects._update_project.update_project(req)
 
-    assert response.status_code == enums.STATUS_BAD_REQUEST.value
-    assert response.get_body() == enums.INVALID_ID.value.encode()
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.get_body() == b"Invalid Format ID"
 
 
 def test__project_azure_endpoint__creates_an_project__when_project_has_all_attributes(
@@ -210,7 +210,7 @@ def test__project_azure_endpoint__creates_an_project__when_project_has_all_attri
     project_json_data = json.loads(response.get_body())
     project_body['id'] = project_json_data['id']
 
-    assert response.status_code == enums.STATUS_CREATED.value
+    assert response.status_code == HTTPStatus.CREATED
     assert project_json_data == project_body
 
 
@@ -230,7 +230,7 @@ def test__project_azure_endpoint__returns_a_status_code_400__when_project_does_n
 
     response = azure_projects._create_project.create_project(req)
 
-    assert response.status_code == enums.STATUS_BAD_REQUEST.value
+    assert response.status_code == HTTPStatus.BAD_REQUEST
     assert response.get_body() == json.dumps(['The name key is missing in the input data']).encode()
 
 
@@ -250,5 +250,5 @@ def test__project_azure_endpoint__returns_a_status_code_500__when_project_recive
 
     response = azure_projects._create_project.create_project(req)
 
-    assert response.status_code == enums.INTERNAL_SERVER_ERROR.value
-    assert response.get_body() == enums.NOT_CREATED.value.encode()
+    assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+    assert response.get_body() == b"could not be created"

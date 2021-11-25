@@ -1,13 +1,13 @@
 import dataclasses
 import json
 import typing
+from http import HTTPStatus
 
 import azure.functions as func
 
 from ... import _domain
 from ... import _infrastructure
 from time_tracker._infrastructure import DB as database
-from time_tracker.utils.enums import ResponseEnums as enums
 
 
 def create_project(req: func.HttpRequest) -> func.HttpResponse:
@@ -20,7 +20,7 @@ def create_project(req: func.HttpRequest) -> func.HttpResponse:
 
     validation_errors = _validate_project(project_data)
     if validation_errors:
-        status_code = enums.STATUS_BAD_REQUEST.value
+        status_code = HTTPStatus.BAD_REQUEST
         response = json.dumps(validation_errors)
     else:
         project_to_create = _domain.Project(
@@ -37,13 +37,13 @@ def create_project(req: func.HttpRequest) -> func.HttpResponse:
         created_project = use_case.create_project(project_to_create)
 
         status_code, response = [
-            enums.INTERNAL_SERVER_ERROR.value, enums.NOT_CREATED.value.encode()
-        ] if not created_project else [enums.STATUS_CREATED.value, json.dumps(created_project.__dict__)]
+            HTTPStatus.INTERNAL_SERVER_ERROR,  b"could not be created"
+        ] if not created_project else [HTTPStatus.CREATED, json.dumps(created_project.__dict__)]
 
     return func.HttpResponse(
       body=response,
       status_code=status_code,
-      mimetype=enums.MIME_TYPE.value
+      mimetype="application/json"
     )
 
 

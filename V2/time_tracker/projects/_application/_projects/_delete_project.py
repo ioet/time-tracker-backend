@@ -1,11 +1,11 @@
 import json
+from http import HTTPStatus
 
 import azure.functions as func
 
 from ... import _domain
 from ... import _infrastructure
 from time_tracker._infrastructure import DB as database
-from time_tracker.utils.enums import ResponseEnums as enums
 
 
 def delete_project(req: func.HttpRequest) -> func.HttpResponse:
@@ -18,18 +18,18 @@ def delete_project(req: func.HttpRequest) -> func.HttpResponse:
         deleted_project = use_case.delete_project(project_id)
 
         status_code, response = [
-          enums.STATUS_NOT_FOUND.value, enums.NOT_FOUND.value.encode()
-        ] if not deleted_project else [enums.STATUS_OK.value, json.dumps(deleted_project.__dict__)]
+          HTTPStatus.NOT_FOUND, b"Not found"
+        ] if not deleted_project else [HTTPStatus.OK, json.dumps(deleted_project.__dict__)]
 
         return func.HttpResponse(
             body=response,
             status_code=status_code,
-            mimetype=enums.MIME_TYPE.value,
+            mimetype="application/json",
         )
 
     except ValueError:
         return func.HttpResponse(
-            body=enums.INVALID_ID.value.encode(),
-            status_code=enums.STATUS_BAD_REQUEST.value,
-            mimetype=enums.MIME_TYPE.value
+            body=b"Invalid Format ID",
+            status_code=HTTPStatus.BAD_REQUEST,
+            mimetype="application/json"
         )
