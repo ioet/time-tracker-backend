@@ -1,10 +1,10 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 
 @dataclass(frozen=True)
 class TimeEntry:
-    id: int
+    id: Optional[int]
     start_date: str
     owner_id: int
     description: str
@@ -12,6 +12,6 @@ class TimeEntry:
     uri: str
     technologies: List[str]
     end_date: str
-    deleted: bool
+    deleted: Optional[bool]
     timezone_offset: str
     project_id: int

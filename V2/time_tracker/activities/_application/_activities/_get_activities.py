@@ -7,10 +7,9 @@ from ... import _domain
 from ... import _infrastructure
 from time_tracker._infrastructure import DB
 
-DATABASE = DB()
-
 
 def get_activities(req: func.HttpRequest) -> func.HttpResponse:
+    database = DB()
     logging.info(
         'Python HTTP trigger function processed a request to get an activity.'
     )
@@ -19,11 +18,11 @@ def get_activities(req: func.HttpRequest) -> func.HttpResponse:
 
     try:
         if activity_id:
-            response = _get_by_id(int(activity_id))
+            response = _get_by_id(int(activity_id), database)
             if response == b'Not Found':
                 status_code = 404
         else:
-            response = _get_all()
+            response = _get_all(database)
 
         return func.HttpResponse(
             body=response, status_code=status_code, mimetype="application/json"
@@ -34,18 +33,18 @@ def get_activities(req: func.HttpRequest) -> func.HttpResponse:
         )
 
 
-def _get_by_id(activity_id: int) -> str:
+def _get_by_id(activity_id: int, database: DB) -> str:
     activity_use_case = _domain._use_cases.GetActivityUseCase(
-        _create_activity_service(DATABASE)
+        _create_activity_service(database)
     )
     activity = activity_use_case.get_activity_by_id(activity_id)
 
     return json.dumps(activity.__dict__) if activity else b'Not Found'
 
 
-def _get_all() -> str:
+def _get_all(database: DB) -> str:
     activities_use_case = _domain._use_cases.GetActivitiesUseCase(
-        _create_activity_service(DATABASE)
+        _create_activity_service(database)
     )
     return json.dumps(
         [

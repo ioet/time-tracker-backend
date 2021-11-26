@@ -1,10 +1,11 @@
 .PHONY: help
 help:
 		@echo "---------------HELP-----------------"
-		@echo "To install the dependencies type make install"
-		@echo "To test the project type make test"
-		@echo "To run the local database type make start-local"
-		@echo "To run all comands type make ci"
+		@echo "- make install --> Install the dependencies"
+		@echo "- make test --> Run all tests"
+		@echo "- make test specific_test=<name_of_the_test> --> Run specific test"
+		@echo "- make start-local --> Run local database"
+		@echo "- make ci --> Install the dependencies and run all tests"
 		@echo "------------------------------------"
 
 .PHONY: install
@@ -17,13 +18,16 @@ install:
 
 .PHONY: test
 test: export ENVIRONMENT = test
-test: export TEST_DB_CONNECTION = sqlite:///:memory:
 test:
 		@echo "=========================================Lint with flake8========================================="
 		flake8 . --show-source --statistics
 		@echo "Completed flake8!"
 		@echo "=========================================Test with pytest========================================="
-		python -m pytest -v
+		@if [ "$(specific_test)" ]; then \
+		python -m pytest -vv -s -k $(specific_test);\
+		else \
+		python -m pytest -v;\
+		fi
 		@echo "Completed test!"
 
 start-local:

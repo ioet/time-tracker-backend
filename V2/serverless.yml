@@ -72,9 +72,9 @@ functions:
       - http: true
         x-azure-settings:
           methods:
-            - PUT   
+            - PUT
           route: activities/{id}
-          authLevel: anonymous    
+          authLevel: anonymous
 
   create_activity:
     handler: time_tracker/activities/interface.create_activity
@@ -100,6 +100,16 @@ functions:
           route: time-entries/
           authLevel: anonymous
 
+  get_time_entries:
+    handler: time_tracker/time_entries/interface.get_time_entries
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - GET
+          route: time-entries/{id:?}
+          authLevel: anonymous
+
   delete_time_entry:
     handler: time_tracker/time_entries/interface.delete_time_entry
     events:
@@ -109,6 +119,16 @@ functions:
             - DELETE
           route: time-entries/{id}
           authLevel: anonymous
+
+  update_time_entry:
+    handler: time_tracker/time_entries/interface.update_time_entry
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - PUT   
+          route: time-entries/{id}
+          authLevel: anonymous   
 
 #endregion end Time-Entries
 

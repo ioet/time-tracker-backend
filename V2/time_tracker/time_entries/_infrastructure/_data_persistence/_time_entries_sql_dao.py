@@ -1,6 +1,8 @@
 import dataclasses
+import typing
 
 import sqlalchemy
+import sqlalchemy.sql as sql
 
 import time_tracker.time_entries._domain as domain
 from time_tracker._infrastructure import _db
@@ -31,6 +33,19 @@ class TimeEntriesSQLDao(domain.TimeEntriesDao):
             extend_existing=True,
         )
 
+    def get_by_id(self, time_entry_id: int) -> domain.TimeEntry:
+        query = sql.select(self.time_entry).where(self.time_entry.c.id == time_entry_id)
+        time_entry = self.db.get_session().execute(query).one_or_none()
+        return self.__create_time_entry_dto(dict(time_entry)) if time_entry else None
+
+    def get_all(self) -> typing.List[domain.TimeEntry]:
+        query = sql.select(self.time_entry)
+        result = self.db.get_session().execute(query)
+        return [
+            self.__create_time_entry_dto(dict(time_entry))
+            for time_entry in result
+        ]
+
     def create(self, time_entry_data: domain.TimeEntry) -> domain.TimeEntry:
         try:
             new_time_entry = time_entry_data.__dict__
@@ -44,9 +59,19 @@ class TimeEntriesSQLDao(domain.TimeEntriesDao):
         except sqlalchemy.exc.SQLAlchemyError:
             return None
 
-    def __create_time_entry_dto(self, time_entry: dict) -> domain.TimeEntry:
-        time_entry = {key: time_entry.get(key) for key in self.time_entry_key}
-        return domain.TimeEntry(**time_entry)
+    def update(self, time_entry_id: int, time_entry_data: dict) -> domain.TimeEntry:
+        try:
+            query = self.time_entry.update().where(self.time_entry.c.id == time_entry_id).values(time_entry_data)
+            self.db.get_session().execute(query)
+            query_updated_time_entry = (
+                sqlalchemy.sql.select(self.time_entry)
+                .where(self.time_entry.c.id == time_entry_id)
+            )
+            time_entry = self.db.get_session().execute(query_updated_time_entry).one_or_none()
+
+            return self.__create_time_entry_dto(dict(time_entry)) if time_entry else None
+        except sqlalchemy.exc.SQLAlchemyError:
+            return None
 
     def delete(self, time_entry_id: int) -> domain.TimeEntry:
         query = (
@@ -58,3 +83,10 @@ class TimeEntriesSQLDao(domain.TimeEntriesDao):
         query_deleted_time_entry = sqlalchemy.sql.select(self.time_entry).where(self.time_entry.c.id == time_entry_id)
         time_entry = self.db.get_session().execute(query_deleted_time_entry).one_or_none()
         return self.__create_time_entry_dto(dict(time_entry)) if time_entry else None
+
+    def __create_time_entry_dto(self, time_entry: dict) -> domain.TimeEntry:
+        time_entry.update({
+            "start_date": str(time_entry.get("start_date")),
+            "end_date": str(time_entry.get("end_date"))})
+        time_entry = {key: time_entry.get(key) for key in self.time_entry_key}
+        return domain.TimeEntry(**time_entry)

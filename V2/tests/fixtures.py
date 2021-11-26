@@ -5,7 +5,8 @@ import time_tracker.activities._domain as activities_domain
 import time_tracker.time_entries._domain as time_entries_domain
 import time_tracker.customers._domain as customers_domain
 import time_tracker.activities._infrastructure as activities_infrastructure
-import time_tracker.customers._infrastructure as customer_infrastructure
+import time_tracker.customers._infrastructure as customers_infrastructure
+import time_tracker.projects._domain as projects_domain
 from time_tracker._infrastructure import DB
 
 
@@ -45,7 +46,7 @@ def _time_entry_factory() -> time_entries_domain.TimeEntry:
         description=Faker().sentence(),
         activity_id=Faker().random_int(),
         uri=Faker().domain_name(),
-        technologies=["jira", "git"],
+        technologies=str(Faker().pylist()),
         end_date=str(Faker().date_time()),
         deleted=False,
         timezone_offset="300",
@@ -97,10 +98,36 @@ def _customer_factory() -> customers_domain.Customer:
     return _make_customer
 
 
+@pytest.fixture(name='project_factory')
+def _project_factory() -> projects_domain.Project:
+    def _make_project(
+        id=Faker().pyint(),
+        name=Faker().name(),
+        description=Faker().sentence(),
+        project_type_id=Faker().pyint(),
+        customer_id=Faker().pyint(),
+        status=Faker().pyint(),
+        deleted=False,
+        technologies=str(Faker().pylist())
+    ):
+        project = projects_domain.Project(
+            id=id,
+            name=name,
+            description=description,
+            project_type_id=project_type_id,
+            customer_id=customer_id,
+            status=status,
+            deleted=deleted,
+            technologies=technologies
+            )
+        return project
+    return _make_project
+
+
 @pytest.fixture(name='insert_customer')
-def _insert_customer() -> dict:
+def _insert_customer() -> customers_domain.Customer:
     def _new_customer(customer: customers_domain.Customer, database: DB):
-        dao = customer_infrastructure.CustomersSQLDao(database)
+        dao = customers_infrastructure.CustomersSQLDao(database)
         new_customer = dao.create(customer)
         return new_customer
     return _new_customer

@@ -4,5 +4,8 @@ from ._persistence_contracts import TimeEntriesDao
 from ._services import TimeEntryService
 from ._use_cases import (
     CreateTimeEntryUseCase,
-    DeleteTimeEntryUseCase
+    DeleteTimeEntryUseCase,
+    UpdateTimeEntryUseCase,
+    GetTimeEntriesUseCase,
+    GetTimeEntryUseCase
 )

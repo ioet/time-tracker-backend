@@ -17,8 +17,6 @@ def test__activity_azure_endpoint__returns_all_activities(
         insert_activity(existent_activities[1], test_db).__dict__
     ]
 
-    azure_activities._get_activities.DATABASE = test_db
-
     req = func.HttpRequest(method='GET', body=None, url=ACTIVITY_URL)
     response = azure_activities._get_activities.get_activities(req)
     activities_json_data = response.get_body().decode("utf-8")
@@ -33,7 +31,6 @@ def test__activity_azure_endpoint__returns_an_activity__when_activity_matches_it
     existent_activity = activity_factory()
     inserted_activity = insert_activity(existent_activity, test_db).__dict__
 
-    azure_activities._get_activities.DATABASE = test_db
     req = func.HttpRequest(
         method='GET',
         body=None,
@@ -54,7 +51,6 @@ def test__activity_azure_endpoint__returns_an_activity_with_inactive_status__whe
     existent_activity = activity_factory()
     inserted_activity = insert_activity(existent_activity, test_db).__dict__
 
-    azure_activities._delete_activity.DATABASE = test_db
     req = func.HttpRequest(
         method='DELETE',
         body=None,
@@ -76,7 +72,6 @@ def test__update_activity_azure_endpoint__returns_an_activity__when_found_an_act
     existent_activity = activity_factory()
     inserted_activity = insert_activity(existent_activity, test_db).__dict__
 
-    azure_activities._update_activity.DATABASE = test_db
     activity_body = {"description": Faker().sentence()}
     req = func.HttpRequest(
         method='PUT',
