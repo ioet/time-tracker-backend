@@ -225,6 +225,16 @@ functions:
           
           authLevel: anonymous
 
+  get_latest_projects:
+    handler: time_tracker/projects/interface.get_latest_projects
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - GET
+          route: projects/latest
+          authLevel: anonymous
+
 #endregion End Functions Projects
 
 #endregion End Functions

@@ -5,6 +5,8 @@ import sqlalchemy as sq
 
 from ... import _domain as domain
 from time_tracker._infrastructure import _db
+from time_tracker.time_entries._infrastructure._data_persistence import TimeEntriesSQLDao
+from time_tracker.customers._infrastructure._data_persistence import CustomersSQLDao
 
 
 class ProjectsSQLDao(domain.ProjectsDao):
@@ -31,28 +33,57 @@ class ProjectsSQLDao(domain.ProjectsDao):
 
     def create(self, project_data: domain.Project) -> domain.Project:
         try:
-            new_project = project_data.__dict__
-            new_project.pop('id', None)
+            validated_project = {key: value for (key, value) in project_data.__dict__.items() if value is not None}
 
-            query = self.project.insert().values(new_project).return_defaults()
+            query = self.project.insert().values(validated_project).return_defaults()
+
             project = self.db.get_session().execute(query)
-            new_project.update({"id": project.inserted_primary_key[0]})
-            return self.__create_project_dto(new_project)
+            return self.get_by_id(project.inserted_primary_key[0])
 
         except sq.exc.SQLAlchemyError:
             return None
 
     def get_by_id(self, id: int) -> domain.Project:
+        """
+        query = sq.sql.text(
+            "SELECT project.*, json_array((customer.*)) AS customer FROM project "
+            "JOIN customer ON customer.id=project.customer_id "
+            "WHERE project.id=:id GROUP BY project.id "
+        )
+        """
         query = sq.sql.select(self.project).where(self.project.c.id == id)
         project = self.db.get_session().execute(query).one_or_none()
-        return self.__create_project_dto(dict(project)) if project else None
+        if project:
+            customer_model = CustomersSQLDao(self.db).customer
+            query_customer = sq.sql.select(customer_model).where(customer_model.c.id == project["customer_id"])
+            customer = self.db.get_session().execute(query_customer).one_or_none()
+            project = dict(project)
+            project.update({"customer": dict(customer)if customer else None})
+
+        return self.__create_project_dto(project) if project else None
 
     def get_all(self) -> typing.List[domain.Project]:
-        query = sq.sql.select(self.project)
-        result = self.db.get_session().execute(query)
+        """
+        query = sq.sql.text(
+            "SELECT project.*, json_array((customer.*)) AS customer FROM project "
+            "JOIN customer ON customer.id=project.customer_id GROUP BY project.id"
+        )
+        """
+        customer_model = CustomersSQLDao(self.db).customer
+        query = sq.sql.select(self.project, customer_model).join(customer_model)
+        result = self.db.get_session().execute(query).all()
+        projects = []
+
+        for project in result:
+            query_customer = sq.sql.select(customer_model).where(customer_model.c.id == project["customer_id"])
+            customer = self.db.get_session().execute(query_customer).one_or_none()
+            project = dict(project)
+            project.update({"customer": dict(customer)if customer else None})
+            projects.append(project)
+
         return [
-            self.__create_project_dto(dict(project))
-            for project in result
+            self.__create_project_dto(project)
+            for project in projects
         ]
 
     def delete(self, id: int) -> domain.Project:
@@ -71,6 +102,16 @@ class ProjectsSQLDao(domain.ProjectsDao):
             return self.get_by_id(id)
         except sq.exc.SQLAlchemyError as error:
             raise Exception(error.orig)
+
+    def get_latest(self, owner_id: int) -> typing.List[domain.Project]:
+        time_entries_dao = TimeEntriesSQLDao(self.db)
+        latest_time_entries = time_entries_dao.get_latest_entries(owner_id)
+        latest_projects = []
+        if latest_time_entries:
+            filter_project = typing.Counter(time_entry['project_id'] for time_entry in latest_time_entries)
+            latest_projects = [self.get_by_id(project_id) for project_id in filter_project]
+
+        return latest_projects
 
     def __create_project_dto(self, project: dict) -> domain.Project:
         project = {key: project.get(key) for key in self.project_key}

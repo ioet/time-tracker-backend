@@ -1,4 +1,5 @@
 import abc
+import typing
 
 from .. import Project
 
@@ -9,7 +10,7 @@ class ProjectsDao(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def get_all(self) -> Project:
+    def get_all(self) -> typing.List[Project]:
         pass
 
     @abc.abstractmethod
@@ -22,4 +23,8 @@ class ProjectsDao(abc.ABC):
 
     @abc.abstractmethod
     def delete(self, id: int) -> Project:
+        pass
+
+    @abc.abstractmethod
+    def get_latest(self, owner_id: int) -> typing.List[Project]:
         pass

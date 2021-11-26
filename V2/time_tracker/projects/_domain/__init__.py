@@ -7,5 +7,6 @@ from ._use_cases import (
     DeleteProjectUseCase,
     GetProjectsUseCase,
     GetProjectUseCase,
-    UpdateProjectUseCase
+    UpdateProjectUseCase,
+    GetLatestProjectsUseCase
 )

@@ -22,3 +22,6 @@ class ProjectService:
 
     def delete(self, id: int) -> Project:
         return self.project_dao.delete(id)
+
+    def get_latest(self, owner_id: int) -> typing.List[Project]:
+        return self.project_dao.get_latest(owner_id)
