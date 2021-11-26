@@ -2,8 +2,6 @@ service: azure-time-tracker
 
 frameworkVersion: "2"
 
-#region start Config
-
 provider:
   name: azure
   region: westus2
@@ -38,13 +36,11 @@ package:
     - "!.gitignore"
     - "!.git/**"
 
-#endregion end Config
-
 #region start Functions
 
 functions:
 
-#region start Activities
+#region Start Functions Activities
 
   get_activities:
     handler: time_tracker/activities/interface.get_activities
@@ -86,9 +82,9 @@ functions:
           route: activities/
           authLevel: anonymous
 
-#endregion end Activities
+#endregion End Functions Activities
 
-#region start Time-Entries
+#region Start Functions Time-Entries
 
   create_time_entry:
     handler: time_tracker/time_entries/interface.create_time_entry
@@ -130,9 +126,9 @@ functions:
           route: time-entries/{id}
           authLevel: anonymous   
 
-#endregion end Time-Entries
+#endregion End Functions Time-Entries
 
-#region start Customer
+#region Start Functions Customers
 
   create_customer:
     handler: time_tracker/customers/interface.create_customer
@@ -174,6 +170,50 @@ functions:
           route: customers/{id}
           authLevel: anonymous
 
-#endregion end Customer
+#endregion End Functions Customers
 
-#endregion end Functions
+#region Start Functions Projects
+
+  get_projects:
+    handler: time_tracker/projects/interface.get_projects
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - GET
+          route: projects/{id:?}
+          authLevel: anonymous
+
+  delete_project:
+    handler: time_tracker/projects/interface.delete_project
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - DELETE
+          route: projects/{id}
+          authLevel: anonymous
+
+  update_project:
+    handler: time_tracker/projects/interface.update_project
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - PUT   
+          route: projects/{id}
+          authLevel: anonymous    
+
+  create_project:
+    handler: time_tracker/projects/interface.create_project
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - POST
+          route: projects/
+          authLevel: anonymous
+
+#endregion End Functions Projects
+
+#endregion End Functions
