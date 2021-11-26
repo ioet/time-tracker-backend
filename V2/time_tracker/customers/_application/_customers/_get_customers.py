@@ -1,3 +1,4 @@
+from http import HTTPStatus
 import json
 
 import azure.functions as func
@@ -9,13 +10,13 @@ from time_tracker._infrastructure import DB
 
 def get_customers(req: func.HttpRequest) -> func.HttpResponse:
     customer_id = req.route_params.get('id')
-    status_code = 200
+    status_code = HTTPStatus.OK
 
     try:
         if customer_id:
             response = _get_by_id(int(customer_id))
             if response == b'This customer does not exist':
-                status_code = 404
+                status_code = HTTPStatus.NOT_FOUND
         else:
             response = _get_all()
 
@@ -24,7 +25,7 @@ def get_customers(req: func.HttpRequest) -> func.HttpResponse:
         )
     except ValueError:
         return func.HttpResponse(
-            body=b"The id has an invalid format", status_code=400, mimetype="application/json"
+            body=b"The id has an invalid format", status_code=HTTPStatus.BAD_REQUEST, mimetype="application/json"
         )
 
 

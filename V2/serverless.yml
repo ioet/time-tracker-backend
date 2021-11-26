@@ -2,7 +2,7 @@ service: azure-time-tracker
 
 frameworkVersion: "2"
 
-#region Config
+#region start Config
 
 provider:
   name: azure
@@ -38,13 +38,13 @@ package:
     - "!.gitignore"
     - "!.git/**"
 
-#endregion Fin Config
+#endregion end Config
 
-#region Functions
+#region start Functions
 
 functions:
 
-#region Activities
+#region start Activities
 
   get_activities:
     handler: time_tracker/activities/interface.get_activities
@@ -86,9 +86,9 @@ functions:
           route: activities/
           authLevel: anonymous
 
-#endregion fin Activities
+#endregion end Activities
 
-#region Time-Entries
+#region start Time-Entries
 
   create_time_entry:
     handler: time_tracker/time_entries/interface.create_time_entry
@@ -110,9 +110,9 @@ functions:
           route: time-entries/{id}
           authLevel: anonymous
 
-#endregion Fin TimeEntries
+#endregion end Time-Entries
 
-#region Customer
+#region start Customer
 
   create_customer:
     handler: time_tracker/customers/interface.create_customer
@@ -154,7 +154,6 @@ functions:
           route: customers/{id}
           authLevel: anonymous
 
-#endregion Fin Customer
+#endregion end Customer
 
-#endregion Fin Funciones
-            
+#endregion end Functions

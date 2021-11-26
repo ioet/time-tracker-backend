@@ -1,5 +1,6 @@
-import pytest
 import typing
+
+import pytest
 from faker import Faker
 
 import time_tracker.customers._domain as domain

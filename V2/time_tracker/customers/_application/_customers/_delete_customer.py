@@ -1,4 +1,5 @@
 import json
+from http import HTTPStatus
 
 import azure.functions as func
 
@@ -20,19 +21,19 @@ def delete_customer(req: func.HttpRequest) -> func.HttpResponse:
         if not deleted_customer:
             return func.HttpResponse(
                 body="Not found",
-                status_code=404,
+                status_code=HTTPStatus.NOT_FOUND,
                 mimetype=DATATYPE
             )
 
         return func.HttpResponse(
             body=json.dumps(deleted_customer.__dict__, default=str),
-            status_code=200,
+            status_code=HTTPStatus.OK,
             mimetype=DATATYPE,
         )
 
     except ValueError:
         return func.HttpResponse(
             body=b"Invalid Format ID",
-            status_code=400,
+            status_code=HTTPStatus.BAD_REQUEST,
             mimetype=DATATYPE
         )

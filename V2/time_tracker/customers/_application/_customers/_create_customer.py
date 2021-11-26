@@ -1,6 +1,7 @@
 import dataclasses
 import json
 import typing
+from http import HTTPStatus
 
 import azure.functions as func
 
@@ -32,10 +33,10 @@ def create_customer(req: func.HttpRequest) -> func.HttpResponse:
 
         if created_customer:
             body = json.dumps(created_customer.__dict__)
-            status_code = 201
+            status_code = HTTPStatus.CREATED
         else:
             body = b'This customer already exists'
-            status_code = 409
+            status_code = HTTPStatus.CONFLICT
 
         return func.HttpResponse(
             body=body,
@@ -45,7 +46,7 @@ def create_customer(req: func.HttpRequest) -> func.HttpResponse:
     except ValueError:
         return func.HttpResponse(
             body=b'Invalid format or structure of the attributes of the customer',
-            status_code=400,
+            status_code=HTTPStatus.BAD_REQUEST,
             mimetype="application/json"
         )
 

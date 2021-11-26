@@ -2,7 +2,6 @@ import dataclasses
 import typing
 
 import sqlalchemy as sq
-import sqlalchemy.sql as sql
 
 import time_tracker.customers._domain as domain
 from time_tracker._infrastructure import _db
@@ -25,8 +24,8 @@ class CustomersSQLDao(domain.CustomersDao):
         )
 
     def get_by_id(self, id: int) -> domain.Customer:
-        query = sql.select(self.customer).where(
-            sql.and_(self.customer.c.id == id, self.customer.c.deleted.is_(False))
+        query = sq.sql.select(self.customer).where(
+            sq.sql.and_(self.customer.c.id == id, self.customer.c.deleted.is_(False))
             )
         customer = self.db.get_session().execute(query).one_or_none()
         return self.__create_customer_dto(dict(customer)) if customer else None
@@ -70,12 +69,9 @@ class CustomersSQLDao(domain.CustomersDao):
 
     def update(self, id: int, data: domain.Customer) -> domain.Customer:
         try:
-            new_customer = {
-                "name": data.name,
-                "description": data.description,
-                "status": data.status,
-                "deleted": data.deleted
-            }
+            new_customer = data.__dict__
+            new_customer.pop("id")
+
             customer_validated = {key: value for (key, value) in new_customer.items() if value is not None}
             query = self.customer.update().where(self.customer.c.id == id).values(customer_validated)
             self.db.get_session().execute(query)
