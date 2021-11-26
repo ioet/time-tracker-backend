@@ -128,7 +128,7 @@ def test__update_customer_dao__returns_an_updated_customer_dto__when_updates_cor
     assert updated_customer.__dict__ == inserted_customer
 
 
-def test__update_customer_dao__returns_None__when_an_incorrect_id_is_passed(
+def test__update_customer_dao__returns_none__when_an_incorrect_id_is_passed(
     test_db, customer_factory, create_fake_dao, insert_customer
 ):
     dao = create_fake_dao(test_db)

@@ -51,6 +51,6 @@ def create_customer(req: func.HttpRequest) -> func.HttpResponse:
         )
 
 
-def _validate_customer(customer_data: dict) -> bool:
+def _validate_customer(customer_data: dict) -> typing.List[str]:
     return [field.name for field in dataclasses.fields(_domain.Customer)
             if (field.name not in customer_data) and (field.type != typing.Optional[field.type])]
