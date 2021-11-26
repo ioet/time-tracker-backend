@@ -170,7 +170,7 @@ def test_get_latest_entries__returns_a_list_of_latest_time_entries__when_an_owne
     assert result == [inserted_time_entry.__dict__]
 
 
-def test_get_latest_entries__returns_None__when_an_owner_id_is_not_found(
+def test_get_latest_entries__returns_none__when_an_owner_id_is_not_found(
     create_fake_dao, test_db, insert_activity, activity_factory
 ):
     dao = create_fake_dao(test_db)

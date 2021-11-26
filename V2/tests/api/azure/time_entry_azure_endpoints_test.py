@@ -9,6 +9,7 @@ import time_tracker.time_entries._application._time_entries as azure_time_entrie
 from time_tracker._infrastructure import DB
 from time_tracker.time_entries import _domain as domain_time_entries
 from time_tracker.time_entries import _infrastructure as infrastructure_time_entries
+from time_tracker.utils.enums import ResponseEnums
 
 
 TIME_ENTRY_URL = "/api/time-entries/"
@@ -227,11 +228,11 @@ def test__get_latest_entries_azure_endpoint__returns_a_list_of_latest_time_entri
     response = azure_time_entries._get_latest_entries.get_latest_entries(req)
     time_entry_json_data = json.loads(response.get_body().decode("utf-8"))
 
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert time_entry_json_data == [inserted_time_entry]
 
 
-def test__get_latest_entries_azure_endpoint__returns_No_time_entries_found__when_recieve_an_invalid_owner_id(
+def test__get_latest_entries_azure_endpoint__returns_not_found__when_recieve_an_invalid_owner_id(
     test_db, insert_activity, activity_factory,
 ):
     insert_activity(activity_factory(), test_db)
@@ -245,5 +246,5 @@ def test__get_latest_entries_azure_endpoint__returns_No_time_entries_found__when
 
     response = azure_time_entries._get_latest_entries.get_latest_entries(req)
 
-    assert response.status_code == 404
-    assert response.get_body() == b'No time entries found'
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.get_body().decode("utf-8") == ResponseEnums.NOT_FOUND.value

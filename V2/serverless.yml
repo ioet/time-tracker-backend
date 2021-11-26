@@ -124,7 +124,7 @@ functions:
         x-azure-settings:
           methods:
             - GET
-          route: time-entries/latest
+          route: time-entries/latest/
           authLevel: anonymous
 
   create_customer:
