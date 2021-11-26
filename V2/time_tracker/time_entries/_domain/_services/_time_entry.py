@@ -21,3 +21,6 @@ class TimeEntryService:
 
     def get_all(self) -> typing.List[TimeEntry]:
         return self.time_entry_dao.get_all()
+
+    def get_latest_entries(self, owner_id: int, limit: int) -> typing.List[TimeEntry]:
+        return self.time_entry_dao.get_latest_entries(owner_id, limit)

@@ -9,6 +9,7 @@ import time_tracker.time_entries._application._time_entries as azure_time_entrie
 from time_tracker._infrastructure import DB
 from time_tracker.time_entries import _domain as domain_time_entries
 from time_tracker.time_entries import _infrastructure as infrastructure_time_entries
+from time_tracker.utils.enums import ResponseEnums
 
 
 TIME_ENTRY_URL = "/api/time-entries/"
@@ -208,3 +209,42 @@ def test__update_time_entries_azure_endpoint__returns_a_status_code_400__when_ti
 
     assert response.status_code == 400
     assert response.get_body() == b'Incorrect time entry body'
+
+
+def test__get_latest_entries_azure_endpoint__returns_a_list_of_latest_time_entries__when_an_owner_id_match(
+    test_db, time_entry_factory, insert_time_entry, insert_activity, activity_factory,
+):
+    inserted_activity = insert_activity(activity_factory(), test_db).__dict__
+    time_entry_body = time_entry_factory(activity_id=inserted_activity["id"], technologies="[jira,sql]")
+    inserted_time_entry = insert_time_entry(time_entry_body, test_db).__dict__
+
+    req = func.HttpRequest(
+        method='GET',
+        body=None,
+        url=TIME_ENTRY_URL+"latest/",
+        params={"owner_id": inserted_time_entry["owner_id"]},
+    )
+
+    response = azure_time_entries._get_latest_entries.get_latest_entries(req)
+    time_entry_json_data = json.loads(response.get_body().decode("utf-8"))
+
+    assert response.status_code == HTTPStatus.OK
+    assert time_entry_json_data == [inserted_time_entry]
+
+
+def test__get_latest_entries_azure_endpoint__returns_not_found__when_recieve_an_invalid_owner_id(
+    test_db, insert_activity, activity_factory,
+):
+    insert_activity(activity_factory(), test_db)
+
+    req = func.HttpRequest(
+        method='GET',
+        body=None,
+        url=TIME_ENTRY_URL+"latest/",
+        params={"owner_id": Faker().pyint()},
+    )
+
+    response = azure_time_entries._get_latest_entries.get_latest_entries(req)
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.get_body().decode("utf-8") == ResponseEnums.NOT_FOUND.value
