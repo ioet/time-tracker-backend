@@ -3,6 +3,8 @@ from faker import Faker
 
 from time_tracker.time_entries._domain import _use_cases
 
+fake = Faker()
+
 
 def test__create_time_entry_function__uses_the_time_entries_service__to_create_time_entry(
     mocker: MockFixture, time_entry_factory
@@ -43,3 +45,33 @@ def test__update_time_entries_function__uses_the_time_entry_service__to_update_a
 
     assert time_entry_service.update.called
     assert expected_time_entry == updated_time_entry
+
+
+def test__get_all_time_entries_function__using_the_use_case_get_time_entries__to_get_all_time_entries(
+    mocker: MockFixture,
+):
+    expected_time_entries = mocker.Mock()
+    time_entry_service = mocker.Mock(
+        get_all=mocker.Mock(return_value=expected_time_entries)
+    )
+
+    time_entries_use_case = _use_cases.GetTimeEntriesUseCase(time_entry_service)
+    actual_time_entries = time_entries_use_case.get_time_entries()
+
+    assert time_entry_service.get_all.called
+    assert expected_time_entries == actual_time_entries
+
+
+def test__get_time_entry_by_id_function__uses_the_time_entry_service__to_retrieve_time_entry(
+    mocker: MockFixture,
+):
+    expected_time_entries = mocker.Mock()
+    time_entry_service = mocker.Mock(
+        get_by_id=mocker.Mock(return_value=expected_time_entries)
+    )
+
+    time_entry_use_case = _use_cases.GetTimeEntryUseCase(time_entry_service)
+    actual_time_entry = time_entry_use_case.get_time_entry_by_id(fake.uuid4())
+
+    assert time_entry_service.get_by_id.called
+    assert expected_time_entries == actual_time_entry

@@ -46,3 +46,29 @@ def test__update_time_entry__uses_the_time_entry_dao__to_update_one_time_entry(
 
     assert time_entry_dao.update.called
     assert expected_time_entry == updated_time_entry
+
+
+def test__get_all__uses_the_time_entry_dao__to_retrieve_time_entries(mocker):
+    expected_time_entries = mocker.Mock()
+    time_entry_dao = mocker.Mock(
+        get_all=mocker.Mock(return_value=expected_time_entries)
+    )
+    time_activity_service = TimeEntryService(time_entry_dao)
+
+    actual_activities = time_activity_service.get_all()
+
+    assert time_entry_dao.get_all.called
+    assert expected_time_entries == actual_activities
+
+
+def test__get_by_id__uses_the_time_entry_dao__to_retrieve_one_time_entry(mocker):
+    expected_time_entry = mocker.Mock()
+    time_entry_dao = mocker.Mock(
+        get_by_id=mocker.Mock(return_value=expected_time_entry)
+    )
+    time_entry_service = TimeEntryService(time_entry_dao)
+
+    actual_time_entry = time_entry_service.get_by_id(Faker().uuid4())
+
+    assert time_entry_dao.get_by_id.called
+    assert expected_time_entry == actual_time_entry
