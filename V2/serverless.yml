@@ -1,6 +1,6 @@
 service: azure-time-tracker
 
-frameworkVersion: "2"
+frameworkVersion: '2'
 
 provider:
   name: azure
@@ -23,18 +23,18 @@ plugins:
 
 package:
   patterns:
-    - "!env/**"
-    - "!.env/**"
-    - "!local.settings.json"
-    - "!.vscode/**"
-    - "!__pycache__/**"
-    - "!node_modules/**"
-    - "!.python_packages/**"
-    - "!.funcignore"
-    - "!package.json"
-    - "!package-lock.json"
-    - "!.gitignore"
-    - "!.git/**"
+    - '!env/**'
+    - '!.env/**'
+    - '!local.settings.json'
+    - '!.vscode/**'
+    - '!__pycache__/**'
+    - '!node_modules/**'
+    - '!.python_packages/**'
+    - '!.funcignore'
+    - '!package.json'
+    - '!package-lock.json'
+    - '!.gitignore'
+    - '!.git/**'
 
 #region start Functions
 
@@ -126,6 +126,16 @@ functions:
           route: time-entries/{id}
           authLevel: anonymous   
 
+  get_latest_time_entry:
+    handler: time_tracker/time_entries/interface.get_latest_entries
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - GET
+          route: time-entries/latest/
+          authLevel: anonymous
+
 #endregion End Functions Time-Entries
 
 #region Start Functions Customers
@@ -212,6 +222,7 @@ functions:
           methods:
             - POST
           route: projects/
+          
           authLevel: anonymous
 
 #endregion End Functions Projects

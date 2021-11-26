@@ -17,9 +17,14 @@ class TimeEntriesDao(abc.ABC):
     def update(self, id: int, new_time_entry: dict) -> TimeEntry:
         pass
 
+    @abc.abstractmethod
     def get_by_id(self, id: int) -> TimeEntry:
         pass
 
     @abc.abstractmethod
     def get_all(self) -> typing.List[TimeEntry]:
+        pass
+
+    @abc.abstractmethod
+    def get_latest_entries(self, owner_id: int, limit: int) -> typing.List[TimeEntry]:
         pass
