@@ -1,2 +1,2 @@
 # flake8: noqa
-from ._time_entries_dao import TimeEntriesSQLDao
+from ._time_entries_sql_dao import TimeEntriesSQLDao
