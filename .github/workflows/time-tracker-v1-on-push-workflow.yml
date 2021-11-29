@@ -26,7 +26,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements/time_tracker_api/dev.txt
           pip install -r requirements/time_tracker_events/dev.txt
-
       - name: Login to azure
         uses: Azure/login@v1
         with:
@@ -54,7 +53,6 @@ jobs:
           AZURE_STORAGE_ACCOUNT_KEY: ${{ steps.timeTrackerAzureVault.outputs.AZURE-STORAGE-ACCOUNT-KEY }}
         run: |
           pytest tests
-
       - name: Login to docker registry
         uses: azure/docker-login@v1
         with:

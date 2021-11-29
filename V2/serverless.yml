@@ -36,7 +36,12 @@ package:
     - '!.gitignore'
     - '!.git/**'
 
+#region start Functions
+
 functions:
+
+#region Start Functions Activities
+
   get_activities:
     handler: time_tracker/activities/interface.get_activities
     events:
@@ -76,6 +81,10 @@ functions:
             - POST
           route: activities/
           authLevel: anonymous
+
+#endregion End Functions Activities
+
+#region Start Functions Time-Entries
 
   create_time_entry:
     handler: time_tracker/time_entries/interface.create_time_entry
@@ -127,6 +136,10 @@ functions:
           route: time-entries/latest/
           authLevel: anonymous
 
+#endregion End Functions Time-Entries
+
+#region Start Functions Customers
+
   create_customer:
     handler: time_tracker/customers/interface.create_customer
     events:
@@ -136,6 +149,40 @@ functions:
             - POST
           route: customers/
           authLevel: anonymous
+
+  get_customers:
+    handler: time_tracker/customers/interface.get_customers
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - GET
+          route: customers/{id:?}
+          authLevel: anonymous
+
+  update_customer:
+    handler: time_tracker/customers/interface.update_customer
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - PUT
+          route: customers/{id}
+          authLevel: anonymous
+
+  delete_customer:
+    handler: time_tracker/customers/interface.delete_customer
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - DELETE
+          route: customers/{id}
+          authLevel: anonymous
+
+#endregion End Functions Customers
+
+#region Start Functions Projects
 
   get_projects:
     handler: time_tracker/projects/interface.get_projects
@@ -177,3 +224,7 @@ functions:
           route: projects/
           
           authLevel: anonymous
+
+#endregion End Functions Projects
+
+#endregion End Functions

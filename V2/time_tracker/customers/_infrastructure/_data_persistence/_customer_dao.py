@@ -1,4 +1,5 @@
 import dataclasses
+import typing
 
 import sqlalchemy as sq
 
@@ -22,6 +23,21 @@ class CustomersSQLDao(domain.CustomersDao):
             extend_existing=True,
         )
 
+    def get_by_id(self, id: int) -> domain.Customer:
+        query = sq.sql.select(self.customer).where(
+            sq.sql.and_(self.customer.c.id == id, self.customer.c.deleted.is_(False))
+            )
+        customer = self.db.get_session().execute(query).one_or_none()
+        return self.__create_customer_dto(dict(customer)) if customer else None
+
+    def get_all(self) -> typing.List[domain.Customer]:
+        query = sq.sql.select(self.customer).where(self.customer.c.deleted.is_(False))
+        result = self.db.get_session().execute(query)
+        return [
+            self.__create_customer_dto(dict(customer))
+            for customer in result
+        ]
+
     def create(self, data: domain.Customer) -> domain.Customer:
         try:
             new_customer = data.__dict__
@@ -39,3 +55,26 @@ class CustomersSQLDao(domain.CustomersDao):
     def __create_customer_dto(self, customer: dict) -> domain.Customer:
         customer = {key: customer.get(key) for key in self.customer_key}
         return domain.Customer(**customer)
+
+    def delete(self, customer_id: int) -> domain.Customer:
+        query = (
+            self.customer.update()
+            .where(self.customer.c.id == customer_id)
+            .values({"deleted": True})
+        )
+        self.db.get_session().execute(query)
+        query_deleted_customer = sq.sql.select(self.customer).where(self.customer.c.id == customer_id)
+        customer = self.db.get_session().execute(query_deleted_customer).one_or_none()
+        return self.__create_customer_dto(dict(customer)) if customer else None
+
+    def update(self, id: int, data: domain.Customer) -> domain.Customer:
+        try:
+            new_customer = data.__dict__
+            new_customer.pop("id")
+
+            customer_validated = {key: value for (key, value) in new_customer.items() if value is not None}
+            query = self.customer.update().where(self.customer.c.id == id).values(customer_validated)
+            self.db.get_session().execute(query)
+            return self.get_by_id(id)
+        except sq.exc.SQLAlchemyError:
+            return None

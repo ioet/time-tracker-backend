@@ -2,9 +2,9 @@ import pytest
 from faker import Faker
 
 import time_tracker.activities._domain as activities_domain
-import time_tracker.activities._infrastructure as activities_infrastructure
 import time_tracker.time_entries._domain as time_entries_domain
 import time_tracker.customers._domain as customers_domain
+import time_tracker.activities._infrastructure as activities_infrastructure
 import time_tracker.customers._infrastructure as customers_infrastructure
 import time_tracker.projects._domain as projects_domain
 from time_tracker._infrastructure import DB
