@@ -88,17 +88,6 @@ def test_get_latest_entries__returns_a_list_of_latest_time_entries__when_an_owne
     assert result == [inserted_time_entry]
 
 
-def test_get_latest_entries__returns_none__when_an_owner_id_is_not_found(
-    create_fake_dao, test_db, insert_activity, activity_factory
-):
-    dao = create_fake_dao(test_db)
-    insert_activity(activity_factory(), dao.db)
-
-    result = dao.get_latest_entries(Faker().pyint())
-
-    assert result is None
-
-
 def test_update__returns_an_time_entry_dto__when_found_one_time_entry_to_update(
     test_db, create_fake_dao, time_entry_factory, insert_activity, activity_factory, insert_project
 ):
@@ -132,12 +121,13 @@ def test_update__returns_none__when_doesnt_found_one_time_entry_to_update(
 
 
 def test__get_all__returns_a_list_of_time_entries_dto_objects__when_one_or_more_time_entries_are_found_in_sql_database(
-    test_db, create_fake_dao, time_entry_factory, insert_activity, activity_factory
+    test_db, create_fake_dao, time_entry_factory, insert_activity, activity_factory, insert_project
 ):
 
     dao = create_fake_dao(test_db)
+    inserted_project = insert_project()
     inserted_activity = insert_activity(activity_factory(), dao.db)
-    time_entries_to_insert = time_entry_factory(activity_id=inserted_activity.id)
+    time_entries_to_insert = time_entry_factory(activity_id=inserted_activity.id, project_id=inserted_project.id)
     inserted_time_entries = [dao.create(time_entries_to_insert)]
 
     time_entry = dao.get_all()
@@ -157,11 +147,12 @@ def test__get_all__returns_an_empty_list__when_doesnt_found_any_time_entries_in_
 
 
 def test__get_by_id__returns_a_time_entry_dto__when_found_one_time_entry_that_match_id_with_sql_database(
-    test_db, create_fake_dao, time_entry_factory, insert_activity, activity_factory
+    test_db, create_fake_dao, time_entry_factory, insert_activity, activity_factory, insert_project
 ):
     dao = create_fake_dao(test_db)
+    inserted_project = insert_project()
     inserted_activity = insert_activity(activity_factory(), dao.db)
-    time_entries_to_insert = time_entry_factory(activity_id=inserted_activity.id)
+    time_entries_to_insert = time_entry_factory(activity_id=inserted_activity.id, project_id=inserted_project.id)
     inserted_time_entries = dao.create(time_entries_to_insert)
 
     time_entry = dao.get_by_id(time_entries_to_insert.id)
@@ -182,21 +173,6 @@ def test__get_by_id__returns_none__when_no_time_entry_matches_by_id(
     time_entry = dao.get_by_id(Faker().pyint())
 
     assert time_entry is None
-
-
-def test_get_latest_entries__returns_a_list_of_latest_time_entries__when_an_owner_id_match(
-    create_fake_dao, time_entry_factory, insert_activity, activity_factory, test_db
-):
-    dao = create_fake_dao(test_db)
-    inserted_activity = insert_activity(activity_factory(), dao.db)
-    time_entry_to_insert = time_entry_factory(
-        activity_id=inserted_activity.id,
-        technologies="[jira,sql]")
-    inserted_time_entry = dao.create(time_entry_to_insert)
-
-    result = dao.get_latest_entries(int(inserted_time_entry.owner_id))
-
-    assert result == [inserted_time_entry.__dict__]
 
 
 def test_get_latest_entries__returns_none__when_an_owner_id_is_not_found(

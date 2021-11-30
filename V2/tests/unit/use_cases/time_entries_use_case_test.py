@@ -34,19 +34,6 @@ def test__delete_time_entry_function__uses_the_time_entry_service__to_delete_tim
     assert expected_time_entry == deleted_time_entry
 
 
-def test__get_latest_entries_function__uses_the_time_entry_service__to_get_last_entries(
-    mocker: MockFixture,
-):
-    expected_latest_time_entries = mocker.Mock()
-    time_entry_service = mocker.Mock(get_latest_entries=mocker.Mock(return_value=expected_latest_time_entries))
-
-    time_entry_use_case = _use_cases.GetLastestTimeEntryUseCase(time_entry_service)
-    latest_time_entries = time_entry_use_case.get_latest_entries(Faker().pyint(), Faker().pyint())
-
-    assert time_entry_service.get_latest_entries.called
-    assert expected_latest_time_entries == latest_time_entries
-
-
 def test__update_time_entries_function__uses_the_time_entry_service__to_update_an_time_entry(
     mocker: MockFixture,
 ):

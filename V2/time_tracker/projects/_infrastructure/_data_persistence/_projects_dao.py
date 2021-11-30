@@ -44,41 +44,26 @@ class ProjectsSQLDao(domain.ProjectsDao):
             return None
 
     def get_by_id(self, id: int) -> domain.Project:
-        """
-        query = sq.sql.text(
-            "SELECT project.*, json_array((customer.*)) AS customer FROM project "
-            "JOIN customer ON customer.id=project.customer_id "
-            "WHERE project.id=:id GROUP BY project.id "
-        )
-        """
         query = sq.sql.select(self.project).where(self.project.c.id == id)
         project = self.db.get_session().execute(query).one_or_none()
         if project:
-            customer_model = CustomersSQLDao(self.db).customer
-            query_customer = sq.sql.select(customer_model).where(customer_model.c.id == project["customer_id"])
-            customer = self.db.get_session().execute(query_customer).one_or_none()
+            customer_dao = CustomersSQLDao(self.db)
+            customer = customer_dao.get_by_id(project["customer_id"])
             project = dict(project)
-            project.update({"customer": dict(customer)if customer else None})
+            project.update({"customer": customer.__dict__ if customer else None})
 
         return self.__create_project_dto(project) if project else None
 
     def get_all(self) -> typing.List[domain.Project]:
-        """
-        query = sq.sql.text(
-            "SELECT project.*, json_array((customer.*)) AS customer FROM project "
-            "JOIN customer ON customer.id=project.customer_id GROUP BY project.id"
-        )
-        """
-        customer_model = CustomersSQLDao(self.db).customer
-        query = sq.sql.select(self.project, customer_model).join(customer_model)
+        query = sq.sql.select(self.project)
         result = self.db.get_session().execute(query).all()
         projects = []
 
         for project in result:
-            query_customer = sq.sql.select(customer_model).where(customer_model.c.id == project["customer_id"])
-            customer = self.db.get_session().execute(query_customer).one_or_none()
+            customer_dao = CustomersSQLDao(self.db)
+            customer = customer_dao.get_by_id(project["customer_id"])
             project = dict(project)
-            project.update({"customer": dict(customer)if customer else None})
+            project.update({"customer": customer.__dict__ if customer else None})
             projects.append(project)
 
         return [
@@ -107,6 +92,7 @@ class ProjectsSQLDao(domain.ProjectsDao):
         time_entries_dao = TimeEntriesSQLDao(self.db)
         latest_time_entries = time_entries_dao.get_latest_entries(owner_id)
         latest_projects = []
+
         if latest_time_entries:
             filter_project = typing.Counter(time_entry['project_id'] for time_entry in latest_time_entries)
             latest_projects = [self.get_by_id(project_id) for project_id in filter_project]

@@ -13,7 +13,7 @@ def get_latest_projects(req: func.HttpRequest) -> func.HttpResponse:
     project_service = _domain.ProjectService(project_dao)
     use_case = _domain._use_cases.GetLatestProjectsUseCase(project_service)
 
-    owner_id = 2
+    owner_id = req.params.get('owner_id')
     response = [
             project.__dict__
             for project in use_case.get_latest(owner_id)

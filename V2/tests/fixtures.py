@@ -3,6 +3,7 @@ from faker import Faker
 
 import time_tracker.activities._domain as activities_domain
 import time_tracker.time_entries._domain as time_entries_domain
+import time_tracker.time_entries._infrastructure as time_entries_infrastructure
 import time_tracker.customers._domain as customers_domain
 import time_tracker.activities._infrastructure as activities_infrastructure
 import time_tracker.customers._infrastructure as customers_infrastructure
@@ -146,3 +147,22 @@ def _insert_project(test_db, insert_customer, project_factory, customer_factory)
         inserted_project = dao.create(project_to_insert)
         return inserted_project
     return _new_project
+
+
+@pytest.fixture(name='insert_time_entry')
+def _insert_time_entry(
+    test_db, insert_project, activity_factory, insert_activity, time_entry_factory
+) -> time_entries_domain.TimeEntry:
+
+    inserted_project = insert_project()
+    inserted_activity = insert_activity(activity_factory(), test_db)
+
+    def _new_time_entry(owner_id: int = Faker().pyint()):
+        dao = time_entries_infrastructure.TimeEntriesSQLDao(test_db)
+        time_entries_to_insert = time_entry_factory(
+            activity_id=inserted_activity.id, project_id=inserted_project.id, owner_id=owner_id
+        )
+
+        inserted_time_entries = dao.create(time_entries_to_insert)
+        return inserted_time_entries
+    return _new_time_entry

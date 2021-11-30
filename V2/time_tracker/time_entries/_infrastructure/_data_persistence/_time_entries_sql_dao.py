@@ -84,20 +84,6 @@ class TimeEntriesSQLDao(domain.TimeEntriesDao):
         time_entry = self.db.get_session().execute(query_deleted_time_entry).one_or_none()
         return self.__create_time_entry_dto(dict(time_entry)) if time_entry else None
 
-    def get_latest_entries(self, owner_id: int, limit: int = 20) -> typing.List[domain.TimeEntry]:
-        query = (
-            self.time_entry.select()
-            .where(sqlalchemy.and_(
-                self.time_entry.c.owner_id == owner_id,
-                self.time_entry.c.deleted.is_(False)
-            ))
-            .order_by(self.time_entry.c.start_date.desc())
-            .limit(limit)
-        )
-        time_entries_data = self.db.get_session().execute(query)
-        list_time_entries = [dict(entry) for entry in time_entries_data]
-        return list_time_entries if len(list_time_entries) > 0 else None
-
     def __create_time_entry_dto(self, time_entry: dict) -> domain.TimeEntry:
         time_entry.update({
             "start_date": str(time_entry.get("start_date")),

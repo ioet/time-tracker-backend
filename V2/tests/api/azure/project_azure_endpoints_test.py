@@ -232,3 +232,40 @@ def test__project_azure_endpoint__returns_a_status_code_500__when_project_receiv
 
     assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
     assert response.get_body() == b"could not be created"
+
+
+def test__get_latest_projects_azure_endpoint__returns_a_list_of_latest_projects__when_an_owner_id_match(
+    insert_time_entry
+):
+    inserted_time_entry = insert_time_entry().__dict__
+
+    req = func.HttpRequest(
+        method='GET',
+        body=None,
+        url=PROJECT_URL+"latest/",
+        params={"owner_id": inserted_time_entry["owner_id"]},
+    )
+
+    response = azure_projects._get_latest_projects.get_latest_projects(req)
+    projects_json_data = json.loads(response.get_body().decode("utf-8"))
+
+    assert response.status_code == HTTPStatus.OK
+    assert inserted_time_entry["project_id"] == projects_json_data[0]["id"]
+
+
+def test__get_latest_projects_azure_endpoint__returns_an_empty_list__when_an_owner_id_not_match(
+    insert_time_entry
+):
+    insert_time_entry().__dict__
+
+    req = func.HttpRequest(
+        method='GET',
+        body=None,
+        url=PROJECT_URL+"latest/",
+    )
+
+    response = azure_projects._get_latest_projects.get_latest_projects(req)
+    projects_json_data = json.loads(response.get_body().decode("utf-8"))
+
+    assert response.status_code == HTTPStatus.OK
+    assert projects_json_data == []

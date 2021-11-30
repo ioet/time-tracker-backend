@@ -139,3 +139,15 @@ def test_delete__returns_none__when_no_project_matching_its_id_is_found_with_sql
     results = dao.delete(project_to_insert.id)
 
     assert results is None
+
+
+def test_get_latest_projects__returns_a_list_of_project_dto_objects__when_find_projects_in_the_latest_time_entries(
+    create_fake_dao, insert_time_entry
+):
+    dao = create_fake_dao
+    owner_id = Faker().pyint()
+    inserted_time_entries = insert_time_entry(owner_id)
+    latest_projects = dao.get_latest(owner_id)
+
+    assert isinstance(latest_projects, typing.List)
+    assert latest_projects[0].id == inserted_time_entries.project_id
