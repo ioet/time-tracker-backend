@@ -4,6 +4,8 @@ from faker import Faker
 import azure.functions as func
 
 import time_tracker.activities._application._activities as azure_activities
+from time_tracker.activities._application._activities.utils import parse_status_to_string_for_ui as parse_status
+from time_tracker.utils.enums import StatusEnums
 
 ACTIVITY_URL = '/api/activities/'
 
@@ -13,8 +15,8 @@ def test__activity_azure_endpoint__returns_all_activities(
 ):
     existent_activities = [activity_factory(), activity_factory()]
     inserted_activities = [
-        insert_activity(existent_activities[0], test_db).__dict__,
-        insert_activity(existent_activities[1], test_db).__dict__
+        parse_status(insert_activity(existent_activities[0], test_db).__dict__),
+        parse_status(insert_activity(existent_activities[1], test_db).__dict__)
     ]
 
     req = func.HttpRequest(method='GET', body=None, url=ACTIVITY_URL)
@@ -29,7 +31,7 @@ def test__activity_azure_endpoint__returns_an_activity__when_activity_matches_it
     test_db, activity_factory, insert_activity
 ):
     existent_activity = activity_factory()
-    inserted_activity = insert_activity(existent_activity, test_db).__dict__
+    inserted_activity = parse_status(insert_activity(existent_activity, test_db).__dict__)
 
     req = func.HttpRequest(
         method='GET',
@@ -62,7 +64,7 @@ def test__activity_azure_endpoint__returns_an_activity_with_inactive_status__whe
     activity_json_data = json.loads(response.get_body().decode("utf-8"))
 
     assert response.status_code == 200
-    assert activity_json_data['status'] == 0
+    assert activity_json_data['status'] == StatusEnums(0).name
     assert activity_json_data['deleted'] is True
 
 
@@ -70,7 +72,7 @@ def test__update_activity_azure_endpoint__returns_an_activity__when_found_an_act
     test_db, activity_factory, insert_activity
 ):
     existent_activity = activity_factory()
-    inserted_activity = insert_activity(existent_activity, test_db).__dict__
+    inserted_activity = parse_status(insert_activity(existent_activity, test_db).__dict__)
 
     activity_body = {"description": Faker().sentence()}
     req = func.HttpRequest(
@@ -108,4 +110,4 @@ def test__activity_azure_endpoint__creates_an_activity__when_activity_has_all_at
     activity_body['id'] = activitiy_json_data['id']
 
     assert response.status_code == 201
-    assert activitiy_json_data == activity_body
+    assert activitiy_json_data == parse_status(activity_body)

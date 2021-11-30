@@ -7,6 +7,7 @@ import azure.functions as func
 from ... import _domain
 from ... import _infrastructure
 from time_tracker._infrastructure import DB
+from .utils import parse_status_to_string_for_ui as parse_status
 
 
 def create_activity(req: func.HttpRequest) -> func.HttpResponse:
@@ -27,8 +28,8 @@ def create_activity(req: func.HttpRequest) -> func.HttpResponse:
         id=None,
         name=activity_data['name'],
         description=activity_data['description'],
-        status=activity_data['status'],
-        deleted=activity_data['deleted']
+        status=None,
+        deleted=None
     )
 
     created_activity = use_case.create_activity(activity_to_create)
@@ -39,15 +40,16 @@ def create_activity(req: func.HttpRequest) -> func.HttpResponse:
             mimetype="application/json",
         )
     return func.HttpResponse(
-        body=json.dumps(created_activity.__dict__),
+        body=json.dumps(parse_status(created_activity.__dict__)),
         status_code=201,
         mimetype="application/json"
     )
 
 
 def _validate_activity(activity_data: dict) -> typing.List[str]:
-    activity_fields = [field.name for field in dataclasses.fields(_domain.Activity)]
-    missing_keys = [field for field in activity_fields if field not in activity_data]
+    activity_fields = [field for field in dataclasses.fields(_domain.Activity)]
+    missing_keys = [field.name for field in activity_fields
+                    if (field.name not in activity_data) and (field.type != typing.Optional[field.type])]
     return [
         f'The {missing_key} key is missing in the input data'
         for missing_key in missing_keys

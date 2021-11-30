@@ -6,6 +6,7 @@ import azure.functions as func
 from ... import _domain
 from ... import _infrastructure
 from time_tracker._infrastructure import DB
+from .utils import parse_status_to_string_for_ui as parse_status
 
 
 def get_activities(req: func.HttpRequest) -> func.HttpResponse:
@@ -39,7 +40,7 @@ def _get_by_id(activity_id: int, database: DB) -> str:
     )
     activity = activity_use_case.get_activity_by_id(activity_id)
 
-    return json.dumps(activity.__dict__) if activity else b'Not Found'
+    return json.dumps(parse_status(activity.__dict__)) if activity else b'Not Found'
 
 
 def _get_all(database: DB) -> str:
@@ -48,7 +49,7 @@ def _get_all(database: DB) -> str:
     )
     return json.dumps(
         [
-            activity.__dict__
+            parse_status(activity.__dict__)
             for activity in activities_use_case.get_activities()
         ]
     )

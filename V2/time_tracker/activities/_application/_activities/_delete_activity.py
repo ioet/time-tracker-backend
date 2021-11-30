@@ -3,9 +3,11 @@ import logging
 
 import azure.functions as func
 
+
 from ... import _domain
 from ... import _infrastructure
 from time_tracker._infrastructure import DB
+from .utils import parse_status_to_string_for_ui as parse_status
 
 
 def delete_activity(req: func.HttpRequest) -> func.HttpResponse:
@@ -32,7 +34,7 @@ def _delete(activity_id: int) -> str:
         _create_activity_service(database)
     )
     activity = activity_use_case.delete_activity(activity_id)
-    return json.dumps(activity.__dict__) if activity else b'Not found'
+    return json.dumps(parse_status(activity.__dict__)) if activity else b'Not found'
 
 
 def _create_activity_service(db: DB) -> _domain.ActivityService:
