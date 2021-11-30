@@ -8,6 +8,7 @@ from ... import _domain
 from ... import _infrastructure
 from time_tracker._infrastructure import DB
 from .utils import parse_status_to_string_for_ui as parse_status
+from .utils import parse_status_to_number
 
 
 def update_activity(req: func.HttpRequest) -> func.HttpResponse:
@@ -43,7 +44,7 @@ def _update(activity_id: int, activity_data: dict) -> str:
     activity = activity_use_case.update_activity(
         activity_id, activity_data.get("name"),
         activity_data.get("description"),
-        activity_data.get("status"),
+        parse_status_to_number(activity_data.get("status")),
         activity_data.get("deleted")
         )
     return json.dumps(parse_status(activity.__dict__)) if activity else b'Not Found'
