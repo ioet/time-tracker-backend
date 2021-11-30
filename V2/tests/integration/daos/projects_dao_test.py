@@ -7,18 +7,6 @@ from time_tracker.projects import _infrastructure as infrastructure
 from time_tracker._infrastructure import DB
 
 
-@pytest.fixture(name='insert_project')
-def _insert_project(customer_factory, test_db, insert_customer, create_fake_dao, project_factory) -> domain.Project:
-    inserted_customer = insert_customer(customer_factory(), test_db)
-
-    def _new_project():
-        project_to_insert = project_factory(customer_id=inserted_customer.id)
-        inserted_project = create_fake_dao.create(project_to_insert)
-        return inserted_project
-
-    return _new_project
-
-
 @pytest.fixture(name='create_fake_dao')
 def _create_fake_dao() -> domain.ProjectsDao:
     db_fake = DB()
@@ -43,6 +31,9 @@ def test__create_project__returns_a_project_dto__when_saves_correctly_with_sql_d
     project_to_insert = project_factory(customer_id=inserted_customer.id)
 
     inserted_project = dao.create(project_to_insert)
+
+    expected_project = project_to_insert.__dict__
+    expected_project.update({"customer": inserted_customer.__dict__})
 
     assert isinstance(inserted_project, domain.Project)
     assert inserted_project == project_to_insert
@@ -85,6 +76,7 @@ def test__get_all__returns_a_list_of_project_dto_objects__when_one_or_more_proje
     ]
 
     projects = dao.get_all()
+
     assert isinstance(projects, typing.List)
     assert projects == inserted_projects
 
@@ -147,3 +139,15 @@ def test_delete__returns_none__when_no_project_matching_its_id_is_found_with_sql
     results = dao.delete(project_to_insert.id)
 
     assert results is None
+
+
+def test_get_latest_projects__returns_a_list_of_project_dto_objects__when_find_projects_in_the_latest_time_entries(
+    create_fake_dao, insert_time_entry
+):
+    dao = create_fake_dao
+    owner_id = Faker().pyint()
+    inserted_time_entries = insert_time_entry(owner_id)
+    latest_projects = dao.get_latest(owner_id)
+
+    assert isinstance(latest_projects, typing.List)
+    assert latest_projects[0].id == inserted_time_entries.project_id

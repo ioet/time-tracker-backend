@@ -72,3 +72,18 @@ def test__create_project__uses_the_project_dao__to_create_an_project(mocker, pro
 
     assert project_dao.create.called
     assert expected_project == actual_project
+
+
+def test__get_latest_projects__uses_the_project_dao__to_get_last_projects(
+    mocker,
+):
+    expected_latest_projects = mocker.Mock()
+    project_dao = mocker.Mock(
+        get_latest=mocker.Mock(return_value=expected_latest_projects)
+    )
+
+    project_service = ProjectService(project_dao)
+    latest_projects = project_service.get_latest(Faker().pyint())
+
+    assert expected_latest_projects == latest_projects
+    assert project_dao.get_latest.called

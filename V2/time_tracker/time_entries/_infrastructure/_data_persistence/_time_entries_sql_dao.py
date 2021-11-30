@@ -29,7 +29,7 @@ class TimeEntriesSQLDao(domain.TimeEntriesDao):
             sqlalchemy.Column('end_date', sqlalchemy.DateTime().with_variant(sqlalchemy.String, "sqlite")),
             sqlalchemy.Column('deleted', sqlalchemy.Boolean),
             sqlalchemy.Column('timezone_offset', sqlalchemy.String),
-            sqlalchemy.Column('project_id', sqlalchemy.Integer),
+            sqlalchemy.Column('project_id', sqlalchemy.Integer, sqlalchemy.ForeignKey('project.id')),
             extend_existing=True,
         )
 

@@ -78,3 +78,16 @@ def test__update_project_function__uses_the_projects_service__to_update_an_proje
 
     assert project_service.update.called
     assert expected_project == updated_project
+
+
+def test__get_latest_projects_function__uses_the_project_service__to_get_latest_project(
+    mocker: MockFixture,
+):
+    expected_latest_projects = mocker.Mock()
+    project_service = mocker.Mock(get_latest=mocker.Mock(return_value=expected_latest_projects))
+
+    project_use_case = _use_cases.GetLatestProjectsUseCase(project_service)
+    latest_projects = project_use_case.get_latest(Faker().pyint())
+
+    assert project_service.get_latest.called
+    assert expected_latest_projects == latest_projects

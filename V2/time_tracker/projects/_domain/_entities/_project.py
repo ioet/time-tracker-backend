@@ -12,3 +12,5 @@ class Project:
     status: int
     deleted: Optional[bool]
     technologies: List[str]
+
+    customer: Optional[dict]

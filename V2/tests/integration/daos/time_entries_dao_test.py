@@ -26,12 +26,12 @@ def _clean_database():
 
 
 def test__time_entry__returns_a_time_entry_dto__when_saves_correctly_with_sql_database(
-    test_db, time_entry_factory, create_fake_dao, insert_activity, activity_factory
+    test_db, time_entry_factory, create_fake_dao, insert_activity, activity_factory, insert_project
 ):
     dao = create_fake_dao(test_db)
     inserted_activity = insert_activity(activity_factory(), dao.db)
-
-    time_entry_to_insert = time_entry_factory(activity_id=inserted_activity.id)
+    inserted_project = insert_project()
+    time_entry_to_insert = time_entry_factory(activity_id=inserted_activity.id, project_id=inserted_project.id)
 
     inserted_time_entry = dao.create(time_entry_to_insert)
 
@@ -51,12 +51,13 @@ def test__time_entry__returns_None__when_not_saves_correctly(
 
 
 def test_delete__returns_an_time_entry_with_true_deleted__when_an_time_entry_matching_its_id_is_found(
-    create_fake_dao, test_db, time_entry_factory, insert_activity, activity_factory
+    create_fake_dao, test_db, time_entry_factory, insert_activity, activity_factory, insert_project
 ):
     dao = create_fake_dao(test_db)
+    inserted_project = insert_project()
     inserted_activity = insert_activity(activity_factory(), dao.db)
-    existent_time_entry = time_entry_factory(activity_id=inserted_activity.id)
-    inserted_time_entry = dao.create(existent_time_entry)
+    time_entry_to_insert = time_entry_factory(activity_id=inserted_activity.id, project_id=inserted_project.id)
+    inserted_time_entry = dao.create(time_entry_to_insert)
 
     result = dao.delete(inserted_time_entry.id)
 
@@ -73,42 +74,60 @@ def test_delete__returns_none__when_no_time_entry_matching_its_id_is_found(
     assert result is None
 
 
-def test_update__returns_an_time_entry_dto__when_found_one_time_entry_to_update(
-    test_db, create_fake_dao, time_entry_factory, insert_activity, activity_factory
+def test_get_latest_entries__returns_a_list_of_latest_time_entries__when_an_owner_id_match(
+    create_fake_dao, time_entry_factory, insert_activity, activity_factory, test_db, insert_project
 ):
     dao = create_fake_dao(test_db)
+    inserted_project = insert_project()
     inserted_activity = insert_activity(activity_factory(), dao.db)
-    existent_time_entries = time_entry_factory(activity_id=inserted_activity.id)
-    inserted_time_entries = dao.create(existent_time_entries).__dict__
-    time_entry_id = inserted_time_entries["id"]
-    inserted_time_entries.update({"description": "description updated"})
+    time_entry_to_insert = time_entry_factory(activity_id=inserted_activity.id, project_id=inserted_project.id)
+    inserted_time_entry = dao.create(time_entry_to_insert).__dict__
 
-    time_entry = dao.update(time_entry_id=time_entry_id, time_entry_data=inserted_time_entries)
+    result = dao.get_latest_entries(int(inserted_time_entry["owner_id"]))
+
+    assert result == [inserted_time_entry]
+
+
+def test_update__returns_an_time_entry_dto__when_found_one_time_entry_to_update(
+    test_db, create_fake_dao, time_entry_factory, insert_activity, activity_factory, insert_project
+):
+    dao = create_fake_dao(test_db)
+    inserted_project = insert_project()
+    inserted_activity = insert_activity(activity_factory(), dao.db)
+    time_entry_to_insert = time_entry_factory(activity_id=inserted_activity.id, project_id=inserted_project.id)
+    inserted_time_entry = dao.create(time_entry_to_insert).__dict__
+
+    time_entry_id = inserted_time_entry["id"]
+    inserted_time_entry.update({"description": "description updated"})
+
+    time_entry = dao.update(time_entry_id=time_entry_id, time_entry_data=inserted_time_entry)
 
     assert time_entry.id == time_entry_id
-    assert time_entry.description == inserted_time_entries.get("description")
+    assert time_entry.description == inserted_time_entry.get("description")
 
 
 def test_update__returns_none__when_doesnt_found_one_time_entry_to_update(
-    test_db, create_fake_dao, time_entry_factory, insert_activity, activity_factory
+    test_db, create_fake_dao, time_entry_factory, insert_activity, activity_factory, insert_project
 ):
     dao = create_fake_dao(test_db)
+    inserted_project = insert_project()
     inserted_activity = insert_activity(activity_factory(), dao.db)
-    existent_time_entries = time_entry_factory(activity_id=inserted_activity.id)
-    inserted_time_entries = dao.create(existent_time_entries).__dict__
+    time_entry_to_insert = time_entry_factory(activity_id=inserted_activity.id, project_id=inserted_project.id)
+    inserted_time_entry = dao.create(time_entry_to_insert).__dict__
 
-    time_entry = dao.update(0, inserted_time_entries)
+    time_entry = dao.update(0, inserted_time_entry)
 
     assert time_entry is None
 
 
 def test__get_all__returns_a_list_of_time_entries_dto_objects__when_one_or_more_time_entries_are_found_in_sql_database(
-    test_db, create_fake_dao, time_entry_factory, insert_activity, activity_factory
+    test_db, create_fake_dao, time_entry_factory, insert_activity, activity_factory, insert_project
 ):
 
     dao = create_fake_dao(test_db)
+    inserted_project = insert_project()
     inserted_activity = insert_activity(activity_factory(), dao.db)
-    time_entries_to_insert = time_entry_factory(activity_id=inserted_activity.id)
+    time_entries_to_insert = time_entry_factory(activity_id=inserted_activity.id, project_id=inserted_project.id)
     inserted_time_entries = [dao.create(time_entries_to_insert)]
 
     time_entry = dao.get_all()
@@ -128,11 +147,12 @@ def test__get_all__returns_an_empty_list__when_doesnt_found_any_time_entries_in_
 
 
 def test__get_by_id__returns_a_time_entry_dto__when_found_one_time_entry_that_match_id_with_sql_database(
-    test_db, create_fake_dao, time_entry_factory, insert_activity, activity_factory
+    test_db, create_fake_dao, time_entry_factory, insert_activity, activity_factory, insert_project
 ):
     dao = create_fake_dao(test_db)
+    inserted_project = insert_project()
     inserted_activity = insert_activity(activity_factory(), dao.db)
-    time_entries_to_insert = time_entry_factory(activity_id=inserted_activity.id)
+    time_entries_to_insert = time_entry_factory(activity_id=inserted_activity.id, project_id=inserted_project.id)
     inserted_time_entries = dao.create(time_entries_to_insert)
 
     time_entry = dao.get_by_id(time_entries_to_insert.id)
@@ -153,21 +173,6 @@ def test__get_by_id__returns_none__when_no_time_entry_matches_by_id(
     time_entry = dao.get_by_id(Faker().pyint())
 
     assert time_entry is None
-
-
-def test_get_latest_entries__returns_a_list_of_latest_time_entries__when_an_owner_id_match(
-    create_fake_dao, time_entry_factory, insert_activity, activity_factory, test_db
-):
-    dao = create_fake_dao(test_db)
-    inserted_activity = insert_activity(activity_factory(), dao.db)
-    time_entry_to_insert = time_entry_factory(
-        activity_id=inserted_activity.id,
-        technologies="[jira,sql]")
-    inserted_time_entry = dao.create(time_entry_to_insert)
-
-    result = dao.get_latest_entries(int(inserted_time_entry.owner_id))
-
-    assert result == [inserted_time_entry.__dict__]
 
 
 def test_get_latest_entries__returns_none__when_an_owner_id_is_not_found(

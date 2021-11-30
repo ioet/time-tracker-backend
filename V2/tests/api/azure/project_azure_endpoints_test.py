@@ -1,27 +1,12 @@
 import json
 from http import HTTPStatus
 
-import pytest
 from faker import Faker
 import azure.functions as func
 
 from time_tracker.projects._application import _projects as azure_projects
-from time_tracker.projects import _domain as domain
-from time_tracker.projects import _infrastructure as infrastructure
 
 PROJECT_URL = '/api/projects/'
-
-
-@pytest.fixture(name='insert_project')
-def _insert_project(test_db, insert_customer, project_factory, customer_factory) -> domain.Project:
-    inserted_customer = insert_customer(customer_factory(), test_db)
-
-    def _new_project():
-        project_to_insert = project_factory(customer_id=inserted_customer.id)
-        dao = infrastructure.ProjectsSQLDao(test_db)
-        inserted_project = dao.create(project_to_insert)
-        return inserted_project
-    return _new_project
 
 
 def test__project_azure_endpoint__returns_all_projects(
@@ -146,19 +131,17 @@ def test__update_project_azure_endpoint__returns_a_project__when_found_a_project
 
 
 def test__update_projects_azure_endpoint__returns_a_status_code_404__when_no_found_a_project_to_update(
-    project_factory
 ):
-    project_body = project_factory().__dict__
+    project_body = {"description": Faker().sentence()}
 
     req = func.HttpRequest(
         method="PUT",
         body=json.dumps(project_body).encode("utf-8"),
         url=PROJECT_URL,
-        route_params={"id": project_body["id"]},
+        route_params={"id": Faker().pyint()},
     )
 
     response = azure_projects._update_project.update_project(req)
-
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert response.get_body() == b"Not found"
 
@@ -249,3 +232,40 @@ def test__project_azure_endpoint__returns_a_status_code_500__when_project_receiv
 
     assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
     assert response.get_body() == b"could not be created"
+
+
+def test__get_latest_projects_azure_endpoint__returns_a_list_of_latest_projects__when_an_owner_id_match(
+    insert_time_entry
+):
+    inserted_time_entry = insert_time_entry().__dict__
+
+    req = func.HttpRequest(
+        method='GET',
+        body=None,
+        url=PROJECT_URL+"latest/",
+        params={"owner_id": inserted_time_entry["owner_id"]},
+    )
+
+    response = azure_projects._get_latest_projects.get_latest_projects(req)
+    projects_json_data = json.loads(response.get_body().decode("utf-8"))
+
+    assert response.status_code == HTTPStatus.OK
+    assert inserted_time_entry["project_id"] == projects_json_data[0]["id"]
+
+
+def test__get_latest_projects_azure_endpoint__returns_an_empty_list__when_an_owner_id_not_match(
+    insert_time_entry
+):
+    insert_time_entry().__dict__
+
+    req = func.HttpRequest(
+        method='GET',
+        body=None,
+        url=PROJECT_URL+"latest/",
+    )
+
+    response = azure_projects._get_latest_projects.get_latest_projects(req)
+    projects_json_data = json.loads(response.get_body().decode("utf-8"))
+
+    assert response.status_code == HTTPStatus.OK
+    assert projects_json_data == []

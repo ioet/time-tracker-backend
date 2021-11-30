@@ -31,7 +31,8 @@ def create_project(req: func.HttpRequest) -> func.HttpResponse:
           customer_id=project_data["customer_id"],
           status=project_data["status"],
           deleted=False,
-          technologies=project_data["technologies"]
+          technologies=project_data["technologies"],
+          customer=None
         )
 
         created_project = use_case.create_project(project_to_create)
