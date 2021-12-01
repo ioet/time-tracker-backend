@@ -7,4 +7,6 @@ def parse_status_to_string_for_ui(activity: dict) -> dict:
 
 
 def parse_status_to_number(status: str) -> int:
-    return StatusEnums[status].value
+    if(isinstance(status, str)):
+        return StatusEnums[status].value
+    return status

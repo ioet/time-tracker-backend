@@ -51,7 +51,6 @@ functions:
             - GET
           route: activities/{id:?}
           authLevel: anonymous
-          cors: true
 
   delete_activity:
     handler: time_tracker/activities/interface.delete_activity
@@ -62,7 +61,6 @@ functions:
             - DELETE
           route: activities/{id}
           authLevel: anonymous
-          cors: true
 
   update_activity:
     handler: time_tracker/activities/interface.update_activity
@@ -73,7 +71,6 @@ functions:
             - PUT
           route: activities/{id}
           authLevel: anonymous
-          cors: true
 
   create_activity:
     handler: time_tracker/activities/interface.create_activity
@@ -84,7 +81,6 @@ functions:
             - POST
           route: activities/
           authLevel: anonymous
-          cors: true
 
 #endregion End Functions Activities
 
@@ -99,7 +95,6 @@ functions:
             - POST
           route: time-entries/
           authLevel: anonymous
-          cors: true
 
   get_time_entries:
     handler: time_tracker/time_entries/interface.get_time_entries
@@ -110,7 +105,6 @@ functions:
             - GET
           route: time-entries/{id:?}
           authLevel: anonymous
-          cors: true
 
   delete_time_entry:
     handler: time_tracker/time_entries/interface.delete_time_entry
@@ -121,7 +115,6 @@ functions:
             - DELETE
           route: time-entries/{id}
           authLevel: anonymous
-          cors: true
 
   update_time_entry:
     handler: time_tracker/time_entries/interface.update_time_entry
@@ -131,8 +124,7 @@ functions:
           methods:
             - PUT   
           route: time-entries/{id}
-          authLevel: anonymous
-          cors: true   
+          authLevel: anonymous   
 
   get_latest_time_entry:
     handler: time_tracker/time_entries/interface.get_latest_entries
@@ -143,7 +135,6 @@ functions:
             - GET
           route: time-entries/latest/
           authLevel: anonymous
-          cors: true
 
 #endregion End Functions Time-Entries
 
@@ -158,7 +149,6 @@ functions:
             - POST
           route: customers/
           authLevel: anonymous
-          cors: true
 
   get_customers:
     handler: time_tracker/customers/interface.get_customers
@@ -169,7 +159,6 @@ functions:
             - GET
           route: customers/{id:?}
           authLevel: anonymous
-          cors: true
 
   update_customer:
     handler: time_tracker/customers/interface.update_customer
@@ -180,7 +169,6 @@ functions:
             - PUT
           route: customers/{id}
           authLevel: anonymous
-          cors: true
 
   delete_customer:
     handler: time_tracker/customers/interface.delete_customer
@@ -191,7 +179,6 @@ functions:
             - DELETE
           route: customers/{id}
           authLevel: anonymous
-          cors: true
 
 #endregion End Functions Customers
 
@@ -206,7 +193,6 @@ functions:
             - GET
           route: projects/{id:?}
           authLevel: anonymous
-          cors: true
 
   delete_project:
     handler: time_tracker/projects/interface.delete_project
@@ -217,7 +203,6 @@ functions:
             - DELETE
           route: projects/{id}
           authLevel: anonymous
-          cors: true
 
   update_project:
     handler: time_tracker/projects/interface.update_project
@@ -227,8 +212,7 @@ functions:
           methods:
             - PUT   
           route: projects/{id}
-          authLevel: anonymous
-          cors: true    
+          authLevel: anonymous    
 
   create_project:
     handler: time_tracker/projects/interface.create_project
@@ -240,7 +224,6 @@ functions:
           route: projects/
           
           authLevel: anonymous
-          cors: true
 
   get_latest_projects:
     handler: time_tracker/projects/interface.get_latest_projects
@@ -251,7 +234,6 @@ functions:
             - GET
           route: projects/latest
           authLevel: anonymous
-          cors: true
 
 #endregion End Functions Projects
 
