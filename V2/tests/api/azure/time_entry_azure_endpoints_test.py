@@ -13,6 +13,7 @@ from time_tracker.utils.enums import ResponseEnums
 
 
 TIME_ENTRY_URL = "/api/time-entries/"
+TIME_ENTRY_SUMMARY_URL = "/api/time-entries/summary/"
 
 
 @pytest.fixture(name='insert_time_entry')
@@ -272,3 +273,90 @@ def test__get_latest_entries_azure_endpoint__returns_not_found__when_recieve_an_
 
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert response.get_body().decode("utf-8") == ResponseEnums.NOT_FOUND.value
+
+
+def test__time_entry_azure_endpoint__returns_the_summary(
+    test_db, time_entry_factory, insert_time_entry, activity_factory, insert_activity, insert_project
+):
+    inserted_project = insert_project()
+    inserted_activity = insert_activity(activity_factory(), test_db)
+    existent_time_entries = time_entry_factory(activity_id=inserted_activity.id,
+                                               owner_id=69,
+                                               start_date='11/10/2021',
+                                               end_date='11/11/2021',
+                                               project_id=inserted_project.id)
+    inserted_time_entries = insert_time_entry(existent_time_entries, test_db).__dict__
+
+    req = func.HttpRequest(
+        method='GET',
+        body=None,
+        url=TIME_ENTRY_SUMMARY_URL,
+        params={'owner_id': inserted_time_entries['owner_id'],
+                'start_date': '11/10/2021',
+                'end_date': '11/11/2021'},
+    )
+
+    response = azure_time_entries.get_time_entries_summary(req)
+
+    time_entries_obtained = response.get_body().decode("utf-8")
+    assert response.status_code == HTTPStatus.OK
+    assert json.loads(time_entries_obtained) == [inserted_time_entries]
+
+
+def test__time_entry_summary_azure_endpoint__returns_not_found_with_invalid_owner_id(
+    test_db, insert_activity, activity_factory
+):
+
+    insert_activity(activity_factory(), test_db)
+
+    request_params = {
+        "method": 'GET',
+        "body": None,
+        "url": TIME_ENTRY_SUMMARY_URL,
+        "params": {"owner_id": 96},
+    }
+    req_owner_id = func.HttpRequest(**request_params)
+
+    response_owner_id = azure_time_entries._get_time_entries_summary.get_time_entries_summary(req_owner_id)
+
+    assert response_owner_id.status_code == HTTPStatus.NOT_FOUND
+    assert response_owner_id.get_body().decode() == ResponseEnums.NOT_FOUND.value
+
+    request_params["params"] = {"owner_id": 69, "start_date": "", "end_date": "11/11/2021"}
+    req_start_date = func.HttpRequest(**request_params)
+
+    response_start_date = azure_time_entries._get_time_entries_summary.get_time_entries_summary(req_start_date)
+
+    assert response_start_date.status_code == HTTPStatus.NOT_FOUND
+    assert response_start_date.get_body().decode() == ResponseEnums.NOT_FOUND.value
+
+
+def test__time_entry_summary_azure_endpoint__returns_invalid_date_format_with_invalid_date_format(
+    test_db, insert_activity, activity_factory
+):
+
+    insert_activity(activity_factory(), test_db)
+
+    wrong_date_format = "30/11/2021"
+    right_date_format = "11/30/2021"
+
+    request_params = {
+        "method": 'GET',
+        "body": None,
+        "url": TIME_ENTRY_SUMMARY_URL,
+        "params": {"owner_id": 1, "start_date": wrong_date_format, "end_date": right_date_format},
+    }
+
+    req_owner_id = func.HttpRequest(**request_params)
+    response_owner_id = azure_time_entries._get_time_entries_summary.get_time_entries_summary(req_owner_id)
+
+    assert response_owner_id.status_code == HTTPStatus.NOT_FOUND
+    assert response_owner_id.get_body().decode() == ResponseEnums.INVALID_DATE_FORMAT.value
+
+    request_params["params"] = {"owner_id": 1, "start_date": right_date_format, "end_date": wrong_date_format}
+    req_start_date = func.HttpRequest(**request_params)
+
+    response_start_date = azure_time_entries._get_time_entries_summary.get_time_entries_summary(req_start_date)
+
+    assert response_start_date.status_code == HTTPStatus.NOT_FOUND
+    assert response_start_date.get_body().decode() == ResponseEnums.INVALID_DATE_FORMAT.value

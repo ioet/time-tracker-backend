@@ -8,3 +8,4 @@ class ResponseEnums(Enum):
     INCORRECT_BODY = "Incorrect body"
 
     MIME_TYPE = "application/json"
+    INVALID_DATE_FORMAT = "Bad time format, should use date format %m/%d/%Y"

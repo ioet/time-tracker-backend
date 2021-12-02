@@ -4,3 +4,4 @@ from ._time_entries import delete_time_entry
 from ._time_entries import update_time_entry
 from ._time_entries import get_time_entries
 from ._time_entries import get_latest_entries
+from ._time_entries import get_time_entries_summary

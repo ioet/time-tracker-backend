@@ -10,4 +10,5 @@ from ._use_cases import (
     GetTimeEntriesUseCase,
     GetTimeEntryUseCase,
     GetLastestTimeEntryUseCase,
+    GetTimeEntriesSummaryUseCase,
 )

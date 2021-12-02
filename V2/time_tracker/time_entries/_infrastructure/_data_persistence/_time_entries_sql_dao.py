@@ -3,6 +3,7 @@ import typing
 
 import sqlalchemy
 import sqlalchemy.sql as sql
+# from sqlalchemy import func
 
 import time_tracker.time_entries._domain as domain
 from time_tracker._infrastructure import _db
@@ -103,4 +104,20 @@ class TimeEntriesSQLDao(domain.TimeEntriesDao):
         )
         time_entries_data = self.db.get_session().execute(query)
         list_time_entries = [dict(entry) for entry in time_entries_data]
+        return list_time_entries if len(list_time_entries) > 0 else None
+
+    def get_time_entries_summary(self, owner_id: int, start_date: str, end_date: str,
+                                 format: str = "%m/%d/%Y") -> typing.List[domain.TimeEntry]:
+        query = (
+            self.time_entry.select()
+            .where(sqlalchemy.and_(self.time_entry.c.owner_id == owner_id,
+                                   self.time_entry.c.start_date.between(start_date, end_date),
+                                   self.time_entry.c.end_date.between(start_date, end_date),
+                                   self.time_entry.c.deleted.is_(False))
+                   )
+            .order_by(self.time_entry.c.start_date.desc())
+        )
+
+        time_entries = self.db.get_session().execute(query)
+        list_time_entries = [dict(entry) for entry in time_entries]
         return list_time_entries if len(list_time_entries) > 0 else None

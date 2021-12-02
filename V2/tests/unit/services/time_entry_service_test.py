@@ -87,3 +87,22 @@ def test__get_latest_entries__uses_the_time_entry_dao__to_get_last_entries(
 
     assert expected_latest_time_entries == latest_time_entries
     assert time_entry_dao.get_latest_entries.called
+
+
+def test__get_time_entries_summary__uses_the_time_entry_dao__to_get_time_entries_summary(
+    mocker,
+):
+    expected_time_entries_summary = mocker.Mock()
+    time_entry_dao = mocker.Mock(
+        get_time_entries_summary=mocker.Mock(
+            return_value=expected_time_entries_summary
+        )
+    )
+
+    time_entry_service = TimeEntryService(time_entry_dao)
+    time_entries_summary = time_entry_service.get_time_entries_summary(
+        Faker().pyint(), Faker().date(), Faker().date()
+    )
+
+    assert expected_time_entries_summary == time_entries_summary
+    assert time_entry_dao.get_time_entries_summary.called

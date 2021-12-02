@@ -88,3 +88,16 @@ def test__get_latest_entries_function__uses_the_time_entry_service__to_get_last_
 
     assert time_entry_service.get_latest_entries.called
     assert expected_latest_time_entries == latest_time_entries
+
+
+def test__get_time_entries_summary_function__uses_the_time_entry_service__to_get_summary(
+    mocker: MockFixture,
+):
+    expected_time_entries_summary = mocker.Mock()
+    time_entry_service = mocker.Mock(get_time_entries_summary=mocker.Mock(return_value=expected_time_entries_summary))
+
+    time_entry_use_case = _use_cases.GetTimeEntriesSummaryUseCase(time_entry_service)
+    summary = time_entry_use_case.get_time_entries_summary(Faker().pyint(), Faker().date(), Faker().date())
+
+    assert time_entry_service.get_time_entries_summary.called
+    assert expected_time_entries_summary == summary

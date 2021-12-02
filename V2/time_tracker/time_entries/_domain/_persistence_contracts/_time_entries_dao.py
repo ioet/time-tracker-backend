@@ -28,3 +28,7 @@ class TimeEntriesDao(abc.ABC):
     @abc.abstractmethod
     def get_latest_entries(self, owner_id: int, limit: int) -> typing.List[TimeEntry]:
         pass
+
+    @abc.abstractmethod
+    def get_time_entries_summary(self, owner_id: int, start_date: str, end_date: str) -> typing.List[TimeEntry]:
+        pass

@@ -135,6 +135,16 @@ functions:
             - GET
           route: time-entries/latest/
           authLevel: anonymous
+  
+  get_time_entries_summary:
+    handler: time_tracker/time_entries/interface.get_time_entries_summary
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - GET
+          route: time-entries/summary/
+          authLevel: anonymous
 
 #endregion End Functions Time-Entries
 

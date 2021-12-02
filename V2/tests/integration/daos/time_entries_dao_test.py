@@ -184,3 +184,32 @@ def test_get_latest_entries__returns_none__when_an_owner_id_is_not_found(
     result = dao.get_latest_entries(Faker().pyint())
 
     assert result is None
+
+
+def test_get_time_entries_summary__returns_a_list_of_time_entries__when_a_time_entry_exists_in_the_given_date_limits(
+    create_fake_dao, time_entry_factory, insert_activity, activity_factory, test_db, insert_project
+):
+    dao = create_fake_dao(test_db)
+    inserted_project = insert_project()
+    inserted_activity = insert_activity(activity_factory(), dao.db)
+    time_entry_to_insert = time_entry_factory(activity_id=inserted_activity.id,
+                                              project_id=inserted_project.id,
+                                              start_date='11/11/2021',
+                                              end_date='11/12/2021')
+    inserted_time_entry = dao.create(time_entry_to_insert).__dict__
+
+    result = dao.get_time_entries_summary(inserted_time_entry["owner_id"], '1/1/2021', '12/12/2021')
+
+    assert result == [inserted_time_entry]
+
+
+def test_get_time_entries_summary_returns_none__when_an_owner_id_or_date_limits_are_not_found(
+    create_fake_dao, test_db, insert_activity, activity_factory
+):
+    dao = create_fake_dao(test_db)
+    insert_activity(activity_factory(), dao.db)
+    result = dao.get_time_entries_summary(Faker().pyint(),
+                                          Faker().date(),
+                                          Faker().date())
+
+    assert result is None
