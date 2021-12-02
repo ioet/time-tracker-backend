@@ -1,5 +1,6 @@
-from time_tracker.time_entries._domain import TimeEntry, TimeEntryService
 import typing
+
+from time_tracker.time_entries._domain import TimeEntry, TimeEntryService
 
 
 class GetTimeEntriesSummaryUseCase:

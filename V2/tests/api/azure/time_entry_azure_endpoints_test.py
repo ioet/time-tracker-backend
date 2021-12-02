@@ -297,44 +297,33 @@ def test__time_entry_azure_endpoint__returns_the_summary(
     )
 
     response = azure_time_entries.get_time_entries_summary(req)
-
     time_entries_obtained = response.get_body().decode("utf-8")
-    assert response.status_code == HTTPStatus.OK
+    assert response.status_code == HTTPStatus.OK.value
     assert json.loads(time_entries_obtained) == [inserted_time_entries]
 
 
 def test__time_entry_summary_azure_endpoint__returns_not_found_with_invalid_owner_id(
     test_db, insert_activity, activity_factory
 ):
-
     insert_activity(activity_factory(), test_db)
 
     request_params = {
         "method": 'GET',
         "body": None,
         "url": TIME_ENTRY_SUMMARY_URL,
-        "params": {"owner_id": 96},
-    }
-    req_owner_id = func.HttpRequest(**request_params)
+        "params": {"owner_id": Faker().pyint()}
+        }
 
+    req_owner_id = func.HttpRequest(**request_params)
     response_owner_id = azure_time_entries._get_time_entries_summary.get_time_entries_summary(req_owner_id)
 
-    assert response_owner_id.status_code == HTTPStatus.NOT_FOUND
+    assert response_owner_id.status_code == HTTPStatus.NOT_FOUND.value
     assert response_owner_id.get_body().decode() == ResponseEnums.NOT_FOUND.value
-
-    request_params["params"] = {"owner_id": 69, "start_date": "", "end_date": "11/11/2021"}
-    req_start_date = func.HttpRequest(**request_params)
-
-    response_start_date = azure_time_entries._get_time_entries_summary.get_time_entries_summary(req_start_date)
-
-    assert response_start_date.status_code == HTTPStatus.NOT_FOUND
-    assert response_start_date.get_body().decode() == ResponseEnums.NOT_FOUND.value
 
 
 def test__time_entry_summary_azure_endpoint__returns_invalid_date_format_with_invalid_date_format(
     test_db, insert_activity, activity_factory
 ):
-
     insert_activity(activity_factory(), test_db)
 
     wrong_date_format = "30/11/2021"
@@ -350,7 +339,7 @@ def test__time_entry_summary_azure_endpoint__returns_invalid_date_format_with_in
     req_owner_id = func.HttpRequest(**request_params)
     response_owner_id = azure_time_entries._get_time_entries_summary.get_time_entries_summary(req_owner_id)
 
-    assert response_owner_id.status_code == HTTPStatus.NOT_FOUND
+    assert response_owner_id.status_code == HTTPStatus.NOT_FOUND.value
     assert response_owner_id.get_body().decode() == ResponseEnums.INVALID_DATE_FORMAT.value
 
     request_params["params"] = {"owner_id": 1, "start_date": right_date_format, "end_date": wrong_date_format}
@@ -358,5 +347,5 @@ def test__time_entry_summary_azure_endpoint__returns_invalid_date_format_with_in
 
     response_start_date = azure_time_entries._get_time_entries_summary.get_time_entries_summary(req_start_date)
 
-    assert response_start_date.status_code == HTTPStatus.NOT_FOUND
+    assert response_start_date.status_code == HTTPStatus.NOT_FOUND.value
     assert response_start_date.get_body().decode() == ResponseEnums.INVALID_DATE_FORMAT.value

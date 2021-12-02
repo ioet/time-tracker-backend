@@ -52,9 +52,9 @@ def get_time_entries_summary(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(**response_params)
 
 
-def _validate_time_format(time: str, format: str = "%m/%d/%Y"):
+def _validate_time_format(time: str) -> bool:
     try:
-        datetime.datetime.strptime(time, format)
+        datetime.datetime.strptime(time, "%m/%d/%Y")
     except ValueError:
         return False
     return True
