@@ -7,8 +7,8 @@ import azure.functions as func
 from ... import _domain
 from ... import _infrastructure
 from time_tracker._infrastructure import DB
-from .utils import parse_status_to_string_for_ui as parse_status
-from .utils import parse_status_to_number
+from time_tracker.utils.parsers import parse_status_to_string_for_ui as parse_status
+from time_tracker.utils.parsers import parse_status_to_number
 
 
 def update_activity(req: func.HttpRequest) -> func.HttpResponse:

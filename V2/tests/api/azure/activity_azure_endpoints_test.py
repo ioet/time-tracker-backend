@@ -4,7 +4,7 @@ from faker import Faker
 import azure.functions as func
 
 import time_tracker.activities._application._activities as azure_activities
-from time_tracker.activities._application._activities.utils import parse_status_to_string_for_ui as parse_status
+from time_tracker.utils.parsers import parse_status_to_string_for_ui as parse_status
 from time_tracker.utils.enums import StatusEnums
 
 ACTIVITY_URL = '/api/activities/'
