@@ -9,6 +9,7 @@ from ... import _infrastructure
 from time_tracker._infrastructure import DB
 from time_tracker.utils.parsers import parse_status_to_string_for_ui as parse_status
 from time_tracker.utils.parsers import parse_status_to_number
+from time_tracker.utils.enums import StatusEnums
 
 
 def update_activity(req: func.HttpRequest) -> func.HttpResponse:
@@ -41,11 +42,13 @@ def _update(activity_id: int, activity_data: dict) -> str:
     activity_use_case = _domain._use_cases.UpdateActivityUseCase(
         _create_activity_service(database)
     )
+    status = parse_status_to_number(activity_data.get("status"))
+    deleted = status == StatusEnums.inactive.value
     activity = activity_use_case.update_activity(
         activity_id, activity_data.get("name"),
         activity_data.get("description"),
-        parse_status_to_number(activity_data.get("status")),
-        activity_data.get("deleted")
+        status,
+        deleted,
         )
     return json.dumps(parse_status(activity.__dict__)) if activity else b'Not Found'
 
