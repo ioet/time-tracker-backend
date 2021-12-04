@@ -13,7 +13,8 @@ class MSConfig:
         'MS_SECRET',
         'MS_SCOPE',
         'MS_ENDPOINT',
-        'USERID'
+        'USERID',
+        'AZURE_STORAGE_CONNECTION_STRING'
     ]
 
     check_variables_are_defined(ms_variables)
@@ -24,6 +25,7 @@ class MSConfig:
     SCOPE = os.environ.get('MS_SCOPE')
     ENDPOINT = os.environ.get('MS_ENDPOINT')
     USERID = os.environ.get('USERID')
+    AZURE_STORAGE_CONNECTION_STRING = os.environ.get('AZURE_STORAGE_CONNECTION_STRING')
 
 
 class BearerAuth(requests.auth.AuthBase):
@@ -67,6 +69,9 @@ class AzureConnection:
         self.client = self.get_msal_client()
         self.access_token = self.get_token()
         self.groups_and_users = None
+    
+    def get_blob_storage_connection_string(self) -> str:
+        return self.config.AZURE_STORAGE_CONNECTION_STRING
 
     def get_msal_client(self):
         client = msal.ConfidentialClientApplication(

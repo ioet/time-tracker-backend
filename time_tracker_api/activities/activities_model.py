@@ -7,13 +7,15 @@ from commons.data_access_layer.cosmos_db import (
     CosmosDBModel,
     CosmosDBDao,
     CosmosDBRepository,
+    CustomError,
 )
 from time_tracker_api.database import CRUDDao, APICosmosDBDao
 from typing import List, Callable
 from commons.data_access_layer.database import EventContext
 from utils.enums.status import Status
 from utils.query_builder import CosmosDBQueryBuilder
-from commons.data_access_layer.file_stream import FileStream
+from commons.data_access_layer.file import FileStream
+
 
 class ActivityDao(CRUDDao):
     pass
@@ -118,16 +120,27 @@ class ActivityCosmosDBRepository(CosmosDBRepository):
         self,
         event_context: EventContext,
         mapper: Callable = None,
+        activity_id: str = None,
         file_name: str = "activity.json",
-        ):
+    ):
         tenant_id_value = self.find_partition_key_value(event_context)
         function_mapper = self.get_mapper_or_dict(mapper)
         if tenant_id_value is None:
-            return []
-            
-        fs = FileStream("storageaccounteystr82c5","tt-common-files")
+            return [{"result": "error", "message": "tenant_id is None"}]
+
+        fs = FileStream("tt-common-files")
         result = fs.get_file_stream(file_name)
-        return list(map(function_mapper, json.load(result))) if result is not None else []
+        result_json = list(map(function_mapper, json.loads(
+            result))) if result is not None else []
+        if activity_id is not None:
+            result_json = [
+                activity
+                for activity in result_json
+                if activity.id == activity_id
+            ]
+
+        return result_json
+
 
 class ActivityCosmosDBDao(APICosmosDBDao, ActivityDao):
     def __init__(self, repository):
@@ -143,7 +156,7 @@ class ActivityCosmosDBDao(APICosmosDBDao, ActivityDao):
             activity_ids,
         )
 
-    def get_all(
+    def get_all_v1(
         self,
         conditions: dict = None,
         activities_id: List = None,
@@ -162,10 +175,24 @@ class ActivityCosmosDBDao(APICosmosDBDao, ActivityDao):
         )
         return activities
 
-    def get_all_test(self, conditions: dict = None) -> list:
+    def get_all(self, **kwargs) -> list:
         event_ctx = self.create_event_context("read-many")
-        activities = self.repository.find_all_from_blob_storage(event_context=event_ctx)
+        activities = self.repository.find_all_from_blob_storage(
+            event_context=event_ctx
+        )
         return activities
+
+    def get(self, id: str = None) -> list:
+        event_ctx = self.create_event_context("read-many")
+        activities = self.repository.find_all_from_blob_storage(
+            event_context=event_ctx,
+            activity_id=id
+        )
+        
+        if len(activities) > 0:
+            return activities[0]
+        else:
+            raise CustomError(404, "It was not found")
 
     def create(self, activity_payload: dict):
         event_ctx = self.create_event_context('create')

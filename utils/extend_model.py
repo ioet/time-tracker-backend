@@ -96,7 +96,7 @@ def add_project_info_to_time_entries(time_entries, projects):
                 setattr(time_entry, 'customer_name', project.customer_name)
 
 
-def add_activity_name_to_time_entries(time_entries, activities):
+def add_activity_name_to_time_entries_v1(time_entries, activities):
     for time_entry in time_entries:
         for activity in activities:
             if time_entry.activity_id == activity.id:
@@ -106,6 +106,19 @@ def add_activity_name_to_time_entries(time_entries, activities):
                     else activity.name
                 )
                 setattr(time_entry, 'activity_name', name)
+
+def add_activity_name_to_time_entries(time_entries, activities):
+    for time_entry in time_entries:
+        result = [x for x in activities if time_entry.activity_id == x.id]
+        if result:
+            name = (
+                    result[0].name + " (archived)"
+                    if result[0].is_deleted()
+                    else result[0].name
+                )
+            setattr(time_entry, 'activity_name', name)
+        else:
+            setattr(time_entry, 'activity_name', "activity")
 
 
 def add_user_email_to_time_entries(time_entries, users):
