@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.46.0 (2021-12-04)
+### Feature
+* TT-384 add read file from blob storage 12.1 ([#366](https://github.com/ioet/time-tracker-backend/issues/366)) ([`fd39f66`](https://github.com/ioet/time-tracker-backend/commit/fd39f660dbd895fcc17d6767ca453bcc2b91ab7b))
+
 ## v0.45.0 (2021-12-04)
 ### Feature
 * TT-414 get latest projects ([#363](https://github.com/ioet/time-tracker-backend/issues/363)) ([`aedf3d2`](https://github.com/ioet/time-tracker-backend/commit/aedf3d24d1cae9f40dcfb61196c619c15a1ac35c))
