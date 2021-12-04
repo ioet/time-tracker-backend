@@ -2,6 +2,26 @@
 
 <!--next-version-placeholder-->
 
+## v0.45.0 (2021-12-04)
+### Feature
+* TT-414 get latest projects ([#363](https://github.com/ioet/time-tracker-backend/issues/363)) ([`aedf3d2`](https://github.com/ioet/time-tracker-backend/commit/aedf3d24d1cae9f40dcfb61196c619c15a1ac35c))
+* TT-418 crud customer v2 ([#361](https://github.com/ioet/time-tracker-backend/issues/361)) ([`1db51d6`](https://github.com/ioet/time-tracker-backend/commit/1db51d68824a429730fedd1cbf58ee334ee00fa0))
+* TT-429 created enums for response messages ([#362](https://github.com/ioet/time-tracker-backend/issues/362)) ([`fd0bc98`](https://github.com/ioet/time-tracker-backend/commit/fd0bc986fcc074bd5f6d6e9b7b602951375f2aee))
+* TT-404 GET Time Entries ([#341](https://github.com/ioet/time-tracker-backend/issues/341)) ([`c8a3134`](https://github.com/ioet/time-tracker-backend/commit/c8a31341b120792f46442815fad2d463262302ab))
+* TT-417-crud-v2-projects ([#360](https://github.com/ioet/time-tracker-backend/issues/360)) ([`10ec2bb`](https://github.com/ioet/time-tracker-backend/commit/10ec2bb9e2b5f67358c00b549a376b7f610041de))
+* TT-402 put v2 time entries ([#347](https://github.com/ioet/time-tracker-backend/issues/347)) ([`48f6411`](https://github.com/ioet/time-tracker-backend/commit/48f641170a968c7f12bc60f7882b0f4eda6cede2))
+* TT-418 CRUD customer v2 ([#359](https://github.com/ioet/time-tracker-backend/issues/359)) ([`d6c4c4d`](https://github.com/ioet/time-tracker-backend/commit/d6c4c4d67e72db867f197af8c7f8147839d6c178))
+* TT-403 delete v2 time entries ([#346](https://github.com/ioet/time-tracker-backend/issues/346)) ([`60a0dc7`](https://github.com/ioet/time-tracker-backend/commit/60a0dc7015f98b24a3429b1ceabf31e722741649))
+* TT-401-Post-v2-time-entries ([#344](https://github.com/ioet/time-tracker-backend/issues/344)) ([`5f107f3`](https://github.com/ioet/time-tracker-backend/commit/5f107f33cb640f7fa8e498db2157efb2d11f401d))
+* TT-399 Config use makefile to executing tests ([#350](https://github.com/ioet/time-tracker-backend/issues/350)) ([`32ee36f`](https://github.com/ioet/time-tracker-backend/commit/32ee36f39e81866c2f0767cf243c61afde6841c9))
+
+### Fix
+* TT-401 change in activity database instance and refactor test ([#355](https://github.com/ioet/time-tracker-backend/issues/355)) ([`b81319f`](https://github.com/ioet/time-tracker-backend/commit/b81319fe12bff57816dac1d0354000bfc6674c1c))
+
+### Documentation
+* TT-419 update readme V2 ([#357](https://github.com/ioet/time-tracker-backend/issues/357)) ([`6dd8505`](https://github.com/ioet/time-tracker-backend/commit/6dd85055b666888c7a22ffa1635b2e53903e7942))
+* TT-399 Readme update how to use makefile ([#354](https://github.com/ioet/time-tracker-backend/issues/354)) ([`10cc426`](https://github.com/ioet/time-tracker-backend/commit/10cc4269e4e60c6eff77bf1cf02cdf0d31dac86f))
+
 ## v0.44.0 (2021-11-15)
 ### Feature
 * TT-357 Create V2 Activities Azure DAO ([#334](https://github.com/ioet/time-tracker-backend/issues/334)) ([`3a99add`](https://github.com/ioet/time-tracker-backend/commit/3a99add39a3130c540d86b02c5a69dbda8536e8e))
