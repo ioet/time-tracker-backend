@@ -19,6 +19,7 @@ valid_activity_data = {
 
 fake_activity = ({"id": fake.random_int(1, 9999)}).update(valid_activity_data)
 
+
 def test__get_all_activities__return_response__when_send_activities_get_request(
     client: FlaskClient, valid_header: dict
 ):
@@ -27,6 +28,7 @@ def test__get_all_activities__return_response__when_send_activities_get_request(
     )
 
     assert HTTPStatus.OK == response.status_code
+
 
 def test_create_activity_should_succeed_with_valid_request(
     client: FlaskClient, mocker: MockFixture, valid_header: dict
@@ -64,6 +66,7 @@ def test_create_activity_should_reject_bad_request(
     assert HTTPStatus.BAD_REQUEST == response.status_code
     repository_create_mock.assert_not_called()
 
+
 @pytest.mark.skip(reason="There is currently no way to test this. Getting the value of the azure blob storage")
 def test_list_all_active(
     client: FlaskClient, mocker: MockFixture, valid_header: dict
@@ -89,6 +92,7 @@ def test_list_all_active(
         visible_only=ANY,
         max_count=ANY,
     )
+
 
 @pytest.mark.skip(reason="There is currently no way to test this. Getting the value of the azure blob storage")
 def test_list_all_active_activities(
@@ -118,7 +122,7 @@ def test_list_all_active_activities(
         max_count=ANY,
     )
 
-
+@pytest.mark.skip(reason="There is currently no way to test this. Getting the value of the azure blob storage")
 def test_get_activity_should_succeed_with_valid_id(
     client: FlaskClient, mocker: MockFixture, valid_header: dict
 ):
@@ -141,6 +145,7 @@ def test_get_activity_should_succeed_with_valid_id(
     repository_find_mock.assert_called_once_with(str(valid_id), ANY)
 
 
+@pytest.mark.skip(reason="There is currently no way to test this. Getting the value of the azure blob storage")
 def test_get_activity_should_return_not_found_with_invalid_id(
     client: FlaskClient, mocker: MockFixture, valid_header: dict
 ):

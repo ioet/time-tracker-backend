@@ -47,4 +47,4 @@ pytz==2019.3
 python-dateutil==2.8.1
 
 # azure blob storage
-azure-storage-blob==2.1.0
+azure-storage-blob==12.1.0
