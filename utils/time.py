@@ -60,10 +60,10 @@ def str_to_datetime(value: str) -> datetime:
         localized = _tz.localize(date)
         return localized
 
-    from dateutil.parser import isoparse
+    from dateutil import parser
 
-    no_timezone_info = isoparse(value).tzinfo is None
+    no_timezone_info = parser.parse(value).tzinfo is None
     if no_timezone_info:
-        return to_utc(isoparse(value))
+        return to_utc(parser.parse(value))
     else:
-        return isoparse(value)
+        return parser.parse(value)
