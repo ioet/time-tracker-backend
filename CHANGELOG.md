@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.46.1 (2022-01-20)
+### Fix
+* TT-507 Error in time-entries list for different time zone ([#367](https://github.com/ioet/time-tracker-backend/issues/367)) ([`628da5c`](https://github.com/ioet/time-tracker-backend/commit/628da5c165c434bfc2a47ffc00222710cdc379b3))
+
 ## v0.46.0 (2021-12-04)
 ### Feature
 * TT-384 add read file from blob storage 12.1 ([#366](https://github.com/ioet/time-tracker-backend/issues/366)) ([`fd39f66`](https://github.com/ioet/time-tracker-backend/commit/fd39f660dbd895fcc17d6767ca453bcc2b91ab7b))
