@@ -134,8 +134,8 @@ class AzureConnection:
                 endpoint = endpoint + skip_token_attribute + request_token
                 
         for user in users:
-            userEmails = user['otherMails']
-            if(len(userEmails) != 0 and userEmails[0].split('@')[1] == 'ioet.com'):
+            user_emails = user['otherMails']
+            if(len(user_emails) != 0 and user_emails[0].split('@')[1] == 'ioet.com'):
                 valid_users.append(user)
         
         return [self.to_azure_user(user) for user in valid_users]
