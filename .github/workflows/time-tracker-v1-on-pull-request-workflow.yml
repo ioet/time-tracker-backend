@@ -48,7 +48,6 @@ jobs:
           DATABASE_ACCOUNT_URI: ${{ steps.timeTrackerAzureVault.outputs.DATABASE-ACCOUNT-URI }}
           DATABASE_MASTER_KEY: ${{ steps.timeTrackerAzureVault.outputs.DATABASE-MASTER-KEY }}
           DATABASE_NAME: ${{ steps.timeTrackerAzureVault.outputs.DATABASE-NAME }}
-          FLASK_APP: ${{ steps.timeTrackerAzureVault.outputs.FLASK-APP }}
           AZURE_APP_CONFIGURATION_CONNECTION_STRING: ${{ steps.timeTrackerAzureVault.outputs.AZURE-APP-CONFIGURATION-CONNECTION-STRING }}
           USERID: ${{ steps.timeTrackerAzureVault.outputs.USERID }}
           AZURE_STORAGE_ACCOUNT_KEY: ${{ steps.timeTrackerAzureVault.outputs.AZURE-STORAGE-ACCOUNT-KEY }}
