@@ -35,7 +35,7 @@ jobs:
         uses: Azure/get-keyvault-secrets@v1
         with:
           keyvault: "time-tracker-secrets"
-          secrets: "MS-CLIENT-ID, MS-AUTHORITY, MS-SCOPE, MS-SECRET, MS-ENDPOINT, USERID, AZURE-APP-CONFIGURATION-CONNECTION-STRING, DATABASE-ACCOUNT-URI, DATABASE-MASTER-KEY, DATABASE-NAME, AZURE-STORAGE-ACCOUNT-KEY, AZURE-STORAGE-CONNECTION-STRING"
+          secrets: "MS-CLIENT-ID, MS-AUTHORITY, MS-SCOPE, MS-SECRET, MS-ENDPOINT, FLASK-APP, USERID, AZURE-APP-CONFIGURATION-CONNECTION-STRING, DATABASE-ACCOUNT-URI, DATABASE-MASTER-KEY, DATABASE-NAME, AZURE-STORAGE-ACCOUNT-KEY, AZURE-STORAGE-CONNECTION-STRING"
         id: timeTrackerAzureVault
 
       - name: Run tests
@@ -45,11 +45,12 @@ jobs:
           MS_SCOPE: ${{ steps.timeTrackerAzureVault.outputs.MS-SCOPE }}
           MS_SECRET: ${{ steps.timeTrackerAzureVault.outputs.MS-SECRET }}
           MS_ENDPOINT: ${{ steps.timeTrackerAzureVault.outputs.MS-ENDPOINT }}
-          USERID: ${{ steps.timeTrackerAzureVault.outputs.USERID }}
-          AZURE_APP_CONFIGURATION_CONNECTION_STRING: ${{ steps.timeTrackerAzureVault.outputs.AZURE-APP-CONFIGURATION-CONNECTION-STRING }}
           DATABASE_ACCOUNT_URI: ${{ steps.timeTrackerAzureVault.outputs.DATABASE-ACCOUNT-URI }}
           DATABASE_MASTER_KEY: ${{ steps.timeTrackerAzureVault.outputs.DATABASE-MASTER-KEY }}
           DATABASE_NAME: ${{ steps.timeTrackerAzureVault.outputs.DATABASE-NAME }}
+          FLASK_APP: ${{ steps.timeTrackerAzureVault.outputs.FLASK-APP }}
+          AZURE_APP_CONFIGURATION_CONNECTION_STRING: ${{ steps.timeTrackerAzureVault.outputs.AZURE-APP-CONFIGURATION-CONNECTION-STRING }}
+          USERID: ${{ steps.timeTrackerAzureVault.outputs.USERID }}
           AZURE_STORAGE_ACCOUNT_KEY: ${{ steps.timeTrackerAzureVault.outputs.AZURE-STORAGE-ACCOUNT-KEY }}
           AZURE_STORAGE_CONNECTION_STRING: ${{ steps.timeTrackerAzureVault.outputs.AZURE-STORAGE-CONNECTION-STRING }}
         run: |
