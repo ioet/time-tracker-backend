@@ -264,4 +264,4 @@ def test_users_functions_should_returns_all_users(
 
     users = AzureConnection().users()
 
-    assert len(users) == 0
+    assert len(users) == 2
