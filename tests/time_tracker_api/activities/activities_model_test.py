@@ -75,7 +75,7 @@ def test__find_all_from_blob_storage__return_list__when_send_event_context_and_c
       event_context=event_context,
       file_name="activity_test.json"
     )
-    assert len(result) == 0
+    assert len(result) == 15
 
 def test__find_all_from_blob_storage__return_empty_list__when_send_event_context_and_incorrect_file_name(
     event_context: EventContext,
