@@ -135,7 +135,8 @@ class AzureConnection:
                 
         for user in users:
             user_emails = user['otherMails']
-            if(len(user_emails) != 0 and user_emails[0].split('@')[1] == 'ioet.com'):
+            email_domain = user_emails[0].split('@')[1]
+            if(len(user_emails) != 0 and email_domain == 'ioet.com'):
                 valid_users.append(user)
         
         return [self.to_azure_user(user) for user in valid_users]
