@@ -69,7 +69,7 @@ class AzureConnection:
         self.client = self.get_msal_client()
         self.access_token = self.get_token()
         self.groups_and_users = None
-    
+
     def get_blob_storage_connection_string(self) -> str:
         return self.config.AZURE_STORAGE_CONNECTION_STRING
 
@@ -187,7 +187,15 @@ class AzureConnection:
             headers=HTTP_PATCH_HEADERS,
         )
         assert 204 == response.status_code
-
+        if self.groups_and_users is None:
+            self.groups_and_users = [(group_name, [user_id])]
+        elif group_name not in [gn for (gn, ul) in self.groups_and_users]:
+            self.groups_and_users.append((group_name, [user_id]))
+        else:
+            for (cache_group_name, user_ids) in self.groups_and_users:
+                if group_name == cache_group_name:
+                    if user_id not in user_ids:
+                        user_ids.append(user_id)
         return self.get_user(user_id)
 
     def remove_user_from_group(self, user_id, group_name):
@@ -201,7 +209,11 @@ class AzureConnection:
             headers=HTTP_PATCH_HEADERS,
         )
         assert 204 == response.status_code
-
+        if self.groups_and_users is not None:
+            for (cache_group_name, user_ids) in self.groups_and_users:
+                if group_name == cache_group_name:
+                    if user_id in user_ids:
+                        user_ids.remove(user_id)
         return self.get_user(user_id)
 
     def get_non_test_users(self) -> List[AzureUser]:
@@ -271,7 +283,6 @@ class AzureConnection:
         result = list(map(parse_item, response.json()['value']))
         users_id = self.config.USERID.split(",")
         result[0][1].extend(users_id)
-        
         return result
 
     def is_user_in_group(self, user_id, data: dict):

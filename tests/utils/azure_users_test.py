@@ -17,10 +17,10 @@ from pytest import mark
     ],
 )
 def test_azure_connection_is_test_user(
-    get_mock,
-    field_name,
-    field_value,
-    is_test_user_expected_value,
+        get_mock,
+        field_name,
+        field_value,
+        is_test_user_expected_value,
 ):
     response_mock = Mock()
     response_mock.status_code = 200
@@ -58,7 +58,7 @@ def test_azure_connection_get_test_user_ids(get_mock):
 @patch('utils.azure_users.AzureConnection.get_test_user_ids')
 @patch('utils.azure_users.AzureConnection.users')
 def test_azure_connection_get_non_test_users(
-    users_mock, get_test_user_ids_mock
+        users_mock, get_test_user_ids_mock
 ):
     test_user = AzureUser('ID1', None, None, [], [])
     non_test_user = AzureUser('ID2', None, None, [], [])
@@ -81,7 +81,7 @@ def test_azure_connection_get_group_id_by_group_name(get_mock):
     group_id = 'ID1'
     azure_connection = AzureConnection()
     assert (
-        azure_connection.get_group_id_by_group_name('group_name') == group_id
+            azure_connection.get_group_id_by_group_name('group_name') == group_id
     )
 
 
@@ -91,7 +91,7 @@ def test_azure_connection_get_group_id_by_group_name(get_mock):
 @patch('requests.post')
 @mark.parametrize('expected_value', [True, False])
 def test_is_user_in_group(
-    post_mock, get_group_id_by_group_name_mock, expected_value
+        post_mock, get_group_id_by_group_name_mock, expected_value
 ):
     response_expected = {'value': expected_value}
     response_mock = Mock()
@@ -104,8 +104,8 @@ def test_is_user_in_group(
 
     azure_connection = AzureConnection()
     assert (
-        azure_connection.is_user_in_group('user_id', payload_mock)
-        == response_expected
+            azure_connection.is_user_in_group('user_id', payload_mock)
+            == response_expected
     )
 
 
@@ -164,7 +164,7 @@ def test_get_groups_and_users(get_mock):
     ],
 )
 def test_get_groups_by_user_id(
-    get_groups_and_users_mock, user_id, groups_expected_value
+        get_groups_and_users_mock, user_id, groups_expected_value
 ):
     get_groups_and_users_mock.return_value = [
         ('test-group-1', ['user-id1', 'user-id2']),
@@ -180,7 +180,7 @@ def test_get_groups_by_user_id(
 @patch('utils.azure_users.AzureConnection.get_token', Mock())
 @patch('utils.azure_users.AzureConnection.get_groups_and_users')
 def test_get_groups_and_users_called_once_by_instance(
-    get_groups_and_users_mock,
+        get_groups_and_users_mock,
 ):
     get_groups_and_users_mock.return_value = []
     user_id = 'user-id1'
@@ -198,7 +198,7 @@ def test_get_groups_and_users_called_once_by_instance(
 @patch('utils.azure_users.AzureConnection.get_group_id_by_group_name')
 @patch('requests.post')
 def test_add_user_to_group(
-    post_mock, get_group_id_by_group_name_mock, get_user_mock
+        post_mock, get_group_id_by_group_name_mock, get_user_mock
 ):
     get_group_id_by_group_name_mock.return_value = 'dummy_group'
     test_user = AzureUser('ID1', None, None, [], [])
@@ -224,7 +224,7 @@ def test_add_user_to_group(
 @patch('utils.azure_users.AzureConnection.get_group_id_by_group_name')
 @patch('requests.delete')
 def test_remove_user_from_group(
-    delete_mock, get_group_id_by_group_name_mock, get_user_mock
+        delete_mock, get_group_id_by_group_name_mock, get_user_mock
 ):
     get_group_id_by_group_name_mock.return_value = 'dummy_group'
     test_user = AzureUser('ID1', None, None, [], [])
@@ -247,7 +247,7 @@ def test_remove_user_from_group(
 @patch('utils.azure_users.AzureConnection.get_groups_and_users')
 @patch('requests.get')
 def test_users_functions_should_returns_all_users(
-    get_mock, get_groups_and_users_mock
+        get_mock, get_groups_and_users_mock
 ):
     first_response = Response()
     first_response.status_code = 200
