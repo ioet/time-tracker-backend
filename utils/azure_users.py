@@ -108,6 +108,7 @@ class AzureConnection:
             role_fields_params=role_fields_params,
         )
 
+        final_endpoint = endpoint  
         exists_users = True
         users = []
         valid_users = []
@@ -115,8 +116,8 @@ class AzureConnection:
 
         while exists_users:
             response = requests.get(
-                endpoint, auth=BearerAuth(self.access_token)
-            )
+                final_endpoint, auth=BearerAuth(self.access_token)
+            )  
             json_response = response.json()
             assert 200 == response.status_code
             assert 'value' in json_response
@@ -131,8 +132,8 @@ class AzureConnection:
                 request_token = remaining_users_link.split(
                     skip_token_attribute
                 )[1]
-                endpoint = endpoint + skip_token_attribute + request_token
-                
+                final_endpoint = endpoint + skip_token_attribute + request_token     
+
         for user in users:
             user_emails = user['otherMails']
             if(len(user_emails) != 0 and user_emails[0].split('@')[1] == 'ioet.com'):
