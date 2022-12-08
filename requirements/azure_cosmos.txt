@@ -5,7 +5,7 @@
 # Azure Cosmos DB official library
 azure-core==1.9.0
 azure-cosmos==4.0.0b6
-certifi==2019.11.28
+certifi==2022.12.7
 chardet==3.0.4
 idna==2.8
 six==1.13.0
